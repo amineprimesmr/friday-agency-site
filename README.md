@@ -2,6 +2,8 @@
 
 Site statique (HTML / CSS / JS) pour **Friday** : navigation plein écran par panneaux, carousel réalisations, déploiement **Vercel**.
 
+**Dépôt GitHub :** https://github.com/amineprimesmr/friday-agency-site
+
 ## URL production
 
 - **https://friday-agency-site.vercel.app**
