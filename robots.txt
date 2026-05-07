@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://friday-agency-site.vercel.app/sitemap.xml

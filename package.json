@@ -1,0 +1,12 @@
+{
+  "name": "friday-agency-site",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Friday — vitrine agence apps iOS & sites web",
+  "scripts": {
+    "start": "npx --yes serve -l 8888 .",
+    "dev": "npx --yes serve -l 8888 .",
+    "deploy": "npx --yes vercel@latest deploy --prod --yes",
+    "deploy:preview": "npx --yes vercel@latest deploy --yes"
+  }
+}
