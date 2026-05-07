@@ -20,9 +20,8 @@
   --dur-lg: 1s;
   --viewport-top: max(4.75rem, calc(env(safe-area-inset-top) + 3.5rem));
   --viewport-bottom: max(7.95rem, calc(env(safe-area-inset-bottom) + 6.45rem));
-  --rail-above-dock: 6.1rem;
   --viewport-right: max(1rem, env(safe-area-inset-right));
-  --viewport-left: max(3.35rem, calc(env(safe-area-inset-left) + 2.75rem));
+  --viewport-left: max(1rem, env(safe-area-inset-left));
 
   /* Liquid glass — même base que le switcher Fidelity / fooontic */
   --lg-glass: #bbbbbc;
@@ -72,7 +71,8 @@ html {
 .bg-base {
   position: fixed;
   inset: 0;
-  z-index: -3;
+  /* Au-dessus du canvas mais sous showcase — éviter z-index négatif (masqué par le fond du viewport). */
+  z-index: 0;
   pointer-events: none;
   background: radial-gradient(120% 90% at 50% 10%, var(--bg-c), var(--bg-b) 45%, var(--bg-a));
   transform: translateZ(0);
@@ -82,7 +82,7 @@ html {
 .bg-showcase {
   position: fixed;
   inset: 0;
-  z-index: -2;
+  z-index: 1;
   pointer-events: none;
   overflow: hidden;
   opacity: 0;
@@ -103,6 +103,12 @@ html {
   inset: 0;
   background-size: cover;
   background-position: center;
+  opacity: 1;
+  transition: opacity 0.85s var(--ease-out-expo);
+}
+
+.bg-showcase.has-photo .bg-showcase__wash {
+  opacity: 0.08;
 }
 
 .bg-showcase__wash--myfidpass {
@@ -121,16 +127,42 @@ html {
   background-image: linear-gradient(125deg, rgba(180, 83, 9, 0.42) 0%, rgba(30, 41, 59, 0.92) 45%, rgba(14, 116, 144, 0.62) 100%);
 }
 
-.bg-showcase__photo-wrap {
-  position: absolute;
-  inset: -14%;
-  z-index: 1;
-  opacity: 0;
-  transition: opacity 0.85s var(--ease-out-expo);
+.bg-showcase__wash--spotify-maquette {
+  background-image: linear-gradient(145deg, rgba(29, 185, 84, 0.42) 0%, rgba(18, 18, 18, 0.94) 42%, rgba(25, 25, 25, 0.9) 100%);
 }
 
-.bg-showcase__photo-wrap.is-loaded {
+.bg-showcase__wash--friday-accueil {
+  background-image: radial-gradient(120% 90% at 50% 20%, rgba(6, 61, 122, 0.88) 0%, rgba(4, 28, 56, 0.94) 45%, rgba(8, 18, 40, 0.96) 100%);
+}
+
+/* Double calque : crossfade + léger zoom sur la couche entrante (même easing que le track carrousel). */
+.bg-showcase__photo-stack {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  contain: strict;
+}
+
+.bg-showcase__layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  z-index: 1;
+  transform: scale(1.085);
+  transform-origin: center center;
+  transition:
+    opacity 0.74s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 1.08s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.72s var(--ease-out-expo);
+  filter: brightness(0.94);
+}
+
+.bg-showcase__layer.is-visible {
   opacity: 1;
+  z-index: 2;
+  transform: scale(1);
+  filter: brightness(1);
 }
 
 .bg-showcase__photo {
@@ -138,19 +170,70 @@ html {
   height: 100%;
   object-fit: cover;
   object-position: center top;
-  transform: scale(1.05);
-  filter: blur(46px) saturate(1.12) brightness(0.52);
+  display: block;
+  transform: translateZ(0);
+  image-rendering: auto;
+}
+
+@supports (image-rendering: high-quality) {
+  .bg-showcase__photo {
+    image-rendering: high-quality;
+  }
+}
+
+.bg-showcase.has-photo .bg-showcase__photo {
+  filter: none;
+}
+
+/*
+ * Accueil : JPG souvent en format téléphone. En « cover + center top » sur grand écran,
+ * le recadrage est violent ; en ≥768px on affiche l’image en entier (contain) sur fond degradé.
+ */
+@media (min-width: 768px) {
+  #friday-showcase-bg[data-active-showcase="friday-accueil"].has-photo .bg-showcase__wash {
+    opacity: 0.16;
+  }
+
+  #friday-showcase-bg[data-active-showcase="friday-accueil"].has-photo .bg-showcase__layer {
+    background: radial-gradient(ellipse 88% 78% at 50% 40%, #0c2848 0%, #051525 50%, #020910 100%);
+  }
+
+  #friday-showcase-bg[data-active-showcase="friday-accueil"] .bg-showcase__photo {
+    object-fit: contain;
+    object-position: center center;
+  }
+}
+
+@media (min-width: 1200px) {
+  #friday-showcase-bg[data-active-showcase="friday-accueil"] .bg-showcase__photo {
+    width: 92%;
+    max-width: min(1100px, 92vw);
+    height: 100%;
+    margin: 0 auto;
+    object-fit: contain;
+    object-position: center center;
+  }
 }
 
 .bg-showcase__veil {
   position: absolute;
   inset: 0;
   z-index: 2;
+  pointer-events: none;
   background: linear-gradient(
     180deg,
-    rgba(6, 40, 85, 0.55) 0%,
-    rgba(5, 32, 72, 0.72) 38%,
-    rgba(4, 24, 55, 0.82) 100%
+    rgba(8, 28, 56, 0.34) 0%,
+    rgba(6, 22, 48, 0.48) 45%,
+    rgba(4, 16, 38, 0.82) 100%
+  );
+}
+
+.bg-showcase.has-photo .bg-showcase__veil {
+  background: linear-gradient(
+    180deg,
+    rgba(4, 14, 32, 0.05) 0%,
+    rgba(3, 12, 28, 0.22) 58%,
+    rgba(2, 8, 22, 0.62) 100%
   );
 }
 
@@ -159,12 +242,15 @@ html {
     transition-duration: 0.25s;
   }
 
-  .bg-showcase__photo-wrap {
-    transition-duration: 0.3s;
+  .bg-showcase__layer {
+    transition-duration: 0.28s, 0.28s, 0.25s;
+    transform: scale(1);
+    filter: none;
   }
 
-  .bg-showcase__photo {
-    filter: blur(18px) saturate(1.05) brightness(0.52);
+  .bg-showcase__layer.is-visible {
+    transform: scale(1);
+    filter: none;
   }
 }
 
@@ -172,7 +258,7 @@ html {
 .ambient-blobs {
   position: fixed;
   inset: -15%;
-  z-index: -1;
+  z-index: 2;
   pointer-events: none;
   overflow: hidden;
   contain: strict;
@@ -180,7 +266,7 @@ html {
   transition: opacity 0.75s var(--ease-out-expo);
 }
 
-body[data-friday-panel="1"] .ambient-blobs {
+body[data-friday-panel="0"] .ambient-blobs {
   opacity: 0.42;
 }
 
@@ -309,35 +395,6 @@ body {
   html.friday-animate .friday-panel.is-active .motion-reveal--delay-3 {
     transition-delay: 0.22s;
   }
-
-  html.friday-animate .friday-panel--home.is-active .hero-copy--stagger > * {
-    opacity: 0;
-    animation: heroFadeUp var(--dur-lg) var(--ease-out-expo) forwards;
-  }
-
-  html.friday-animate .friday-panel--home.is-active .hero-copy--stagger > *:nth-child(1) {
-    animation-delay: 0.06s;
-  }
-  html.friday-animate .friday-panel--home.is-active .hero-copy--stagger > *:nth-child(2) {
-    animation-delay: 0.14s;
-  }
-  html.friday-animate .friday-panel--home.is-active .hero-copy--stagger > *:nth-child(3) {
-    animation-delay: 0.22s;
-  }
-  html.friday-animate .friday-panel--home.is-active .hero-copy--stagger > *:nth-child(4) {
-    animation-delay: 0.3s;
-  }
-
-  @keyframes heroFadeUp {
-    from {
-      opacity: 0;
-      transform: translate3d(0, 28px, 0);
-    }
-    to {
-      opacity: 1;
-      transform: translate3d(0, 0, 0);
-    }
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -345,11 +402,6 @@ body {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
-  }
-
-  html.friday-animate .friday-panel--home.is-active .hero-copy--stagger > * {
-    opacity: 1;
-    animation: none;
   }
 }
 
@@ -365,16 +417,16 @@ body {
   border: 0;
 }
 
-/* --- Top bar (fixe) --- */
+/* --- Top bar : menu verre unique (logo + Expertises) --- */
 .top-glass-bar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 100;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: start;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
   gap: 0.75rem;
   padding-top: max(0.65rem, env(safe-area-inset-top));
   padding-bottom: 0.5rem;
@@ -393,34 +445,85 @@ body {
   .top-glass-bar.is-scrolled {
     padding-top: max(0.38rem, env(safe-area-inset-top));
   }
-
-  .top-glass-bar.is-scrolled .glass-pill,
-  .top-glass-bar.is-scrolled .glass-icon-btn {
-    transform: translateZ(0) scale(0.97);
-  }
-
-  .top-glass-bar.is-scrolled .glass-pill:hover,
-  .top-glass-bar.is-scrolled .glass-icon-btn:hover {
-    transform: scale(1.02);
-  }
 }
 
 .top-glass-bar > * {
   pointer-events: auto;
 }
 
-.top-glass-bar .glass-pill--logo {
-  justify-self: start;
+.top-glass-menu {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 4px 7px 4px 5px;
+  border-radius: 99em;
+  isolation: isolate;
+  gap: 0.15rem;
+  background-color: color-mix(in srgb, var(--lg-glass) 12%, transparent);
+  backdrop-filter: blur(12px) saturate(var(--lg-sat));
+  -webkit-backdrop-filter: blur(12px) saturate(var(--lg-sat));
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 10%), transparent),
+    inset 1.8px 3px 0 -2px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 90%), transparent),
+    inset -2px -2px 0 -2px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 80%), transparent),
+    inset -3px -8px 1px -6px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 60%), transparent),
+    inset -0.3px -1px 4px 0 color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 12%), transparent),
+    inset -1.5px 2.5px 0 -2px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 20%), transparent),
+    inset 0 3px 4px -2px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 20%), transparent),
+    inset 2px -6.5px 1px -4px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 10%), transparent),
+    0 1px 5px 0 color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 10%), transparent),
+    0 6px 16px 0 color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 8%), transparent);
 }
 
-.top-glass-bar .friday-switcher-host {
-  justify-self: center;
-  grid-column: 2;
+.top-glass-menu .friday-switcher-host {
+  flex: 0 1 auto;
+  min-width: 0;
+  padding-left: 0.38rem;
+  margin-left: 0.12rem;
+  border-left: 1px solid color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 28%), transparent);
 }
 
-.top-glass-bar .glass-icon-btn:last-of-type {
-  justify-self: end;
-  grid-column: 3;
+.site-logo {
+  display: block;
+  line-height: 0;
+  text-decoration: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.top-glass-menu .site-logo--menu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 1px;
+  border-radius: 50%;
+}
+
+.site-logo:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--text) 55%, transparent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.top-glass-menu .site-logo--menu:focus-visible {
+  border-radius: 50%;
+}
+
+.site-logo__img {
+  width: 2.35rem;
+  height: 2.35rem;
+  display: block;
+  object-fit: contain;
+  object-position: left center;
+  filter: drop-shadow(0 2px 10px color-mix(in srgb, var(--lg-dark) 35%, transparent));
+}
+
+.top-glass-menu .site-logo__img {
+  width: 1.85rem;
+  height: 1.85rem;
+  object-position: center;
+  filter: none;
 }
 
 .glass-pill {
@@ -457,8 +560,9 @@ body {
   width: 1.65rem;
   height: 1.65rem;
   border-radius: 50%;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.08));
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  object-fit: cover;
+  display: block;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.28);
 }
 
 .logo-text {
@@ -520,32 +624,12 @@ body {
   transition-duration: var(--dur-xs);
 }
 
-#theme-toggle {
-  position: relative;
-}
-
-#theme-toggle.icon-spin .icon-sun,
-#theme-toggle.icon-spin .icon-moon {
-  animation: iconSpin 0.55s var(--ease-out-expo);
-}
-
-@keyframes iconSpin {
-  from {
-    transform: rotate(-90deg) scale(0.6);
-    opacity: 0;
-  }
-  to {
-    transform: rotate(0) scale(1);
-    opacity: 1;
-  }
-}
-
 .glass-icon-btn--round {
   width: 2.55rem;
   height: 2.55rem;
 }
 
-/* --- Liquid glass switcher (2 slots — même logique que saas-liquid-glass-billing / Fidelity) --- */
+/* --- Liquid glass switcher (3 positions — Tout / iOS / Web) --- */
 #friday-liquid-glass {
   --c-glass: var(--lg-glass);
   --c-light: var(--lg-light);
@@ -566,8 +650,8 @@ body {
   --sw-pad-y: 4px;
   --sw-pad-yb: 4px;
   --sw-gap: 6px;
-  --sw-track: calc(100% - 2 * var(--sw-pad-x) - 1 * var(--sw-gap));
-  --sw-slot: calc(var(--sw-track) / 2);
+  --sw-track: calc(100% - 2 * var(--sw-pad-x) - 2 * var(--sw-gap));
+  --sw-slot: calc(var(--sw-track) / 3);
   --sw-shift: calc(var(--sw-slot) + var(--sw-gap));
 
   position: relative;
@@ -575,11 +659,11 @@ body {
   display: flex;
   align-items: center;
   gap: var(--sw-gap);
-  width: min(292px, calc(100vw - 8.5rem));
+  width: min(412px, calc(100vw - 11.25rem));
   height: 46px;
   box-sizing: border-box;
   padding: var(--sw-pad-y) var(--sw-pad-x) var(--sw-pad-yb);
-  margin: 0 auto;
+  margin: 0;
   border: none;
   border-radius: 99em;
   font-size: var(--fz);
@@ -587,20 +671,10 @@ body {
   isolation: isolate;
   overflow: hidden;
   min-inline-size: 0;
-  background-color: color-mix(in srgb, var(--c-glass) 12%, transparent);
-  backdrop-filter: blur(12px) saturate(var(--saturation));
-  -webkit-backdrop-filter: blur(12px) saturate(var(--saturation));
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 10%), transparent),
-    inset 1.8px 3px 0 -2px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 90%), transparent),
-    inset -2px -2px 0 -2px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 80%), transparent),
-    inset -3px -8px 1px -6px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 60%), transparent),
-    inset -0.3px -1px 4px 0 color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 12%), transparent),
-    inset -1.5px 2.5px 0 -2px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 20%), transparent),
-    inset 0 3px 4px -2px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 20%), transparent),
-    inset 2px -6.5px 1px -4px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
-    0 1px 5px 0 color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
-    0 6px 16px 0 color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 8%), transparent);
+  background-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
   transition:
     background-color 520ms var(--ease-switcher),
     box-shadow 520ms var(--ease-switcher);
@@ -714,7 +788,7 @@ body {
     0 3px 6px 0 color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 8%), transparent);
 }
 
-#friday-liquid-glass fieldset.switcher:has(input[data-option="1"]:checked)::after {
+#friday-liquid-glass fieldset.switcher:has(input[data-option="0"]:checked)::after {
   left: var(--sw-pad-x);
   transform-origin: right;
   transition:
@@ -724,8 +798,18 @@ body {
   animation: fridayScaleToggle 560ms var(--ease-out-expo);
 }
 
-#friday-liquid-glass fieldset.switcher:has(input[data-option="2"]:checked)::after {
+#friday-liquid-glass fieldset.switcher:has(input[data-option="1"]:checked)::after {
   left: calc(var(--sw-pad-x) + var(--sw-shift));
+  transform-origin: center;
+  transition:
+    background-color 520ms var(--ease-switcher),
+    box-shadow 520ms var(--ease-switcher),
+    left 560ms var(--ease-switcher);
+  animation: fridayScaleToggle 560ms var(--ease-out-expo);
+}
+
+#friday-liquid-glass fieldset.switcher:has(input[data-option="2"]:checked)::after {
+  left: calc(var(--sw-pad-x) + 2 * var(--sw-shift));
   transform-origin: left;
   transition:
     background-color 520ms var(--ease-switcher),
@@ -734,11 +818,27 @@ body {
   animation: fridayScaleToggle2 560ms var(--ease-out-expo);
 }
 
+#friday-liquid-glass fieldset.switcher[data-previous="0"]:has(input[data-option="1"]:checked)::after {
+  transform-origin: left;
+}
+
+#friday-liquid-glass fieldset.switcher[data-previous="1"]:has(input[data-option="0"]:checked)::after {
+  transform-origin: right;
+}
+
 #friday-liquid-glass fieldset.switcher[data-previous="1"]:has(input[data-option="2"]:checked)::after {
   transform-origin: left;
 }
 
 #friday-liquid-glass fieldset.switcher[data-previous="2"]:has(input[data-option="1"]:checked)::after {
+  transform-origin: right;
+}
+
+#friday-liquid-glass fieldset.switcher[data-previous="0"]:has(input[data-option="2"]:checked)::after {
+  transform-origin: left;
+}
+
+#friday-liquid-glass fieldset.switcher[data-previous="2"]:has(input[data-option="0"]:checked)::after {
   transform-origin: right;
 }
 
@@ -766,18 +866,6 @@ body {
   }
 }
 
-/* --- Rail gauche --- */
-.side-rail {
-  position: fixed;
-  left: max(0.55rem, env(safe-area-inset-left));
-  top: 50%;
-  translate: 0 -50%;
-  z-index: 90;
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-}
-
 /* --- Zone viewport (pas de scroll document) --- */
 .main-stage {
   position: fixed;
@@ -785,7 +873,7 @@ body {
   bottom: var(--viewport-bottom);
   left: var(--viewport-left);
   right: var(--viewport-right);
-  z-index: 1;
+  z-index: 3;
   max-width: min(1200px, 100%);
   margin-inline: auto;
   pointer-events: none;
@@ -800,6 +888,16 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
+}
+
+/* Carrousel réalisations : déborde jusqu’au bord droit du viewport (safe area via --viewport-right). */
+body[data-friday-panel="0"] .panel-stack {
+  overflow-x: visible;
+  overflow-y: hidden;
+}
+
+body[data-friday-panel="0"] .friday-panel--work.is-active {
+  overflow: visible;
 }
 
 .friday-panel {
@@ -828,6 +926,13 @@ body {
   z-index: 1;
 }
 
+/* Focus programmé sur le panneau actif — aucun contour (sinon rectangle visible plein cadre) */
+.friday-panel:focus,
+.friday-panel:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
 .panel-inner {
   width: 100%;
   max-height: 100%;
@@ -846,9 +951,70 @@ body {
 .panel-inner--work {
   justify-content: flex-start;
   gap: clamp(0.35rem, 1.2dvh, 0.55rem);
-  padding-top: clamp(0px, 0.8dvh, 0.35rem);
+  padding-top: clamp(0.35rem, 1dvh, 0.65rem);
+  padding-right: 0;
   flex: 1;
   min-height: 0;
+}
+
+/*
+ * Écran : bord droit réel (safe area). Le carrousel s’étend au-delà de la colonne max-width
+ * quand main-stage est centré (ex. 1200px sur grand écran).
+ */
+.panel-inner--work .cinema-carousel {
+  margin-top: auto;
+  /* Largeur étendue jusqu’au bord droit du viewport : --cinema-bleed-px posé par main.js (mesure réelle). */
+  width: calc(100% + var(--cinema-bleed-px, 0px));
+  max-width: none;
+  margin-right: calc(-1 * var(--cinema-bleed-px, 0px));
+  flex: 0 1 auto;
+  box-sizing: border-box;
+}
+
+.panel-inner--work .projects-carousel-dots {
+  margin-top: 0.15rem;
+  transform: none;
+}
+
+/*
+ * Réalisations : la slide active reste centrée sur la colonne ; on voit l’aperçu à droite uniquement.
+ * Rien à gauche du bord gauche de la carte (--cinema-clip-left posé par main.js, pas de zoom ni changement de forme des cartes).
+ */
+.panel-inner--work .cinema-carousel__viewport {
+  mask-image: none;
+  -webkit-mask-image: none;
+  clip-path: inset(0 0 0 var(--cinema-clip-left, 0px));
+}
+
+@media (max-width: 767.98px) {
+  .panel-inner--work .cinema-carousel {
+    max-width: 100%;
+  }
+
+  .panel-inner--work .projects-carousel-dots {
+    justify-content: center;
+    flex-wrap: nowrap;
+    width: 100%;
+    max-width: 100%;
+    padding-left: 0.125rem;
+    padding-right: 0.125rem;
+    box-sizing: border-box;
+    gap: 0.35rem;
+    transform: none;
+  }
+
+  .panel-inner--work .projects-dot {
+    width: 6px;
+    height: 6px;
+    flex-shrink: 0;
+  }
+
+  .panel-inner--work .projects-dot.is-active {
+    width: 1.35rem;
+    height: 6px;
+    border-radius: 99em;
+    background: rgba(255, 255, 255, 0.92);
+  }
 }
 
 .panel-inner--contact {
@@ -868,235 +1034,187 @@ body {
   text-align: left;
 }
 
-.showcase-heading {
-  margin: 0;
-  font-size: clamp(0.82rem, 2.8vw, 1rem);
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.showcase-heading.cinema-tag {
-  letter-spacing: 0.12em;
-}
-
-.showcase {
-  margin-top: 0;
-}
-
-/* Carrousel horizontal type cinéma */
+/* Carrousel : cartes panoramiques (plus larges que hautes) ; aperçu de la suivante sur les côtés */
 .cinema-carousel {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0;
   width: 100%;
+  max-width: 100%;
+  margin-left: 0;
   flex: 1;
   min-height: 0;
   touch-action: manipulation;
+  box-sizing: border-box;
 }
 
 .cinema-carousel__viewport {
   flex: 1;
   min-width: 0;
+  width: 100%;
   overflow: hidden;
-  mask-image: linear-gradient(
-    90deg,
-    transparent,
-    #000 6%,
-    #000 94%,
-    transparent
-  );
+  padding-right: 0;
+  margin-right: 0;
+  /* Efface un éventuel volet de la carte précédente à gauche ; bord droit net (flush écran). */
+  mask-image: linear-gradient(90deg, transparent 0%, #000 min(48px, 12%), #000 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 min(48px, 12%), #000 100%);
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  mask-size: 100% 100%;
+  -webkit-mask-size: 100% 100%;
 }
 
 .cinema-carousel__track {
+  position: relative;
   display: flex;
   align-items: stretch;
   gap: 1rem;
   will-change: transform;
-  transition: transform 0.62s var(--ease-out-expo);
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  transition: transform 0.72s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .cinema-carousel__track {
     transition: none;
   }
-}
 
-.cinema-carousel__arrow {
-  flex-shrink: 0;
-  width: 2.5rem;
-  height: 2.5rem;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text);
-  isolation: isolate;
-  background-color: color-mix(in srgb, var(--lg-glass) 12%, transparent);
-  backdrop-filter: blur(12px) saturate(var(--lg-sat));
-  -webkit-backdrop-filter: blur(12px) saturate(var(--lg-sat));
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 10%), transparent),
-    inset 1.8px 3px 0 -2px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 90%), transparent),
-    inset -2px -2px 0 -2px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 80%), transparent),
-    inset -3px -8px 1px -6px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 60%), transparent),
-    inset -0.3px -1px 4px 0 color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 12%), transparent),
-    inset -1.5px 2.5px 0 -2px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 20%), transparent),
-    inset 0 3px 4px -2px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 20%), transparent),
-    inset 2px -6.5px 1px -4px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 10%), transparent),
-    0 1px 5px 0 color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 10%), transparent),
-    0 6px 16px 0 color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 8%), transparent);
-  transition:
-    transform var(--dur-sm) var(--ease-spring),
-    opacity var(--dur-xs) ease,
-    box-shadow var(--dur-sm) var(--ease-out-expo);
-  z-index: 2;
-}
-
-@media (hover: hover) {
-  .cinema-carousel__arrow:hover {
-    transform: scale(1.06);
-    box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 14%), transparent),
-      inset 1.8px 3px 0 -2px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 95%), transparent),
-      inset -2px -2px 0 -2px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 85%), transparent),
-      inset -3px -8px 1px -6px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 65%), transparent),
-      inset -0.3px -1px 4px 0 color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 14%), transparent),
-      inset -1.5px 2.5px 0 -2px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 22%), transparent),
-      inset 0 3px 4px -2px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 22%), transparent),
-      inset 2px -6.5px 1px -4px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 11%), transparent),
-      0 3px 10px 0 color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 12%), transparent),
-      0 12px 28px 0 color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 12%), transparent);
-  }
-}
-
-.cinema-carousel__arrow:active {
-  transform: scale(0.94);
-}
-
-@media (max-width: 480px) {
-  .cinema-carousel__arrow {
-    width: 2.15rem;
-    height: 2.15rem;
-  }
-
-  .cinema-carousel__arrow svg {
-    width: 18px;
-    height: 18px;
+  .cinema-carousel__viewport {
+    mask-image: none;
+    -webkit-mask-image: none;
   }
 }
 
 .cinema-slide {
-  flex: 0 0 min(540px, calc(100vw - 8.5rem));
-  max-width: min(540px, calc(100vw - 8.5rem));
-  border-radius: clamp(22px, 4vw, 30px);
+  box-sizing: border-box;
+  flex: 0 0 clamp(288px, 80vw, 540px);
+  max-width: clamp(288px, 80vw, 540px);
+  border-radius: clamp(20px, 3.6vw, 28px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   isolation: isolate;
   border: none;
-  background-color: color-mix(in srgb, var(--lg-glass) 12%, transparent);
-  backdrop-filter: blur(18px) saturate(var(--lg-sat));
-  -webkit-backdrop-filter: blur(18px) saturate(var(--lg-sat));
+  /* Carte opaque (pas de vitre transparente sur le fond). */
+  background-color: rgba(16, 24, 40, 0.98);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 10%), transparent),
-    inset 1.8px 3px 0 -2px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 90%), transparent),
-    inset -2px -2px 0 -2px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 80%), transparent),
-    inset -3px -8px 1px -6px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 60%), transparent),
-    inset -0.3px -1px 4px 0 color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 12%), transparent),
-    inset -1.5px 2.5px 0 -2px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 20%), transparent),
-    inset 0 3px 4px -2px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 20%), transparent),
-    inset 2px -6.5px 1px -4px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 10%), transparent),
-    0 4px 12px 0 color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 12%), transparent),
-    0 22px 50px 0 color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 14%), transparent);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 10px 36px rgba(0, 12, 32, 0.45);
 }
 
-.cinema-slide__poster {
-  flex: 1 1 auto;
-  min-height: clamp(100px, 22dvh, 200px);
-  max-height: 36dvh;
-  background-size: cover;
-  background-position: center;
+.panel-inner--work .cinema-slide--filtered-out {
+  display: none !important;
 }
 
-.cinema-slide__poster--myfidpass {
-  background-image: linear-gradient(135deg, rgba(18, 120, 212, 0.95) 0%, rgba(8, 45, 110, 0.92) 50%, rgba(20, 160, 140, 0.55) 100%);
-}
-
-.cinema-slide__poster--carvinguard {
-  background-image: linear-gradient(145deg, rgba(35, 45, 62, 0.97) 0%, rgba(15, 23, 42, 0.95) 40%, rgba(60, 80, 110, 0.65) 100%);
-}
-
-.cinema-slide__poster--myfidpass-ios {
-  background-image: linear-gradient(165deg, rgba(99, 102, 241, 0.55) 0%, rgba(15, 23, 42, 0.94) 35%, rgba(30, 58, 138, 0.85) 100%);
-}
-
-.cinema-slide__poster--carredespros {
-  background-image: linear-gradient(125deg, rgba(180, 83, 9, 0.35) 0%, rgba(30, 41, 59, 0.92) 45%, rgba(14, 116, 144, 0.55) 100%);
+body.theme-soft .cinema-slide {
+  background-color: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.65),
+    0 12px 36px rgba(20, 60, 120, 0.22);
 }
 
 .cinema-slide__glass {
   flex-shrink: 0;
-  padding: clamp(0.85rem, 2.5vw, 1.15rem) clamp(1rem, 3vw, 1.35rem) clamp(1rem, 2.8vw, 1.25rem);
+  padding: clamp(0.52rem, 1.6vw, 0.72rem) clamp(0.95rem, 2.8vw, 1.15rem) clamp(0.62rem, 2vw, 0.82rem);
+  background-color: rgba(12, 18, 32, 0.98);
+}
+
+body.theme-soft .cinema-slide__glass {
+  background-color: rgba(248, 252, 255, 0.98);
+}
+
+body.theme-soft .cinema-slide__desc {
+  color: rgba(15, 35, 65, 0.72);
+}
+
+body.theme-soft .cinema-slide__title {
+  color: rgba(12, 36, 72, 0.96);
 }
 
 .cinema-slide__title {
-  margin: 0 0 0.35rem;
-  font-size: clamp(1.15rem, 3.8vw, 1.45rem);
+  margin: 0 0 0.28rem;
+  font-size: clamp(1.05rem, 3.2vw, 1.28rem);
   font-weight: 700;
   letter-spacing: -0.02em;
 }
 
 .cinema-slide__desc {
-  margin: 0 0 0.85rem;
-  font-size: clamp(0.82rem, 2.7vw, 0.94rem);
-  line-height: 1.5;
+  margin: 0 0 0.58rem;
+  font-size: clamp(0.78rem, 2.4vw, 0.88rem);
+  line-height: 1.45;
   color: var(--text-muted);
 }
 
 .cinema-slide__cta {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.45rem;
-  padding: 0.52rem 1.15rem;
+  padding: 0.42rem 1.05rem;
   border-radius: 99em;
+  font: inherit;
   font-weight: 600;
   font-size: 0.86rem;
   text-decoration: none;
   color: var(--text);
   isolation: isolate;
   border: none;
-  background-color: color-mix(in srgb, var(--lg-glass) 22%, transparent);
-  backdrop-filter: blur(12px) saturate(var(--lg-sat));
-  -webkit-backdrop-filter: blur(12px) saturate(var(--lg-sat));
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 12%), transparent),
-    inset 2px 1px 0 -1px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 90%), transparent),
-    inset -1.5px -1px 0 -1px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 80%), transparent),
-    inset -2px -6px 1px -5px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 60%), transparent),
-    inset -1px 2px 3px -1px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 20%), transparent),
-    inset 0 -4px 1px -2px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 10%), transparent),
-    0 3px 10px 0 color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 12%), transparent);
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.16);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
   transition:
     transform var(--dur-sm) var(--ease-spring),
     box-shadow var(--dur-sm) var(--ease-out-expo);
 }
 
+/* Slide « vitrine » : pas de bandeau visuel type carrousel, uniquement le CTA. */
+.cinema-slide--accueil {
+  min-height: min(22dvh, 168px);
+}
+
+.cinema-slide--accueil .cinema-slide__glass--accueil {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0.85rem, 3vw, 1.35rem);
+  border-top: none;
+  text-align: center;
+}
+
+.cinema-slide--accueil .cinema-slide__cta--accueil {
+  width: 100%;
+  max-width: 17.5rem;
+  padding-block: 0.62rem;
+  font-size: 0.9rem;
+}
+
+body.theme-soft .cinema-slide__cta {
+  background-color: rgba(15, 55, 120, 0.12);
+  color: rgba(12, 36, 72, 0.95);
+  box-shadow: inset 0 0 0 1px rgba(15, 55, 120, 0.18);
+}
+
 @media (hover: hover) {
   .cinema-slide__cta:hover {
     transform: translateY(-2px);
+    background-color: rgba(255, 255, 255, 0.22);
     box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 16%), transparent),
-      inset 2px 1px 0 -1px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 95%), transparent),
-      inset -1.5px -1px 0 -1px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 85%), transparent),
-      inset -2px -6px 1px -5px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 65%), transparent),
-      inset -1px 2px 3px -1px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 22%), transparent),
-      inset 0 -4px 1px -2px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 11%), transparent),
-      0 6px 18px 0 color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 14%), transparent);
+      inset 0 0 0 1px rgba(255, 255, 255, 0.28),
+      0 6px 18px rgba(0, 10, 28, 0.35);
+  }
+
+  body.theme-soft .cinema-slide__cta:hover {
+    background-color: rgba(15, 55, 120, 0.18);
+    box-shadow:
+      inset 0 0 0 1px rgba(15, 55, 120, 0.26),
+      0 6px 18px rgba(20, 60, 120, 0.18);
   }
 }
 
@@ -1118,8 +1236,7 @@ body {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   isolation: auto;
-  /* Main-stage est décalé (rail gauche) ; le dock est centré viewport — on recale comme le dock */
-  transform: translateX(calc((var(--viewport-right) - var(--viewport-left)) / 2));
+  transform: none;
 }
 
 .projects-dot {
@@ -1476,6 +1593,10 @@ button.glass-card__cta {
     filter var(--dur-sm) ease;
 }
 
+.dock-icon-home {
+  display: block;
+}
+
 .dock-btn:focus-visible,
 .dock-cta:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--lg-light) 78%, transparent);
@@ -1531,17 +1652,14 @@ button.glass-card__cta {
   padding: 0.84rem 1.65rem;
   isolation: isolate;
   overflow: hidden;
-  background-color: color-mix(in srgb, #7ddbff 24%, color-mix(in srgb, var(--lg-glass) 34%, transparent));
-  backdrop-filter: blur(12px) saturate(175%);
-  -webkit-backdrop-filter: blur(12px) saturate(175%);
+  background-color: #0a0a0b;
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 18%), transparent),
-    inset 2px 3px 0 -1px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 88%), transparent),
-    inset -2px -3px 0 -2px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 55%), transparent),
-    inset -1px 2px 4px -1px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 18%), transparent),
-    inset 0 -3px 2px -1px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 12%), transparent),
-    0 4px 6px 0 color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 12%), transparent),
-    0 14px 32px 0 color-mix(in srgb, #063d7a 42%, transparent);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
+    0 4px 8px rgba(0, 0, 0, 0.35),
+    0 14px 28px rgba(0, 0, 0, 0.28);
   transition:
     transform var(--dur-sm) var(--ease-spring),
     box-shadow var(--dur-md) var(--ease-out-expo),
@@ -1559,13 +1677,11 @@ button.glass-card__cta {
   inset: 0;
   border-radius: inherit;
   background: linear-gradient(
-    132deg,
-    color-mix(in srgb, var(--lg-light) 22%, transparent) 0%,
-    transparent 45%,
-    transparent 55%,
-    color-mix(in srgb, #7ddbff 35%, transparent) 100%
+    180deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    transparent 48%
   );
-  opacity: 0.72;
+  opacity: 1;
   pointer-events: none;
   z-index: 0;
 }
@@ -1578,27 +1694,24 @@ button.glass-card__cta {
   background: linear-gradient(
     118deg,
     transparent 38%,
-    rgba(255, 255, 255, 0.42) 49.5%,
+    rgba(255, 255, 255, 0.22) 49.5%,
     transparent 61%
   );
   transform: translate3d(-115%, 0, 0) rotate(12deg);
   pointer-events: none;
   z-index: 0;
-  opacity: 0.85;
+  opacity: 0.55;
 }
 
 @media (hover: hover) {
   .dock-cta:hover {
     transform: translate3d(0, -4px, 0) scale(1.04);
-    background-color: color-mix(in srgb, #7ddbff 32%, color-mix(in srgb, var(--lg-glass) 28%, transparent));
+    background-color: #161618;
     box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 22%), transparent),
-      inset 2px 3px 0 -1px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 94%), transparent),
-      inset -2px -4px 0 -2px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 62%), transparent),
-      inset -1px 2px 5px -1px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 20%), transparent),
-      inset 0 -3px 2px -1px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 14%), transparent),
-      0 8px 14px 0 color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 14%), transparent),
-      0 22px 48px 0 color-mix(in srgb, #063d7a 48%, transparent);
+      inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+      0 8px 16px rgba(0, 0, 0, 0.4),
+      0 20px 40px rgba(0, 0, 0, 0.22);
   }
 }
 
@@ -1638,160 +1751,108 @@ button.glass-card__cta {
 }
 
 .dock-cta.is-active {
-  background-color: color-mix(in srgb, #7ddbff 38%, color-mix(in srgb, var(--lg-glass) 40%, transparent));
+  background-color: #050506;
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 20%), transparent),
-    inset 2px 2px 0 -1px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 92%), transparent),
-    inset -1.5px -2px 0 -1px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 72%), transparent),
-    inset -2px -6px 1px -5px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 52%), transparent),
-    inset -1px 2px 4px -1px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 22%), transparent),
-    inset 0 -4px 2px -2px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 12%), transparent),
-    0 4px 14px 0 color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 14%), transparent),
-    0 18px 44px 0 color-mix(in srgb, #063d7a 52%, transparent);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+    0 4px 14px rgba(0, 0, 0, 0.42),
+    0 18px 38px rgba(0, 0, 0, 0.3);
 }
 
-/* Theme toggle icons */
-body.theme-soft #theme-toggle .icon-sun {
-  display: none;
-}
-body.theme-soft #theme-toggle .icon-moon {
-  display: block !important;
-}
-body.theme-deep #theme-toggle .icon-moon {
-  display: none !important;
-}
-body.theme-deep #theme-toggle .icon-sun {
-  display: block;
-}
-
-/* Mobile : header — grille corrigée (override spécificité .top-glass-bar .friday-switcher-host) */
+/* Mobile : menu en pilule compacte (pas edge-to-edge — évite la barre « interminable »). */
 @media (max-width: 767.98px) {
   :root {
     --viewport-left: max(0.85rem, env(safe-area-inset-left));
     --viewport-right: max(0.85rem, env(safe-area-inset-right));
-    --viewport-top: max(7.25rem, calc(env(safe-area-inset-top) + 6rem));
+    --viewport-top: max(6rem, calc(env(safe-area-inset-top) + 4.35rem));
     --viewport-bottom: max(8.35rem, calc(env(safe-area-inset-bottom) + 7.05rem));
-    --rail-above-dock: 6.35rem;
   }
 
   .panel-inner--hero {
     align-items: flex-start;
   }
 
-  .cinema-slide {
-    flex-basis: min(480px, calc(100vw - 6rem));
-    max-width: min(480px, calc(100vw - 6rem));
-  }
-
-  .cinema-carousel__viewport {
-    mask-image: none;
-  }
-
   .top-glass-bar {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-rows: auto auto;
-    column-gap: 0.5rem;
-    row-gap: 0.55rem;
-    padding-left: max(0.55rem, env(safe-area-inset-left));
-    padding-right: max(0.55rem, env(safe-area-inset-right));
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-left: max(0.45rem, env(safe-area-inset-left));
+    padding-right: max(0.45rem, env(safe-area-inset-right));
     padding-top: max(0.5rem, env(safe-area-inset-top));
     padding-bottom: 0.4rem;
   }
 
-  .top-glass-bar .glass-pill--logo {
-    grid-column: 1;
-    grid-row: 1;
-    justify-self: start;
+  .top-glass-menu {
+    width: auto;
+    max-width: calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right) - 0.5rem);
     min-width: 0;
-    max-width: 100%;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 0.18rem;
+    padding: 2px 6px 2px 5px;
+    box-sizing: border-box;
   }
 
-  .top-glass-bar .glass-icon-btn:last-of-type {
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: end;
-    flex-shrink: 0;
+  .top-glass-menu .site-logo__img {
+    width: 1.28rem;
+    height: 1.28rem;
   }
 
-  .top-glass-bar .friday-switcher-host {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    justify-self: stretch;
-    margin-inline: 0;
+  .top-glass-menu .friday-switcher-host {
+    flex: 0 0 auto;
+    width: auto;
+    max-width: none;
+    padding-left: 0.2rem;
+    margin-left: 0.06rem;
+    border-left-width: 1px;
   }
 
   #friday-liquid-glass {
-    width: 100%;
-    max-width: 100%;
+    width: auto;
+    flex: 0 0 auto;
+    max-width: none;
     min-width: 0;
     display: flex;
     justify-content: center;
+    --fz: 0.72rem;
   }
 
   #friday-liquid-glass fieldset.switcher {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    margin-inline: auto;
-    height: 44px;
+    --sw-pad-x: 4px;
+    --sw-pad-y: 3px;
+    --sw-pad-yb: 3px;
+    --sw-gap: 4px;
+    --sw-track: calc(100% - 2 * var(--sw-pad-x) - 2 * var(--sw-gap));
+    --sw-slot: calc(var(--sw-track) / 3);
+    --sw-shift: calc(var(--sw-slot) + var(--sw-gap));
+    width: 10.35rem;
+    max-width: min(10.35rem, calc(100vw - 5.25rem));
+    min-width: 9.65rem;
+    min-height: 0;
+    height: 34px;
     box-sizing: border-box;
-    backdrop-filter: blur(10px) saturate(var(--saturation));
-    -webkit-backdrop-filter: blur(10px) saturate(var(--saturation));
+    font-size: var(--fz);
   }
 
   #friday-liquid-glass .switcher__option {
-    padding: 0 2px;
-    gap: 0.28rem;
+    padding: 0 1px;
+    gap: 0;
   }
 
   #friday-liquid-glass .switcher__text {
-    font-size: 0.74rem;
+    font-size: 0.66rem;
+    font-weight: 600;
     letter-spacing: 0;
   }
 
   #friday-liquid-glass .switcher__icon-inline {
-    width: 0.95rem;
-    height: 0.95rem;
-  }
-
-  .glass-pill {
-    padding: 0.32rem 0.65rem 0.32rem 0.45rem;
-    gap: 0.35rem;
-  }
-
-  .logo-mark {
-    width: 1.45rem;
-    height: 1.45rem;
-  }
-
-  .logo-text {
-    font-size: 0.88rem;
-  }
-
-  .top-glass-bar .glass-icon-btn:last-of-type {
-    width: 2.45rem;
-    height: 2.45rem;
+    display: none;
   }
 
   .hero {
     justify-content: flex-start;
     padding-top: 0.5rem;
     min-height: auto;
-  }
-
-  .side-rail {
-    flex-direction: row;
-    top: auto;
-    bottom: calc(max(1rem, env(safe-area-inset-bottom)) + var(--rail-above-dock) + 2.25rem);
-    left: 50%;
-    translate: -50%;
-    flex-wrap: wrap;
-    justify-content: center;
-    width: calc(100vw - 2rem);
-    max-width: 20rem;
   }
 
   .glass-card {
@@ -1805,6 +1866,32 @@ body.theme-deep #theme-toggle .icon-sun {
 }
 
 @media (max-width: 420px) {
+  .top-glass-menu {
+    padding: 2px 5px 2px 4px;
+    gap: 0.12rem;
+  }
+
+  #friday-liquid-glass fieldset.switcher {
+    width: 9.85rem;
+    max-width: min(9.85rem, calc(100vw - 4.75rem));
+    min-width: 9.15rem;
+    height: 32px;
+    --sw-pad-x: 3px;
+    --sw-gap: 3px;
+    --sw-track: calc(100% - 2 * var(--sw-pad-x) - 2 * var(--sw-gap));
+    --sw-slot: calc(var(--sw-track) / 3);
+    --sw-shift: calc(var(--sw-slot) + var(--sw-gap));
+  }
+
+  #friday-liquid-glass .switcher__text {
+    font-size: 0.62rem;
+  }
+
+  .top-glass-menu .site-logo__img {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
   .bottom-dock {
     gap: 0.35rem;
     padding: 0.55rem 0.5rem 0.55rem 0.62rem;
@@ -1831,14 +1918,363 @@ body.theme-deep #theme-toggle .icon-sun {
   }
 }
 
-@media (max-width: 380px) {
-  #friday-liquid-glass .switcher__text {
-    font-size: 0.68rem;
-  }
+/* --------------------------------------------------------------------------
+   Page Instagram (scroll, grille d’embeds)
+   -------------------------------------------------------------------------- */
 
-  #friday-liquid-glass fieldset.switcher {
-    --sw-gap: 4px;
-    --sw-pad-x: 6px;
-    height: 42px;
+html:has(body.instagram-page) {
+  height: auto;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+body.instagram-page {
+  height: auto;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.instagram-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: max(0.65rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right))
+    max(0.5rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+  pointer-events: none;
+}
+
+.instagram-header > *,
+.instagram-header .instagram-header__actions {
+  pointer-events: auto;
+}
+
+.instagram-header .glass-pill {
+  text-decoration: none;
+  color: var(--text);
+}
+
+.instagram-header__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.instagram-main {
+  max-width: min(1180px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 1rem 0 clamp(2rem, 6dvh, 3rem);
+}
+
+.instagram-intro {
+  margin-bottom: 1.25rem;
+  padding: 1.25rem 1.4rem;
+  border-radius: 22px;
+}
+
+.instagram-title {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.35rem, 4vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.instagram-lead {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+.instagram-lead code {
+  font-size: 0.86em;
+  padding: 0.12em 0.35em;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.instagram-empty {
+  margin: 0 0 1.25rem;
+  padding: 1.1rem 1.25rem;
+  border-radius: 18px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+.instagram-empty code {
+  font-size: 0.88em;
+}
+
+.instagram-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.instagram-embed-wrap {
+  border-radius: 0;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 12px 36px rgba(0, 12, 32, 0.35);
+  background: rgba(12, 18, 32, 0.35);
+}
+
+body.theme-soft .instagram-embed-wrap {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+    0 10px 28px rgba(20, 60, 120, 0.14);
+}
+
+.instagram-embed {
+  display: block;
+  width: 100%;
+  min-height: 480px;
+  border: none;
+  background: transparent;
+}
+
+@media (max-width: 480px) {
+  .instagram-embed {
+    min-height: 520px;
   }
+}
+
+body.theme-soft .instagram-theme-btn .icon-sun {
+  display: none;
+}
+
+body.theme-soft .instagram-theme-btn .icon-moon {
+  display: block !important;
+}
+
+body.theme-deep .instagram-theme-btn .icon-moon {
+  display: none !important;
+}
+
+body.theme-deep .instagram-theme-btn .icon-sun {
+  display: block;
+}
+
+.instagram-native-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
+}
+
+.instagram-native-blur-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  padding: 0.55rem 0.8rem;
+  box-sizing: border-box;
+  isolation: isolate;
+  border-radius: 14px;
+  background-color: color-mix(in srgb, var(--lg-glass) 14%, transparent);
+  backdrop-filter: blur(12px) saturate(var(--lg-sat));
+  -webkit-backdrop-filter: blur(12px) saturate(var(--lg-sat));
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 10%), transparent),
+    0 4px 14px rgba(0, 12, 28, 0.18);
+}
+
+body.theme-soft .instagram-native-blur-controls {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.45),
+    0 4px 14px rgba(20, 60, 120, 0.12);
+}
+
+.instagram-native-blur-label {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.instagram-native-blur-range {
+  flex: 1 1 140px;
+  min-width: min(100%, 140px);
+  height: 1.35rem;
+  margin: 0;
+  accent-color: #7ddbff;
+  cursor: pointer;
+}
+
+.instagram-native-blur-value {
+  flex-shrink: 0;
+  min-width: 2.75rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.instagram-native-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Laisse de la place aux box-shadow du bouton glass (évite la coupe nette). */
+  padding-block: 0.35rem 0.65rem;
+}
+
+.instagram-native-wrap {
+  border-radius: 0;
+  overflow: visible;
+  isolation: isolate;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 12px 36px rgba(0, 12, 32, 0.38);
+}
+
+body.theme-soft .instagram-native-wrap {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55),
+    0 10px 28px rgba(20, 60, 120, 0.16);
+}
+
+.instagram-native-post {
+  display: block;
+}
+
+.instagram-native-post__inner {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  min-height: 420px;
+  /* visible : les ombres du .glass-btn ne doivent pas être rognées par le cadre. */
+  overflow: visible;
+}
+
+.instagram-native-post__media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.instagram-native-post__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transform: translateZ(0);
+  transform-origin: center center;
+  image-rendering: auto;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+@supports (image-rendering: high-quality) {
+  .instagram-native-post__img {
+    image-rendering: high-quality;
+  }
+}
+
+.instagram-native-post__footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  /* Espace pour les halos du liquid glass (~22px blur sur .glass-btn). */
+  padding-top: clamp(1.15rem, 4.5vw, 1.65rem);
+  padding-bottom: clamp(1.1rem, 4vw, 1.55rem);
+  padding-inline: clamp(0.65rem, 2.5vw, 1rem);
+  background: transparent;
+  pointer-events: none;
+}
+
+.instagram-native-post__footer .instagram-native-cta {
+  pointer-events: auto;
+}
+
+.instagram-native-cta {
+  width: auto;
+  max-width: calc(100% - 1rem);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.48rem 0.78rem;
+  white-space: nowrap;
+  color: transparent;
+}
+
+.instagram-native-cta .instagram-native-cta__label {
+  display: inline-block;
+  font-weight: 800;
+  font-size: clamp(0.8rem, 2.5vw, 0.92rem);
+  letter-spacing: -0.04em;
+  font-feature-settings: "kern" 1, "liga" 1;
+  background: linear-gradient(
+    115deg,
+    #000000 0%,
+    #1a1a1a 38%,
+    #3d3d3d 62%,
+    #242424 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.instagram-native-cta:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--lg-light) 72%, transparent);
+  outline-offset: 3px;
+}
+
+button.instagram-native-download {
+  font: inherit;
+  cursor: pointer;
+  width: auto;
+  max-width: calc(100% - 1rem);
+  padding-inline: 1.1rem;
+  color: transparent;
+}
+
+.instagram-native-download:disabled {
+  cursor: wait;
+  opacity: 0.85;
+}
+
+.instagram-native-download__label {
+  display: inline-block;
+  font-weight: 700;
+  font-size: clamp(0.82rem, 2.6vw, 0.95rem);
+  letter-spacing: 0.03em;
+  background: linear-gradient(
+    115deg,
+    #000000 0%,
+    #1a1a1a 38%,
+    #3d3d3d 62%,
+    #242424 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.instagram-native-download:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--lg-light) 72%, transparent);
+  outline-offset: 3px;
 }

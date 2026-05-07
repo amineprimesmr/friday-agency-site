@@ -6,7 +6,7 @@
     <meta name="description" content="Friday — agence apps iOS et sites web sur mesure." />
     <meta name="theme-color" content="#063d7a" />
     <meta name="color-scheme" content="dark light" />
-    <link rel="canonical" href="https://friday-agency-site.vercel.app/" />
+    <link rel="canonical" href="https://frid4y.agency/" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="fr_FR" />
     <meta property="og:site_name" content="Friday" />
@@ -15,15 +15,17 @@
       property="og:description"
       content="Agence digitale : applications iOS et sites internet livrés avec le même soin que les grandes équipes produit."
     />
-    <meta property="og:url" content="https://friday-agency-site.vercel.app/" />
-    <meta property="og:image" content="https://friday-agency-site.vercel.app/favicon.svg" />
+    <meta property="og:url" content="https://frid4y.agency/" />
+    <meta property="og:image" content="https://frid4y.agency/assets/logo.png" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="Friday — Apps iOS & sites web" />
+    <meta name="twitter:image" content="https://frid4y.agency/assets/logo.png" />
     <meta
       name="twitter:description"
       content="Agence digitale : applications iOS et sites internet sur mesure."
     />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/assets/logo.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/assets/logo.png" />
     <title>Friday — Apps iOS & sites web</title>
     <script>
       document.documentElement.classList.add("friday-animate");
@@ -46,175 +48,139 @@
 
     <div class="bg-showcase" id="friday-showcase-bg" aria-hidden="true">
       <div class="bg-showcase__wash" id="friday-showcase-wash"></div>
-      <div class="bg-showcase__photo-wrap">
-        <img
-          class="bg-showcase__photo"
-          alt=""
-          width="1600"
-          height="900"
-          decoding="async"
-          referrerpolicy="no-referrer"
-        />
+      <div class="bg-showcase__photo-stack">
+        <!-- Double calque : crossfade sans trou pendant le chargement ; fichiers dans assets/fond/ -->
+        <div class="bg-showcase__layer" data-showcase-layer="0" aria-hidden="true">
+          <img class="bg-showcase__photo" alt="" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" />
+        </div>
+        <div class="bg-showcase__layer" data-showcase-layer="1" aria-hidden="true">
+          <img class="bg-showcase__photo" alt="" decoding="async" referrerpolicy="no-referrer" />
+        </div>
       </div>
       <div class="bg-showcase__veil"></div>
     </div>
 
     <header class="top-glass-bar" aria-label="Navigation principale">
-      <a href="#accueil" class="glass-pill glass-pill--logo" data-friday-go="0">
-        <span class="logo-mark" aria-hidden="true"></span>
-        <span class="logo-text">Friday</span>
-      </a>
+      <div class="top-glass-menu">
+        <a class="site-logo site-logo--menu" href="#realisations" aria-label="Friday — retour aux réalisations" data-friday-go="0">
+          <img class="site-logo__img" src="/assets/logo.png" alt="" width="32" height="32" decoding="async" />
+        </a>
+        <div id="friday-liquid-glass" class="friday-switcher-host">
+          <fieldset class="switcher" role="radiogroup" aria-label="Filtrer les réalisations">
+            <legend class="switcher__legend">Filtre réalisations</legend>
 
-      <div id="friday-liquid-glass" class="friday-switcher-host">
-        <fieldset class="switcher" role="radiogroup" aria-label="Expertises">
-          <legend class="switcher__legend">Expertises</legend>
+            <label class="switcher__option" title="Toutes les réalisations">
+              <input
+                class="switcher__input"
+                type="radio"
+                name="friday-switcher"
+                value="all"
+                data-option="0"
+                checked
+              />
+              <svg class="switcher__icon-inline" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"
+                />
+              </svg>
+              <span class="switcher__text">Tout</span>
+            </label>
 
-          <label class="switcher__option">
-            <input
-              class="switcher__input"
-              type="radio"
-              name="friday-switcher"
-              value="ios"
-              data-option="1"
-              checked
-            />
-            <svg class="switcher__icon-inline" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.75"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M12 18h.01M8 21h8a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2z"
+            <label class="switcher__option" title="Applications natives (iOS)">
+              <input
+                class="switcher__input"
+                type="radio"
+                name="friday-switcher"
+                value="ios"
+                data-option="1"
               />
-            </svg>
-            <span class="switcher__text">Apps iOS</span>
-          </label>
+              <svg class="switcher__icon-inline" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 18h.01M8 21h8a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2z"
+                />
+              </svg>
+              <span class="switcher__text">iOS</span>
+            </label>
 
-          <label class="switcher__option">
-            <input class="switcher__input" type="radio" name="friday-switcher" value="web" data-option="2" />
-            <svg class="switcher__icon-inline" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.75"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"
-              />
-              <path
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.75"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M3 12h18M12 3a15 15 0 0 1 4 9 15 15 0 0 1-4 9 15 15 0 0 1-4-9 15 15 0 0 1 4-9z"
-              />
-            </svg>
-            <span class="switcher__text">Sites web</span>
-          </label>
-        </fieldset>
+            <label class="switcher__option" title="Sites &amp; expériences web">
+              <input class="switcher__input" type="radio" name="friday-switcher" value="web" data-option="2" />
+              <svg class="switcher__icon-inline" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"
+                />
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3 12h18M12 3a15 15 0 0 1 4 9 15 15 0 0 1-4 9 15 15 0 0 1-4-9 15 15 0 0 1 4-9z"
+                />
+              </svg>
+              <span class="switcher__text">Web</span>
+            </label>
+          </fieldset>
+        </div>
       </div>
-
-      <button type="button" class="glass-icon-btn" aria-label="Rechercher (bientôt)">
-        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-          <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.75" />
-          <path d="M16 16l5 5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
-        </svg>
-      </button>
     </header>
-
-    <aside class="side-rail" aria-label="Raccourcis">
-      <button type="button" class="glass-icon-btn glass-icon-btn--round" aria-label="Profil">
-        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-          <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.75" />
-          <path d="M20 21a8 8 0 0 0-16 0" fill="none" stroke="currentColor" stroke-width="1.75" />
-        </svg>
-      </button>
-      <button type="button" class="glass-icon-btn glass-icon-btn--round" aria-label="Favoris">
-        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-          <path
-            d="M12 21s-6.716-4.436-9-8c-1.838-2.83 1.071-6.36 5-4 2.379 1.294 4.773-.616 4-3-1.036-3.261-8-2.667-8 5 0 6.286 8 10 8 10z"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.75"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </button>
-      <button type="button" id="theme-toggle" class="glass-icon-btn glass-icon-btn--round" aria-label="Passer en thème clair">
-        <svg class="icon-sun" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-          <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.75" />
-          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
-        </svg>
-        <svg class="icon-moon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-          <path
-            d="M21 14.5A8.5 8.5 0 0 1 9.5 3 7 7 0 1 0 21 14.5z"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.75"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </button>
-    </aside>
 
     <main class="main-stage" id="friday-viewport" aria-live="polite">
       <div class="panel-stack">
         <section
-          class="friday-panel friday-panel--home is-active"
-          id="accueil"
-          data-friday-panel="0"
-          role="tabpanel"
-          aria-label="Accueil"
-          tabindex="-1"
-        >
-          <div class="panel-inner panel-inner--hero">
-            <div class="hero-copy hero-copy--stagger">
-              <p class="hero-kicker">Agence digitale</p>
-              <h1 id="hero-title" class="hero-title">
-                <span class="hero-title__text">Friday</span>
-              </h1>
-              <p class="hero-lead" id="hero-lead">
-                Design et développement d’applications mobiles iOS et de sites internet — livrés avec le même soin que
-                les grandes équipes produit.
-              </p>
-              <div class="hero-ctas">
-                <button type="button" class="glass-btn" data-friday-go="2">Discuter du projet</button>
-                <button type="button" class="glass-btn glass-btn--ghost" data-friday-go="1">Réalisations</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section
-          class="friday-panel friday-panel--work"
+          class="friday-panel friday-panel--work is-active"
           id="realisations"
-          data-friday-panel="1"
+          data-friday-panel="0"
           role="tabpanel"
           aria-label="Réalisations et expertises"
           tabindex="-1"
-          hidden
         >
           <div class="panel-inner panel-inner--work">
-            <h2 id="showcase-title" class="showcase-heading cinema-tag motion-reveal">À l’affiche</h2>
-
-            <div class="cinema-carousel motion-reveal motion-reveal--delay-1" data-projects-carousel>
-              <button type="button" class="cinema-carousel__arrow cinema-carousel__arrow--prev" aria-label="Projet précédent">
-                <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-              </button>
+            <!--
+              Qualité max pour assets/fond/* : exporter des captures larges (ex. 3840×2160).
+              Optionnel : data-showcase-srcset="/assets/fond/x.png 1920w, /assets/fond/x@2x.png 3840w"
+              + data-showcase-sizes="100vw" pour que le navigateur choisisse la meilleure résolution.
+            -->
+            <div class="cinema-carousel motion-reveal" data-projects-carousel>
               <div class="cinema-carousel__viewport">
                 <div class="cinema-carousel__track">
                   <article
+                    class="cinema-slide cinema-slide--accueil"
+                    data-carousel-slide
+                    data-friday-filter="all"
+                    aria-roledescription="slide"
+                    aria-label="Ce site — vitrine"
+                    data-showcase-key="friday-accueil"
+                    data-showcase-image="/assets/fond/accueil.jpg"
+                  >
+                    <div class="cinema-slide__glass cinema-slide__glass--accueil">
+                      <button type="button" class="cinema-slide__cta cinema-slide__cta--accueil" data-carousel-jump="1">
+                        Nos réalisations
+                      </button>
+                    </div>
+                  </article>
+                  <article
                     class="cinema-slide"
                     data-carousel-slide
+                    data-friday-filter="web"
                     aria-roledescription="slide"
                     data-showcase-key="myfidpass"
-                    data-showcase-url="https://myfidpass.fr"
+                    data-showcase-image="/assets/fond/fidpass.png"
                   >
-                    <div class="cinema-slide__poster cinema-slide__poster--myfidpass"></div>
                     <div class="cinema-slide__glass">
                       <h3 class="cinema-slide__title">Myfidpass</h3>
                       <p class="cinema-slide__desc">
@@ -228,11 +194,11 @@
                   <article
                     class="cinema-slide"
                     data-carousel-slide
+                    data-friday-filter="web"
                     aria-roledescription="slide"
                     data-showcase-key="carvinguard"
-                    data-showcase-url="https://carvinguard.fr"
+                    data-showcase-image="/assets/fond/carvinguard.png?v=20260507"
                   >
-                    <div class="cinema-slide__poster cinema-slide__poster--carvinguard"></div>
                     <div class="cinema-slide__glass">
                       <p class="cinema-slide__desc">
                         Site vitrine et identité produit — présentation claire, conversion et image premium.
@@ -245,11 +211,11 @@
                   <article
                     class="cinema-slide"
                     data-carousel-slide
+                    data-friday-filter="ios"
                     aria-roledescription="slide"
                     data-showcase-key="myfidpass-ios"
-                    data-showcase-url="https://myfidpass.fr"
+                    data-showcase-image="/assets/fond/carvinguardphone.png"
                   >
-                    <div class="cinema-slide__poster cinema-slide__poster--myfidpass-ios"></div>
                     <div class="cinema-slide__glass">
                       <p class="cinema-slide__desc">
                         Application native — fluidité Apple, notifications et expérience carte au quotidien.
@@ -262,11 +228,11 @@
                   <article
                     class="cinema-slide"
                     data-carousel-slide
+                    data-friday-filter="web"
                     aria-roledescription="slide"
                     data-showcase-key="carredespros"
-                    data-showcase-url="https://carredespros.fr"
+                    data-showcase-image="/assets/fond/carredespros.png"
                   >
-                    <div class="cinema-slide__poster cinema-slide__poster--carredespros"></div>
                     <div class="cinema-slide__glass">
                       <p class="cinema-slide__desc">
                         Présence web pour les pros — structuration de l’offre et mise en avant des services.
@@ -276,11 +242,26 @@
                       </a>
                     </div>
                   </article>
+                  <article
+                    class="cinema-slide"
+                    data-carousel-slide
+                    data-friday-filter="web"
+                    aria-roledescription="slide"
+                    data-showcase-key="spotify-maquette"
+                    data-showcase-image="/assets/fond/spotify.png"
+                  >
+                    <div class="cinema-slide__glass">
+                      <h3 class="cinema-slide__title">Maquette Spotify</h3>
+                      <p class="cinema-slide__desc">
+                        Interface web inspirée de Spotify — navigation, lecture et grille découverte, démo front-end.
+                      </p>
+                      <a class="cinema-slide__cta" href="https://spotify-maquette.vercel.app/" target="_blank" rel="noopener noreferrer">
+                        Voir la démo <span aria-hidden="true">→</span>
+                      </a>
+                    </div>
+                  </article>
                 </div>
               </div>
-              <button type="button" class="cinema-carousel__arrow cinema-carousel__arrow--next" aria-label="Projet suivant">
-                <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-              </button>
             </div>
 
             <div
@@ -289,10 +270,12 @@
               aria-label="Choisir une réalisation"
               data-carousel-dots
             >
-              <button type="button" class="projects-dot is-active" role="tab" aria-selected="true" data-carousel-index="0" aria-label="Myfidpass web"></button>
-              <button type="button" class="projects-dot" role="tab" aria-selected="false" data-carousel-index="1" aria-label="Carving Guard"></button>
-              <button type="button" class="projects-dot" role="tab" aria-selected="false" data-carousel-index="2" aria-label="Myfidpass iOS"></button>
-              <button type="button" class="projects-dot" role="tab" aria-selected="false" data-carousel-index="3" aria-label="Carré des pros"></button>
+              <button type="button" class="projects-dot is-active" role="tab" aria-selected="true" data-carousel-index="0" aria-label="Ce site — vitrine"></button>
+              <button type="button" class="projects-dot" role="tab" aria-selected="false" data-carousel-index="1" aria-label="Myfidpass web"></button>
+              <button type="button" class="projects-dot" role="tab" aria-selected="false" data-carousel-index="2" aria-label="Carving Guard"></button>
+              <button type="button" class="projects-dot" role="tab" aria-selected="false" data-carousel-index="3" aria-label="Myfidpass iOS"></button>
+              <button type="button" class="projects-dot" role="tab" aria-selected="false" data-carousel-index="4" aria-label="Carré des pros"></button>
+              <button type="button" class="projects-dot" role="tab" aria-selected="false" data-carousel-index="5" aria-label="Maquette Spotify"></button>
             </div>
           </div>
         </section>
@@ -300,7 +283,7 @@
         <section
           class="friday-panel friday-panel--contact"
           id="contact"
-          data-friday-panel="2"
+          data-friday-panel="1"
           role="tabpanel"
           aria-label="Contact"
           tabindex="-1"
@@ -321,15 +304,21 @@
         <button
           type="button"
           class="dock-btn dock-item is-active"
-          aria-label="Accueil"
+          aria-label="Réalisations"
           aria-current="true"
           data-friday-go="0"
         >
-          <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
-            <path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+          <svg class="dock-icon-home" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" fill="none">
+            <path
+              stroke="currentColor"
+              stroke-width="1.65"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V9.5z"
+            />
           </svg>
         </button>
-        <button type="button" class="dock-btn dock-item" aria-label="Tarifs et devis" data-friday-go="2">
+        <button type="button" class="dock-btn dock-item" aria-label="Contact" data-friday-go="1">
           <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
             <path
               fill="currentColor"
@@ -337,16 +326,8 @@
             />
           </svg>
         </button>
-        <button type="button" class="dock-btn dock-item" aria-label="Réalisations" data-friday-go="1">
-          <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
-            <path
-              fill="currentColor"
-              d="m19 9 1.25-2.77L23 5l-2.75-1.23L19 1l-1.25 2.76L15 5l2.75 1.23L19 9zm-7 11 2.95 6 6.5-2.91-.71-1.57L13 18l-6.03 3.56-.71 1.57L6 18l6-6zM12 12l2.95 6 6.5-2.91-.71-1.57L12 13l-6.03 3.56-.71 1.57L6 18l6-6z"
-            />
-          </svg>
-        </button>
       </div>
-      <button type="button" class="dock-cta dock-item" aria-label="Commencer un projet" data-friday-go="2">
+      <button type="button" class="dock-cta dock-item" aria-label="Commencer un projet" data-friday-go="1">
         <span class="dock-cta__label">Commencer</span>
       </button>
     </nav>

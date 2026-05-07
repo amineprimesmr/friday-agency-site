@@ -16,6 +16,22 @@ npm run dev
 
 Puis ouvrir http://localhost:8888 (ou le port indiqué par `serve`).
 
+## Fonds « Réalisations »
+
+Le fond derrière le carousel affiche une **capture** du site (pas une iframe : la plupart des sites bloquent l’intégration avec `X-Frame-Options` ou une CSP).
+
+Par défaut, le script essaie deux services publics (WordPress mshots, puis thum.io) à partir de `data-showcase-url`. Ces URLs sont souvent lentes ou indisponibles ; dans ce cas tu ne vois que le dégradé (wash).
+
+Pour afficher une **vraie capture** :
+
+1. Exporte une image (WebP ou JPG, ~1600×900), via une capture d’écran ou par exemple Playwright :  
+   `npx playwright screenshot https://example.com assets/showcase/exemple.webp --viewport-size=1440,900`
+2. Place le fichier dans `assets/showcase/`.
+3. Sur la carte correspondante dans `index.html`, ajoute par exemple :  
+   `data-showcase-image="./assets/showcase/exemple.webp"`
+
+Tu peux lister plusieurs chemins séparés par une virgule ; la première image qui charge correctement est utilisée.
+
 ## Déploiement production (CLI)
 
 Depuis la racine du projet (compte Vercel déjà lié via `.vercel/` local, ignoré par Git) :
