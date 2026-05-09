@@ -2,9 +2,9 @@
  * Interface plein écran sans scroll : navigation par panneaux (dock / points / boutons).
  */
 
-const PANEL_COUNT = 2;
-/** Panneau 0 = Réalisations (accueil du site), panneau 1 = Contact. #accueil redirige vers les réalisations. */
-const HASH_PANEL = { accueil: 0, realisations: 0, contact: 1 };
+const PANEL_COUNT = 3;
+/** Panneau 0 = Réalisations, 1 = Contact, 2 = Brief « Commencer ». */
+const HASH_PANEL = { accueil: 0, realisations: 0, contact: 1, projet: 2, commencer: 2 };
 
 /** Crossfade à deux calques : quel layer affiche la photo (null = aucune couche visible). */
 let showcaseBackdropGen = 0;
@@ -263,6 +263,7 @@ function wireSwitcherTrackPrevious(fieldset) {
 /** Dock : .dock-item — Réalisations (0), Contact (1), CTA Commencer (2). */
 function dockPhysicalIndexForPanel(panelIdx) {
   if (panelIdx === 0) return 0;
+  if (panelIdx === 1) return 1;
   return 2;
 }
 
@@ -288,6 +289,11 @@ function goPanel(rawIdx) {
   let idx = Number(rawIdx);
   if (!Number.isFinite(idx)) return;
   idx = Math.max(0, Math.min(PANEL_COUNT - 1, idx));
+
+  const prevPanel = document.body.dataset.fridayPanel ?? "0";
+  if (prevPanel === "2" && String(idx) !== "2") {
+    resetFridayStartIfNeeded();
+  }
 
   const panels = [...document.querySelectorAll(".friday-panel")];
   const dots = document.querySelectorAll(".carousel-dots .dot");
@@ -317,7 +323,198 @@ function goPanel(rawIdx) {
   }
 
   const activePanel = panels[idx];
+  if (idx === 2) {
+    const success = document.getElementById("start-success");
+    requestAnimationFrame(() => {
+      if (!success || success.hidden) {
+        document.getElementById("start-name")?.focus({ preventScroll: true });
+      } else {
+        document.querySelector(".start-success__back")?.focus({ preventScroll: true });
+      }
+    });
+    return;
+  }
   activePanel?.focus({ preventScroll: true });
+}
+
+/** Sortie du panneau brief : réinitialise l’écran « merci » pour la prochaine visite. */
+function resetFridayStartIfNeeded() {
+  const success = document.getElementById("start-success");
+  const form = document.getElementById("friday-start-form");
+  if (!success || !form || success.hidden) return;
+  form.reset();
+  success.hidden = true;
+  form.hidden = false;
+  form.setAttribute("aria-hidden", "false");
+  const err = document.getElementById("start-form-error");
+  if (err) {
+    err.hidden = true;
+    err.textContent = "";
+  }
+  const fb = document.getElementById("start-mailto-fallback");
+  if (fb) fb.setAttribute("hidden", "");
+  const sub = document.getElementById("start-submit");
+  if (sub) sub.disabled = false;
+  toggleSubmitBusy(false);
+}
+
+function toggleSubmitBusy(busy) {
+  const sub = document.getElementById("start-submit");
+  const idle = sub?.querySelector(".start-submit__idle");
+  const bsy = sub?.querySelector(".start-submit__busy");
+  if (idle) idle.hidden = Boolean(busy);
+  if (bsy) bsy.hidden = !busy;
+  if (sub) sub.disabled = Boolean(busy);
+}
+
+function showStartFormError(msg) {
+  const err = document.getElementById("start-form-error");
+  if (!err) return;
+  err.textContent = msg;
+  err.hidden = false;
+}
+
+function clearStartFormError() {
+  const err = document.getElementById("start-form-error");
+  if (!err) return;
+  err.hidden = true;
+  err.textContent = "";
+}
+
+function basicEmailOk(s) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s).trim());
+}
+
+function buildMailtoFallback(body) {
+  const enc = encodeURIComponent(body);
+  return `mailto:hello@friday.studio?subject=${encodeURIComponent("Brief — Friday")}&body=${enc}`;
+}
+
+function initFridayStartForm() {
+  const form = document.getElementById("friday-start-form");
+  if (!form) return;
+
+  const successEl = document.getElementById("start-success");
+  const mailtoFallback = document.getElementById("start-mailto-fallback");
+  const mailtoLink = document.getElementById("start-mailto-link");
+
+  function hideMailtoFallback() {
+    mailtoFallback?.setAttribute("hidden", "");
+    if (mailtoLink) mailtoLink.href = "#";
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearStartFormError();
+    hideMailtoFallback();
+
+    const hp = form.querySelector(".start-honeypot");
+    if (hp && hp.value.trim() !== "") {
+      return;
+    }
+
+    const fd = new FormData(form);
+    const name = String(fd.get("name") ?? "").trim();
+    const email = String(fd.get("email") ?? "").trim();
+    const phone = String(fd.get("phone") ?? "").trim();
+    const company = String(fd.get("company") ?? "").trim();
+    const message = String(fd.get("message") ?? "").trim();
+
+    if (!name) {
+      showStartFormError("Indiquez votre nom.");
+      document.getElementById("start-name")?.focus();
+      return;
+    }
+    if (!email || !basicEmailOk(email)) {
+      showStartFormError("Une adresse e-mail valide est requise.");
+      document.getElementById("start-email")?.focus();
+      return;
+    }
+    if (!phone || phone.replace(/[\s().-]/g, "").length < 6) {
+      showStartFormError("Indiquez un numéro de téléphone joignable.");
+      document.getElementById("start-phone")?.focus();
+      return;
+    }
+    if (!company) {
+      showStartFormError("Indiquez votre entreprise ou votre structure.");
+      document.getElementById("start-company")?.focus();
+      return;
+    }
+    if (!message || message.length < 12) {
+      showStartFormError("Décrivez votre projet en quelques lignes (au moins 12 caractères).");
+      document.getElementById("start-message")?.focus();
+      return;
+    }
+
+    const targetEmail = form.getAttribute("data-formsubmit-email")?.trim() ?? "hello@friday.studio";
+    const textBody = [
+      `Nom : ${name}`,
+      `E-mail : ${email}`,
+      `Téléphone : ${phone}`,
+      `Entreprise : ${company}`,
+      "",
+      "Projet :",
+      message,
+    ].join("\n");
+
+    const payload = {
+      name,
+      email,
+      phone,
+      company,
+      message,
+      _subject: `Brief Friday — ${company}`,
+      _replyto: email,
+    };
+
+    toggleSubmitBusy(true);
+    form.setAttribute("aria-busy", "true");
+
+    let ok = false;
+    try {
+      const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(targetEmail)}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && !data.error) {
+        ok = true;
+      }
+    } catch {
+      ok = false;
+    }
+
+    form.removeAttribute("aria-busy");
+    toggleSubmitBusy(false);
+
+    if (ok && successEl) {
+      form.hidden = true;
+      form.setAttribute("aria-hidden", "true");
+      successEl.hidden = false;
+      return;
+    }
+
+    showStartFormError("L’envoi direct n’a pas pu aboutir (réseau ou configuration serveur).");
+    if (mailtoLink && mailtoFallback) {
+      mailtoLink.href = buildMailtoFallback(textBody);
+      mailtoFallback.removeAttribute("hidden");
+    }
+  });
+
+  form.querySelectorAll(".start-input").forEach((el) => {
+    el.addEventListener(
+      "input",
+      () => {
+        clearStartFormError();
+        hideMailtoFallback();
+      },
+      { passive: true }
+    );
+  });
 }
 
 function initFridayNavigation() {
@@ -749,6 +946,7 @@ function initVisibilityPause() {
 const fieldset = document.querySelector("#friday-liquid-glass fieldset.switcher");
 wireSwitcherTrackPrevious(fieldset);
 initFridayNavigation();
+initFridayStartForm();
 initProjectsCarousel();
 initVisibilityPause();
 lockWindowScroll();

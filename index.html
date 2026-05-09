@@ -296,6 +296,123 @@
             </div>
           </div>
         </section>
+
+        <section
+          class="friday-panel friday-panel--start"
+          id="projet"
+          data-friday-panel="2"
+          role="tabpanel"
+          aria-label="Démarrer un projet"
+          tabindex="-1"
+          hidden
+        >
+          <div class="panel-inner panel-inner--start">
+            <div class="start-hero motion-reveal">
+              <p class="start-kicker">Friday</p>
+              <h2 class="start-title">Parlons de votre projet</h2>
+              <p class="start-lead">Quelques lignes suffisent — nous vous répondons sous 48&nbsp;h ouvrées.</p>
+            </div>
+
+            <div class="start-card glass-panel motion-reveal motion-reveal--delay-1" data-start-card>
+              <form class="start-form" id="friday-start-form" novalidate data-formsubmit-email="hello@friday.studio">
+                <input type="text" name="_honey" class="start-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
+                <div class="start-fields">
+                  <div class="start-field motion-reveal motion-reveal--delay-1">
+                    <label class="start-label" for="start-name">Nom</label>
+                    <input
+                      class="start-input"
+                      id="start-name"
+                      name="name"
+                      type="text"
+                      autocomplete="name"
+                      required
+                      maxlength="120"
+                    />
+                  </div>
+                  <div class="start-field motion-reveal motion-reveal--delay-2">
+                    <label class="start-label" for="start-email">E-mail</label>
+                    <input
+                      class="start-input"
+                      id="start-email"
+                      name="email"
+                      type="email"
+                      autocomplete="email"
+                      required
+                      maxlength="254"
+                      inputmode="email"
+                    />
+                  </div>
+                  <div class="start-field motion-reveal motion-reveal--delay-2">
+                    <label class="start-label" for="start-phone">Téléphone</label>
+                    <input
+                      class="start-input"
+                      id="start-phone"
+                      name="phone"
+                      type="tel"
+                      autocomplete="tel"
+                      required
+                      maxlength="32"
+                      inputmode="tel"
+                    />
+                  </div>
+                  <div class="start-field motion-reveal motion-reveal--delay-3">
+                    <label class="start-label" for="start-company">Entreprise</label>
+                    <input
+                      class="start-input"
+                      id="start-company"
+                      name="company"
+                      type="text"
+                      autocomplete="organization"
+                      required
+                      maxlength="120"
+                    />
+                  </div>
+                  <div class="start-field start-field--grow motion-reveal motion-reveal--delay-3">
+                    <label class="start-label" for="start-message">Votre projet</label>
+                    <textarea
+                      class="start-input start-textarea"
+                      id="start-message"
+                      name="message"
+                      required
+                      rows="4"
+                      maxlength="4000"
+                      placeholder="Contexte, échéance, budget indicatif…"
+                    ></textarea>
+                  </div>
+                </div>
+                <p class="start-error" id="start-form-error" role="alert" hidden></p>
+                <p class="start-fallback" id="start-mailto-fallback" hidden>
+                  <a class="start-fallback__link" id="start-mailto-link" href="#">Ouvrir dans Mail</a>
+                </p>
+                <div class="start-actions motion-reveal motion-reveal--delay-3">
+                  <button type="submit" class="start-submit" id="start-submit">
+                    <span class="start-submit__idle">Envoyer</span>
+                    <span class="start-submit__busy" hidden>Envoi…</span>
+                  </button>
+                </div>
+              </form>
+
+              <div class="start-success" id="start-success" hidden>
+                <div class="start-success__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="40" height="40" fill="none">
+                    <path
+                      d="M5 13l4 4L19 7"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      pathLength="1"
+                      class="start-success__check"
+                    />
+                  </svg>
+                </div>
+                <h3 class="start-success__title">Message envoyé</h3>
+                <p class="start-success__text">Merci ! Nous vous écrivons très bientôt.</p>
+                <button type="button" class="start-success__back" data-friday-go="0">Retour aux réalisations</button>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
 
@@ -327,7 +444,7 @@
           </svg>
         </button>
       </div>
-      <button type="button" class="dock-cta dock-item" aria-label="Commencer un projet" data-friday-go="1">
+      <button type="button" class="dock-cta dock-item" aria-label="Commencer un projet" data-friday-go="2">
         <span class="dock-cta__label">Commencer</span>
       </button>
     </nav>
