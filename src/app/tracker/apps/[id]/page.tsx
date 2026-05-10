@@ -458,7 +458,12 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
                   Pubs actives Meta, TikTok, Google liées à {app.name}
                 </p>
               </div>
-              <AppAds appName={app.name} developerName={app.sellerName || app.artistName} bundleId={app.bundleId} />
+              <AppAds
+                appName={app.name}
+                developerName={app.sellerName || app.artistName}
+                bundleId={app.bundleId}
+                countryCode={country}
+              />
             </div>
           )}
 
