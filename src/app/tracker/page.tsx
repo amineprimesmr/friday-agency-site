@@ -17,7 +17,7 @@ import { FreshDrops } from "@/components/tracker/fresh-drops";
 import { Watchlist } from "@/components/tracker/watchlist";
 
 export const metadata: Metadata = {
-  title: "App Store Tracker — Classements iOS en temps réel",
+  title: "App Store Tracker — Trouvez la meilleure app à lancer",
 };
 
 export const revalidate = 900;
@@ -63,68 +63,69 @@ export default async function TrackerDashboard() {
 
   return (
     <>
-      <MetricsBar stats={stats} />
-
-      <div className="mx-auto max-w-7xl space-y-10 px-4 py-8 sm:px-6">
-
-        {/* ── Hero CTA ── */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent p-6 sm:p-8">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.04),transparent_65%)]" />
-          <div className="relative flex flex-wrap items-center justify-between gap-6">
-            <div>
-              <div className="mb-2 flex items-center gap-2">
-                <span className="flex h-1.5 w-1.5 animate-pulse rounded-full bg-white/50" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-white/45">Données live · Apple RSS + iTunes API</span>
-              </div>
-              <h1 className="text-2xl font-bold text-white sm:text-3xl">
-                Analyse n&apos;importe quelle app iOS
-              </h1>
-              <p className="mt-1.5 max-w-lg text-sm text-white/50">
-                Classements, estimations téléchargements & revenus, publicités Meta/TikTok/Google, profil développeur. 500M+ apps indexées.
-              </p>
-            </div>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Link
-                href="/tracker/search"
-                className="flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-white/90"
-              >
-                🔍 Explorer les apps
-              </Link>
-              <Link
-                href="/tracker/top-charts"
-                className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/[0.1] hover:text-white"
-              >
-                📊 Voir les classements
-              </Link>
-            </div>
+      {/* ── Hero : headline centrée sous le menu ── */}
+      <section className="relative border-b border-white/[0.06] bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(255,255,255,0.07),transparent)]">
+        <div className="mx-auto max-w-3xl px-4 pb-12 pt-10 text-center sm:pb-16 sm:pt-14">
+          <p className="mb-5 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/40">
+            <span className="h-px w-8 bg-gradient-to-r from-transparent to-white/25" aria-hidden />
+            Intelligence App Store
+            <span className="h-px w-8 bg-gradient-to-l from-transparent to-white/25" aria-hidden />
+          </p>
+          <h1 className="text-balance text-[clamp(1.85rem,5vw,3.25rem)] font-semibold leading-[1.12] tracking-tight text-white">
+            Trouvez la meilleure app à lancer
+          </h1>
+          <p className="mx-auto mt-5 max-w-lg text-pretty text-[15px] leading-relaxed text-white/45 sm:text-base">
+            Classements temps réel, estimations, créatives publicitaires et signaux marché — tout pour comparer et prioriser votre prochain lancement.
+          </p>
+          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+            <Link
+              href="/tracker/search"
+              className="inline-flex min-h-11 w-full max-w-xs items-center justify-center rounded-2xl bg-white px-6 text-sm font-semibold text-neutral-950 shadow-[0_0_0_1px_rgba(255,255,255,0.08)] transition hover:bg-white/95 sm:w-auto sm:max-w-none"
+            >
+              Explorer les apps
+            </Link>
+            <Link
+              href="/tracker/top-charts"
+              className="inline-flex min-h-11 w-full max-w-xs items-center justify-center rounded-2xl border border-white/[0.12] bg-white/[0.04] px-6 text-sm font-semibold text-white/85 transition hover:border-white/20 hover:bg-white/[0.08] sm:w-auto sm:max-w-none"
+            >
+              Voir les classements
+            </Link>
           </div>
 
-          {/* Mini preview des top apps */}
           {heroApps.length > 0 && (
-            <div className="relative mt-6 flex gap-3">
+            <div className="mx-auto mt-12 flex max-w-xl flex-wrap items-center justify-center gap-2 sm:gap-3">
+              <span className="w-full text-center text-[10px] font-medium uppercase tracking-[0.2em] text-white/30 sm:w-auto sm:text-left">
+                Tendance US
+              </span>
               {heroApps.map((app) => (
                 <Link
                   key={app.id}
                   href={`/tracker/apps/${app.id}?country=us`}
-                  className="group flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2 transition hover:border-white/20 hover:bg-white/[0.08]"
+                  className="group inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2 transition hover:border-white/18 hover:bg-white/[0.06]"
                 >
-                  <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg ring-1 ring-white/10">
+                  <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg ring-1 ring-white/10">
                     {app.artworkUrl ? (
-                      <Image src={app.artworkUrl} alt={app.name} fill className="object-cover" sizes="32px" unoptimized />
+                      <Image src={app.artworkUrl} alt={app.name} fill className="object-cover" sizes="36px" unoptimized />
                     ) : (
-                      <span className="flex h-full w-full items-center justify-center bg-white/5 text-xs font-bold text-white/40">{app.name.charAt(0)}</span>
+                      <span className="flex h-full w-full items-center justify-center bg-white/5 text-xs font-bold text-white/40">
+                        {app.name.charAt(0)}
+                      </span>
                     )}
                   </span>
-                  <div>
-                    <p className="text-xs font-medium text-white/80 group-hover:text-white">{app.name}</p>
-                    <p className="text-[10px] text-white/35">#{app.rank} US</p>
-                  </div>
+                  <span className="text-left">
+                    <span className="block text-xs font-medium text-white/85 group-hover:text-white">{app.name}</span>
+                    <span className="text-[10px] text-white/35">Top gratuit · #{app.rank}</span>
+                  </span>
                 </Link>
               ))}
-              <span className="flex items-center text-xs text-white/25">+{topMoversGrid.filter((a) => a.country === "us").length - 3} apps →</span>
             </div>
           )}
         </div>
+      </section>
+
+      <MetricsBar stats={stats} />
+
+      <div className="mx-auto max-w-7xl space-y-10 px-4 py-10 sm:px-6">
 
         {/* ── Top movers + Watchlist ── */}
         <div className="grid gap-6 lg:grid-cols-3">
