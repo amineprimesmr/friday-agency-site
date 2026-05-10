@@ -6,6 +6,7 @@ import {
   fetchAppDetail,
   fetchCountryRankings,
   fetchCategoryApps,
+  fetchSensorTowerApp,
   COUNTRY_MAP,
   type CountryCode,
   type CountryRanking,
@@ -170,10 +171,11 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
   const { id } = await params;
   const { country = "us", tab = "overview" } = await searchParams;
 
-  const [app, countryRankings, competitors] = await Promise.all([
+  const [app, countryRankings, competitors, stData] = await Promise.all([
     fetchAppDetail(id, country as CountryCode),
     fetchCountryRankings(id),
     fetchCategoryApps("", country, id, 12),
+    fetchSensorTowerApp(id),
   ]);
 
   if (!app) notFound();
@@ -322,24 +324,40 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
             <p className="text-[11px] text-white/40">{formatRatingCount(app.userRatingCount)} avis · {timeAgo(app.currentVersionReleaseDate)}</p>
           </div>
           <div className="flex flex-col gap-1.5 overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.025] p-4">
-            <span className="inline-flex w-fit items-center gap-1 rounded-full bg-white/[0.05] px-2 py-0.5 text-[10px] font-medium text-white/35">
-              Est. · {monthLabel}
-            </span>
+            {stData ? (
+              <span className="inline-flex w-fit items-center gap-1 rounded-full bg-violet-400/10 px-2 py-0.5 text-[10px] font-medium text-violet-300">
+                ⚡ SensorTower · Monde
+              </span>
+            ) : (
+              <span className="inline-flex w-fit items-center gap-1 rounded-full bg-white/[0.05] px-2 py-0.5 text-[10px] font-medium text-white/35">
+                Est. · {monthLabel}
+              </span>
+            )}
             <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">⬇ Téléch.</p>
             <p className="text-3xl font-bold tabular-nums text-violet-300">
-              {currentRank ? estimateMonthlyDownloads(currentRank, country) : "—"}
+              {stData
+                ? stData.downloadsString.toUpperCase()
+                : currentRank ? estimateMonthlyDownloads(currentRank, country) : "—"}
             </p>
-            <p className="text-[11px] text-white/40">/mois</p>
+            <p className="text-[11px] text-white/40">/mois · {stData ? "données réelles" : "estimation"}</p>
           </div>
           <div className="flex flex-col gap-1.5 overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.025] p-4">
-            <span className="inline-flex w-fit items-center gap-1 rounded-full bg-white/[0.05] px-2 py-0.5 text-[10px] font-medium text-white/35">
-              Est. · {monthLabel}
-            </span>
+            {stData ? (
+              <span className="inline-flex w-fit items-center gap-1 rounded-full bg-emerald-400/10 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
+                ⚡ SensorTower · Monde
+              </span>
+            ) : (
+              <span className="inline-flex w-fit items-center gap-1 rounded-full bg-white/[0.05] px-2 py-0.5 text-[10px] font-medium text-white/35">
+                Est. · {monthLabel}
+              </span>
+            )}
             <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">$ Revenus</p>
             <p className="text-3xl font-bold tabular-nums text-emerald-300">
-              {currentRank ? estimateMonthlyRevenue(currentRank, app.price, app.primaryGenreId, country) : "—"}
+              {stData
+                ? stData.revenueString.toUpperCase()
+                : currentRank ? estimateMonthlyRevenue(currentRank, app.price, app.primaryGenreId, country) : "—"}
             </p>
-            <p className="text-[11px] text-white/40">/mois</p>
+            <p className="text-[11px] text-white/40">/mois · {stData ? "données réelles" : "estimation"}</p>
           </div>
         </div>
       </div>

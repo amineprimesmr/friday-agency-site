@@ -306,11 +306,7 @@ export async function fetchMovers(
   return { gainers, losers };
 }
 
-export async function fetchRecentlyRanked(
-  country = "us",
-  _days = 90,
-  limit = 10,
-): Promise<AppEntry[]> {
+export async function fetchRecentlyRanked(country = "us", limit = 10): Promise<AppEntry[]> {
   const apps = await fetchTopCharts(country, "top-free", 100);
   return [...apps]
     .filter((a) => a.releaseDate)
@@ -432,6 +428,80 @@ function formatMillionsDollar(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `$${Math.round(n / 1_000)}K`;
   return `$${n}`;
+}
+
+// ── SensorTower public API ────────────────────────────────────────────────────
+// Same endpoint used by the "App Stats" Apple Shortcut.
+// No API key required — public endpoint.
+
+export interface SensorTowerData {
+  downloads: number;
+  downloadsString: string; // e.g. "6m" → display as "6M"
+  revenue: number;
+  revenueString: string;   // e.g. "$2m", "< $5k"
+  globalRatingCount: number;
+}
+
+function normalizeSensorTowerString(s: string): string {
+  return s.replace(/([kmbt])$/, (m) => m.toUpperCase());
+}
+
+export async function fetchSensorTowerApp(appId: string | number): Promise<SensorTowerData | null> {
+  try {
+    const res = await fetch(
+      `https://app.sensortower.com/api/ios/apps?app_ids=${appId}`,
+      {
+        headers: { "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15" },
+        next: { revalidate: 3600 },
+      },
+    );
+    if (!res.ok) return null;
+    const data = (await res.json()) as { apps?: Record<string, unknown>[] };
+    const app = data.apps?.[0];
+    if (!app) return null;
+    const dl = app.humanized_worldwide_last_month_downloads as Record<string, unknown> | undefined;
+    const rev = app.humanized_worldwide_last_month_revenue as Record<string, unknown> | undefined;
+    return {
+      downloads: Number(dl?.downloads ?? 0),
+      downloadsString: normalizeSensorTowerString(String(dl?.string ?? "—")),
+      revenue: Number(rev?.revenue ?? 0),
+      revenueString: normalizeSensorTowerString(String(rev?.string ?? "—")),
+      globalRatingCount: Number(app.global_rating_count ?? 0),
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchSensorTowerApps(appIds: (string | number)[]): Promise<Map<string, SensorTowerData>> {
+  const result = new Map<string, SensorTowerData>();
+  if (appIds.length === 0) return result;
+  try {
+    const res = await fetch(
+      `https://app.sensortower.com/api/ios/apps?app_ids=${appIds.join(",")}`,
+      {
+        headers: { "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15" },
+        next: { revalidate: 3600 },
+      },
+    );
+    if (!res.ok) return result;
+    const data = (await res.json()) as { apps?: Record<string, unknown>[] };
+    for (const app of data.apps ?? []) {
+      const id = String(app.app_id ?? "");
+      const dl = app.humanized_worldwide_last_month_downloads as Record<string, unknown> | undefined;
+      const rev = app.humanized_worldwide_last_month_revenue as Record<string, unknown> | undefined;
+      result.set(id, {
+        downloads: Number(dl?.downloads ?? 0),
+        downloadsString: normalizeSensorTowerString(String(dl?.string ?? "—")),
+        revenue: Number(rev?.revenue ?? 0),
+        revenueString: normalizeSensorTowerString(String(rev?.string ?? "—")),
+        globalRatingCount: Number(app.global_rating_count ?? 0),
+      });
+    }
+  } catch {
+    // return empty map
+  }
+  return result;
 }
 
 /** Check where an app appears across all countries' top-free chart */

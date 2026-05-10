@@ -5,12 +5,9 @@ import {
   searchApps,
   COUNTRY_MAP,
   type CountryCode,
-  type SearchResult,
   estimateMonthlyDownloads,
   estimateMonthlyRevenue,
   formatRatingCount,
-  formatBytes,
-  timeAgo,
 } from "@/lib/apple-charts";
 
 export const dynamic = "force-dynamic";

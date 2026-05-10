@@ -3,11 +3,13 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   searchApps,
+  fetchSensorTowerApps,
   COUNTRIES,
   APPLE_CATEGORIES,
   COUNTRY_MAP,
   type CountryCode,
   type SearchResult,
+  type SensorTowerData,
   formatBytes,
   formatRatingCount,
   estimateMonthlyDownloads,
@@ -35,7 +37,7 @@ function Stars({ value }: { value: number }) {
   );
 }
 
-function AppCard({ app, country }: { app: SearchResult; country: string }) {
+function AppCard({ app, country, stData }: { app: SearchResult; country: string; stData?: SensorTowerData }) {
   const dlEst = estimateMonthlyDownloads(app.rank || 50, country);
   const revEst = estimateMonthlyRevenue(app.rank || 50, app.price, app.categoryId, country);
 
@@ -82,14 +84,20 @@ function AppCard({ app, country }: { app: SearchResult; country: string }) {
           )}
         </div>
 
-        <div className="mt-2 flex gap-4">
+        <div className="mt-2 flex items-end gap-4">
           <div>
-            <p className="text-[10px] text-white/30">Téléch. estimés</p>
-            <p className="text-xs font-bold text-violet-300">{dlEst}<span className="font-normal text-white/30">/mois</span></p>
+            <p className="text-[10px] text-white/30">{stData ? "⚡ Téléch. réels" : "Téléch. estimés"}</p>
+            <p className="text-xs font-bold text-violet-300">
+              {stData ? stData.downloadsString.toUpperCase() : dlEst}
+              <span className="font-normal text-white/30">/mois</span>
+            </p>
           </div>
           <div>
-            <p className="text-[10px] text-white/30">Revenus estimés</p>
-            <p className="text-xs font-bold text-emerald-300">{revEst}<span className="font-normal text-white/30">/mois</span></p>
+            <p className="text-[10px] text-white/30">{stData ? "⚡ Revenus réels" : "Revenus estimés"}</p>
+            <p className="text-xs font-bold text-emerald-300">
+              {stData ? stData.revenueString.toUpperCase() : revEst}
+              <span className="font-normal text-white/30">/mois</span>
+            </p>
           </div>
         </div>
       </div>
@@ -105,6 +113,11 @@ export default async function SearchPage({ searchParams }: PageProps) {
 
   const results = q ? await searchApps(q, country, 50, category) : [];
   const countryData = COUNTRY_MAP[country];
+
+  // Batch-fetch real SensorTower data for all results in one request
+  const stMap = results.length > 0
+    ? await fetchSensorTowerApps(results.map((r) => r.id))
+    : new Map<string, SensorTowerData>();
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
@@ -184,7 +197,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
           {results.length > 0 ? (
             <div className="space-y-2">
               {results.map((app) => (
-                <AppCard key={app.id} app={app} country={country} />
+                <AppCard key={app.id} app={app} country={country} stData={stMap.get(app.id)} />
               ))}
             </div>
           ) : (

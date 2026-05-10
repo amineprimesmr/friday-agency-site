@@ -107,10 +107,9 @@ function MetaAdsPanel({ developerName, appName }: { developerName: string; appNa
   );
 }
 
-function TikTokAdsPanel({ appName, developerName }: { appName: string; developerName: string }) {
+function TikTokAdsPanel({ appName }: { appName: string }) {
   const searchQuery = encodeURIComponent(appName);
   const tiktokUrl = `https://ads.tiktok.com/business/creativecenter/inspiration/topads/pc/en?search=${searchQuery}`;
-  const tiktokBrandUrl = `https://ads.tiktok.com/business/creativecenter/inspiration/topads/pc/en`;
 
   return (
     <div className="space-y-4">
@@ -302,7 +301,7 @@ export function AppAds({
         <MetaAdsPanel developerName={developerName} appName={appName} />
       )}
       {platform === "tiktok" && (
-        <TikTokAdsPanel appName={appName} developerName={developerName} />
+        <TikTokAdsPanel appName={appName} />
       )}
       {platform === "google" && (
         <GoogleAdsPanel appName={appName} bundleId={bundleId} />

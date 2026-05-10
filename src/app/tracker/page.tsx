@@ -9,9 +9,6 @@ import {
   COUNTRY_MAP,
   type CountryCode,
   type MultiCountryApp,
-  estimateMonthlyDownloads,
-  estimateMonthlyRevenue,
-  formatRatingCount,
 } from "@/lib/apple-charts";
 import { MetricsBar } from "@/components/tracker/metrics-bar";
 import { TopMoversGrid } from "@/components/tracker/top-movers-grid";
@@ -30,7 +27,7 @@ const DASHBOARD_COUNTRIES: CountryCode[] = ["us", "fr", "gb", "de", "jp", "br", 
 async function getDashboardData() {
   const [moversData, freshDrops, ...countryResults] = await Promise.all([
     fetchMovers("us", "gb"),
-    fetchRecentlyRanked("us", 90, 8),
+    fetchRecentlyRanked("us", 8),
     ...DASHBOARD_COUNTRIES.map((c) =>
       fetchTopCharts(c, "top-free", 6).then((apps) =>
         apps.map((app): MultiCountryApp => ({

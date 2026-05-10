@@ -1,6 +1,10 @@
-# Friday — SaaS « apps à copier-coller »
+# Friday — vitrine + App Tracker + SaaS
 
-Application [Next.js](https://nextjs.org) (App Router, React 19, Tailwind CSS v4, Framer Motion) : landing marketing, catalogue filtrable façon tracker, fiches playbook, paiement **Stripe Checkout** (abonnement) et session membre via cookie JWT signé.
+Monorepo [Next.js](https://nextjs.org) 15 (App Router, React 19, Tailwind CSS v4) : réécriture de la racine vers la **vitrine statique** (`public/legacy-agency/`), **App Store Tracker** (`/tracker`), routes API (Stripe, auth JWT), et assets statiques (`public/`).
+
+## Prérequis
+
+- Node.js **20.9** – **23.x** (voir `package.json` → `engines`)
 
 ## Démarrage
 
@@ -10,28 +14,36 @@ npm install
 npm run dev
 ```
 
-Ouvrir [http://localhost:3000](http://localhost:3000).
-
-- En développement, sans Stripe : utiliser la barre ambre **« Simuler un abonnement »** (cookie membre).
-- En production : renseigner `SUBSCRIPTION_SECRET`, les clés Stripe et les `STRIPE_PRICE_ID_*`. Configurer le webhook `POST /api/webhooks/stripe` si besoin.
+- [http://localhost:3000](http://localhost:3000) — en dev, page Next minimaliste avec liens vitrine / tracker (en prod, `/` est réécrit vers la vitrine HTML).
+- Variables Stripe / JWT : voir `.env.example`.
 
 ## Scripts
 
-| Commande        | Rôle                      |
-|----------------|---------------------------|
-| `npm run dev`  | Serveur de développement |
-| `npm run build`| Build production           |
-| `npm run start`| Serveur après build      |
-| `npm run lint` | ESLint                     |
+| Commande          | Rôle                          |
+|-------------------|-------------------------------|
+| `npm run dev`     | Serveur de développement      |
+| `npm run build`   | Build production                |
+| `npm run start`   | Serveur après build             |
+| `npm run lint`    | ESLint (sources Next uniquement)|
+| `npm run typecheck` | `tsc --noEmit`              |
+| `npm run clean`   | Supprime `.next`               |
 
-## Structure utile
+## Organisation du dépôt
 
-- `src/app` — pages (`/`, `/explorer`, `/apps/[slug]`, `/pricing`, `/dashboard`) et routes API (`checkout`, auth Stripe, webhook).
-- `src/lib/catalog.ts` — données catalogue (à enrichir avec vos ~50 apps).
-- `src/components` — UI réutilisable (cartes, motion, checkout).
-- `legacy/agency` — ancienne vitrine statique ; copie servie sous `/legacy-agency/`.
-- `public/instagram.html` — page Instagram (CSS `/styles.css`).
+| Chemin | Contenu |
+|--------|---------|
+| `src/app/` | App Router : layouts, pages dynamiques, `globals.css` |
+| `src/styles/` | Feuilles CSS additionnelles importées par `globals.css` |
+| `src/components/` | UI réutilisable (`site-*`, `tracker/*`) |
+| `src/lib/` | Logique métier (Apple charts, Stripe, session, etc.) |
+| `public/legacy-agency/` | Vitrine HTML/CSS/JS servie à `/` (rewrite Next) |
+| `public/assets/` | Images servies sous `/assets/*` (logo, fonds vitrine, Instagram) |
+| `public/` | Pages statiques (`instagram.html`, scripts associés, widget tracker) |
 
-## Déploiement Vercel
+Ne pas recréer de dossiers dupliqués à la racine (`assets/`, `legacy/`) : tout ce qui est servi au navigateur vit sous **`public/`**.
 
-Définir les variables d’environnement du tableau `.env.example` dans le projet Vercel. `NEXT_PUBLIC_APP_URL` doit être l’URL publique (pour les redirections Stripe).
+## Déploiement (Vercel)
+
+Configurer les variables de `.env.example` dans le projet Vercel. `NEXT_PUBLIC_APP_URL` doit être l’URL publique (redirections Stripe, métadonnées).
+
+Après `npm ci` sur une machine propre : si des dossiers vides apparaissent sous `node_modules/@types/` avec des noms du type `react 2`, les supprimer — ils cassent `tsc` (artefacts « copie Finder », pas des vrais paquets).

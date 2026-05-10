@@ -19,16 +19,6 @@ interface Props {
   category: string;
 }
 
-function StarRating({ value }: { value: number }) {
-  if (!value) return <span className="text-white/25">—</span>;
-  return (
-    <span className="flex items-center gap-1 text-amber-300">
-      <span className="text-xs">★</span>
-      <span className="tabular-nums text-xs">{value.toFixed(1)}</span>
-    </span>
-  );
-}
-
 export function AppTable({ apps, country, chart, category }: Props) {
   const router = useRouter();
   const pathname = usePathname();

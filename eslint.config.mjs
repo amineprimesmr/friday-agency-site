@@ -10,5 +10,14 @@ const compat = new FlatCompat({
 });
 
 export default [
+  {
+    ignores: [
+      "node_modules/**",
+      ".next/**",
+      "out/**",
+      "public/**/*.js",
+      "public/legacy-agency/**",
+    ],
+  },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
 ];

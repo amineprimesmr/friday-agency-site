@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { fetchTopCharts, fetchRecentlyRanked, COUNTRIES, COUNTRY_MAP, type CountryCode } from "@/lib/apple-charts";
+import { fetchRecentlyRanked, COUNTRIES, COUNTRY_MAP, type CountryCode } from "@/lib/apple-charts";
 
 export const metadata: Metadata = { title: "Nouveautés App Store" };
 export const revalidate = 900;
@@ -24,7 +24,7 @@ export default async function NewReleasesPage({ searchParams }: PageProps) {
   const country = (params.country ?? "us") as CountryCode;
   const countryData = COUNTRY_MAP[country];
 
-  const allApps = await fetchRecentlyRanked(country, 90, 100);
+  const allApps = await fetchRecentlyRanked(country, 100);
   const newApps = allApps.slice(0, 25);
   const newGames = allApps
     .filter((a) => a.category === "Games" || a.categoryId === "6014")
