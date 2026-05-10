@@ -108,7 +108,7 @@ export function Watchlist() {
         <input
           type="email"
           placeholder="vous@email.com"
-          className="mt-2 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-xs text-white placeholder:text-white/25 outline-none focus:border-cyan-400/40"
+          className="mt-2 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-xs text-white placeholder:text-white/25 outline-none focus:border-white/25"
         />
         <button
           type="button"

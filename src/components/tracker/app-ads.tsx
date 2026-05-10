@@ -5,7 +5,7 @@ import { useState } from "react";
 type Platform = "meta" | "tiktok" | "google";
 
 const PLATFORMS: { id: Platform; label: string; icon: string; color: string }[] = [
-  { id: "meta", label: "Meta Ads", icon: "🟦", color: "text-blue-400" },
+  { id: "meta", label: "Meta Ads", icon: "🟦", color: "text-white/70" },
   { id: "tiktok", label: "TikTok Ads", icon: "⬛", color: "text-white" },
   { id: "google", label: "Google UAC", icon: "🔴", color: "text-red-400" },
 ];
@@ -30,7 +30,7 @@ function MetaAdsPanel({ developerName, appName }: { developerName: string; appNa
           href={metaUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 rounded-xl border border-blue-400/20 bg-blue-400/10 px-4 py-2 text-xs font-semibold text-blue-300 transition hover:bg-blue-400/20"
+          className="flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/[0.08] px-4 py-2 text-xs font-semibold text-white/85 transition hover:bg-white/[0.12]"
         >
           Ouvrir Meta Library ↗
         </a>
@@ -39,7 +39,7 @@ function MetaAdsPanel({ developerName, appName }: { developerName: string; appNa
       {/* Embedded preview card */}
       <div className="overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.02]">
         <div className="flex items-center gap-3 border-b border-white/[0.06] p-4">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/20 text-blue-400">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-white/75">
             <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
             </svg>
@@ -69,7 +69,7 @@ function MetaAdsPanel({ developerName, appName }: { developerName: string; appNa
                   {slot.badge}
                 </span>
               )}
-              <div className="h-10 w-10 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center text-xl">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/[0.06] text-xl text-white/55">
                 📣
               </div>
               <div>
@@ -80,7 +80,7 @@ function MetaAdsPanel({ developerName, appName }: { developerName: string; appNa
           ))}
         </div>
 
-        <div className="border-t border-white/[0.06] bg-blue-500/[0.04] px-4 py-3">
+        <div className="border-t border-white/[0.06] bg-white/[0.02] px-4 py-3">
           <p className="text-[11px] text-white/40">
             📌 Clique sur &quot;Ouvrir Meta Library&quot; pour voir les vraies créas actives de <strong className="text-white/60">{developerName}</strong> en temps réel.
           </p>
@@ -184,7 +184,7 @@ function TikTokAdsPanel({ appName }: { appName: string }) {
           {[
             { format: "In-Feed Video", ratio: "9:16", duration: "15-30s", ctr: "Très élevé", color: "bg-pink-400" },
             { format: "Spark Ads (UGC)", ratio: "9:16", duration: "15-60s", ctr: "Élevé", color: "bg-violet-400" },
-            { format: "TopView", ratio: "9:16", duration: "5-60s", ctr: "Maximum", color: "bg-cyan-400" },
+            { format: "TopView", ratio: "9:16", duration: "5-60s", ctr: "Maximum", color: "bg-white/40" },
             { format: "Collection Ads", ratio: "1:1 + 9:16", duration: "N/A", ctr: "Moyen", color: "bg-amber-400" },
           ].map((row) => (
             <div key={row.format} className="flex items-center gap-3">

@@ -5,9 +5,10 @@
 :root {
   color-scheme: dark;
   --font-friday: "DM Sans", ui-sans-serif, system-ui, sans-serif;
-  --bg-agency-a: #063d7a;
-  --bg-agency-b: #0b59a8;
-  --bg-agency-c: #1278d4;
+  /* Fonds noir / anthracite (plus de dégradé bleu plein écran) */
+  --bg-agency-a: #000000;
+  --bg-agency-b: #050508;
+  --bg-agency-c: #0c0c10;
 
   /* Liquid glass (même base que la vitrine statique) */
   --lg-glass: #bbbbbc;
@@ -36,19 +37,13 @@ body {
   min-height: 100dvh;
   font-family: var(--font-friday);
   color: rgba(255, 255, 255, 0.94);
-  background-color: var(--bg-agency-a);
-  background-image: radial-gradient(
-    120% 90% at 50% 10%,
-    var(--bg-agency-c),
-    var(--bg-agency-b) 45%,
-    var(--bg-agency-a)
-  );
-  background-attachment: fixed;
+  background-color: #000000;
+  background-image: none;
 }
 
 ::selection {
-  background: rgba(34, 211, 238, 0.35);
-  color: #050508;
+  background: rgba(255, 255, 255, 0.18);
+  color: #f8fafc;
 }
 
 @media (prefers-reduced-motion: reduce) {

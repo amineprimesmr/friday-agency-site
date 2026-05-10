@@ -17,7 +17,7 @@ export default function TrackerLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-dvh font-sans text-white antialiased">
+    <div className="min-h-dvh bg-black font-sans text-white antialiased">
       <TrackerHeader />
       <main className="pt-[max(4.75rem,calc(env(safe-area-inset-top)+3.25rem))]">{children}</main>
       <TrackerFooter />

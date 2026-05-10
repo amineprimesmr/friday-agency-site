@@ -78,7 +78,7 @@ export default async function DeveloperPage({ params, searchParams }: PageProps)
       <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-6">
         <div className="flex flex-wrap items-center gap-5">
           {/* Avatar placeholder */}
-          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[22px] bg-gradient-to-br from-cyan-400/20 to-violet-500/20 text-3xl font-bold text-white/70 ring-1 ring-white/10">
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[22px] bg-gradient-to-br from-white/15 to-white/[0.04] text-3xl font-bold text-white/70 ring-1 ring-white/10">
             {developerName.charAt(0).toUpperCase()}
           </div>
 
@@ -114,15 +114,15 @@ export default async function DeveloperPage({ params, searchParams }: PageProps)
             href={metaLibraryUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-center gap-4 rounded-2xl border border-blue-400/15 bg-blue-400/[0.05] p-4 transition hover:border-blue-400/30 hover:bg-blue-400/10"
+            className="group flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4 transition hover:border-white/20 hover:bg-white/[0.07]"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/20 text-blue-400">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white/70">
               <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-blue-300 group-hover:text-blue-200">Meta Ad Library</p>
+              <p className="text-sm font-semibold text-white group-hover:text-white">Meta Ad Library</p>
               <p className="text-[11px] text-white/40">Toutes les pubs Facebook & Instagram actives</p>
             </div>
             <span className="text-white/30 group-hover:text-white/60">↗</span>

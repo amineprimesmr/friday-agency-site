@@ -29,31 +29,31 @@ function Metric({
 
 export function MetricsBar({ stats }: { stats: Stats }) {
   return (
-    <div className="border-b border-white/[0.06] bg-[#05050d]/80">
+    <div className="border-b border-white/[0.06] bg-black/90 backdrop-blur-sm">
       <div className="mx-auto flex max-w-7xl divide-x divide-white/[0.06] overflow-x-auto">
         <Metric
           label="APPS SUIVIES"
           value={`${stats.appsTracked.toLocaleString()}`}
           sub="apps suivies"
-          color="text-cyan-300"
+          color="text-white"
         />
         <Metric
           label="MARCHÉS"
           value={String(stats.countriesTracked)}
           sub="marchés couverts"
-          color="text-violet-300"
+          color="text-white/90"
         />
         <Metric
           label="TOP CROSS-MKT"
           value={stats.topGain > 0 ? `+${stats.topGain}` : "—"}
           sub="mover US → UK"
-          color="text-emerald-300"
+          color="text-white/85"
         />
         <Metric
           label="RÉCENTES"
           value={stats.newToday > 0 ? `${stats.newToday}` : "—"}
           sub="apps récentes en top"
-          color="text-amber-300"
+          color="text-white/75"
         />
       </div>
     </div>

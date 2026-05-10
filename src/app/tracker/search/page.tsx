@@ -141,12 +141,12 @@ export default async function SearchPage({ searchParams }: PageProps) {
               defaultValue={q}
               placeholder="Nom d'app, développeur, mot-clé…"
               autoFocus
-              className="w-full rounded-2xl border border-white/10 bg-white/[0.04] py-3 pl-10 pr-4 text-sm text-white placeholder:text-white/30 outline-none focus:border-cyan-400/40 focus:bg-white/[0.06]"
+              className="w-full rounded-2xl border border-white/10 bg-white/[0.04] py-3 pl-10 pr-4 text-sm text-white placeholder:text-white/30 outline-none focus:border-white/25 focus:bg-white/[0.06]"
             />
           </div>
           <button
             type="submit"
-            className="rounded-2xl bg-gradient-to-r from-cyan-500 to-violet-600 px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110"
+            className="rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-white/90"
           >
             Rechercher
           </button>
@@ -158,7 +158,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
           <select
             name="country"
             defaultValue={country}
-            className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white outline-none focus:border-cyan-400/40"
+            className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white outline-none focus:border-white/25"
           >
             {COUNTRIES.map((c) => (
               <option key={c.code} value={c.code} className="bg-[#0d0d1a]">
@@ -171,7 +171,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
           <select
             name="category"
             defaultValue={category}
-            className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white outline-none focus:border-cyan-400/40"
+            className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white outline-none focus:border-white/25"
           >
             {APPLE_CATEGORIES.map((c) => (
               <option key={c.id} value={c.id} className="bg-[#0d0d1a]">

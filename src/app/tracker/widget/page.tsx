@@ -70,13 +70,13 @@ export default async function WidgetPage() {
       </nav>
 
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-gradient-to-br from-cyan-500/10 via-violet-500/5 to-transparent p-8">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(139,92,246,0.15),transparent_70%)]" />
+      <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent p-8">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.04),transparent_65%)]" />
         <div className="relative flex flex-wrap items-center gap-8">
           <div className="flex-1">
             <div className="mb-3 flex items-center gap-2">
-              <span className="flex h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-300">Widget Scriptable · Gratuit</span>
+              <span className="flex h-1.5 w-1.5 animate-pulse rounded-full bg-white/50" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-white/45">Widget Scriptable · Gratuit</span>
             </div>
             <h1 className="text-3xl font-bold text-white">App Tracker<br/>sur ton iPhone</h1>
             <p className="mt-2 max-w-md text-sm text-white/50">
@@ -131,7 +131,7 @@ export default async function WidgetPage() {
         <div className="space-y-3">
           {STEPS.map((step) => (
             <div key={step.n} className="flex items-start gap-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500/20 to-violet-500/20 text-sm font-bold text-cyan-300 ring-1 ring-white/10">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-bold text-white/80 ring-1 ring-white/10">
                 {step.n}
               </div>
               <div className="flex-1">
@@ -174,7 +174,7 @@ export default async function WidgetPage() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0a0a14]">
+        <div className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[#050508]">
           {/* Code header bar */}
           <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-3">
             <span className="h-3 w-3 rounded-full bg-red-500/60" />
@@ -189,11 +189,11 @@ export default async function WidgetPage() {
       </div>
 
       {/* Tips */}
-      <div className="rounded-2xl border border-violet-400/15 bg-violet-400/[0.04] p-5">
-        <h2 className="mb-3 text-[11px] font-bold uppercase tracking-[0.22em] text-violet-300/70">Astuce — Mode Focus (small widget)</h2>
+      <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+        <h2 className="mb-3 text-[11px] font-bold uppercase tracking-[0.22em] text-white/45">Astuce — Mode Focus (small widget)</h2>
         <p className="text-sm text-white/55">
           Pour suivre une app spécifique sur un petit widget, ajoute son nom en paramètre :<br />
-          <span className="mt-1 inline-block rounded-lg bg-white/[0.06] px-3 py-1.5 font-mono text-xs text-cyan-300">
+          <span className="mt-1 inline-block rounded-lg bg-white/[0.06] px-3 py-1.5 font-mono text-xs text-white/75">
             Paramètre widget → &quot;Instagram&quot;
           </span>
           <br />
@@ -211,7 +211,7 @@ export default async function WidgetPage() {
         </div>
         <Link
           href="/tracker"
-          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-violet-600 px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110"
+          className="flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-white/90"
         >
           Ouvrir le Tracker →
         </Link>
@@ -223,31 +223,31 @@ export default async function WidgetPage() {
 
 function WidgetMockup() {
   const apps = [
-    { rank: 1, name: "Paramount+", dl: "15M", rev: "$45M", color: "#22d3ee" },
-    { rank: 2, name: "Netflix Game...", dl: "8M", rev: "$12M", color: "#a78bfa" },
-    { rank: 3, name: "ChatGPT", dl: "6M", rev: "$123M", color: "#34d399" },
-    { rank: 4, name: "Claude", dl: "4M", rev: "$18M", color: "#fbbf24" },
+    { rank: 1, name: "Paramount+", dl: "15M", rev: "$45M", color: "#a3a3a3" },
+    { rank: 2, name: "Netflix Game...", dl: "8M", rev: "$12M", color: "#737373" },
+    { rank: 3, name: "ChatGPT", dl: "6M", rev: "$123M", color: "#525252" },
+    { rank: 4, name: "Claude", dl: "4M", rev: "$18M", color: "#404040" },
   ];
 
   return (
     <div
       className="w-[220px] overflow-hidden rounded-[20px] border border-white/10 shadow-2xl"
       style={{
-        background: "#07070f",
+        background: "#000000",
         boxShadow: "0 0 0 1px rgba(255,255,255,0.07), 0 24px 48px rgba(0,0,0,0.6)",
       }}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2.5">
-        <div className="flex items-center gap-1.5 rounded-lg bg-cyan-400/15 px-2 py-1">
-          <span className="text-[9px] font-bold text-cyan-400">◆ Friday</span>
+        <div className="flex items-center gap-1.5 rounded-lg bg-white/10 px-2 py-1">
+          <span className="text-[9px] font-bold text-white/80">◆ Friday</span>
         </div>
         <div>
           <p className="text-[10px] font-bold text-white">App Tracker</p>
           <p className="text-[8px] text-white/35">🇺🇸 Top 4 · 10 mai</p>
         </div>
-        <div className="rounded-md bg-emerald-400/15 px-1.5 py-0.5">
-          <span className="text-[8px] font-bold text-emerald-400">⬤ LIVE</span>
+        <div className="rounded-md bg-white/10 px-1.5 py-0.5">
+          <span className="text-[8px] font-bold text-white/70">⬤ LIVE</span>
         </div>
       </div>
 
@@ -268,8 +268,8 @@ function WidgetMockup() {
             <div className="flex-1 min-w-0">
               <p className="truncate text-[10px] font-medium text-white/90">{app.name}</p>
               <div className="flex items-center gap-2">
-                <span className="text-[8px] text-violet-400">↓ {app.dl}</span>
-                <span className="text-[8px] text-emerald-400">{app.rev}</span>
+                <span className="text-[8px] text-white/45">↓ {app.dl}</span>
+                <span className="text-[8px] text-white/50">{app.rev}</span>
               </div>
             </div>
           </div>
@@ -280,8 +280,8 @@ function WidgetMockup() {
       <div className="h-px bg-white/10 mx-3" />
       <div className="flex items-center justify-between px-3 py-2">
         <span className="text-[8px] text-white/20">frid4y.agency</span>
-        <div className="rounded-md bg-cyan-400/15 px-2 py-1">
-          <span className="text-[8px] font-bold text-cyan-400">Ouvrir App Tracker →</span>
+        <div className="rounded-md bg-white/10 px-2 py-1">
+          <span className="text-[8px] font-bold text-white/75">Ouvrir App Tracker →</span>
         </div>
       </div>
     </div>

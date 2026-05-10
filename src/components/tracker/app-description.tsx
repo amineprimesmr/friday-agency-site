@@ -19,7 +19,7 @@ export function AppDescription({ text }: { text: string }) {
         {short && (
           <button
             onClick={() => setExpanded((v) => !v)}
-            className="mt-3 text-xs font-medium text-cyan-400 transition hover:text-cyan-300"
+            className="mt-3 text-xs font-medium text-white/55 transition hover:text-white/80"
           >
             {expanded ? "Voir moins ↑" : "Voir plus ↓"}
           </button>

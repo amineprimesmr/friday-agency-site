@@ -14,7 +14,7 @@ export function CopyButton({ text, label = "Copier le code" }: { text: string; l
   return (
     <button
       onClick={handleCopy}
-      className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-violet-600 px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110 active:scale-95"
+      className="flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-white/90 active:scale-95"
     >
       {copied ? (
         <>

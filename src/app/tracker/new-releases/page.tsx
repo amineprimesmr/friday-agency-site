@@ -44,7 +44,7 @@ export default async function NewReleasesPage({ searchParams }: PageProps) {
           <select
             name="country"
             defaultValue={country}
-            className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white outline-none focus:border-cyan-400/40"
+            className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white outline-none focus:border-white/25"
           >
             {COUNTRIES.map((c) => (
               <option key={c.code} value={c.code} className="bg-[#0d0d1a]">

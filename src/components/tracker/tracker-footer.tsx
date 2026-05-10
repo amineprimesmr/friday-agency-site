@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export function TrackerFooter() {
   return (
-    <footer className="mt-16 border-t border-white/[0.06] bg-black/15 py-8 text-xs text-white/35 backdrop-blur-sm">
+    <footer className="mt-16 border-t border-white/[0.06] bg-black py-8 text-xs text-white/35">
       <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 sm:flex-row sm:items-center sm:justify-between">
         <p>
           App Store Tracker — données en temps réel via Apple RSS &amp; iTunes

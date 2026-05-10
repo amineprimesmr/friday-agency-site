@@ -68,13 +68,13 @@ export default async function TrackerDashboard() {
       <div className="mx-auto max-w-7xl space-y-10 px-4 py-8 sm:px-6">
 
         {/* ── Hero CTA ── */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-gradient-to-br from-cyan-500/10 via-violet-500/5 to-transparent p-6 sm:p-8">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(139,92,246,0.12),transparent_70%)]" />
+        <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent p-6 sm:p-8">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.04),transparent_65%)]" />
           <div className="relative flex flex-wrap items-center justify-between gap-6">
             <div>
               <div className="mb-2 flex items-center gap-2">
-                <span className="flex h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-300">Données live · Apple RSS + iTunes API</span>
+                <span className="flex h-1.5 w-1.5 animate-pulse rounded-full bg-white/50" />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-white/45">Données live · Apple RSS + iTunes API</span>
               </div>
               <h1 className="text-2xl font-bold text-white sm:text-3xl">
                 Analyse n&apos;importe quelle app iOS
@@ -86,7 +86,7 @@ export default async function TrackerDashboard() {
             <div className="flex flex-col gap-2 sm:flex-row">
               <Link
                 href="/tracker/search"
-                className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-violet-600 px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110"
+                className="flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-white/90"
               >
                 🔍 Explorer les apps
               </Link>
@@ -185,24 +185,24 @@ export default async function TrackerDashboard() {
                 title: "Recherche universelle",
                 desc: "500M+ apps — cherche par nom, développeur, mot-clé",
                 href: "/tracker/search",
-                accent: "from-cyan-500/20 to-cyan-500/5",
-                border: "border-cyan-400/15",
+                accent: "from-white/12 to-white/[0.02]",
+                border: "border-white/10",
               },
               {
                 icon: "📣",
                 title: "Intelligence publicitaire",
                 desc: "Pubs Meta, TikTok, Google de chaque app",
                 href: "/tracker/search",
-                accent: "from-blue-500/20 to-blue-500/5",
-                border: "border-blue-400/15",
+                accent: "from-white/10 to-white/[0.02]",
+                border: "border-white/10",
               },
               {
                 icon: "🌍",
                 title: "Classements mondiaux",
                 desc: "14 pays · comparaison cross-market",
                 href: "/tracker/top-charts",
-                accent: "from-violet-500/20 to-violet-500/5",
-                border: "border-violet-400/15",
+                accent: "from-white/10 to-white/[0.02]",
+                border: "border-white/10",
               },
             ].map((tool) => (
               <Link

@@ -50,7 +50,7 @@ export function AppTable({ apps, country, chart, category }: Props) {
         <select
           value={country}
           onChange={(e) => updateParam("country", e.target.value)}
-          className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white outline-none focus:border-cyan-400/40"
+          className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white outline-none focus:border-white/25"
         >
           {COUNTRIES.map((c) => (
             <option key={c.code} value={c.code} className="bg-[#0d0d1a]">
@@ -63,7 +63,7 @@ export function AppTable({ apps, country, chart, category }: Props) {
         <select
           value={chart}
           onChange={(e) => updateParam("chart", e.target.value)}
-          className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white outline-none focus:border-cyan-400/40"
+          className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white outline-none focus:border-white/25"
         >
           {CHART_TYPES.map((t) => (
             <option key={t.id} value={t.id} className="bg-[#0d0d1a]">
@@ -76,7 +76,7 @@ export function AppTable({ apps, country, chart, category }: Props) {
         <select
           value={category}
           onChange={(e) => updateParam("category", e.target.value)}
-          className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white outline-none focus:border-cyan-400/40"
+          className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white outline-none focus:border-white/25"
         >
           {APPLE_CATEGORIES.map((c) => (
             <option key={c.id} value={c.id} className="bg-[#0d0d1a]">
@@ -90,7 +90,7 @@ export function AppTable({ apps, country, chart, category }: Props) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Rechercher…"
-          className="ml-auto w-full max-w-xs rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-cyan-400/40 sm:w-auto"
+          className="ml-auto w-full max-w-xs rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-white/25 sm:w-auto"
         />
       </div>
 
