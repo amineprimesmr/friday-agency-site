@@ -1,219 +1,129 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { readFile } from "fs/promises";
-import path from "path";
-import { CopyButton } from "@/components/tracker/copy-button";
 
 export const metadata: Metadata = {
-  title: "Widget iOS — App Tracker by Friday",
-  description: "Widget Scriptable pour iPhone : top apps, téléchargements & revenus réels en temps réel.",
+  title: "Raccourci iOS — App Stats par Friday Tracker",
+  description: "Raccourci iOS natif : téléchargements & revenus réels SensorTower directement depuis le Share Sheet de l'App Store.",
 };
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-static";
 
 const STEPS = [
   {
     n: "1",
-    icon: "📲",
-    title: "Installer Scriptable",
-    desc: "Télécharge l'app gratuite Scriptable sur l'App Store.",
-    cta: "App Store",
-    href: "https://apps.apple.com/fr/app/scriptable/id1405459188",
+    icon: "⬇️",
+    title: 'Télécharger le raccourci',
+    desc: 'Clique "Obtenir le raccourci" ci-dessous — iOS ouvre directement l\'app Raccourcis.',
   },
   {
     n: "2",
-    icon: "📋",
-    title: "Copier le code",
-    desc: "Copie le script ci-dessous, ouvre Scriptable → + → colle le code → ▶ pour tester.",
-    cta: null,
-    href: null,
+    icon: "✅",
+    title: "Ajouter",
+    desc: 'Appuie sur "Ajouter le raccourci" dans la popup.',
   },
   {
     n: "3",
-    icon: "🔲",
-    title: "Ajouter le widget",
-    desc: "Maintiens appuyé sur l'écran d'accueil → + → Scriptable → choisis la taille (medium recommandé).",
-    cta: null,
-    href: null,
-  },
-  {
-    n: "4",
-    icon: "⚙️",
-    title: "Configurer (optionnel)",
-    desc: 'Appuie sur "Éditer le widget" → Script → friday-tracker-widget. Pour le mode focus, entre un nom d\'app dans le champ "Paramètre".',
-    cta: null,
-    href: null,
+    icon: "📤",
+    title: "Utiliser depuis l'App Store",
+    desc: "Ouvre une app → Partager → App Stats — Friday Tracker. Le rapport s'affiche automatiquement.",
   },
 ];
 
-const FEATURES = [
-  { icon: "⚡", label: "Données SensorTower", desc: "Téléchargements & revenus réels" },
-  { icon: "📊", label: "Top Charts live", desc: "US App Store mis à jour toutes les heures" },
-  { icon: "🔍", label: "Mode focus", desc: "1 app spécifique via paramètre widget" },
-  { icon: "📐", label: "3 tailles", desc: "Small · Medium · Large" },
-  { icon: "🌙", label: "Dark natif", desc: "Design glass assorti à l'app" },
-  { icon: "🔗", label: "Lien direct", desc: "Tap → ouvre l'App Tracker" },
-];
-
-export default async function WidgetPage() {
-  const filePath = path.join(process.cwd(), "public", "friday-tracker-widget.js");
-  const code = await readFile(filePath, "utf-8");
-
+export default function WidgetPage() {
   return (
-    <div className="mx-auto max-w-4xl space-y-10 px-4 py-10 sm:px-6">
+    <div className="mx-auto max-w-3xl space-y-10 px-4 py-10 sm:px-6">
 
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-white/30">
         <Link href="/tracker" className="transition hover:text-white/60">Tableau de bord</Link>
         <span>/</span>
-        <span className="text-white/55">Widget iOS</span>
+        <span className="text-white/55">Raccourci iOS</span>
       </nav>
 
-      {/* Hero */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent p-8">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.04),transparent_65%)]" />
-        <div className="relative flex flex-wrap items-center gap-8">
-          <div className="flex-1">
+      {/* ── Hero card ── */}
+      <div className="relative overflow-hidden rounded-2xl border border-emerald-400/20 bg-gradient-to-br from-emerald-500/10 via-emerald-500/[0.03] to-transparent p-8">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(52,211,153,0.12),transparent_70%)]" />
+
+        <div className="relative flex flex-wrap items-start gap-10">
+
+          {/* Left: text */}
+          <div className="flex-1 min-w-[240px]">
             <div className="mb-3 flex items-center gap-2">
-              <span className="flex h-1.5 w-1.5 animate-pulse rounded-full bg-white/50" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-white/45">Widget Scriptable · Gratuit</span>
+              <span className="text-2xl">⚡</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-300">Raccourci iOS Natif · Gratuit</span>
             </div>
-            <h1 className="text-3xl font-bold text-white">App Tracker<br/>sur ton iPhone</h1>
-            <p className="mt-2 max-w-md text-sm text-white/50">
-              Top apps, téléchargements & revenus réels (SensorTower) directement sur ton écran d&apos;accueil.
-              Tap → ouvre l&apos;App Tracker.
+            <h1 className="text-3xl font-bold text-white">
+              App Stats<br />
+              <span className="text-emerald-300">par Friday Tracker</span>
+            </h1>
+            <p className="mt-3 max-w-md text-sm text-white/55">
+              Partage n&apos;importe quelle app depuis l&apos;App Store → le raccourci récupère
+              <strong className="text-white/80"> téléchargements &amp; revenus réels</strong> (SensorTower)
+              et affiche le rapport instantanément. Zéro saisie, zéro app tierce.
             </p>
-            <div className="mt-4 flex flex-wrap gap-3">
+
+            {/* Feature pills */}
+            <div className="mt-5 flex flex-wrap gap-2">
+              {[
+                { icon: "📤", label: "Share Sheet" },
+                { icon: "⚡", label: "SensorTower live" },
+                { icon: "🔗", label: "Ouvre App Tracker" },
+                { icon: "📱", label: "iOS 16+" },
+              ].map(f => (
+                <div key={f.label} className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs text-white/60">
+                  <span>{f.icon}</span>
+                  <span>{f.label}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* CTAs */}
+            <div className="mt-7 flex flex-wrap gap-3">
               <a
-                href="https://apps.apple.com/fr/app/scriptable/id1405459188"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-4 py-2.5 text-sm font-medium text-white/80 transition hover:bg-white/[0.1] hover:text-white"
+                href="/tracker/shortcut"
+                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-500 px-6 py-3 text-sm font-bold text-[#050508] shadow-lg shadow-emerald-500/20 transition hover:brightness-110 active:scale-95"
               >
-                📲 Installer Scriptable
+                <span>⬇</span>
+                <span>Obtenir le raccourci</span>
               </a>
-              <a
-                href="/friday-tracker-widget.js"
-                download="friday-tracker-widget.js"
-                className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-4 py-2.5 text-sm font-medium text-white/80 transition hover:bg-white/[0.1] hover:text-white"
-              >
-                ⬇ Télécharger le script
-              </a>
+              <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-xs text-white/40">
+                <span>📱</span>
+                <span>iPhone &amp; iPad</span>
+              </div>
             </div>
           </div>
 
-          {/* Widget preview mockup */}
+          {/* Right: result mockup */}
           <div className="shrink-0">
-            <WidgetMockup />
+            <ResultMockup />
           </div>
         </div>
-      </div>
 
-      {/* Features */}
-      <div>
-        <h2 className="mb-4 text-[11px] font-bold uppercase tracking-[0.22em] text-white/40">Fonctionnalités</h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {FEATURES.map((f) => (
-            <div key={f.label} className="flex items-start gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
-              <span className="text-2xl">{f.icon}</span>
+        {/* Steps */}
+        <div className="relative mt-8 grid gap-3 sm:grid-cols-3">
+          {STEPS.map((s) => (
+            <div key={s.n} className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-black/30 p-4">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-400/20 text-sm font-bold text-emerald-300">
+                {s.n}
+              </div>
               <div>
-                <p className="text-xs font-semibold text-white/80">{f.label}</p>
-                <p className="text-[11px] text-white/40">{f.desc}</p>
+                <p className="text-xs font-semibold text-white/80">{s.icon} {s.title}</p>
+                <p className="mt-0.5 text-[11px] text-white/40">{s.desc}</p>
               </div>
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Steps */}
-      <div>
-        <h2 className="mb-4 text-[11px] font-bold uppercase tracking-[0.22em] text-white/40">Installation en 4 étapes</h2>
-        <div className="space-y-3">
-          {STEPS.map((step) => (
-            <div key={step.n} className="flex items-start gap-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-bold text-white/80 ring-1 ring-white/10">
-                {step.n}
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold text-white/90">
-                  {step.icon} {step.title}
-                </p>
-                <p className="mt-0.5 text-xs text-white/45">{step.desc}</p>
-              </div>
-              {step.cta && step.href && (
-                <a
-                  href={step.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="shrink-0 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/60 transition hover:border-white/20 hover:text-white"
-                >
-                  {step.cta} ↗
-                </a>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Code block */}
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <div>
-            <h2 className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/40">Script Scriptable</h2>
-            <p className="mt-0.5 text-xs text-white/30">{code.split("\n").length} lignes · JavaScript</p>
-          </div>
-          <div className="flex gap-2">
-            <a
-              href="/friday-tracker-widget.js"
-              download="friday-tracker-widget.js"
-              className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-medium text-white/60 transition hover:border-white/20 hover:text-white"
-            >
-              ⬇ .js
-            </a>
-            <CopyButton text={code} />
-          </div>
-        </div>
-
-        <div className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[#050508]">
-          {/* Code header bar */}
-          <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-3">
-            <span className="h-3 w-3 rounded-full bg-red-500/60" />
-            <span className="h-3 w-3 rounded-full bg-amber-500/60" />
-            <span className="h-3 w-3 rounded-full bg-emerald-500/60" />
-            <span className="ml-3 text-[11px] text-white/30">friday-tracker-widget.js</span>
-          </div>
-          <pre className="max-h-[480px] overflow-auto p-5 text-[11px] leading-relaxed text-white/70">
-            <code>{code}</code>
-          </pre>
-        </div>
-      </div>
-
-      {/* Tips */}
-      <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-        <h2 className="mb-3 text-[11px] font-bold uppercase tracking-[0.22em] text-white/45">Astuce — Mode Focus (small widget)</h2>
-        <p className="text-sm text-white/55">
-          Pour suivre une app spécifique sur un petit widget, ajoute son nom en paramètre :<br />
-          <span className="mt-1 inline-block rounded-lg bg-white/[0.06] px-3 py-1.5 font-mono text-xs text-white/75">
-            Paramètre widget → &quot;Instagram&quot;
-          </span>
-          <br />
-          <span className="mt-1 inline-block text-xs text-white/35">
-            Le widget affichera les downloads & revenus réels de cette app + lien direct vers sa fiche.
-          </span>
-        </p>
       </div>
 
       {/* Back CTA */}
       <div className="flex items-center justify-between rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
         <div>
-          <p className="font-semibold text-white/80">Voir toutes les apps</p>
-          <p className="text-xs text-white/40">Classements · Recherche · Profil développeur</p>
+          <p className="font-semibold text-white/80">Analyser une app maintenant</p>
+          <p className="text-xs text-white/40">Recherche · Classements · Profil développeur</p>
         </div>
-        <Link
-          href="/tracker"
-          className="flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-neutral-950 transition hover:bg-white/90"
-        >
-          Ouvrir le Tracker →
+        <Link href="/tracker/search"
+          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-violet-600 px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110">
+          🔍 Explorer →
         </Link>
       </div>
 
@@ -221,67 +131,43 @@ export default async function WidgetPage() {
   );
 }
 
-function WidgetMockup() {
-  const apps = [
-    { rank: 1, name: "Paramount+", dl: "15M", rev: "$45M", color: "#a3a3a3" },
-    { rank: 2, name: "Netflix Game...", dl: "8M", rev: "$12M", color: "#737373" },
-    { rank: 3, name: "ChatGPT", dl: "6M", rev: "$123M", color: "#525252" },
-    { rank: 4, name: "Claude", dl: "4M", rev: "$18M", color: "#404040" },
-  ];
-
+/* ── Mockup résultat du raccourci ── */
+function ResultMockup() {
   return (
     <div
-      className="w-[220px] overflow-hidden rounded-[20px] border border-white/10 shadow-2xl"
-      style={{
-        background: "#000000",
-        boxShadow: "0 0 0 1px rgba(255,255,255,0.07), 0 24px 48px rgba(0,0,0,0.6)",
-      }}
+      className="w-[190px] overflow-hidden rounded-[20px] border border-white/10 shadow-2xl"
+      style={{ background: "#1c1c1e", boxShadow: "0 0 0 1px rgba(255,255,255,0.08), 0 20px 40px rgba(0,0,0,0.7)" }}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2.5">
-        <div className="flex items-center gap-1.5 rounded-lg bg-white/10 px-2 py-1">
-          <span className="text-[9px] font-bold text-white/80">◆ Friday</span>
-        </div>
+      {/* iOS notification bar */}
+      <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
+        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500 text-base font-bold text-white">$</div>
         <div>
-          <p className="text-[10px] font-bold text-white">App Tracker</p>
-          <p className="text-[8px] text-white/35">🇺🇸 Top 4 · 10 mai</p>
-        </div>
-        <div className="rounded-md bg-white/10 px-1.5 py-0.5">
-          <span className="text-[8px] font-bold text-white/70">⬤ LIVE</span>
+          <p className="text-xs font-semibold text-white">App Stats</p>
+          <p className="text-[9px] text-white/40">Friday Tracker</p>
         </div>
       </div>
-
-      {/* Divider */}
-      <div className="h-px bg-white/10 mx-3" />
-
-      {/* Apps */}
-      <div className="space-y-0.5 p-2">
-        {apps.map((app) => (
-          <div key={app.rank} className="flex items-center gap-2 rounded-xl px-2 py-1.5">
-            <span className="w-5 text-center text-[9px] font-bold" style={{ color: app.rank === 1 ? "#fbbf24" : "rgba(255,255,255,0.35)" }}>
-              #{app.rank}
-            </span>
-            <div
-              className="h-6 w-6 shrink-0 rounded-md"
-              style={{ background: `${app.color}30`, border: `1px solid ${app.color}40` }}
-            />
-            <div className="flex-1 min-w-0">
-              <p className="truncate text-[10px] font-medium text-white/90">{app.name}</p>
-              <div className="flex items-center gap-2">
-                <span className="text-[8px] text-white/45">↓ {app.dl}</span>
-                <span className="text-[8px] text-white/50">{app.rev}</span>
-              </div>
-            </div>
+      {/* Result text */}
+      <div className="px-4 py-4">
+        <p className="text-[11px] font-semibold text-white">📱 TikTok</p>
+        <div className="mt-3 space-y-1.5">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-white/40">⬇️</span>
+            <span className="text-[10px] text-white/80">6m téléch./mois</span>
           </div>
-        ))}
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-white/40">💰</span>
+            <span className="text-[10px] text-white/80">$123m revenus/mois</span>
+          </div>
+        </div>
+        <div className="mt-3 border-t border-white/10 pt-3">
+          <p className="text-[9px] text-white/30">⚡ SensorTower · Monde</p>
+          <p className="text-[9px] text-white/30">🔗 Friday Tracker →</p>
+        </div>
       </div>
-
-      {/* Footer */}
-      <div className="h-px bg-white/10 mx-3" />
-      <div className="flex items-center justify-between px-3 py-2">
-        <span className="text-[8px] text-white/20">frid4y.agency</span>
-        <div className="rounded-md bg-white/10 px-2 py-1">
-          <span className="text-[8px] font-bold text-white/75">Ouvrir App Tracker →</span>
+      {/* iOS button */}
+      <div className="border-t border-white/10 px-4 py-3">
+        <div className="flex w-full items-center justify-center rounded-xl bg-white/10 py-2">
+          <span className="text-[11px] font-semibold text-white">OK</span>
         </div>
       </div>
     </div>
