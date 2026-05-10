@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { TrackerHeader } from "@/components/tracker/tracker-header";
 import { TrackerFooter } from "@/components/tracker/tracker-footer";
+import "@/styles/shiny-cta-button.css";
 
 export const metadata: Metadata = {
   title: {

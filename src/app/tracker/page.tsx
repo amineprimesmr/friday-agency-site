@@ -64,20 +64,25 @@ export default async function TrackerDashboard() {
   return (
     <>
       {/* ── Hero : headline centrée sous le menu ── */}
-      <section className="relative border-b border-white/[0.06] bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(255,255,255,0.07),transparent)]">
-        <div className="mx-auto max-w-3xl px-4 pb-12 pt-10 text-center sm:pb-16 sm:pt-14">
-          <p className="mb-5 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/40">
+      <section className="relative overflow-hidden border-b border-white/[0.06] bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(255,255,255,0.07),transparent)]">
+        {/* Halo bas-droite — renforce le dégradé du titre sans surcharger */}
+        <div
+          className="pointer-events-none absolute -bottom-32 -right-32 h-[min(70vw,28rem)] w-[min(70vw,28rem)] rounded-full bg-gradient-to-br from-sky-400/12 via-violet-500/8 to-transparent blur-3xl"
+          aria-hidden
+        />
+        <div className="relative mx-auto max-w-4xl px-4 pb-12 pt-10 text-center sm:pb-16 sm:pt-14">
+          <p className="mb-6 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/40">
             <span className="h-px w-8 bg-gradient-to-r from-transparent to-white/25" aria-hidden />
             Intelligence App Store
             <span className="h-px w-8 bg-gradient-to-l from-transparent to-white/25" aria-hidden />
           </p>
-          <h1 className="text-balance text-[clamp(1.85rem,5vw,3.25rem)] font-semibold leading-[1.12] tracking-tight text-white">
+          <h1 className="bg-gradient-to-br from-white via-zinc-100 to-zinc-500 bg-clip-text pb-1.5 text-[clamp(2.5rem,9.5vw,6rem)] font-semibold leading-[1.04] tracking-[-0.035em] text-transparent sm:text-[clamp(2.65rem,10vw,6.25rem)]">
             Trouvez la meilleure app à lancer
           </h1>
-          <p className="mx-auto mt-5 max-w-lg text-pretty text-[15px] leading-relaxed text-white/45 sm:text-base">
+          <p className="mx-auto mt-6 max-w-lg text-pretty text-[15px] leading-relaxed text-white/45 sm:mt-7 sm:text-base">
             Classements temps réel, estimations, créatives publicitaires et signaux marché — tout pour comparer et prioriser votre prochain lancement.
           </p>
-          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:mt-11 sm:flex-row sm:gap-4">
             <Link
               href="/tracker/search"
               className="inline-flex min-h-11 w-full max-w-xs items-center justify-center rounded-2xl bg-white px-6 text-sm font-semibold text-neutral-950 shadow-[0_0_0_1px_rgba(255,255,255,0.08)] transition hover:bg-white/95 sm:w-auto sm:max-w-none"
@@ -86,9 +91,9 @@ export default async function TrackerDashboard() {
             </Link>
             <Link
               href="/tracker/top-charts"
-              className="inline-flex min-h-11 w-full max-w-xs items-center justify-center rounded-2xl border border-white/[0.12] bg-white/[0.04] px-6 text-sm font-semibold text-white/85 transition hover:border-white/20 hover:bg-white/[0.08] sm:w-auto sm:max-w-none"
+              className="tracker-shiny-cta min-h-11 w-full max-w-xs sm:w-auto sm:max-w-none"
             >
-              Voir les classements
+              <span>Voir les classements</span>
             </Link>
           </div>
 

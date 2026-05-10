@@ -26,56 +26,54 @@
     transform var(--dur-sm) var(--ease-out-expo);
 }
 
-/* Pleine largeur : givrage du fond qui défile (le blur ne peut pas s’appliquer sans couche semi-transparente). */
-.top-glass-bar::before {
-  content: "";
+/*
+ * Givrage pleine largeur : éléments DOM (pas ::before) → backdrop-filter fiable WebKit/Safari.
+ * Dégradés en rgba (pas seulement color-mix) pour vieux navigateurs.
+ */
+.top-glass-bar__frost {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  backdrop-filter: blur(36px) saturate(195%) brightness(1.03);
-  -webkit-backdrop-filter: blur(36px) saturate(195%) brightness(1.03);
+  transform: translateZ(0);
+  -webkit-backdrop-filter: blur(40px) saturate(185%);
+  backdrop-filter: blur(40px) saturate(185%);
   background: linear-gradient(
-    168deg,
-    color-mix(in srgb, var(--lg-light) 10%, rgba(6, 6, 10, 0.82)) 0%,
-    color-mix(in srgb, var(--lg-light) 5%, rgba(3, 3, 6, 0.72)) 38%,
-    color-mix(in srgb, var(--lg-light) 3%, rgba(0, 0, 0, 0.58)) 100%
+    165deg,
+    rgba(18, 18, 24, 0.86) 0%,
+    rgba(8, 8, 12, 0.78) 42%,
+    rgba(0, 0, 0, 0.72) 100%
   );
-  border-bottom: 1px solid color-mix(in srgb, var(--lg-light) 11%, transparent);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--lg-light) 16%, transparent),
-    inset 0 -1px 0 color-mix(in srgb, var(--lg-dark) 22%, transparent);
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35);
 }
 
-/* Reflet “lumière” traversant la barre (approximation refraction / specular du guide). */
-.top-glass-bar::after {
-  content: "";
+/* Trait lumineux très léger — sans mix-blend-mode ni bleu : sinon sans blur ça fait une “plaque” sale à gauche. */
+.top-glass-bar__sheen {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: 1;
   pointer-events: none;
-  opacity: 0.55;
+  opacity: 0.28;
   background: linear-gradient(
     118deg,
-    transparent 0%,
-    transparent 36%,
-    color-mix(in srgb, var(--lg-light) 14%, transparent) 47%,
-    color-mix(in srgb, #b8d4ff 9%, transparent) 52%,
-    transparent 63%,
-    transparent 100%
+    transparent 38%,
+    rgba(255, 255, 255, 0.07) 49.5%,
+    transparent 61%
   );
-  mix-blend-mode: soft-light;
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .top-glass-bar::before {
-    backdrop-filter: blur(16px) saturate(140%);
-    -webkit-backdrop-filter: blur(16px) saturate(140%);
-    background: rgba(5, 5, 8, 0.92);
+  .top-glass-bar__frost {
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    backdrop-filter: blur(14px) saturate(130%);
+    background: rgba(5, 5, 8, 0.94);
   }
 
-  .top-glass-bar::after {
-    opacity: 0.25;
+  .top-glass-bar__sheen {
+    opacity: 0.12;
   }
 }
 
@@ -85,9 +83,14 @@
   }
 }
 
-.top-glass-bar > * {
+.top-glass-bar > .top-glass-bar__frost,
+.top-glass-bar > .top-glass-bar__sheen {
+  pointer-events: none;
+}
+
+.top-glass-bar > .top-glass-menu {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   pointer-events: auto;
 }
 
@@ -117,7 +120,7 @@
     0 6px 16px 0 color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 8%), transparent);
 }
 
-/* Surbrillance bord supérieur-gauche → bas-droite (specular rim, voir kube.io “Specular Highlight”). */
+/* Surbrillance pilule — blanc neutre uniquement (les bleus + soft-light surpillonnaient en patch sans blur). */
 .top-glass-menu::before {
   content: "";
   position: absolute;
@@ -127,14 +130,12 @@
   z-index: 2;
   background: linear-gradient(
     152deg,
-    color-mix(in srgb, var(--lg-light) 26%, transparent) 0%,
-    color-mix(in srgb, var(--lg-light) 8%, transparent) 28%,
-    transparent 52%,
-    color-mix(in srgb, #9ebdff 10%, transparent) 88%,
-    transparent 100%
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0.04) 35%,
+    transparent 55%,
+    rgba(255, 255, 255, 0.06) 100%
   );
-  opacity: 0.42;
-  mix-blend-mode: soft-light;
+  opacity: 0.38;
 }
 
 @media (prefers-reduced-transparency: reduce) {
@@ -176,8 +177,10 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  padding: 1px;
+  padding: 2px;
   border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .site-logo:focus-visible {

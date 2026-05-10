@@ -207,6 +207,9 @@ export function TrackerHeader() {
       {searchOpen && <SearchModal onClose={() => setSearchOpen(false)} />}
 
       <header className={`top-glass-bar${scrolled ? " is-scrolled" : ""}`} aria-label="Navigation App Tracker">
+        {/* Calques réels : backdrop-filter sur pseudo-éléments est souvent cassé (Safari / WebKit prod). */}
+        <div className="top-glass-bar__frost" aria-hidden />
+        <div className="top-glass-bar__sheen" aria-hidden />
         <div className="top-glass-menu">
           <Link href="/tracker" className="site-logo site-logo--menu" aria-label="App Tracker — accueil">
             <Image src="/assets/logo.png" alt="" width={30} height={30} className="site-logo__img" priority />
