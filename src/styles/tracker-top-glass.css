@@ -1,4 +1,6 @@
-/* Tracker header — top glass bar + segmented liquid switcher (aligned with public legacy vitrine) */
+/* Tracker header — top glass bar + segmented liquid switcher (aligned with public legacy vitrine)
+ * Liquid-glass UX: full-bleed backdrop blur (frosted strip) + pill with stronger blur, inset specular,
+ * diagonal “light” refraction cue — inspired by kube.io liquid-glass CSS/SVG article (Apple WWDC-style bar). */
 
 .top-glass-bar {
   position: fixed;
@@ -18,9 +20,63 @@
   max-width: 100vw;
   pointer-events: none;
   transform: translateZ(0);
+  isolation: isolate;
   transition:
     padding var(--dur-sm) var(--ease-out-expo),
     transform var(--dur-sm) var(--ease-out-expo);
+}
+
+/* Pleine largeur : givrage du fond qui défile (le blur ne peut pas s’appliquer sans couche semi-transparente). */
+.top-glass-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  backdrop-filter: blur(36px) saturate(195%) brightness(1.03);
+  -webkit-backdrop-filter: blur(36px) saturate(195%) brightness(1.03);
+  background: linear-gradient(
+    168deg,
+    color-mix(in srgb, var(--lg-light) 10%, rgba(6, 6, 10, 0.82)) 0%,
+    color-mix(in srgb, var(--lg-light) 5%, rgba(3, 3, 6, 0.72)) 38%,
+    color-mix(in srgb, var(--lg-light) 3%, rgba(0, 0, 0, 0.58)) 100%
+  );
+  border-bottom: 1px solid color-mix(in srgb, var(--lg-light) 11%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--lg-light) 16%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--lg-dark) 22%, transparent);
+}
+
+/* Reflet “lumière” traversant la barre (approximation refraction / specular du guide). */
+.top-glass-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  background: linear-gradient(
+    118deg,
+    transparent 0%,
+    transparent 36%,
+    color-mix(in srgb, var(--lg-light) 14%, transparent) 47%,
+    color-mix(in srgb, #b8d4ff 9%, transparent) 52%,
+    transparent 63%,
+    transparent 100%
+  );
+  mix-blend-mode: soft-light;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .top-glass-bar::before {
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    background: rgba(5, 5, 8, 0.92);
+  }
+
+  .top-glass-bar::after {
+    opacity: 0.25;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -30,10 +86,13 @@
 }
 
 .top-glass-bar > * {
+  position: relative;
+  z-index: 1;
   pointer-events: auto;
 }
 
 .top-glass-menu {
+  position: relative;
   display: inline-flex;
   align-items: center;
   max-width: 100%;
@@ -41,9 +100,10 @@
   border-radius: 99em;
   isolation: isolate;
   gap: 0.15rem;
-  background-color: color-mix(in srgb, var(--lg-glass) 12%, transparent);
-  backdrop-filter: blur(12px) saturate(var(--lg-sat));
-  -webkit-backdrop-filter: blur(12px) saturate(var(--lg-sat));
+  /* Couche plus dense pour que le flou + reflets du fond soient visibles (liquid glass). */
+  background-color: color-mix(in srgb, var(--lg-glass) 18%, rgba(10, 10, 14, 0.35));
+  backdrop-filter: blur(22px) saturate(var(--lg-sat)) brightness(1.04);
+  -webkit-backdrop-filter: blur(22px) saturate(var(--lg-sat)) brightness(1.04);
   box-shadow:
     inset 0 0 0 1px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 10%), transparent),
     inset 1.8px 3px 0 -2px color-mix(in srgb, var(--lg-light) calc(var(--lg-rxl) * 90%), transparent),
@@ -55,6 +115,44 @@
     inset 2px -6.5px 1px -4px color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 10%), transparent),
     0 1px 5px 0 color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 10%), transparent),
     0 6px 16px 0 color-mix(in srgb, var(--lg-dark) calc(var(--lg-rxd) * 8%), transparent);
+}
+
+/* Surbrillance bord supérieur-gauche → bas-droite (specular rim, voir kube.io “Specular Highlight”). */
+.top-glass-menu::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    152deg,
+    color-mix(in srgb, var(--lg-light) 26%, transparent) 0%,
+    color-mix(in srgb, var(--lg-light) 8%, transparent) 28%,
+    transparent 52%,
+    color-mix(in srgb, #9ebdff 10%, transparent) 88%,
+    transparent 100%
+  );
+  opacity: 0.42;
+  mix-blend-mode: soft-light;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .top-glass-menu {
+    background-color: color-mix(in srgb, var(--lg-glass) 22%, rgba(12, 12, 16, 0.92));
+    backdrop-filter: blur(14px) saturate(130%);
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+  }
+
+  .top-glass-menu::before {
+    opacity: 0.2;
+  }
+}
+
+/* Contenu interactif au-dessus du voile specular (::before). */
+.top-glass-menu > * {
+  position: relative;
+  z-index: 3;
 }
 
 .top-glass-menu .tracker-switcher-host {
