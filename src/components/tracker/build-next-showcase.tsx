@@ -80,7 +80,6 @@ function PhoneCell({ label, src, reduceMotion }: PhoneCellProps) {
 export function BuildNextShowcase({ videoSrcs }: { videoSrcs: string[] }) {
   const reduceMotion = useReducedMotion();
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const slideIndexRef = useRef(0);
   const cells = LABELS.map((label, i) => ({
     label,
     src: videoSrcs[i] ?? null,
@@ -88,90 +87,71 @@ export function BuildNextShowcase({ videoSrcs }: { videoSrcs: string[] }) {
 
   useEffect(() => {
     if (reduceMotion) return;
+    const el = scrollerRef.current;
+    if (!el) return;
 
-    let tick = 0;
+    const SPEED = 0.042; // px/ms ≈ 42px/s
+    let rafId = 0;
+    let lastTime: number | null = null;
+    let paused = false;
+    let running = false;
 
-    function scroller(): HTMLDivElement | null {
-      return scrollerRef.current;
+    function isCarouselMode() {
+      return el.scrollWidth > el.clientWidth + 6;
     }
 
-    function isCarouselActive() {
-      const el = scroller();
-      return !!el && el.scrollWidth > el.clientWidth + 6;
-    }
-
-    function advance() {
-      const el = scroller();
-      if (!el || !isCarouselActive()) return;
-      const items = el.children;
-      const n = items.length;
-      if (n === 0) return;
-      const next = (slideIndexRef.current + 1) % n;
-      slideIndexRef.current = next;
-      items[next]?.scrollIntoView({
-        behavior: "auto",
-        block: "nearest",
-        inline: "start",
-      });
-    }
-
-    function stopTimer() {
-      if (tick !== 0) {
-        window.clearInterval(tick);
-        tick = 0;
+    function tick(now: number) {
+      if (!running) return;
+      if (!paused && lastTime !== null) {
+        const dt = Math.min(now - lastTime, 100);
+        el.scrollLeft += SPEED * dt;
+        if (el.scrollLeft >= el.scrollWidth - el.clientWidth - 1) {
+          el.scrollLeft = 0;
+        }
       }
+      lastTime = paused ? null : now;
+      rafId = requestAnimationFrame(tick);
     }
 
-    function startTimer() {
-      stopTimer();
-      if (!isCarouselActive()) return;
-      tick = window.setInterval(advance, 4000);
+    function start() {
+      if (running) return;
+      running = true;
+      lastTime = null;
+      rafId = requestAnimationFrame(tick);
     }
 
-    function afterLayout(fn: () => void) {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(fn);
-      });
+    function stop() {
+      running = false;
+      cancelAnimationFrame(rafId);
     }
 
-    afterLayout(() => {
-      const el = scroller();
-      if (!el || !isCarouselActive()) return;
-      slideIndexRef.current = 0;
-      el.scrollLeft = 0;
-      startTimer();
-    });
-
-    const scrollNode = scroller();
     const ro =
       typeof ResizeObserver !== "undefined"
         ? new ResizeObserver(() => {
-            afterLayout(() => {
-              if (!isCarouselActive()) stopTimer();
-              else startTimer();
-            });
+            if (isCarouselMode()) start();
+            else stop();
           })
         : null;
-    if (scrollNode) ro?.observe(scrollNode);
+    ro?.observe(el);
 
-    const onWinResize = () => {
-      afterLayout(() => {
-        if (!isCarouselActive()) stopTimer();
-        else startTimer();
-      });
-    };
-    window.addEventListener("resize", onWinResize);
+    if (isCarouselMode()) start();
 
+    const onTouchStart = () => { paused = true; };
+    const onTouchEnd = () => { setTimeout(() => { paused = false; }, 600); };
     const onVisibility = () => {
-      if (document.visibilityState !== "visible") stopTimer();
-      else afterLayout(startTimer);
+      if (document.visibilityState !== "visible") { paused = true; }
+      else { paused = false; }
     };
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchend", onTouchEnd, { passive: true });
     document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
-      stopTimer();
+      stop();
       ro?.disconnect();
-      window.removeEventListener("resize", onWinResize);
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchend", onTouchEnd);
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [reduceMotion, videoSrcs]);
@@ -185,7 +165,7 @@ export function BuildNextShowcase({ videoSrcs }: { videoSrcs: string[] }) {
         id="build-next-heading"
         className="mx-auto max-w-3xl px-2 text-center text-[clamp(1.75rem,5.5vw,2.75rem)] font-semibold tracking-[-0.03em] text-white"
       >
-        Construisez le suivant…
+        Notre sélection de la semaine
       </h2>
 
       <div className="mt-10 lg:mt-14">
