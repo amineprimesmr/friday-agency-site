@@ -1,19 +1,22 @@
-import fs from "node:fs";
-import path from "node:path";
-
-const VIDEO_EXT = /\.(mp4|webm|mov|m4v)$/i;
+/**
+ * Chemins publics vers les vidéos showcase (fichiers dans `/public/assets/appvideo`).
+ *
+ * Important déploiement Vercel : ne pas utiliser `fs.readdir` ici — Next.js file tracing
+ * inclurait tout le dossier dans la serverless function de la page (limite ~300 Mo).
+ * Ajouter une entrée quand tu ajoutes un fichier ; ou pointe vers des URLs externes.
+ */
+const APP_SHOWCASE_VIDEO_FILENAMES = [
+  "kalam.mov",
+  "kotcha.mov",
+  "locket.mov",
+  "napper.mov",
+  "speak.mov",
+  "watchlab.mov",
+] as const;
 
 /** Fichiers vidéo publics dans `/public/assets/appvideo`, triés par nom. */
 export function listAppShowcaseVideos(): string[] {
-  const dir = path.join(process.cwd(), "public", "assets", "appvideo");
-  try {
-    if (!fs.existsSync(dir)) return [];
-    return fs
-      .readdirSync(dir)
-      .filter((f) => VIDEO_EXT.test(f))
-      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }))
-      .map((f) => `/assets/appvideo/${encodeURIComponent(f)}`);
-  } catch {
-    return [];
-  }
+  return [...APP_SHOWCASE_VIDEO_FILENAMES]
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }))
+    .map((f) => `/assets/appvideo/${encodeURIComponent(f)}`);
 }
