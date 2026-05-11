@@ -11,7 +11,7 @@ async function generateImage(prompt: string, size: string, apiKey: string): Prom
     },
     body: JSON.stringify({
       model: "dall-e-3",
-      prompt,
+      prompt: `Stylized digital art illustration of a fictional character for a creative project. Not a real person. ${prompt}`,
       n: 1,
       size: "1024x1792",
       quality: "hd",
