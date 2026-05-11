@@ -12,15 +12,11 @@ export const metadata: Metadata = {
     "Suivez les classements App Store en temps réel : Top Charts, nouveautés, mouvements de rangs par pays et catégorie.",
 };
 
-export default function TrackerLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function TrackerLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-dvh bg-black font-sans text-white antialiased">
       <TrackerHeader />
-      <main className="pt-[max(4.75rem,calc(env(safe-area-inset-top)+3.25rem))]">{children}</main>
+      <main>{children}</main>
       <TrackerFooter />
     </div>
   );

@@ -89,12 +89,14 @@ export default async function TrackerDashboard() {
             >
               Explorer les apps
             </Link>
-            <Link
-              href="/tracker/top-charts"
+            <a
+              href="https://www.icloud.com/shortcuts/a9d9656c24474d00b18eafb57393977b"
+              target="_blank"
+              rel="noopener noreferrer"
               className="tracker-shiny-cta min-h-11 w-full max-w-xs sm:w-auto sm:max-w-none"
             >
-              <span>Voir les classements</span>
-            </Link>
+              <span>Extension gratuite →</span>
+            </a>
           </div>
 
           {heroApps.length > 0 && (

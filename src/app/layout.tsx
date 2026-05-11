@@ -1,20 +1,18 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-/** Polices chargées en CSS (`globals.css`) pour éviter `next/font` → chaîne PostCSS fragile sur certains setups. */
-
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
   title: {
-    default: "Friday — Apps iOS & sites web",
+    default: "Friday — App Store Tracker",
     template: "%s · Friday",
   },
   description:
-    "Agence digitale : applications iOS et sites internet livrés avec le même soin que les grandes équipes produit.",
+    "Suivez les classements App Store en temps réel : Top Charts, nouveautés, mouvements de rangs par pays et catégorie.",
   openGraph: {
-    title: "Friday — Apps iOS & sites web",
+    title: "Friday — App Store Tracker",
     description:
-      "Agence digitale : applications iOS et sites internet sur mesure.",
+      "Classements iOS en temps réel, top charts, nouveautés et explorer d'apps.",
     type: "website",
     locale: "fr_FR",
   },
@@ -26,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className="h-full">
+    <html lang="fr" className="h-full" suppressHydrationWarning>
       <body className="min-h-full bg-black antialiased">{children}</body>
     </html>
   );
