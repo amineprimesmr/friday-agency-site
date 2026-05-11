@@ -15,6 +15,7 @@ import { TopMoversGrid } from "@/components/tracker/top-movers-grid";
 import { MoversTable } from "@/components/tracker/movers-table";
 import { FreshDrops } from "@/components/tracker/fresh-drops";
 import { Watchlist } from "@/components/tracker/watchlist";
+import { HeroAppIconRotator } from "@/components/tracker/hero-app-icon-rotator";
 
 export const metadata: Metadata = {
   title: "App Store Tracker — Trouvez la meilleure app à lancer",
@@ -77,7 +78,11 @@ export default async function TrackerDashboard() {
             <span className="h-px w-8 bg-gradient-to-l from-transparent to-white/25" aria-hidden />
           </p>
           <h1 className="bg-gradient-to-br from-white via-zinc-100 to-zinc-500 bg-clip-text pb-1.5 text-[clamp(2.5rem,9.5vw,6rem)] font-semibold leading-[1.04] tracking-[-0.035em] text-transparent sm:text-[clamp(2.65rem,10vw,6.25rem)]">
-            Trouvez la meilleure app à lancer
+            Trouvez la meilleure{" "}
+            <HeroAppIconRotator
+              apps={heroApps.map((a) => ({ id: a.id, name: a.name, artworkUrl: a.artworkUrl }))}
+            />
+            app à lancer
           </h1>
           <p className="mx-auto mt-6 max-w-lg text-pretty text-[15px] leading-relaxed text-white/45 sm:mt-7 sm:text-base">
             Classements temps réel, estimations, créatives publicitaires et signaux marché — tout pour comparer et prioriser votre prochain lancement.
