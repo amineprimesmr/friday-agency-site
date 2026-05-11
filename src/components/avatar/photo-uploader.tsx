@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { readApiJson } from "@/lib/read-api-json";
 
 interface Props {
   onReady: (data: {
@@ -56,7 +57,7 @@ export function PhotoUploader({ onReady }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ imageBase64, mimeType }),
       });
-      const data = (await res.json()) as { masterPrompt?: string; error?: string };
+      const data = await readApiJson<{ masterPrompt?: string; error?: string }>(res);
       if (!res.ok || !data.masterPrompt) throw new Error(data.error ?? "Analysis failed");
       setMasterPrompt(data.masterPrompt);
     } catch (e) {
@@ -76,7 +77,7 @@ export function PhotoUploader({ onReady }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ imageBase64, mimeType }),
       });
-      const data = (await res.json()) as { fileId?: string; error?: string };
+      const data = await readApiJson<{ fileId?: string; error?: string }>(res);
       if (!res.ok || !data.fileId) {
         throw new Error(data.error ?? "Échec upload référence OpenAI");
       }

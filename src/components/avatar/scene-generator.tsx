@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { buildScenePrompt, SCENE_PRESETS, ScenePreset } from "@/lib/avatar-prompts";
+import { readApiJson } from "@/lib/read-api-json";
 
 interface Props {
   masterPrompt: string;
@@ -65,9 +66,11 @@ export function SceneGenerator({
             size: "1024x1536",
             referenceFileIds: sceneReferenceFileIds,
           }),
-        })
-          .then((r) => r.json())
-          .then((d: { imageUrl?: string }) => d.imageUrl ?? null),
+        }).then(async (r) => {
+          const d = await readApiJson<{ imageUrl?: string; error?: string }>(r);
+          if (!r.ok) throw new Error(d.error ?? `HTTP ${r.status}`);
+          return d.imageUrl ?? null;
+        }),
       );
       const results = await Promise.all(promises);
       const valid = results.filter(Boolean) as string[];

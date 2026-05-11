@@ -4,7 +4,8 @@ import {
   openaiUploadBuffer,
 } from "@/lib/openai-avatar";
 
-export const maxDuration = 120;
+/** Vercel Pro (or higher) allows up to 300s; GPT Image 2 edits can run a long time. */
+export const maxDuration = 300;
 export const runtime = "nodejs";
 
 async function generateFromText(

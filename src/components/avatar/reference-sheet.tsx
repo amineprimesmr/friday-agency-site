@@ -7,6 +7,7 @@ import {
   REFERENCE_ANGLE_ORDER,
   ReferenceAngle,
 } from "@/lib/avatar-prompts";
+import { readApiJson } from "@/lib/read-api-json";
 
 interface Props {
   masterPrompt: string;
@@ -47,11 +48,11 @@ async function callGenerateImage(
       referenceFileIds,
     }),
   });
-  const data = (await res.json()) as {
+  const data = await readApiJson<{
     imageUrl?: string;
     outputFileId?: string;
     error?: string;
-  };
+  }>(res);
   if (!res.ok || !data.imageUrl || !data.outputFileId) {
     throw new Error(data.error ?? "Generation failed");
   }
