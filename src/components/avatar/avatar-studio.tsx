@@ -1,14 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { CharacterBible, BIBLE_DEFAULTS, ReferenceAngle } from "@/lib/avatar-prompts";
-import { CharacterBibleForm } from "./character-bible-form";
+import { ReferenceAngle } from "@/lib/avatar-prompts";
+import { PhotoUploader } from "./photo-uploader";
 import { ReferenceSheet } from "./reference-sheet";
 import { SceneGenerator } from "./scene-generator";
 import { VideoAnimator } from "./video-animator";
 
+interface PhotoData {
+  masterPrompt: string;
+  imageBase64: string;
+  mimeType: string;
+}
+
 const STEPS = [
-  { id: 1, label: "Character Bible", sublabel: "Décris le personnage" },
+  { id: 1, label: "Photo", sublabel: "Upload & analyse IA" },
   { id: 2, label: "Reference Sheet", sublabel: "5 angles 360°" },
   { id: 3, label: "Scènes", sublabel: "Génère les images" },
   { id: 4, label: "Vidéo", sublabel: "Anime avec Kling" },
@@ -16,12 +22,16 @@ const STEPS = [
 
 export function AvatarStudio() {
   const [step, setStep] = useState(1);
-  const [bible, setBible] = useState<CharacterBible>(BIBLE_DEFAULTS);
-  const [referenceImages, setReferenceImages] = useState<
-    Partial<Record<ReferenceAngle, string>>
-  >({});
+  const [photoData, setPhotoData] = useState<PhotoData | null>(null);
+  const [referenceImages, setReferenceImages] = useState<Partial<Record<ReferenceAngle, string>>>({});
   const [selectedScene, setSelectedScene] = useState<string | null>(null);
   const [selectedScenePresetId, setSelectedScenePresetId] = useState<string | undefined>();
+
+  function handlePhotoReady(data: PhotoData) {
+    setPhotoData(data);
+    setReferenceImages({});
+    setStep(2);
+  }
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-12">
@@ -34,7 +44,7 @@ export function AvatarStudio() {
           Avatar Generator
         </h1>
         <p className="mt-3 text-sm text-white/40">
-          Crée un avatar ultra-réaliste et anime-le en vidéo — en 4 étapes.
+          Upload une photo → IA génère le personnage ultra-réaliste → anime en vidéo.
         </p>
       </div>
 
@@ -44,6 +54,7 @@ export function AvatarStudio() {
           <div key={s.id} className="flex items-center">
             <button
               onClick={() => step > s.id && setStep(s.id)}
+              disabled={step <= s.id}
               className={`flex flex-col items-center gap-1 px-3 py-2 transition ${
                 step > s.id ? "cursor-pointer opacity-60 hover:opacity-100" : "cursor-default"
               }`}
@@ -60,22 +71,14 @@ export function AvatarStudio() {
                 {step > s.id ? "✓" : s.id}
               </div>
               <div className="hidden flex-col items-center sm:flex">
-                <span
-                  className={`text-xs font-semibold ${
-                    step === s.id ? "text-white" : "text-white/40"
-                  }`}
-                >
+                <span className={`text-xs font-semibold ${step === s.id ? "text-white" : "text-white/40"}`}>
                   {s.label}
                 </span>
                 <span className="text-[10px] text-white/25">{s.sublabel}</span>
               </div>
             </button>
             {i < STEPS.length - 1 && (
-              <div
-                className={`h-px w-8 transition sm:w-12 ${
-                  step > s.id ? "bg-white/30" : "bg-white/8"
-                }`}
-              />
+              <div className={`h-px w-8 transition sm:w-12 ${step > s.id ? "bg-white/30" : "bg-white/8"}`} />
             )}
           </div>
         ))}
@@ -91,26 +94,25 @@ export function AvatarStudio() {
         </div>
 
         {step === 1 && (
-          <CharacterBibleForm
-            bible={bible}
-            onChange={setBible}
-            onNext={() => setStep(2)}
-          />
+          <PhotoUploader onReady={handlePhotoReady} />
         )}
 
-        {step === 2 && (
+        {step === 2 && photoData && (
           <ReferenceSheet
-            bible={bible}
+            masterPrompt={photoData.masterPrompt}
+            referenceImageBase64={photoData.imageBase64}
+            mimeType={photoData.mimeType}
             images={referenceImages}
             onImagesChange={setReferenceImages}
             onNext={() => setStep(3)}
           />
         )}
 
-        {step === 3 && (
+        {step === 3 && photoData && (
           <SceneGenerator
-            bible={bible}
-            referenceImageUrl={referenceImages.three_quarters ?? referenceImages.front}
+            masterPrompt={photoData.masterPrompt}
+            referenceImageBase64={photoData.imageBase64}
+            mimeType={photoData.mimeType}
             onSelectScene={(url, presetId) => {
               setSelectedScene(url);
               setSelectedScenePresetId(presetId);

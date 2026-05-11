@@ -1,17 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import {
-  CharacterBible,
-  buildMasterPrompt,
-  buildScenePrompt,
-  SCENE_PRESETS,
-  ScenePreset,
-} from "@/lib/avatar-prompts";
+import { buildScenePrompt, SCENE_PRESETS, ScenePreset } from "@/lib/avatar-prompts";
 
 interface Props {
-  bible: CharacterBible;
-  referenceImageUrl?: string;
+  masterPrompt: string;
+  referenceImageBase64: string;
+  mimeType: string;
   onSelectScene: (imageUrl: string, presetId?: string) => void;
   onNext: () => void;
 }
@@ -33,10 +28,15 @@ const SHOT_OPTIONS = [
   "Extreme close-up face",
   "Low angle medium shot",
   "Over-the-shoulder",
-  "Bird's eye view",
 ];
 
-export function SceneGenerator({ bible, onSelectScene, onNext }: Props) {
+export function SceneGenerator({
+  masterPrompt,
+  referenceImageBase64,
+  mimeType,
+  onSelectScene,
+  onNext,
+}: Props) {
   const [selectedPreset, setSelectedPreset] = useState<ScenePreset | null>(null);
   const [customScene, setCustomScene] = useState("");
   const [lighting, setLighting] = useState(LIGHTING_OPTIONS[0]);
@@ -46,7 +46,6 @@ export function SceneGenerator({ bible, onSelectScene, onNext }: Props) {
   const [loading, setLoading] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
 
-  const masterPrompt = buildMasterPrompt(bible);
   const scenePrompt = buildScenePrompt(
     masterPrompt,
     selectedPreset,
@@ -59,15 +58,19 @@ export function SceneGenerator({ bible, onSelectScene, onNext }: Props) {
     setLoading(true);
     setGeneratedImages([]);
     try {
-      // Generate 2 variants in parallel
       const promises = [0, 1].map(() =>
         fetch("/api/avatar/generate-image", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: scenePrompt, aspectRatio: "portrait_16_9" }),
+          body: JSON.stringify({
+            prompt: scenePrompt,
+            referenceImageBase64,
+            mimeType,
+            size: "1024x1536",
+          }),
         })
           .then((r) => r.json())
-          .then((d: { imageUrl?: string; error?: string }) => d.imageUrl ?? null),
+          .then((d: { imageUrl?: string }) => d.imageUrl ?? null),
       );
       const results = await Promise.all(promises);
       const valid = results.filter(Boolean) as string[];
@@ -90,7 +93,7 @@ export function SceneGenerator({ bible, onSelectScene, onNext }: Props) {
   return (
     <div className="flex flex-col gap-6">
       <p className="text-sm text-white/50">
-        Choisis un preset ou décris ta propre scène. Le personnage y sera inséré avec son look exact.
+        Choisis une scène — ta photo de référence est utilisée pour maintenir la cohérence du personnage.
       </p>
 
       {/* Preset grid */}
@@ -102,10 +105,7 @@ export function SceneGenerator({ bible, onSelectScene, onNext }: Props) {
           {SCENE_PRESETS.map((preset) => (
             <button
               key={preset.id}
-              onClick={() => {
-                setSelectedPreset(preset);
-                setCustomScene("");
-              }}
+              onClick={() => { setSelectedPreset(preset); setCustomScene(""); }}
               className={`rounded-xl border p-3 text-left transition ${
                 selectedPreset?.id === preset.id
                   ? "border-violet-500/60 bg-violet-600/20 text-white"
@@ -119,8 +119,6 @@ export function SceneGenerator({ bible, onSelectScene, onNext }: Props) {
               </div>
             </button>
           ))}
-
-          {/* Custom */}
           <button
             onClick={() => setSelectedPreset(null)}
             className={`rounded-xl border p-3 text-left transition ${
@@ -149,38 +147,28 @@ export function SceneGenerator({ bible, onSelectScene, onNext }: Props) {
             placeholder="Ex: sitting at a poker table in a Vegas casino, surrounded by chips, confident expression, dramatic overhead light…"
             className="resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/25 outline-none focus:border-violet-500/60 transition-colors"
           />
-
-          {/* Lighting & shot pickers */}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-white/50 uppercase tracking-wider">
-                Lumière
-              </label>
+              <label className="text-xs font-medium text-white/50 uppercase tracking-wider">Lumière</label>
               <select
                 value={lighting}
                 onChange={(e) => setLighting(e.target.value)}
-                className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-violet-500/60 transition-colors"
+                className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-violet-500/60"
               >
                 {LIGHTING_OPTIONS.map((l) => (
-                  <option key={l} value={l} className="bg-neutral-900">
-                    {l}
-                  </option>
+                  <option key={l} value={l} className="bg-neutral-900">{l}</option>
                 ))}
               </select>
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-white/50 uppercase tracking-wider">
-                Cadrage
-              </label>
+              <label className="text-xs font-medium text-white/50 uppercase tracking-wider">Cadrage</label>
               <select
                 value={shot}
                 onChange={(e) => setShot(e.target.value)}
-                className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-violet-500/60 transition-colors"
+                className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-violet-500/60"
               >
                 {SHOT_OPTIONS.map((s) => (
-                  <option key={s} value={s} className="bg-neutral-900">
-                    {s}
-                  </option>
+                  <option key={s} value={s} className="bg-neutral-900">{s}</option>
                 ))}
               </select>
             </div>
@@ -194,9 +182,7 @@ export function SceneGenerator({ bible, onSelectScene, onNext }: Props) {
           className="flex w-full items-center justify-between px-4 py-3 text-left"
           onClick={() => setShowPrompt(!showPrompt)}
         >
-          <span className="text-xs font-semibold uppercase tracking-wider text-white/40">
-            Prompt de scène généré
-          </span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-white/40">Prompt de scène</span>
           <span className="text-xs text-white/30">{showPrompt ? "Masquer ▲" : "Voir ▼"}</span>
         </button>
         {showPrompt && (
@@ -208,16 +194,14 @@ export function SceneGenerator({ bible, onSelectScene, onNext }: Props) {
         )}
       </div>
 
-      {/* Generate button */}
       <button
         onClick={generateVariants}
         disabled={!canGenerate || loading}
         className="w-full rounded-xl bg-violet-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-900/40 transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-40 active:scale-[0.98]"
       >
-        {loading ? "Génération en cours (2 variantes)…" : "Générer 2 variantes"}
+        {loading ? "Génération des 2 variantes…" : "Générer 2 variantes"}
       </button>
 
-      {/* Generated images */}
       {generatedImages.length > 0 && (
         <div className="flex flex-col gap-4">
           <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-violet-400">
@@ -228,9 +212,7 @@ export function SceneGenerator({ bible, onSelectScene, onNext }: Props) {
               <div key={i} className="flex flex-col gap-2">
                 <div
                   className={`relative cursor-pointer overflow-hidden rounded-xl border-2 transition ${
-                    selectedImage === url
-                      ? "border-violet-500"
-                      : "border-white/10 hover:border-white/30"
+                    selectedImage === url ? "border-violet-500" : "border-white/10 hover:border-white/30"
                   }`}
                   onClick={() => setSelectedImage(url)}
                 >
