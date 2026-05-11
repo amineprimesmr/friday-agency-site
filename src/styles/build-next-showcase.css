@@ -1,0 +1,11 @@
+/* Scroll horizontal mobile : pas de scrollbar visible */
+@media (max-width: 767.98px) {
+  .build-next-scroller {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .build-next-scroller::-webkit-scrollbar {
+    display: none;
+  }
+}

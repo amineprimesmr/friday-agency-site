@@ -140,6 +140,18 @@ export interface SearchResult extends AppEntry {
 const RSS_BASE = "https://rss.marketingtools.apple.com/api/v2";
 const ITUNES_BASE = "https://itunes.apple.com";
 const REVALIDATE = 900;
+/** évite les SSR qui restent bloqués si rss.itunes.apple.com pend indéfiniment */
+const FETCH_TIMEOUT_MS = 12_000;
+
+function fetchTimed(
+  input: RequestInfo | URL,
+  init?: RequestInit & { next?: { revalidate?: number | false } },
+): Promise<Response> {
+  return fetch(input, {
+    ...init,
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
+}
 
 export async function fetchTopCharts(
   country: string,
@@ -149,7 +161,7 @@ export async function fetchTopCharts(
   const clamped = Math.min(Math.max(limit, 1), 100);
   const url = `${RSS_BASE}/${country}/apps/${chart}/${clamped}/apps.json`;
   try {
-    const res = await fetch(url, { next: { revalidate: REVALIDATE } });
+    const res = await fetchTimed(url, { next: { revalidate: REVALIDATE } });
     if (!res.ok) return [];
     const data = (await res.json()) as {
       feed?: { results?: Record<string, unknown>[] };
@@ -191,7 +203,7 @@ export async function searchApps(
     ...(categoryId && categoryId !== "all" ? { genreId: categoryId } : {}),
   });
   try {
-    const res = await fetch(`${ITUNES_BASE}/search?${params}`, {
+    const res = await fetchTimed(`${ITUNES_BASE}/search?${params}`, {
       next: { revalidate: 300 },
     });
     if (!res.ok) return [];
@@ -227,10 +239,9 @@ export async function fetchAppDetail(
   country = "us",
 ): Promise<AppDetail | null> {
   try {
-    const res = await fetch(
-      `${ITUNES_BASE}/lookup?id=${id}&country=${country}`,
-      { next: { revalidate: 3600 } },
-    );
+    const res = await fetchTimed(`${ITUNES_BASE}/lookup?id=${id}&country=${country}`, {
+      next: { revalidate: 3600 },
+    });
     if (!res.ok) return null;
     const data = (await res.json()) as {
       results?: Record<string, unknown>[];
@@ -448,13 +459,12 @@ function normalizeSensorTowerString(s: string): string {
 
 export async function fetchSensorTowerApp(appId: string | number): Promise<SensorTowerData | null> {
   try {
-    const res = await fetch(
-      `https://app.sensortower.com/api/ios/apps?app_ids=${appId}`,
-      {
-        headers: { "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15" },
-        next: { revalidate: 3600 },
+    const res = await fetchTimed(`https://app.sensortower.com/api/ios/apps?app_ids=${appId}`, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15",
       },
-    );
+      next: { revalidate: 3600 },
+    });
     if (!res.ok) return null;
     const data = (await res.json()) as { apps?: Record<string, unknown>[] };
     const app = data.apps?.[0];
@@ -477,13 +487,12 @@ export async function fetchSensorTowerApps(appIds: (string | number)[]): Promise
   const result = new Map<string, SensorTowerData>();
   if (appIds.length === 0) return result;
   try {
-    const res = await fetch(
-      `https://app.sensortower.com/api/ios/apps?app_ids=${appIds.join(",")}`,
-      {
-        headers: { "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15" },
-        next: { revalidate: 3600 },
+    const res = await fetchTimed(`https://app.sensortower.com/api/ios/apps?app_ids=${appIds.join(",")}`, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15",
       },
-    );
+      next: { revalidate: 3600 },
+    });
     if (!res.ok) return result;
     const data = (await res.json()) as { apps?: Record<string, unknown>[] };
     for (const app of data.apps ?? []) {

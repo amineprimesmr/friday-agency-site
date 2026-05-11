@@ -1,31 +1,34 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import {
   fetchTopCharts,
   fetchMovers,
   fetchRecentlyRanked,
-  COUNTRIES,
   COUNTRY_MAP,
   type CountryCode,
   type MultiCountryApp,
 } from "@/lib/apple-charts";
-import { MetricsBar } from "@/components/tracker/metrics-bar";
 import { TopMoversGrid } from "@/components/tracker/top-movers-grid";
 import { MoversTable } from "@/components/tracker/movers-table";
 import { FreshDrops } from "@/components/tracker/fresh-drops";
 import { Watchlist } from "@/components/tracker/watchlist";
+import { BuildNextShowcase } from "@/components/tracker/build-next-showcase";
+import { MyfidLaunchStepsSection } from "@/components/tracker/myfid-launch-steps-section";
+import { MyfidThreeStepsSection } from "@/components/tracker/myfid-three-steps-section";
 import { HeroAppIconRotator } from "@/components/tracker/hero-app-icon-rotator";
+import { listAppShowcaseVideos } from "@/lib/app-videos";
 
 export const metadata: Metadata = {
-  title: "App Store Tracker — Trouvez la meilleure app à lancer",
+  title: "App Store Tracker — Créez votre app et monétisez-la",
 };
 
 export const revalidate = 900;
 
 const DASHBOARD_COUNTRIES: CountryCode[] = ["us", "fr", "gb", "de", "jp", "br", "mx"];
 
-async function getDashboardData() {
+type DashboardData = Awaited<ReturnType<typeof getDashboardDataCore>>;
+
+async function getDashboardDataCore() {
   const [moversData, freshDrops, ...countryResults] = await Promise.all([
     fetchMovers("us", "gb"),
     fetchRecentlyRanked("us", 8),
@@ -41,101 +44,75 @@ async function getDashboardData() {
   ]);
 
   const topMoversGrid: MultiCountryApp[] = countryResults.flat();
-  const appsTracked = topMoversGrid.length * 4 + 200;
 
   return {
     moversData,
     freshDrops,
     topMoversGrid,
-    stats: {
-      appsTracked,
-      countriesTracked: COUNTRIES.length,
-      topGain: moversData.gainers[0]?.change ?? 0,
-      newToday: freshDrops.length,
-    },
   };
 }
 
-export default async function TrackerDashboard() {
-  const { moversData, freshDrops, topMoversGrid, stats } = await getDashboardData();
+/** Données classements : ne fait jamais planter la page (réseau / Apple / cache Turbopack). */
+async function getDashboardData(): Promise<DashboardData> {
+  try {
+    return await getDashboardDataCore();
+  } catch (err) {
+    console.error("[tracker] getDashboardData:", err);
+    return {
+      moversData: { gainers: [], losers: [] },
+      freshDrops: [],
+      topMoversGrid: [],
+    };
+  }
+}
 
-  // Top 3 apps US pour la hero section
+export default async function TrackerDashboard() {
+  const { moversData, freshDrops, topMoversGrid } = await getDashboardData();
+  const appShowcaseVideos = listAppShowcaseVideos();
+
   const heroApps = topMoversGrid.filter((a) => a.country === "us").slice(0, 3);
 
   return (
     <>
-      {/* ── Hero : headline centrée sous le menu ── */}
-      <section className="relative overflow-hidden border-b border-white/[0.06] bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(255,255,255,0.07),transparent)]">
-        {/* Halo bas-droite — renforce le dégradé du titre sans surcharger */}
-        <div
-          className="pointer-events-none absolute -bottom-32 -right-32 h-[min(70vw,28rem)] w-[min(70vw,28rem)] rounded-full bg-gradient-to-br from-sky-400/12 via-violet-500/8 to-transparent blur-3xl"
-          aria-hidden
-        />
-        <div className="relative mx-auto max-w-4xl px-4 pb-12 pt-10 text-center sm:pb-16 sm:pt-14">
-          <p className="mb-6 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/40">
-            <span className="h-px w-8 bg-gradient-to-r from-transparent to-white/25" aria-hidden />
-            Intelligence App Store
-            <span className="h-px w-8 bg-gradient-to-l from-transparent to-white/25" aria-hidden />
-          </p>
-          <h1 className="bg-gradient-to-br from-white via-zinc-100 to-zinc-500 bg-clip-text pb-1.5 text-[clamp(2.5rem,9.5vw,6rem)] font-semibold leading-[1.04] tracking-[-0.035em] text-transparent sm:text-[clamp(2.65rem,10vw,6.25rem)]">
-            Trouvez la meilleure{" "}
-            <HeroAppIconRotator
-              apps={heroApps.map((a) => ({ id: a.id, name: a.name, artworkUrl: a.artworkUrl }))}
-            />
-            app à lancer
-          </h1>
-          <p className="mx-auto mt-6 max-w-lg text-pretty text-[15px] leading-relaxed text-white/45 sm:mt-7 sm:text-base">
-            Classements temps réel, estimations, créatives publicitaires et signaux marché — tout pour comparer et prioriser votre prochain lancement.
-          </p>
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:mt-11 sm:flex-row sm:gap-4">
-            <Link
-              href="/tracker/search"
-              className="inline-flex min-h-11 w-full max-w-xs items-center justify-center rounded-2xl bg-white px-6 text-sm font-semibold text-neutral-950 shadow-[0_0_0_1px_rgba(255,255,255,0.08)] transition hover:bg-white/95 sm:w-auto sm:max-w-none"
-            >
-              Explorer les apps
-            </Link>
-            <a
-              href="https://www.icloud.com/shortcuts/a9d9656c24474d00b18eafb57393977b"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="tracker-shiny-cta min-h-11 w-full max-w-xs sm:w-auto sm:max-w-none"
-            >
-              <span>Extension gratuite →</span>
-            </a>
-          </div>
-
-          {heroApps.length > 0 && (
-            <div className="mx-auto mt-12 flex max-w-xl flex-wrap items-center justify-center gap-2 sm:gap-3">
-              <span className="w-full text-center text-[10px] font-medium uppercase tracking-[0.2em] text-white/30 sm:w-auto sm:text-left">
-                Tendance US
-              </span>
-              {heroApps.map((app) => (
-                <Link
-                  key={app.id}
-                  href={`/tracker/apps/${app.id}?country=us`}
-                  className="group inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2 transition hover:border-white/18 hover:bg-white/[0.06]"
-                >
-                  <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg ring-1 ring-white/10">
-                    {app.artworkUrl ? (
-                      <Image src={app.artworkUrl} alt={app.name} fill className="object-cover" sizes="36px" unoptimized />
-                    ) : (
-                      <span className="flex h-full w-full items-center justify-center bg-white/5 text-xs font-bold text-white/40">
-                        {app.name.charAt(0)}
-                      </span>
-                    )}
-                  </span>
-                  <span className="text-left">
-                    <span className="block text-xs font-medium text-white/85 group-hover:text-white">{app.name}</span>
-                    <span className="text-[10px] text-white/35">Top gratuit · #{app.rank}</span>
-                  </span>
-                </Link>
-              ))}
+      {/* Hero : titre + halo (overflow masqué) puis carrousel vidéos (ombres et débordements visibles) */}
+      <div className="border-b border-white/[0.06] bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(255,255,255,0.07),transparent)]">
+        <div className="relative overflow-hidden">
+          <div
+            className="pointer-events-none absolute -bottom-32 -right-32 h-[min(70vw,28rem)] w-[min(70vw,28rem)] rounded-full bg-gradient-to-br from-sky-400/12 via-violet-500/8 to-transparent blur-3xl"
+            aria-hidden
+          />
+          <div className="relative mx-auto max-w-4xl px-4 pt-10 text-center sm:pt-14">
+            <h1 className="bg-gradient-to-br from-white via-zinc-100 to-zinc-500 bg-clip-text pb-1.5 text-[clamp(2.5rem,9.5vw,6rem)] font-semibold leading-[1.04] tracking-[-0.035em] text-transparent sm:text-[clamp(2.65rem,10vw,6.25rem)]">
+              Créez votre{" "}
+              <HeroAppIconRotator
+                apps={heroApps.map((a) => ({ id: a.id, name: a.name, artworkUrl: a.artworkUrl }))}
+              />
+              app et monétisez-la
+            </h1>
+            <p className="mx-auto mt-6 max-w-lg text-pretty text-[15px] leading-relaxed text-white/45 sm:mt-7 sm:text-base">
+              Pubs, produits, emails, hooks, stratégies &amp; plus.
+              <br />
+              Tout au même endroit, actualisé chaque jour.
+            </p>
+            <div className="mt-10 flex justify-center px-2 sm:mt-11">
+              <a
+                href="https://www.icloud.com/shortcuts/a9d9656c24474d00b18eafb57393977b"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="tracker-extension-cta w-fit max-w-[min(100%,20rem)] sm:max-w-[min(100%,28rem)]"
+              >
+                <span>Extension gratuite →</span>
+              </a>
             </div>
-          )}
+          </div>
         </div>
-      </section>
 
-      <MetricsBar stats={stats} />
+        <div className="relative mx-auto w-full max-w-[min(100%,110rem)] px-4 pb-16 pt-2 sm:px-6 sm:pb-28 sm:pt-4">
+          <BuildNextShowcase videoSrcs={appShowcaseVideos} />
+        </div>
+      </div>
+
+      <MyfidThreeStepsSection />
 
       <div className="mx-auto max-w-7xl space-y-10 px-4 py-10 sm:px-6">
 
@@ -235,6 +212,8 @@ export default async function TrackerDashboard() {
         </div>
 
       </div>
+
+      <MyfidLaunchStepsSection />
     </>
   );
 }

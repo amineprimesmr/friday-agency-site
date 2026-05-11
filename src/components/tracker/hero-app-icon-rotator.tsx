@@ -29,7 +29,7 @@ export function HeroAppIconRotator({ apps }: { apps: HeroRotatorApp[] }) {
 
   return (
     <span
-      className="relative mx-1 inline-flex align-middle [--hero-icon:2.85rem] sm:[--hero-icon:3.35rem] md:[--hero-icon:3.75rem]"
+      className="relative ml-1 mr-[0.65rem] inline-flex align-middle sm:mr-3 md:mr-3.5 [--hero-icon:2.85rem] sm:[--hero-icon:3.35rem] md:[--hero-icon:3.75rem]"
       style={{ perspective: "960px" }}
       aria-hidden
     >
@@ -37,39 +37,7 @@ export function HeroAppIconRotator({ apps }: { apps: HeroRotatorApp[] }) {
         className="relative inline-flex h-[var(--hero-icon)] w-[var(--hero-icon)] items-center justify-center"
         style={{ transformStyle: "preserve-3d" }}
       >
-        {/* Halo tournant très lent — lisible sans voler la vedette au titre */}
-        {!reduceMotion && (
-          <motion.span
-            aria-hidden
-            className="pointer-events-none absolute -inset-[5px] rounded-[1.4rem] opacity-[0.55] blur-[2px] sm:rounded-[1.55rem]"
-            style={{
-              background:
-                "conic-gradient(from 0deg, rgba(56,189,248,0.95), rgba(167,139,250,0.45), rgba(56,189,248,0.35), rgba(129,140,248,0.75), rgba(56,189,248,0.95))",
-            }}
-            animate={{ rotate: 360 }}
-            transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
-          />
-        )}
-
-        <motion.span
-          className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl bg-neutral-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_14px_44px_rgba(0,0,0,0.55)] ring-1 ring-white/18"
-          animate={
-            reduceMotion
-              ? undefined
-              : {
-                  boxShadow: [
-                    "inset 0 1px 0 rgba(255,255,255,0.14), 0 14px 44px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.12)",
-                    "inset 0 1px 0 rgba(255,255,255,0.18), 0 18px 50px rgba(56,189,248,0.12), 0 0 28px rgba(167,139,250,0.22)",
-                    "inset 0 1px 0 rgba(255,255,255,0.14), 0 14px 44px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.12)",
-                  ],
-                }
-          }
-          transition={
-            reduceMotion
-              ? undefined
-              : { duration: 2.8, repeat: Infinity, ease: [0.45, 0, 0.55, 1] }
-          }
-        >
+        <span className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl bg-neutral-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_14px_44px_rgba(0,0,0,0.55)] ring-1 ring-white/18">
           <AnimatePresence mode="wait" initial={false}>
             <motion.span
               key={`${current.id}-${index}`}
@@ -131,7 +99,7 @@ export function HeroAppIconRotator({ apps }: { apps: HeroRotatorApp[] }) {
             aria-hidden
             className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/25 via-transparent to-transparent opacity-35"
           />
-        </motion.span>
+        </span>
       </span>
     </span>
   );

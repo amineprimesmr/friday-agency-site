@@ -1,0 +1,32 @@
+.tracker-switcher-host {
+  /* Tokens « dark » du CodePen — appliqués au menu uniquement */
+  --c-glass: #bbbbbc;
+  --c-light: #fff;
+  --c-dark: #000;
+  --c-content: #e1e1e1;
+  --c-action: #03d5ff;
+  --glass-reflex-dark: 2;
+  --glass-reflex-light: 0.3;
+  --saturation: 150%;
+  /*
+   * Le pill doit passer au-dessus du hero / du flux pour que backdrop-filter
+   * échantillonne le réel fond de page ; avec z-index: 1 tout le monde peignait par-dessus.
+   */
+  position: relative;
+  z-index: 900;
+}
+
+.tracker-switcher-host .switcher {
+  --fz: 20px;
+  font-family: "DM Sans", system-ui, sans-serif;
+  z-index: 900;
+  will-change: backdrop-filter;
+  transform: translateZ(0);
+}
+
+/* Clair / Dim : même place dans le flux (curseur inchangé) mais pas cliquables ni visibles */
+.tracker-switcher-host .switcher__option:has(input[value="light"]),
+.tracker-switcher-host .switcher__option:has(input[value="dim"]) {
+  visibility: hidden;
+  pointer-events: none;
+}
