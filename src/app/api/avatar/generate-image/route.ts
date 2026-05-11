@@ -43,7 +43,7 @@ async function generateWithResponses(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "gpt-image-2",
+      model: "gpt-4o",
       input: [{ role: "user", content }],
       tools: [{ type: "image_generation", quality: "high", size, output_format: "png" }],
     }),
