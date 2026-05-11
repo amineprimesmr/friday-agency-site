@@ -18,6 +18,9 @@ import { MyfidThreeStepsSection } from "@/components/tracker/myfid-three-steps-s
 import { HeroAppIconRotator } from "@/components/tracker/hero-app-icon-rotator";
 import { listAppShowcaseVideos } from "@/lib/app-videos";
 
+const TRACKER_ANCHOR_SCROLL =
+  "scroll-mt-[calc(5.75rem+env(safe-area-inset-top,0px)+1rem)] max-md:scroll-mt-[calc(6.375rem+env(safe-area-inset-top,0px)+1rem)]";
+
 export const metadata: Metadata = {
   title: "App Store Tracker — Créez votre app et monétisez-la",
 };
@@ -75,7 +78,10 @@ export default async function TrackerDashboard() {
   return (
     <>
       {/* Hero : titre + halo (overflow masqué) puis carrousel vidéos (ombres et débordements visibles) */}
-      <div className="border-b border-white/[0.06] bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(255,255,255,0.07),transparent)]">
+      <div
+        id="tracker-app"
+        className={`border-b border-white/[0.06] bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(255,255,255,0.07),transparent)] ${TRACKER_ANCHOR_SCROLL}`}
+      >
         <div className="relative overflow-hidden">
           <div
             className="pointer-events-none absolute -bottom-32 -right-32 h-[min(70vw,28rem)] w-[min(70vw,28rem)] rounded-full bg-gradient-to-br from-sky-400/12 via-violet-500/8 to-transparent blur-3xl"
@@ -112,7 +118,9 @@ export default async function TrackerDashboard() {
         </div>
       </div>
 
-      <MyfidThreeStepsSection />
+      <div id="tracker-affiliation" className={TRACKER_ANCHOR_SCROLL}>
+        <MyfidThreeStepsSection />
+      </div>
 
       <div className="mx-auto max-w-7xl space-y-10 px-4 py-10 sm:px-6">
 
@@ -164,7 +172,7 @@ export default async function TrackerDashboard() {
         </div>
 
         {/* ── Outils Intelligence ── */}
-        <div>
+        <div id="tracker-ads-ia" className={TRACKER_ANCHOR_SCROLL}>
           <h2 className="mb-4 text-xs font-bold uppercase tracking-[0.22em] text-white/40">
             Outils d&apos;intelligence
           </h2>

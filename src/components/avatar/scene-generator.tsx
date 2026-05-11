@@ -1,12 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
+import { useMemo, useState } from "react";
 import { buildScenePrompt, SCENE_PRESETS, ScenePreset } from "@/lib/avatar-prompts";
 import { requestAvatarImageGeneration } from "@/lib/avatar-image-client";
+import type { SceneDraftPersisted } from "@/lib/avatar-studio-persistence";
 
 interface Props {
   masterPrompt: string;
   sceneReferenceFileIds: string[];
+  sceneDraft: SceneDraftPersisted;
+  setSceneDraft: Dispatch<SetStateAction<SceneDraftPersisted>>;
   onSelectScene: (imageUrl: string, presetId?: string) => void;
   onNext: () => void;
 }
@@ -33,36 +37,44 @@ const SHOT_OPTIONS = [
 export function SceneGenerator({
   masterPrompt,
   sceneReferenceFileIds,
+  sceneDraft,
+  setSceneDraft,
   onSelectScene,
   onNext,
 }: Props) {
-  const [selectedPreset, setSelectedPreset] = useState<ScenePreset | null>(null);
-  const [customScene, setCustomScene] = useState("");
-  const [lighting, setLighting] = useState(LIGHTING_OPTIONS[0]);
-  const [shot, setShot] = useState(SHOT_OPTIONS[0]);
-  const [generatedImages, setGeneratedImages] = useState<string[]>([]);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [showPrompt, setShowPrompt] = useState(false);
 
-  const scenePrompt = buildScenePrompt(
-    masterPrompt,
-    selectedPreset,
+  const {
+    selectedPresetId,
     customScene,
     lighting,
     shot,
-  );
+    generatedImages,
+    selectedImageUrl,
+    showPrompt,
+  } = sceneDraft;
+
+  const selectedPreset = useMemo((): ScenePreset | null => {
+    if (!selectedPresetId) return null;
+    return SCENE_PRESETS.find((p) => p.id === selectedPresetId) ?? null;
+  }, [selectedPresetId]);
+
+  const scenePrompt = buildScenePrompt(masterPrompt, selectedPreset, customScene, lighting, shot);
 
   async function generateVariants() {
     setLoading(true);
-    setGeneratedImages([]);
+    setSceneDraft((d) => ({ ...d, generatedImages: [] }));
     try {
       const promises = [0, 1].map(() =>
         requestAvatarImageGeneration(scenePrompt, sceneReferenceFileIds).then((out) => out.imageUrl),
       );
       const results = await Promise.all(promises);
       const valid = results.filter(Boolean) as string[];
-      setGeneratedImages(valid);
+      setSceneDraft((d) => ({
+        ...d,
+        generatedImages: valid,
+        selectedImageUrl: valid[0] ?? null,
+      }));
     } catch (e) {
       alert(`Erreur: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
@@ -71,7 +83,7 @@ export function SceneGenerator({
   }
 
   function handleSelectAndNext(url: string) {
-    setSelectedImage(url);
+    setSceneDraft((d) => ({ ...d, selectedImageUrl: url }));
     onSelectScene(url, selectedPreset?.id);
     onNext();
   }
@@ -94,7 +106,9 @@ export function SceneGenerator({
           {SCENE_PRESETS.map((preset) => (
             <button
               key={preset.id}
-              onClick={() => { setSelectedPreset(preset); setCustomScene(""); }}
+              onClick={() => {
+                setSceneDraft((d) => ({ ...d, selectedPresetId: preset.id, customScene: "" }));
+              }}
               className={`rounded-xl border p-3 text-left transition ${
                 selectedPreset?.id === preset.id
                   ? "border-violet-500/60 bg-violet-600/20 text-white"
@@ -109,7 +123,7 @@ export function SceneGenerator({
             </button>
           ))}
           <button
-            onClick={() => setSelectedPreset(null)}
+            onClick={() => setSceneDraft((d) => ({ ...d, selectedPresetId: null }))}
             className={`rounded-xl border p-3 text-left transition ${
               selectedPreset === null
                 ? "border-violet-500/60 bg-violet-600/20 text-white"
@@ -131,7 +145,7 @@ export function SceneGenerator({
           </h3>
           <textarea
             value={customScene}
-            onChange={(e) => setCustomScene(e.target.value)}
+            onChange={(e) => setSceneDraft((d) => ({ ...d, customScene: e.target.value }))}
             rows={3}
             placeholder="Ex: sitting at a poker table in a Vegas casino, surrounded by chips, confident expression, dramatic overhead light…"
             className="resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/25 outline-none focus:border-violet-500/60 transition-colors"
@@ -141,7 +155,7 @@ export function SceneGenerator({
               <label className="text-xs font-medium text-white/50 uppercase tracking-wider">Lumière</label>
               <select
                 value={lighting}
-                onChange={(e) => setLighting(e.target.value)}
+                onChange={(e) => setSceneDraft((d) => ({ ...d, lighting: e.target.value }))}
                 className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-violet-500/60"
               >
                 {LIGHTING_OPTIONS.map((l) => (
@@ -153,7 +167,7 @@ export function SceneGenerator({
               <label className="text-xs font-medium text-white/50 uppercase tracking-wider">Cadrage</label>
               <select
                 value={shot}
-                onChange={(e) => setShot(e.target.value)}
+                onChange={(e) => setSceneDraft((d) => ({ ...d, shot: e.target.value }))}
                 className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-violet-500/60"
               >
                 {SHOT_OPTIONS.map((s) => (
@@ -169,7 +183,7 @@ export function SceneGenerator({
       <div className="rounded-xl border border-white/8 bg-white/3">
         <button
           className="flex w-full items-center justify-between px-4 py-3 text-left"
-          onClick={() => setShowPrompt(!showPrompt)}
+          onClick={() => setSceneDraft((d) => ({ ...d, showPrompt: !d.showPrompt }))}
         >
           <span className="text-xs font-semibold uppercase tracking-wider text-white/40">Prompt de scène</span>
           <span className="text-xs text-white/30">{showPrompt ? "Masquer ▲" : "Voir ▼"}</span>
@@ -203,13 +217,13 @@ export function SceneGenerator({
               <div key={i} className="flex flex-col gap-2">
                 <div
                   className={`relative cursor-pointer overflow-hidden rounded-xl border-2 transition ${
-                    selectedImage === url ? "border-violet-500" : "border-white/10 hover:border-white/30"
+                    selectedImageUrl === url ? "border-violet-500" : "border-white/10 hover:border-white/30"
                   }`}
-                  onClick={() => setSelectedImage(url)}
+                  onClick={() => setSceneDraft((d) => ({ ...d, selectedImageUrl: url }))}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={url} alt={`Variante ${i + 1}`} className="w-full object-cover" />
-                  {selectedImage === url && (
+                  {selectedImageUrl === url && (
                     <div className="absolute inset-0 flex items-center justify-center bg-violet-600/20">
                       <span className="rounded-full bg-violet-600 px-3 py-1 text-xs font-semibold text-white">
                         Sélectionnée ✓

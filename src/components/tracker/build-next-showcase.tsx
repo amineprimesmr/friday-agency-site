@@ -20,16 +20,16 @@ type PhoneCellProps = {
 
 const PHONE_SHELL =
   "relative mx-auto aspect-[9/19.5] max-w-full shrink-0 shadow-[0_22px_52px_rgba(0,0,0,.52)] ring-1 ring-white/[0.03] " +
-  "w-[min(62vw,13.75rem)] max-w-[13.75rem] " +
-  "sm:w-[min(56vw,15.25rem)] sm:max-w-[15.25rem] " +
-  "md:w-full md:max-w-[19rem] md:shadow-[0_32px_76px_rgba(0,0,0,.58)] " +
-  "lg:!w-[11.75rem] lg:!max-w-[11.75rem] lg:shadow-[0_26px_60px_rgba(0,0,0,.54)] " +
-  "xl:!w-[13.75rem] xl:!max-w-[13.75rem] " +
-  "2xl:!w-[15rem] 2xl:!max-w-[15rem]";
+  "w-[min(72vw,16rem)] max-w-[16rem] " +
+  "sm:w-[min(62vw,17.75rem)] sm:max-w-[17.75rem] " +
+  "md:w-full md:max-w-[22rem] md:shadow-[0_32px_76px_rgba(0,0,0,.58)] " +
+  "lg:!w-[14.5rem] lg:!max-w-[14.5rem] lg:shadow-[0_26px_60px_rgba(0,0,0,.54)] " +
+  "xl:!w-[16.25rem] xl:!max-w-[16.25rem] " +
+  "2xl:!w-[17.75rem] 2xl:!max-w-[17.75rem]";
 
 function PhoneCell({ label, src, reduceMotion }: PhoneCellProps) {
   return (
-    <div className="flex w-[min(62vw,13.75rem)] max-w-[13.75rem] shrink-0 snap-center snap-always flex-col items-center gap-3 sm:w-[min(56vw,15.25rem)] sm:max-w-[15.25rem] sm:gap-4 md:!w-full md:!max-w-[19rem] lg:!w-auto lg:!max-w-none md:justify-self-center">
+    <div className="flex w-[min(72vw,16rem)] max-w-[16rem] shrink-0 snap-center snap-always flex-col items-center gap-3 sm:w-[min(62vw,17.75rem)] sm:max-w-[17.75rem] sm:gap-4 md:!w-full md:!max-w-[22rem] lg:!w-auto lg:!max-w-none md:justify-self-center">
       <p className="max-w-[12rem] text-center text-xs font-medium leading-snug text-white/85 sm:max-w-[16rem] sm:text-sm md:text-base xl:max-w-[14rem] xl:text-[15px]">
         {label}
       </p>
@@ -80,6 +80,7 @@ function PhoneCell({ label, src, reduceMotion }: PhoneCellProps) {
 export function BuildNextShowcase({ videoSrcs }: { videoSrcs: string[] }) {
   const reduceMotion = useReducedMotion();
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const slideIndexRef = useRef(0);
   const cells = LABELS.map((label, i) => ({
     label,
     src: videoSrcs[i] ?? null,
@@ -88,59 +89,92 @@ export function BuildNextShowcase({ videoSrcs }: { videoSrcs: string[] }) {
   useEffect(() => {
     if (reduceMotion) return;
 
-    const mq = window.matchMedia("(max-width: 767.98px)");
     let tick = 0;
 
-    function strideFor(el: HTMLElement): number {
-      const a = el.children[0] as HTMLElement | undefined;
-      const b = el.children[1] as HTMLElement | undefined;
-      if (!a) return 0;
-      if (b) return b.offsetLeft - a.offsetLeft;
-      return a.getBoundingClientRect().width + 24;
+    function scroller(): HTMLDivElement | null {
+      return scrollerRef.current;
+    }
+
+    function isCarouselActive() {
+      const el = scroller();
+      return !!el && el.scrollWidth > el.clientWidth + 6;
     }
 
     function advance() {
-      const el = scrollerRef.current;
-      if (!el || !mq.matches) return;
-      const stride = strideFor(el);
-      const maxScroll = el.scrollWidth - el.clientWidth;
-      if (stride <= 0 || maxScroll <= 16) return;
-
-      const next = el.scrollLeft + stride;
-      /* `instant` évite le scroll CSS smooth (scroll-smooth/md) qui rivalise avec snap + vidéo. */
-      if (next >= maxScroll - 12) {
-        el.scrollTo({ left: 0, behavior: "instant" });
-      } else {
-        el.scrollTo({ left: next, behavior: "instant" });
-      }
+      const el = scroller();
+      if (!el || !isCarouselActive()) return;
+      const items = el.children;
+      const n = items.length;
+      if (n === 0) return;
+      const next = (slideIndexRef.current + 1) % n;
+      slideIndexRef.current = next;
+      items[next]?.scrollIntoView({
+        behavior: "auto",
+        block: "nearest",
+        inline: "start",
+      });
     }
 
-    function stop() {
+    function stopTimer() {
       if (tick !== 0) {
         window.clearInterval(tick);
         tick = 0;
       }
     }
 
-    function start() {
-      stop();
-      if (!mq.matches) return;
-      tick = window.setInterval(advance, 4300);
+    function startTimer() {
+      stopTimer();
+      if (!isCarouselActive()) return;
+      tick = window.setInterval(advance, 4000);
     }
 
-    function onMqChange() {
-      stop();
-      queueMicrotask(start);
+    function afterLayout(fn: () => void) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(fn);
+      });
     }
 
-    start();
-    mq.addEventListener("change", onMqChange);
+    afterLayout(() => {
+      const el = scroller();
+      if (!el || !isCarouselActive()) return;
+      slideIndexRef.current = 0;
+      el.scrollLeft = 0;
+      startTimer();
+    });
+
+    const scrollNode = scroller();
+    const ro =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => {
+            afterLayout(() => {
+              if (!isCarouselActive()) stopTimer();
+              else startTimer();
+            });
+          })
+        : null;
+    if (scrollNode) ro?.observe(scrollNode);
+
+    const onWinResize = () => {
+      afterLayout(() => {
+        if (!isCarouselActive()) stopTimer();
+        else startTimer();
+      });
+    };
+    window.addEventListener("resize", onWinResize);
+
+    const onVisibility = () => {
+      if (document.visibilityState !== "visible") stopTimer();
+      else afterLayout(startTimer);
+    };
+    document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
-      stop();
-      mq.removeEventListener("change", onMqChange);
+      stopTimer();
+      ro?.disconnect();
+      window.removeEventListener("resize", onWinResize);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [reduceMotion]);
+  }, [reduceMotion, videoSrcs]);
 
   return (
     <section
@@ -154,7 +188,7 @@ export function BuildNextShowcase({ videoSrcs }: { videoSrcs: string[] }) {
         Construisez le suivant…
       </h2>
 
-        <div className="mt-10 lg:mt-14">
+      <div className="mt-10 lg:mt-14">
         <div
           ref={scrollerRef}
           role="region"

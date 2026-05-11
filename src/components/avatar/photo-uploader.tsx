@@ -1,18 +1,16 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { readApiJson } from "@/lib/read-api-json";
+import type { PhotoDataPersisted } from "@/lib/avatar-studio-persistence";
 
 interface Props {
-  onReady: (data: {
-    masterPrompt: string;
-    imageBase64: string;
-    mimeType: string;
-    referenceFileId: string;
-  }) => void;
+  onReady: (data: PhotoDataPersisted) => void;
+  /** Session rechargée depuis le navigateur : pré-remplit sans refaire Claude / upload. `null` = formulaire vide. */
+  restoredSession?: PhotoDataPersisted | null;
 }
 
-export function PhotoUploader({ onReady }: Props) {
+export function PhotoUploader({ onReady, restoredSession = null }: Props) {
   const [preview, setPreview] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [mimeType, setMimeType] = useState("image/jpeg");
@@ -22,6 +20,22 @@ export function PhotoUploader({ onReady }: Props) {
   const [showPrompt, setShowPrompt] = useState(false);
   const [uploadingRef, setUploadingRef] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!restoredSession) {
+      setPreview(null);
+      setImageBase64(null);
+      setMasterPrompt(null);
+      setMimeType("image/jpeg");
+      setError(null);
+      return;
+    }
+    setMimeType(restoredSession.mimeType);
+    setImageBase64(restoredSession.imageBase64);
+    setMasterPrompt(restoredSession.masterPrompt);
+    setPreview(`data:${restoredSession.mimeType};base64,${restoredSession.imageBase64}`);
+    setError(null);
+  }, [restoredSession]);
 
   function handleFile(file: File) {
     if (!file.type.startsWith("image/")) return;

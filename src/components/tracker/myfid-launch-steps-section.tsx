@@ -19,7 +19,7 @@ export function MyfidLaunchStepsSection({
   return (
     <section
       id="lancez-vous-rapidement"
-      className={`landing-launch-sf ${interLaunch.className}`}
+      className={`landing-launch-sf scroll-mt-[calc(5.75rem+env(safe-area-inset-top,0px)+1rem)] max-md:scroll-mt-[calc(6.375rem+env(safe-area-inset-top,0px)+1rem)] ${interLaunch.className}`}
       aria-labelledby="landing-launch-heading"
     >
       <div className="landing-launch-sf-inner">

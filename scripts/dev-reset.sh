@@ -6,7 +6,8 @@ set -u
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT" || exit 1
 
-PORTS=(3000 3001 3010 3011 3020 3030 3031 3080)
+# Inclure 3002+ — `next dev` bascule sur le prochain port libre si 3000 est pris par un vieux PID.
+PORTS=(3000 3001 3002 3003 3010 3011 3020 3030 3031 3080)
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -36,5 +37,6 @@ npm install
 
 echo ""
 echo "✓ Reset terminé."
-echo "  Lance ensuite : npm run dev"
+echo "  Lance ensuite : npm run dev   (Webpack — stable sur plusieurs heures)"
+echo "  Variante rapide : npm run dev:turbo   (Turbopack — peut crasher en longue session)"
 echo ""
