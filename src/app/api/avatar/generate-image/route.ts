@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 export const maxDuration = 120;
 
 type ContentItem =
-  | { type: "image_url"; image_url: { url: string } }
-  | { type: "text"; text: string };
+  | { type: "input_image"; image_url: string }
+  | { type: "input_text"; text: string };
 
 async function generateWithResponses(
   prompt: string,
@@ -18,13 +18,13 @@ async function generateWithResponses(
 
   // 1. Reference photo (original upload)
   content.push({
-    type: "image_url",
-    image_url: { url: `data:${mimeType};base64,${referenceImageBase64}` },
+    type: "input_image",
+    image_url: `data:${mimeType};base64,${referenceImageBase64}`,
   });
 
   // 2. Previously generated angles (for consistency chain)
   for (const url of previousImageUrls) {
-    content.push({ type: "image_url", image_url: { url } });
+    content.push({ type: "input_image", image_url: url });
   }
 
   // 3. Instruction text
@@ -34,7 +34,7 @@ async function generateWithResponses(
       ? `Use the first image as the face/appearance reference, and the next ${prevCount} image(s) as previously generated angles of the same character — maintain perfect visual consistency across all of them.\n\n`
       : `Use this photo as the reference for the character's face and features. Maintain exact likeness.\n\n`;
 
-  content.push({ type: "text", text: refText + prompt });
+  content.push({ type: "input_text", text: refText + prompt });
 
   const res = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
