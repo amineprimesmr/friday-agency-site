@@ -15,7 +15,7 @@ async function generateImage(prompt: string, size: string, apiKey: string): Prom
       n: 1,
       size,
       quality: "high",
-      response_format: "b64_json",
+      output_format: "png",
     }),
   });
 
