@@ -2,78 +2,40 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 120;
 
-type ContentItem =
-  | { type: "input_image"; image_url: string }
-  | { type: "input_text"; text: string };
-
-async function generateWithResponses(
+async function generateWithEdits(
   prompt: string,
   referenceImageBase64: string,
   mimeType: string,
-  previousImageUrls: string[],
   size: string,
   apiKey: string,
 ): Promise<string> {
-  const content: ContentItem[] = [];
+  const binary = Buffer.from(referenceImageBase64, "base64");
+  const blob = new Blob([binary], { type: mimeType });
 
-  // 1. Reference photo (original upload)
-  content.push({
-    type: "input_image",
-    image_url: `data:${mimeType};base64,${referenceImageBase64}`,
-  });
+  const formData = new FormData();
+  formData.append("image", blob, "reference.jpg");
+  formData.append("prompt", prompt);
+  formData.append("model", "gpt-image-2");
+  formData.append("size", size);
+  formData.append("n", "1");
+  formData.append("response_format", "b64_json");
 
-  // 2. Previously generated angles (for consistency chain)
-  for (const url of previousImageUrls) {
-    content.push({ type: "input_image", image_url: url });
-  }
-
-  // 3. Instruction text
-  const prevCount = previousImageUrls.length;
-  const refText =
-    prevCount > 0
-      ? `Use the first image as the face/appearance reference, and the next ${prevCount} image(s) as previously generated angles of the same character — maintain perfect visual consistency across all of them.\n\n`
-      : `Use this photo as the reference for the character's face and features. Maintain exact likeness.\n\n`;
-
-  content.push({ type: "input_text", text: refText + prompt });
-
-  const res = await fetch("https://api.openai.com/v1/responses", {
+  const res = await fetch("https://api.openai.com/v1/images/edits", {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "gpt-4o",
-      input: [{ role: "user", content }],
-      tools: [{ type: "image_generation", quality: "high", size, output_format: "png" }],
-    }),
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: formData,
   });
 
   if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`OpenAI Responses API error ${res.status}: ${text}`);
+    const err = await res.json().catch(() => ({}));
+    const msg = (err as { error?: { message?: string } }).error?.message ?? res.statusText;
+    throw new Error(msg);
   }
 
-  const data = (await res.json()) as {
-    output?: Array<{
-      type: string;
-      result?: string;
-      content?: Array<{ type: string; url?: string; image_url?: string }>;
-    }>;
-  };
-
-  // result is base64 PNG data — wrap as data URL
-  for (const item of data.output ?? []) {
-    if (item.type === "image_generation_call" && item.result) {
-      return `data:image/png;base64,${item.result}`;
-    }
-    for (const c of item.content ?? []) {
-      if (c.url) return c.url;
-      if (c.image_url) return c.image_url;
-    }
-  }
-
-  throw new Error("No image found in Responses API response: " + JSON.stringify(data).slice(0, 300));
+  const data = (await res.json()) as { data?: { b64_json?: string }[] };
+  const b64 = data.data?.[0]?.b64_json;
+  if (!b64) throw new Error("No image returned from OpenAI");
+  return `data:image/png;base64,${b64}`;
 }
 
 async function generateTextOnly(prompt: string, size: string, apiKey: string): Promise<string> {
@@ -89,7 +51,7 @@ async function generateTextOnly(prompt: string, size: string, apiKey: string): P
       n: 1,
       size,
       quality: "high",
-      output_format: "url",
+      response_format: "b64_json",
     }),
   });
 
@@ -99,10 +61,10 @@ async function generateTextOnly(prompt: string, size: string, apiKey: string): P
     throw new Error(msg);
   }
 
-  const data = (await res.json()) as { data?: { url?: string }[] };
-  const url = data.data?.[0]?.url;
-  if (!url) throw new Error("No image returned from OpenAI");
-  return url;
+  const data = (await res.json()) as { data?: { b64_json?: string }[] };
+  const b64 = data.data?.[0]?.b64_json;
+  if (!b64) throw new Error("No image returned from OpenAI");
+  return `data:image/png;base64,${b64}`;
 }
 
 export async function POST(req: NextRequest) {
@@ -111,7 +73,6 @@ export async function POST(req: NextRequest) {
       prompt,
       referenceImageBase64,
       mimeType = "image/jpeg",
-      previousImageUrls = [],
       size = "1024x1536",
     } = (await req.json()) as {
       prompt: string;
@@ -133,14 +94,7 @@ export async function POST(req: NextRequest) {
     let imageUrl: string;
 
     if (referenceImageBase64) {
-      imageUrl = await generateWithResponses(
-        prompt,
-        referenceImageBase64,
-        mimeType,
-        previousImageUrls,
-        size,
-        apiKey,
-      );
+      imageUrl = await generateWithEdits(prompt, referenceImageBase64, mimeType, size, apiKey);
     } else {
       imageUrl = await generateTextOnly(prompt, size, apiKey);
     }
