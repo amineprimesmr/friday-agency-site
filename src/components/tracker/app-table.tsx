@@ -30,7 +30,7 @@ export function AppTable({ apps, country, chart, category }: Props) {
     const params = new URLSearchParams(searchParams.toString());
     params.set(key, value);
     startTransition(() => {
-      router.push(`${pathname}?${params.toString()}`);
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
     });
   }
 
@@ -132,7 +132,7 @@ export function AppTable({ apps, country, chart, category }: Props) {
                 <td className="px-4 py-3">
                   <Link
                     href={`/tracker/apps/${app.id}?country=${country}`}
-                    className="flex items-center gap-3"
+                    className="tracker-touch flex items-center gap-3"
                   >
                     <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl ring-1 ring-white/10">
                       {app.artworkUrl ? (

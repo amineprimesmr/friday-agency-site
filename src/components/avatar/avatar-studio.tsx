@@ -246,7 +246,13 @@ export function AvatarStudio() {
             )}
 
             {step === 4 && selectedScene && (
-              <VideoAnimator sceneImageUrl={selectedScene} scenePresetId={selectedScenePresetId} />
+              <VideoAnimator
+                sceneImageUrl={selectedScene}
+                scenePresetId={selectedScenePresetId}
+                customSceneDescription={
+                  selectedScenePresetId ? undefined : sceneDraft.customScene?.trim() || undefined
+                }
+              />
             )}
 
             {step === 4 && !selectedScene && (

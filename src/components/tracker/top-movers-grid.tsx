@@ -15,7 +15,8 @@ export function TopMoversGrid({ apps }: { apps: MultiCountryApp[] }) {
           <Link
             key={`${app.country}-${app.id}-${i}`}
             href={`/tracker/apps/${app.id}?country=${app.country}`}
-            className="group flex flex-col items-center gap-1.5 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3 text-center transition hover:border-white/15 hover:bg-white/[0.05]"
+            className="tracker-touch tracker-rise group flex flex-col items-center gap-1.5 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3 text-center transition hover:border-white/15 hover:bg-white/[0.05]"
+            style={{ animationDelay: `${Math.min(i, 22) * 26}ms` }}
           >
             <div className="relative h-12 w-12 overflow-hidden rounded-xl ring-1 ring-white/10">
               {app.artworkUrl ? (

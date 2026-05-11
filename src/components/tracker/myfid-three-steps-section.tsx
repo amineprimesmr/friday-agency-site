@@ -15,28 +15,28 @@ const inter = Inter({
 /** Données & visuels alignés sur myfidpass (landing chunk). */
 const STEPS = [
   {
-    cardTitle: "Connectez votre commerce",
+    cardTitle: "Copiez une app",
     cardDesc:
-      "Recherchez votre établissement, validez l’adresse : Myfidpass prépare votre espace et votre carte Wallet.",
+      "Repérez une app qui performe, étudiez pubs et classements — dupliquez ce qui fonctionne.",
   },
   {
-    cardTitle: "Personnalisez votre carte",
+    cardTitle: "Créez votre avatar IA",
     cardDesc:
-      "Couleurs, récompenses, tampons ou points : adaptez la carte à votre image et à votre offre.",
+      "À partir d’une photo, générez un avatar parlant pour vos créas et votre contenu vidéo.",
   },
   {
-    cardTitle: "Fidélisez chaque client",
+    cardTitle: "Postez sur TikTok",
     cardDesc:
-      "Partagez le QR, les clients ajoutent la carte au Wallet : chaque passage compte, sans friction.",
+      "Construisez vos hooks et votre calendrier : publiez plus vite avec des formats qui convertissent.",
   },
 ] as const;
 
 const STEP_IMAGES = ["/assets/etape1.png", "/assets/etape2.png", "/assets/etape3.png"] as const;
 
 const STEP_ALTS = [
-  "Étape 1 : connectez votre commerce",
-  "Étape 2 : personnalisez votre carte",
-  "Étape 3 : fidélisez chaque client",
+  "Étape 1 : copiez une app",
+  "Étape 2 : créez votre avatar IA",
+  "Étape 3 : postez sur TikTok",
 ] as const;
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];

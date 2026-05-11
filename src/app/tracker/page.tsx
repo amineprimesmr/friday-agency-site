@@ -16,13 +16,14 @@ import { BuildNextShowcase } from "@/components/tracker/build-next-showcase";
 import { MyfidLaunchStepsSection } from "@/components/tracker/myfid-launch-steps-section";
 import { MyfidThreeStepsSection } from "@/components/tracker/myfid-three-steps-section";
 import { HeroAppIconRotator } from "@/components/tracker/hero-app-icon-rotator";
+import { TrackerHeroTrackappCtas } from "@/components/tracker/tracker-hero-trackapp-ctas";
 import { listAppShowcaseVideos } from "@/lib/app-videos";
 
 const TRACKER_ANCHOR_SCROLL =
   "scroll-mt-[calc(5.75rem+env(safe-area-inset-top,0px)+1rem)] max-md:scroll-mt-[calc(6.375rem+env(safe-area-inset-top,0px)+1rem)]";
 
 export const metadata: Metadata = {
-  title: "App Store Tracker — Créez votre app et monétisez-la",
+  title: "App Store Tracker — Copiez une app et monétisez-la",
 };
 
 export const revalidate = 900;
@@ -89,27 +90,18 @@ export default async function TrackerDashboard() {
           />
           <div className="relative mx-auto max-w-4xl px-4 pt-10 text-center sm:pt-14">
             <h1 className="bg-gradient-to-br from-white via-zinc-100 to-zinc-500 bg-clip-text pb-1.5 text-[clamp(2.5rem,9.5vw,6rem)] font-semibold leading-[1.04] tracking-[-0.035em] text-transparent sm:text-[clamp(2.65rem,10vw,6.25rem)]">
-              Créez votre{" "}
+              Copiez une app{" "}
               <HeroAppIconRotator
                 apps={heroApps.map((a) => ({ id: a.id, name: a.name, artworkUrl: a.artworkUrl }))}
-              />
-              app et monétisez-la
+              />{" "}
+              et monétisez-la
             </h1>
             <p className="mx-auto mt-6 max-w-lg text-pretty text-[15px] leading-relaxed text-white/45 sm:mt-7 sm:text-base">
               Pubs, produits, emails, hooks, stratégies &amp; plus.
               <br />
               Tout au même endroit, actualisé chaque jour.
             </p>
-            <div className="mt-10 flex justify-center px-2 sm:mt-11">
-              <a
-                href="https://www.icloud.com/shortcuts/a9d9656c24474d00b18eafb57393977b"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="tracker-extension-cta w-fit max-w-[min(100%,20rem)] sm:max-w-[min(100%,28rem)]"
-              >
-                <span>Extension gratuite →</span>
-              </a>
-            </div>
+            <TrackerHeroTrackappCtas />
           </div>
         </div>
 
@@ -202,11 +194,12 @@ export default async function TrackerDashboard() {
                 accent: "from-white/10 to-white/[0.02]",
                 border: "border-white/10",
               },
-            ].map((tool) => (
+            ].map((tool, i) => (
               <Link
                 key={tool.title}
                 href={tool.href}
-                className={`group flex flex-col gap-3 rounded-2xl border ${tool.border} bg-gradient-to-br ${tool.accent} p-5 transition hover:brightness-110`}
+                className={`tracker-touch tracker-rise group flex flex-col gap-3 rounded-2xl border ${tool.border} bg-gradient-to-br ${tool.accent} p-5 transition hover:brightness-110`}
+                style={{ animationDelay: `${Math.min(i, 8) * 55}ms` }}
               >
                 <span className="text-3xl">{tool.icon}</span>
                 <div>

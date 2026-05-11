@@ -7,8 +7,7 @@ const interLaunch = Inter({
   display: "swap",
 });
 
-const DEFAULT_CTA_HREF =
-  "https://www.icloud.com/shortcuts/a9d9656c24474d00b18eafb57393977b";
+const DEFAULT_CTA_HREF = "/trackapp";
 
 /** Section « Lancez-vous rapidement » — même structure HTML / classes que la landing myfidpass. */
 export function MyfidLaunchStepsSection({
@@ -61,13 +60,8 @@ export function MyfidLaunchStepsSection({
                 <h3 className="landing-launch-sf-step-title">Diffusez votre flyer de jeu</h3>
               </li>
             </ol>
-            <a
-              className="landing-launch-sf-cta"
-              href={ctaHref}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Accéder à mon espace
+            <a className="landing-launch-sf-cta" href={ctaHref}>
+              Découvrir Trackapp
             </a>
           </div>
         </div>

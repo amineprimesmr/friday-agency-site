@@ -43,10 +43,11 @@ export function MoversTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-white/[0.04]">
-            {apps.map((app) => (
+            {apps.map((app, i) => (
               <tr
                 key={app.id}
-                className="group transition hover:bg-white/[0.03]"
+                className="tracker-rise group transition hover:bg-white/[0.03]"
+                style={{ animationDelay: `${Math.min(i, 24) * 32}ms` }}
               >
                 <td className="px-3 py-2.5 font-mono text-xs font-semibold text-white/60">
                   #{app.rank}
@@ -67,7 +68,7 @@ export function MoversTable({
                 <td className="px-3 py-2.5">
                   <Link
                     href={`/tracker/apps/${app.id}?country=${app.country}`}
-                    className="flex items-center gap-2 hover:underline"
+                    className="tracker-touch flex items-center gap-2 hover:underline"
                   >
                     <span className="relative hidden h-8 w-8 shrink-0 overflow-hidden rounded-lg ring-1 ring-white/10 sm:block">
                       {app.artworkUrl ? (

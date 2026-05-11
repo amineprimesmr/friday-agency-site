@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+import type Stripe from "stripe";
+
+import { unlockTrackappFromCheckoutSession, lockTrackappOnSubscriptionEnded } from "@/lib/trackapp/stripe-sync";
 import { getStripe } from "@/lib/stripe";
 
 export async function POST(req: Request) {
@@ -15,10 +18,26 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing signature" }, { status: 400 });
   }
 
+  let evt: Stripe.Event;
+
   try {
-    stripe.webhooks.constructEvent(payload, signature, secret);
+    evt = stripe.webhooks.constructEvent(payload, signature, secret);
   } catch {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+  }
+
+  try {
+    if (evt.type === "checkout.session.completed") {
+      const sess = evt.data.object as Stripe.Checkout.Session;
+      await unlockTrackappFromCheckoutSession(sess);
+    }
+
+    if (evt.type === "customer.subscription.deleted") {
+      const subscription = evt.data.object as Stripe.Subscription;
+      await lockTrackappOnSubscriptionEnded(subscription);
+    }
+  } catch (hookErr) {
+    console.warn("[stripe-webhook-trackapp]", hookErr);
   }
 
   return NextResponse.json({ received: true });

@@ -314,8 +314,52 @@ Final quality bar: photoreal live-action film still, IMAX-grade clarity, no AI s
 ${NEGATIVE_SUFFIX}`;
 }
 
-// ─── Video Animator — Kling prompt builder ───────────────────────────────────
+// ─── Video Animator — Kling (automated locked-camera prompts) ────────────────
 
+const KLING_CAMERA_LOCKED = `
+CAMERA (mandatory — non-negotiable): Locked-off static tripod matching the uploaded frame exactly for the FULL duration.
+Absolutely NO camera motion: zero pan, tilt, roll, zoom, push-in, dolly, crane, orbit, handheld shake, parallax tricks, reframing,
+or cropping changes. Aspect ratio and field of view identical to source image.` .trim();
+
+const KLING_MOTION_QUALITY = `
+MOTION DISCIPLINE: Only understated, plausible motion coherent with one frozen shot: breathing, occasional natural blink,
+subtle facial micro-expression shifts, slight fabric/hair movement from ambient air, tiny purposeful hand or finger adjustments.
+No melodramatic slaps, exaggerated ricochet motions, teleporting limbs, duplicated faces, anatomy morphing, rubbery IK,
+floating objects not present in plate, hallucinated extras, psychedelic distortions, or physics-defying stunts.` .trim();
+
+const KLING_FINISH_CORE = `
+RENDER BAR: Single continuous photoreal take; temporal consistency with the reference image identity, wardrobe, geometry, props, and backdrop;
+natural skin pores and reflections; restrained cinematic grade; faint film grain; motivated lighting only; seamless motion cadence.
+`.trim();
+
+/** Beat blocks tuned for tripod-locked realism (no choreography that requires reframing). */
+export const KLING_LOCKED_MOTION_BY_SCENE: Record<string, string> = {
+  mac_shock: `Subject stays seated exactly as photographed. Begins calmly focused on the laptop.
+Over several beats eyebrows lift gently—eyes widen in small proportional steps, not cartoon snap—while nostrils flare on a steady inhale.
+Lips separate slightly without shouting; one open palm rises slowly to the forehead and rests there (never slaps furniture).
+Brief hold conveying quiet disbelief → micro-forward lean while gaze tracks the screen, then settles.
+Screen cast on facial planes remains stable smooth light—avoid strobing flicker or impossible glow pulses.`,
+  urban_walk: `Subject remains within the photographed composition (frozen mid-stride or urban pose exactly as plated).
+Tiny weight shift between grounded feet plus relaxed shoulder drop; denim or jacket cuffs respond with credible cloth physics.
+Specular highlights on shoulders/collar wander slowly as if neon sign miles away changes phase—ambient only, camera frame locked.`,
+  rooftop: `Subject anchored on rooftop railing as in frame. Gentle evening breeze subtly animates collar, hair stray wisps only.
+Quiet breathing visible in torso; eyes drift toward horizon then steady; thumbs relax on railing in micro increments.
+Warm sunlight angle absolutely stable.`,
+  studio_flex: `Subject centered as shot. Controlled micro-smirk appears then neutralizes within one exhale cycle.
+Slow two-finger adjustment along sunglasses brow line—minimal travel; shoulders square microscopically; rim light kisses jaw line consistently.`,
+  luxury_car: `Subject beside vehicle door precisely as keyed. Confidence held in posture—only tiny pelvis sway for balance realism.
+Fabric lapel drapes settle; cuff glints oscillate mildly from ambient club entrance spills (no phantom paparazzi flash strobes strobing wildly).`,
+  coffee_work: `Desk scene locked. Fingers skim keys with short restrained typing bursts (no impossible blur); shoulders relax between bursts.
+Brief eye-line down to mug → micro sip lift if mug visible; swallow visible once; cheeks stay lit by stable window key.`,
+};
+
+const KLING_LOCKED_MOTION_FALLBACK_PRESET = `Subject holds established pose identical to uploaded still.
+Quiet breathing tempo; natural single blink midway; microscopic eye reposition; negligible posture correction through spine—no teleporting.`;
+
+const KLING_LOCKED_MOTION_FALLBACK_CUSTOM = `Subject obeys the custom still exactly: restrained lifelike nuances only—steady breath rhythm,
+individual realistic blinks sparingly, small authentic muscle tone shifts compatible with photographed posture—no spectacle acting.`;
+
+/** @deprecated user-driven fields removed — kept name for tooling; prefer buildAutoKlingPrompt */
 export interface AnimationConfig {
   cameraMove: string;
   beatByBeat: string;
@@ -323,65 +367,66 @@ export interface AnimationConfig {
   duration: "5" | "10";
 }
 
-export function buildKlingPrompt(config: AnimationConfig): string {
-  return `${config.cameraMove}.
+export function buildAutoKlingPrompt(config: {
+  duration: "5" | "10";
+  scenePresetId?: string;
+  customSceneDescription?: string;
+}): string {
+  const preset =
+    config.scenePresetId != null
+      ? SCENE_PRESETS.find((s) => s.id === config.scenePresetId) ?? null
+      : null;
 
-${config.beatByBeat}
+  let sceneParagraph: string;
+  if (preset) {
+    sceneParagraph = `PLATE CONTEXT (stay faithful): ${preset.description}`;
+  } else if (config.customSceneDescription?.trim()) {
+    sceneParagraph = `PLATE CONTEXT (custom scene still—respect faithfully): ${config.customSceneDescription.trim()}`;
+  } else {
+    sceneParagraph = `PLATE CONTEXT: Reproduce uploaded frame composition, pose, garments, accessories, props, lighting direction, background layout—unchanged geometrically across time.`;
+  }
 
-${config.mood}.
-Realistic physics, natural facial micro-expressions, smooth fluid motion,
-cinematic color grade, film grain, 35mm anamorphic lens,
-high production value, 4K, slow motion moments where impactful.`;
+  const beatBlock =
+    (config.scenePresetId && KLING_LOCKED_MOTION_BY_SCENE[config.scenePresetId]) ??
+    (config.customSceneDescription?.trim()
+      ? KLING_LOCKED_MOTION_FALLBACK_CUSTOM
+      : KLING_LOCKED_MOTION_FALLBACK_PRESET);
+
+  const ambience = preset
+    ? `Tone & ambience: grounded documentary realism—not caricature—lit as ${preset.lighting}; cinematic motivation from ${preset.shot}; never contradict plate.`
+    : `Tone & ambience: restrained naturalistic realism; lighting and mood inferred only from photographed scene—motivated physically.`;
+
+  const finish = `${KLING_FINISH_CORE}
+
+Duration pacing: match ${config.duration}s total with calm, readable micro-beats—avoid rushed frantic gestures.`;
+
+  return `${KLING_CAMERA_LOCKED}
+
+${sceneParagraph}
+
+${KLING_MOTION_QUALITY}
+
+PRIMARY ACTION BLOCK (${config.duration}s):
+${beatBlock}
+
+${ambience}
+
+FINISH QUALITY BAR:
+Natural micro-expressions, plausible inertia, cohesive depth of field; avoid uncanny mouth motion during silence.
+
+${finish}
+
+NEGATIVE SAFETY FLAGS:
+Forbidden: camera motion words or implied framing drift, hallucinated CGI environments, anatomical melts, glitch faces, jittery neon strobing,
+warped typography on screens, watermark artifacts, surreal dream logic, exaggerated slapstick choreography.`;
+
 }
 
-export const ANIMATION_PRESETS: Record<
-  string,
-  { cameraMove: string; beatByBeat: string; mood: string }
-> = {
-  mac_shock: {
-    cameraMove: "Medium shot, static locked frame, subtle push-in zoom over 3s",
-    beatByBeat: `The character sits at a desk in front of a MacBook Pro.
-He leans forward scrolling slowly, expression calm.
-Suddenly his eyes go wide with shock, he jolts back in his chair.
-His mouth drops open, one hand flies up and grips his head.
-His other hand slaps the desk hard.
-He leans back shaking his head slowly in disbelief.
-Then leans forward again, squinting at the screen in disbelief.
-MacBook screen glow pulses and flickers slightly on his face.`,
-    mood:
-      "Tense, dramatic, relatable — the feeling of seeing something unbelievable online",
-  },
-  urban_walk: {
-    cameraMove:
-      "Medium tracking shot, camera follows from side, slight parallax effect",
-    beatByBeat: `The character walks at a confident, unhurried pace down the wet street.
-His footsteps splash slightly on the glistening pavement.
-He glances briefly to the side — neon signs blur in the bokeh.
-He adjusts his jacket collar with one hand, never breaking stride.
-A car passes in the background, headlights sweep across the scene.
-He continues walking, the camera slowly drifts ahead of him.`,
-    mood: "Cool, cinematic, lone wolf energy — late night city vibe",
-  },
-  rooftop: {
-    cameraMove:
-      "Wide shot, slow crane movement rising from below, then gentle orbit right to left",
-    beatByBeat: `The character stands still on the rooftop edge, facing the city.
-His silhouette is defined against the burning orange sky.
-A gentle breeze moves his clothes slightly.
-He slowly exhales — visible in the cool air.
-He turns his head slightly to the left, looking at something distant.
-One hand tightens on the railing. He breathes deeply.
-Golden light flares softly across his face.`,
-    mood: "Contemplative, powerful, introspective — built different energy",
-  },
-  studio_flex: {
-    cameraMove: "Close to medium, slow dolly-in, then rack focus from background to face",
-    beatByBeat: `The character stands center frame, direct gaze at camera.
-He slowly adjusts his sunglasses with two fingers, never breaking eye contact.
-A slight corner-of-mouth smile appears for just a moment.
-He rolls his shoulders back subtly, posture expands.
-Rim light catches the edge of his jawline.
-He tilts his chin down slightly — commanding look.`,
-    mood: "Confident, high-fashion, magnetic — campaign quality",
-  },
-};
+/** @deprecated Prefer buildAutoKlingPrompt — legacy signature retained for callers */
+export function buildKlingPrompt(_config: AnimationConfig): string {
+  return buildAutoKlingPrompt({
+    duration: _config.duration,
+    scenePresetId: undefined,
+    customSceneDescription: undefined,
+  });
+}

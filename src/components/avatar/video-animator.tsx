@@ -1,33 +1,20 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { buildKlingPrompt, ANIMATION_PRESETS, SCENE_PRESETS } from "@/lib/avatar-prompts";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { buildAutoKlingPrompt, SCENE_PRESETS } from "@/lib/avatar-prompts";
 
 interface Props {
   sceneImageUrl: string;
   scenePresetId?: string;
+  /** Scène personnalisée (texte saisi à l’étape scènes) — alimente le prompt auto si pas de preset */
+  customSceneDescription?: string;
 }
 
-const CAMERA_MOVES = [
-  "Static locked frame",
-  "Slow push-in zoom",
-  "Slow dolly left to right",
-  "Orbit left to right",
-  "Slow crane up",
-  "Handheld slight shake",
-  "Slow pull-back reveal",
-];
-
-export function VideoAnimator({ sceneImageUrl, scenePresetId }: Props) {
-  const preset = scenePresetId
-    ? ANIMATION_PRESETS[scenePresetId] ?? null
-    : null;
-
-  const [cameraMove, setCameraMove] = useState(
-    preset?.cameraMove ?? CAMERA_MOVES[0],
-  );
-  const [beatByBeat, setBeatByBeat] = useState(preset?.beatByBeat ?? "");
-  const [mood, setMood] = useState(preset?.mood ?? "");
+export function VideoAnimator({
+  sceneImageUrl,
+  scenePresetId,
+  customSceneDescription,
+}: Props) {
   const [duration, setDuration] = useState<"5" | "10">("10");
 
   const [status, setStatus] = useState<"idle" | "generating" | "polling" | "done" | "error">("idle");
@@ -37,20 +24,23 @@ export function VideoAnimator({ sceneImageUrl, scenePresetId }: Props) {
   const [showPrompt, setShowPrompt] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const klingPrompt = useMemo(
+    () =>
+      buildAutoKlingPrompt({
+        duration,
+        scenePresetId,
+        customSceneDescription,
+      }),
+    [duration, scenePresetId, customSceneDescription],
+  );
+
   useEffect(() => {
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
   }, []);
 
-  const klingPrompt = buildKlingPrompt({ cameraMove, beatByBeat, mood, duration });
-
   async function handleGenerate() {
-    if (!beatByBeat.trim()) {
-      alert("Décris les actions beat-by-beat avant de lancer.");
-      return;
-    }
-
     setStatus("generating");
     setVideoUrl(null);
     setErrorMsg("");
@@ -98,10 +88,16 @@ export function VideoAnimator({ sceneImageUrl, scenePresetId }: Props) {
   }
 
   const sceneLabel =
-    SCENE_PRESETS.find((s) => s.id === scenePresetId)?.label ?? "Scene personnalisée";
+    SCENE_PRESETS.find((s) => s.id === scenePresetId)?.label ?? "Scène personnalisée";
 
   return (
     <div className="flex flex-col gap-6">
+      <p className="rounded-xl border border-violet-500/25 bg-violet-600/10 px-4 py-3 text-xs leading-relaxed text-violet-200/85">
+        Le prompt Kling est <strong className="text-white">entièrement généré pour toi</strong> à partir de
+        l’image et de la scène choisie : <strong className="text-white">caméra strictement fixe</strong>,
+        mouvements discrets et réalistes, sans texte à rédiger.
+      </p>
+
       {/* Scene preview + video result */}
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
@@ -157,60 +153,13 @@ export function VideoAnimator({ sceneImageUrl, scenePresetId }: Props) {
         </div>
       </div>
 
-      {/* Controls */}
+      {/* Read-only specs */}
       <div className="flex flex-col gap-4">
-        {/* Camera */}
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-medium text-white/50 uppercase tracking-wider">
-            Mouvement caméra
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {CAMERA_MOVES.map((move) => (
-              <button
-                key={move}
-                onClick={() => setCameraMove(move)}
-                className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
-                  cameraMove === move
-                    ? "border-violet-500/60 bg-violet-600/20 text-violet-300"
-                    : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white/80"
-                }`}
-              >
-                {move}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Beat-by-beat */}
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-medium text-white/50 uppercase tracking-wider">
-            Actions beat-by-beat
-          </label>
-          <textarea
-            value={beatByBeat}
-            onChange={(e) => setBeatByBeat(e.target.value)}
-            rows={7}
-            placeholder={`Décris les actions séquentielles, ligne par ligne:
-
-The character sits at a desk in front of a MacBook Pro.
-He leans forward scrolling, expression calm.
-Suddenly his eyes go wide with shock...`}
-            className="resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 font-mono text-xs text-white placeholder-white/25 outline-none focus:border-violet-500/60 transition-colors leading-relaxed"
-          />
-        </div>
-
-        {/* Mood */}
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-medium text-white/50 uppercase tracking-wider">
-            Ambiance / Style
-          </label>
-          <input
-            type="text"
-            value={mood}
-            onChange={(e) => setMood(e.target.value)}
-            placeholder="Ex: Tense, dramatic, relatable — the feeling of seeing something unbelievable"
-            className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/25 outline-none focus:border-violet-500/60 transition-colors"
-          />
+        <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-white/38">Caméra</p>
+          <p className="mt-1 text-sm text-white/75">
+            Plan figé · trépied virtuel · aucun zoom ni mouvement de caméra
+          </p>
         </div>
 
         {/* Duration */}
@@ -222,6 +171,7 @@ Suddenly his eyes go wide with shock...`}
             {(["5", "10"] as const).map((d) => (
               <button
                 key={d}
+                type="button"
                 onClick={() => setDuration(d)}
                 className={`rounded-lg border px-4 py-2 text-sm font-medium transition ${
                   duration === d
@@ -238,26 +188,27 @@ Suddenly his eyes go wide with shock...`}
         {/* Prompt preview */}
         <div className="rounded-xl border border-white/8 bg-white/3">
           <button
+            type="button"
             className="flex w-full items-center justify-between px-4 py-3 text-left"
             onClick={() => setShowPrompt(!showPrompt)}
           >
             <span className="text-xs font-semibold uppercase tracking-wider text-white/40">
-              Prompt Kling généré
+              Prompt Kling (auto, lecture seule)
             </span>
             <span className="text-xs text-white/30">{showPrompt ? "Masquer ▲" : "Voir ▼"}</span>
           </button>
           {showPrompt && (
             <div className="border-t border-white/8 px-4 pb-4 pt-3">
-              <pre className="whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-white/60">
+              <pre className="max-h-[min(50vh,22rem)] overflow-auto whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-white/55">
                 {klingPrompt}
               </pre>
             </div>
           )}
         </div>
 
-        {/* Generate */}
         <button
-          onClick={handleGenerate}
+          type="button"
+          onClick={() => void handleGenerate()}
           disabled={status === "generating" || status === "polling"}
           className="w-full rounded-xl bg-violet-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-900/40 transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]"
         >

@@ -35,15 +35,16 @@ export function FreshDrops({ apps }: { apps: AppEntry[] }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-white/[0.04]">
-            {apps.map((app) => (
+            {apps.map((app, i) => (
               <tr
                 key={app.id}
-                className="group transition hover:bg-white/[0.03]"
+                className="tracker-rise group transition hover:bg-white/[0.03]"
+                style={{ animationDelay: `${Math.min(i, 20) * 34}ms` }}
               >
                 <td className="px-4 py-3">
                   <Link
                     href={`/tracker/apps/${app.id}`}
-                    className="flex items-center gap-3 hover:underline"
+                    className="tracker-touch flex items-center gap-3 hover:underline"
                   >
                     <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl ring-1 ring-white/10">
                       {app.artworkUrl ? (

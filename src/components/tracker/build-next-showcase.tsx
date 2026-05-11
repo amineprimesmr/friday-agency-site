@@ -4,16 +4,10 @@ import { useReducedMotion } from "framer-motion";
 import { useEffect, useRef } from "react";
 import "@/styles/build-next-showcase.css";
 
-const LABELS = [
-  "Agence",
-  "Jeu",
-  "Entreprise de services",
-  "Réseau social",
-  "Plateforme de shopping",
-] as const;
+const SHOWCASE_SLOT_COUNT = 5;
 
 type PhoneCellProps = {
-  label: string;
+  ariaLabel: string;
   src: string | null;
   reduceMotion: boolean | null;
 };
@@ -27,12 +21,9 @@ const PHONE_SHELL =
   "xl:!w-[16.25rem] xl:!max-w-[16.25rem] " +
   "2xl:!w-[17.75rem] 2xl:!max-w-[17.75rem]";
 
-function PhoneCell({ label, src, reduceMotion }: PhoneCellProps) {
+function PhoneCell({ ariaLabel, src, reduceMotion }: PhoneCellProps) {
   return (
-    <div className="flex w-[min(72vw,16rem)] max-w-[16rem] shrink-0 snap-center snap-always flex-col items-center gap-3 sm:w-[min(62vw,17.75rem)] sm:max-w-[17.75rem] sm:gap-4 md:!w-full md:!max-w-[22rem] lg:!w-auto lg:!max-w-none md:justify-self-center">
-      <p className="max-w-[12rem] text-center text-xs font-medium leading-snug text-white/85 sm:max-w-[16rem] sm:text-sm md:text-base xl:max-w-[14rem] xl:text-[15px]">
-        {label}
-      </p>
+    <div className="flex w-[min(72vw,16rem)] max-w-[16rem] shrink-0 snap-center snap-always flex-col items-center sm:w-[min(62vw,17.75rem)] sm:max-w-[17.75rem] md:!w-full md:!max-w-[22rem] lg:!w-auto lg:!max-w-none md:justify-self-center">
       <div className={PHONE_SHELL}>
         <div
           className="absolute inset-0 rounded-[2.25rem] bg-gradient-to-b from-white/[0.14] to-white/[0.04] p-[3px]"
@@ -47,7 +38,7 @@ function PhoneCell({ label, src, reduceMotion }: PhoneCellProps) {
                   muted
                   playsInline
                   preload="metadata"
-                  aria-label={label}
+                  aria-label={ariaLabel}
                 />
               ) : (
                 <video
@@ -58,7 +49,7 @@ function PhoneCell({ label, src, reduceMotion }: PhoneCellProps) {
                   loop
                   playsInline
                   preload="auto"
-                  aria-label={label}
+                  aria-label={ariaLabel}
                 />
               )
             ) : (
@@ -80,9 +71,10 @@ function PhoneCell({ label, src, reduceMotion }: PhoneCellProps) {
 export function BuildNextShowcase({ videoSrcs }: { videoSrcs: string[] }) {
   const reduceMotion = useReducedMotion();
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const cells = LABELS.map((label, i) => ({
-    label,
+  const cells = Array.from({ length: SHOWCASE_SLOT_COUNT }, (_, i) => ({
+    key: i,
     src: videoSrcs[i] ?? null,
+    ariaLabel: `Vidéo d’exemple ${i + 1}`,
   }));
 
   useEffect(() => {
@@ -167,7 +159,7 @@ export function BuildNextShowcase({ videoSrcs }: { videoSrcs: string[] }) {
         id="build-next-heading"
         className="mx-auto max-w-3xl px-2 text-center text-[clamp(1.75rem,5.5vw,2.75rem)] font-semibold tracking-[-0.03em] text-white"
       >
-        Notre sélection de la semaine
+        sélection de la semaine :
       </h2>
 
       <div className="mt-10 lg:mt-14">
@@ -179,7 +171,12 @@ export function BuildNextShowcase({ videoSrcs }: { videoSrcs: string[] }) {
           className="build-next-scroller -mx-4 flex snap-x snap-mandatory gap-6 overflow-x-auto overscroll-x-contain px-5 pb-4 pt-1 scroll-auto md:scroll-smooth sm:-mx-6 sm:gap-8 sm:px-7 md:mx-0 md:grid md:w-full md:max-w-none md:grid-cols-2 md:justify-items-center md:gap-x-8 md:gap-y-12 md:overflow-visible md:px-0 md:pb-8 md:snap-none md:pt-0 lg:grid-cols-5 lg:gap-x-2 lg:gap-y-8 xl:gap-x-4 2xl:gap-x-5"
         >
           {cells.map((cell) => (
-            <PhoneCell key={cell.label} label={cell.label} src={cell.src} reduceMotion={reduceMotion} />
+            <PhoneCell
+              key={cell.key}
+              ariaLabel={cell.ariaLabel}
+              src={cell.src}
+              reduceMotion={reduceMotion}
+            />
           ))}
         </div>
       </div>

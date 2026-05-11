@@ -126,7 +126,7 @@ export function CategoryRevenueShare({ rows, totalUsd, currentAppId, country }: 
                 <li key={row.id}>
                   <Link
                     href={`/tracker/apps/${row.id}?country=${country}`}
-                    className={`flex items-center gap-3 rounded-xl px-2 py-2 transition ${
+                    className={`tracker-touch flex items-center gap-3 rounded-xl px-2 py-2 transition ${
                       row.id === currentAppId ? "bg-white/[0.08] ring-1 ring-white/15" : "hover:bg-white/[0.05]"
                     } ${dim ? "opacity-45" : "opacity-100"}`}
                     onMouseEnter={() => setHoverId(row.id)}
