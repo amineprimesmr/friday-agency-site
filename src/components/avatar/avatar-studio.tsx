@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ReferenceAngle } from "@/lib/avatar-prompts";
 import { PhotoUploader } from "./photo-uploader";
 import { ReferenceSheet } from "./reference-sheet";
@@ -51,6 +51,22 @@ export function AvatarStudio() {
     }
     return ids;
   }, [photoData?.referenceFileId, referenceImageFileIds]);
+
+  const mergeReferenceImages = useCallback((patch: Partial<Record<ReferenceAngle, string>>) => {
+    setReferenceImages((prev) => ({ ...prev, ...patch }));
+  }, []);
+
+  const mergeReferenceFileIds = useCallback((patch: Partial<Record<ReferenceAngle, string>>) => {
+    setReferenceImageFileIds((prev) => ({ ...prev, ...patch }));
+  }, []);
+
+  const removeReferenceFileId = useCallback((angleId: ReferenceAngle) => {
+    setReferenceImageFileIds((prev) => {
+      const next = { ...prev };
+      delete next[angleId];
+      return next;
+    });
+  }, []);
 
   function handlePhotoReady(data: PhotoData) {
     setPhotoData(data);
@@ -127,8 +143,9 @@ export function AvatarStudio() {
             mimeType={photoData.mimeType}
             images={referenceImages}
             referenceImageFileIds={referenceImageFileIds}
-            onImagesChange={setReferenceImages}
-            onReferenceFileIdsChange={setReferenceImageFileIds}
+            onMergeImages={mergeReferenceImages}
+            onMergeFileIds={mergeReferenceFileIds}
+            onRemoveFileId={removeReferenceFileId}
             onNext={() => setStep(3)}
           />
         )}
