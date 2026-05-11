@@ -15,20 +15,24 @@ async function generateImage(prompt: string, size: string, apiKey: string): Prom
       n: 1,
       size,
       quality: "high",
-      output_format: "png",
     }),
   });
 
+  const text = await res.text();
+
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: { message: res.statusText } }));
-    const msg = (err as { error?: { message?: string } }).error?.message ?? res.statusText;
+    let msg = res.statusText;
+    try { msg = (JSON.parse(text) as { error?: { message?: string } }).error?.message ?? msg; } catch {}
     throw new Error(msg);
   }
 
-  const data = (await res.json()) as { data?: { b64_json?: string }[] };
-  const b64 = data.data?.[0]?.b64_json;
-  if (!b64) throw new Error("No image returned from OpenAI");
-  return `data:image/png;base64,${b64}`;
+  let data: { data?: { url?: string; b64_json?: string }[] };
+  try { data = JSON.parse(text); } catch { throw new Error("Invalid JSON from OpenAI: " + text.slice(0, 100)); }
+
+  const item = data.data?.[0];
+  if (item?.url) return item.url;
+  if (item?.b64_json) return `data:image/png;base64,${item.b64_json}`;
+  throw new Error("No image returned from OpenAI");
 }
 
 export async function POST(req: NextRequest) {
