@@ -3,19 +3,22 @@
   "version": "1.0.0",
   "private": true,
   "engines": {
-    "node": ">=20.9.0 <24"
+    "node": ">=20.9.0"
   },
   "scripts": {
-    "dev": "next dev --turbo",
-    "dev:webpack": "next dev",
-    "dev:fresh": "npm run clean && next dev --turbo",
+    "dev": "next dev --turbo --hostname 127.0.0.1",
+    "dev:webpack": "next dev --hostname 127.0.0.1",
+    "clean": "rm -rf .next node_modules/.cache",
+    "reset:dev": "bash scripts/dev-reset.sh",
+    "dev:fresh": "npm run clean && npm run dev",
+    "dev:reset": "npm run reset:dev && npm run dev",
     "build": "next build",
-    "start": "next start",
+    "start": "next start --hostname 127.0.0.1",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "clean": "rm -rf .next node_modules/.cache"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.95.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "jose": "^6.2.3",
