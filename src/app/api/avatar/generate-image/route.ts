@@ -10,12 +10,12 @@ async function generateImage(prompt: string, size: string, apiKey: string): Prom
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "gpt-image-2",
+      model: "dall-e-3",
       prompt,
       n: 1,
-      size,
-      quality: "high",
-      output_format: "png",
+      size: "1024x1792",
+      quality: "hd",
+      response_format: "b64_json",
     }),
   });
 
