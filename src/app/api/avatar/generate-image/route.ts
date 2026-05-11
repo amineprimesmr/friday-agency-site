@@ -2,14 +2,40 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 120;
 
-// Generate with reference photo via Responses API (GPT-4o + image_generation tool)
-async function generateWithReference(
+type ContentItem =
+  | { type: "image_url"; image_url: { url: string } }
+  | { type: "text"; text: string };
+
+async function generateWithResponses(
   prompt: string,
   referenceImageBase64: string,
   mimeType: string,
+  previousImageUrls: string[],
   size: string,
   apiKey: string,
 ): Promise<string> {
+  const content: ContentItem[] = [];
+
+  // 1. Reference photo (original upload)
+  content.push({
+    type: "image_url",
+    image_url: { url: `data:${mimeType};base64,${referenceImageBase64}` },
+  });
+
+  // 2. Previously generated angles (for consistency chain)
+  for (const url of previousImageUrls) {
+    content.push({ type: "image_url", image_url: { url } });
+  }
+
+  // 3. Instruction text
+  const prevCount = previousImageUrls.length;
+  const refText =
+    prevCount > 0
+      ? `Use the first image as the face/appearance reference, and the next ${prevCount} image(s) as previously generated angles of the same character — maintain perfect visual consistency across all of them.\n\n`
+      : `Use this photo as the reference for the character's face and features. Maintain exact likeness.\n\n`;
+
+  content.push({ type: "text", text: refText + prompt });
+
   const res = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
     headers: {
@@ -17,34 +43,9 @@ async function generateWithReference(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "gpt-4o",
-      input: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "input_image",
-              source: {
-                type: "base64",
-                media_type: mimeType,
-                data: referenceImageBase64,
-              },
-            },
-            {
-              type: "input_text",
-              text: `Use this photo as the reference for the character's face and features. Generate a photorealistic image based on this person.\n\n${prompt}`,
-            },
-          ],
-        },
-      ],
-      tools: [
-        {
-          type: "image_generation",
-          quality: "high",
-          size,
-          output_format: "url",
-        },
-      ],
+      model: "gpt-image-2",
+      input: [{ role: "user", content }],
+      tools: [{ type: "image_generation", quality: "high", size, output_format: "url" }],
     }),
   });
 
@@ -54,22 +55,29 @@ async function generateWithReference(
   }
 
   const data = (await res.json()) as {
-    output?: { type: string; result?: string; url?: string }[];
+    output?: Array<{
+      type: string;
+      result?: string;
+      content?: Array<{ type: string; url?: string; image_url?: string }>;
+    }>;
   };
 
-  const imageOutput = data.output?.find((o) => o.type === "image_generation_call");
-  const url = imageOutput?.result ?? imageOutput?.url;
+  // Extract image URL from various possible response shapes
+  for (const item of data.output ?? []) {
+    if (item.type === "image_generation_call" && item.result) {
+      // result is either a URL or base64
+      return item.result;
+    }
+    for (const c of item.content ?? []) {
+      if (c.url) return c.url;
+      if (c.image_url) return c.image_url;
+    }
+  }
 
-  if (!url) throw new Error("No image URL in Responses API response");
-  return url;
+  throw new Error("No image found in Responses API response: " + JSON.stringify(data).slice(0, 300));
 }
 
-// Generate without reference photo — standard generations endpoint
-async function generateTextOnly(
-  prompt: string,
-  size: string,
-  apiKey: string,
-): Promise<string> {
+async function generateTextOnly(prompt: string, size: string, apiKey: string): Promise<string> {
   const res = await fetch("https://api.openai.com/v1/images/generations", {
     method: "POST",
     headers: {
@@ -77,7 +85,7 @@ async function generateTextOnly(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "gpt-image-1",
+      model: "gpt-image-2",
       prompt,
       n: 1,
       size,
@@ -104,11 +112,13 @@ export async function POST(req: NextRequest) {
       prompt,
       referenceImageBase64,
       mimeType = "image/jpeg",
+      previousImageUrls = [],
       size = "1024x1536",
     } = (await req.json()) as {
       prompt: string;
       referenceImageBase64?: string;
       mimeType?: string;
+      previousImageUrls?: string[];
       size?: string;
     };
 
@@ -124,7 +134,14 @@ export async function POST(req: NextRequest) {
     let imageUrl: string;
 
     if (referenceImageBase64) {
-      imageUrl = await generateWithReference(prompt, referenceImageBase64, mimeType, size, apiKey);
+      imageUrl = await generateWithResponses(
+        prompt,
+        referenceImageBase64,
+        mimeType,
+        previousImageUrls,
+        size,
+        apiKey,
+      );
     } else {
       imageUrl = await generateTextOnly(prompt, size, apiKey);
     }
