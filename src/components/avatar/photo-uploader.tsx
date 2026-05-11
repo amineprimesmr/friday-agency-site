@@ -69,7 +69,7 @@ export function PhotoUploader({ onReady }: Props) {
     <div className="flex flex-col gap-6">
       <p className="text-sm text-white/50">
         Upload une photo claire de la personne — de face de préférence, visage bien visible.
-        GPT-4o analysera chaque détail et générera le prompt maître automatiquement.
+        Claude analysera chaque détail et générera le prompt maître automatiquement.
       </p>
 
       {/* Drop zone */}
@@ -128,10 +128,10 @@ export function PhotoUploader({ onReady }: Props) {
           {analyzing ? (
             <span className="flex items-center justify-center gap-2">
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-              GPT-4o analyse le visage…
+              Claude analyse le visage…
             </span>
           ) : (
-            "Analyser avec GPT-4o →"
+            "Analyser avec Claude →"
           )}
         </button>
       )}
