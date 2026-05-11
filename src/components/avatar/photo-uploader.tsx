@@ -3,7 +3,12 @@
 import { useRef, useState } from "react";
 
 interface Props {
-  onReady: (data: { masterPrompt: string; imageBase64: string; mimeType: string }) => void;
+  onReady: (data: {
+    masterPrompt: string;
+    imageBase64: string;
+    mimeType: string;
+    referenceFileId: string;
+  }) => void;
 }
 
 export function PhotoUploader({ onReady }: Props) {
@@ -14,6 +19,7 @@ export function PhotoUploader({ onReady }: Props) {
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
+  const [uploadingRef, setUploadingRef] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   function handleFile(file: File) {
@@ -60,9 +66,31 @@ export function PhotoUploader({ onReady }: Props) {
     }
   }
 
-  function proceed() {
+  async function proceed() {
     if (!masterPrompt || !imageBase64) return;
-    onReady({ masterPrompt, imageBase64, mimeType });
+    setUploadingRef(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/avatar/upload-reference", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageBase64, mimeType }),
+      });
+      const data = (await res.json()) as { fileId?: string; error?: string };
+      if (!res.ok || !data.fileId) {
+        throw new Error(data.error ?? "Échec upload référence OpenAI");
+      }
+      onReady({
+        masterPrompt,
+        imageBase64,
+        mimeType,
+        referenceFileId: data.fileId,
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur inconnue");
+    } finally {
+      setUploadingRef(false);
+    }
   }
 
   return (
@@ -184,10 +212,13 @@ export function PhotoUploader({ onReady }: Props) {
               Régénérer le prompt
             </button>
             <button
-              onClick={proceed}
-              className="flex-[2] rounded-xl bg-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-900/40 transition hover:bg-violet-500 active:scale-[0.98]"
+              onClick={() => void proceed()}
+              disabled={uploadingRef}
+              className="flex-[2] rounded-xl bg-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-900/40 transition hover:bg-violet-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Générer la Reference Sheet 360° →
+              {uploadingRef
+                ? "Upload OpenAI…"
+                : "Générer la Reference Sheet 360° →"}
             </button>
           </div>
         </div>

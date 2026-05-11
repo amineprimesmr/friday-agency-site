@@ -120,6 +120,15 @@ export type ReferenceAngle =
   | "three_quarters"
   | "close_up";
 
+/** Order for sequential reference generation (each step may use prior outputs as file refs). */
+export const REFERENCE_ANGLE_ORDER: ReferenceAngle[] = [
+  "front",
+  "back",
+  "left_profile",
+  "three_quarters",
+  "close_up",
+];
+
 export const REFERENCE_ANGLES: {
   id: ReferenceAngle;
   label: string;
@@ -256,9 +265,12 @@ export function buildScenePrompt(
   const lightingFinal = scene ? scene.lighting : lighting;
   const shotFinal = scene ? scene.shot : shot;
 
-  return `Based on this character reference — ${masterPrompt.split("\n")[0]}
+  return `Use the reference images as the exact same real person — preserve face, skin, hair, body proportions, and outfit details.
 
-Same exact character, same outfit. Cinematic scene:
+Character (must match references exactly):
+${masterPrompt.trim()}
+
+Cinematic scene:
 The character is ${sceneDesc}.
 
 Camera: ${shotFinal}.

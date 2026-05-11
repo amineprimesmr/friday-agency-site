@@ -5,8 +5,7 @@ import { buildScenePrompt, SCENE_PRESETS, ScenePreset } from "@/lib/avatar-promp
 
 interface Props {
   masterPrompt: string;
-  referenceImageBase64: string;
-  mimeType: string;
+  sceneReferenceFileIds: string[];
   onSelectScene: (imageUrl: string, presetId?: string) => void;
   onNext: () => void;
 }
@@ -32,8 +31,7 @@ const SHOT_OPTIONS = [
 
 export function SceneGenerator({
   masterPrompt,
-  referenceImageBase64,
-  mimeType,
+  sceneReferenceFileIds,
   onSelectScene,
   onNext,
 }: Props) {
@@ -65,6 +63,7 @@ export function SceneGenerator({
           body: JSON.stringify({
             prompt: scenePrompt,
             size: "1024x1536",
+            referenceFileIds: sceneReferenceFileIds,
           }),
         })
           .then((r) => r.json())
@@ -91,7 +90,8 @@ export function SceneGenerator({
   return (
     <div className="flex flex-col gap-6">
       <p className="text-sm text-white/50">
-        Choisis une scène — ta photo de référence est utilisée pour maintenir la cohérence du personnage.
+        Choisis une scène — génération par <strong className="text-white/60">édition</strong> (GPT Image 2) avec{" "}
+        {sceneReferenceFileIds.length} fichier(s) image OpenAI : photo uploadée + feuille de refs.
       </p>
 
       {/* Preset grid */}

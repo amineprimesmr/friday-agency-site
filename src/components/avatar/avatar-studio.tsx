@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { ReferenceAngle } from "@/lib/avatar-prompts";
+import { useMemo, useState } from "react";
+import { REFERENCE_ANGLE_ORDER, ReferenceAngle } from "@/lib/avatar-prompts";
 import { PhotoUploader } from "./photo-uploader";
 import { ReferenceSheet } from "./reference-sheet";
 import { SceneGenerator } from "./scene-generator";
@@ -11,6 +11,7 @@ interface PhotoData {
   masterPrompt: string;
   imageBase64: string;
   mimeType: string;
+  referenceFileId: string;
 }
 
 const STEPS = [
@@ -24,18 +25,31 @@ export function AvatarStudio() {
   const [step, setStep] = useState(1);
   const [photoData, setPhotoData] = useState<PhotoData | null>(null);
   const [referenceImages, setReferenceImages] = useState<Partial<Record<ReferenceAngle, string>>>({});
+  const [referenceImageFileIds, setReferenceImageFileIds] = useState<
+    Partial<Record<ReferenceAngle, string>>
+  >({});
   const [selectedScene, setSelectedScene] = useState<string | null>(null);
   const [selectedScenePresetId, setSelectedScenePresetId] = useState<string | undefined>();
+
+  const sceneReferenceFileIds = useMemo(() => {
+    if (!photoData?.referenceFileId) return [];
+    const ids = [photoData.referenceFileId];
+    for (const a of REFERENCE_ANGLE_ORDER) {
+      const fid = referenceImageFileIds[a];
+      if (fid) ids.push(fid);
+    }
+    return ids;
+  }, [photoData?.referenceFileId, referenceImageFileIds]);
 
   function handlePhotoReady(data: PhotoData) {
     setPhotoData(data);
     setReferenceImages({});
+    setReferenceImageFileIds({});
     setStep(2);
   }
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-12">
-      {/* Header */}
       <div className="mb-10 text-center">
         <p className="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-violet-400/80">
           Friday — AI Studio
@@ -44,15 +58,15 @@ export function AvatarStudio() {
           Avatar Generator
         </h1>
         <p className="mt-3 text-sm text-white/40">
-          Upload une photo → IA génère le personnage ultra-réaliste → anime en vidéo.
+          Upload une photo → analyse Claude → GPT Image 2 (éditions haute fidélité) → vidéo Kling.
         </p>
       </div>
 
-      {/* Step indicator */}
       <div className="mb-8 flex items-center justify-center gap-0">
         {STEPS.map((s, i) => (
           <div key={s.id} className="flex items-center">
             <button
+              type="button"
               onClick={() => step > s.id && setStep(s.id)}
               disabled={step <= s.id}
               className={`flex flex-col items-center gap-1 px-3 py-2 transition ${
@@ -84,7 +98,6 @@ export function AvatarStudio() {
         ))}
       </div>
 
-      {/* Step content */}
       <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-xl shadow-black/40 backdrop-blur-sm sm:p-8">
         <div className="mb-6 border-b border-white/8 pb-5">
           <h2 className="text-lg font-bold text-white">
@@ -93,17 +106,18 @@ export function AvatarStudio() {
           <p className="mt-1 text-xs text-white/40">{STEPS[step - 1].sublabel}</p>
         </div>
 
-        {step === 1 && (
-          <PhotoUploader onReady={handlePhotoReady} />
-        )}
+        {step === 1 && <PhotoUploader onReady={handlePhotoReady} />}
 
         {step === 2 && photoData && (
           <ReferenceSheet
             masterPrompt={photoData.masterPrompt}
+            referenceFileId={photoData.referenceFileId}
             referenceImageBase64={photoData.imageBase64}
             mimeType={photoData.mimeType}
             images={referenceImages}
+            referenceImageFileIds={referenceImageFileIds}
             onImagesChange={setReferenceImages}
+            onReferenceFileIdsChange={setReferenceImageFileIds}
             onNext={() => setStep(3)}
           />
         )}
@@ -111,8 +125,7 @@ export function AvatarStudio() {
         {step === 3 && photoData && (
           <SceneGenerator
             masterPrompt={photoData.masterPrompt}
-            referenceImageBase64={photoData.imageBase64}
-            mimeType={photoData.mimeType}
+            sceneReferenceFileIds={sceneReferenceFileIds}
             onSelectScene={(url, presetId) => {
               setSelectedScene(url);
               setSelectedScenePresetId(presetId);
@@ -122,16 +135,14 @@ export function AvatarStudio() {
         )}
 
         {step === 4 && selectedScene && (
-          <VideoAnimator
-            sceneImageUrl={selectedScene}
-            scenePresetId={selectedScenePresetId}
-          />
+          <VideoAnimator sceneImageUrl={selectedScene} scenePresetId={selectedScenePresetId} />
         )}
 
         {step === 4 && !selectedScene && (
           <div className="flex flex-col items-center gap-4 py-12">
             <p className="text-sm text-white/40">Aucune scène sélectionnée.</p>
             <button
+              type="button"
               onClick={() => setStep(3)}
               className="rounded-xl bg-white/10 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-white/15"
             >
