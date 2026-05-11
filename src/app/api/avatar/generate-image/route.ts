@@ -10,12 +10,12 @@ async function generateImage(prompt: string, size: string, apiKey: string): Prom
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "dall-e-3",
-      prompt: `Stylized digital art illustration of a fictional character for a creative project. Not a real person. ${prompt}`,
+      model: "gpt-image-2",
+      prompt,
       n: 1,
-      size: "1024x1792",
-      quality: "hd",
-      response_format: "b64_json",
+      size,
+      quality: "high",
+      output_format: "png",
     }),
   });
 
