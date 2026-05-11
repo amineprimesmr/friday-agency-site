@@ -2,43 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 120;
 
-async function generateWithEdits(
-  prompt: string,
-  referenceImageBase64: string,
-  mimeType: string,
-  size: string,
-  apiKey: string,
-): Promise<string> {
-  const binary = Buffer.from(referenceImageBase64, "base64");
-  const blob = new Blob([binary], { type: mimeType });
-
-  const formData = new FormData();
-  formData.append("image", blob, "reference.jpg");
-  formData.append("prompt", prompt);
-  formData.append("model", "gpt-image-2");
-  formData.append("size", size);
-  formData.append("n", "1");
-  formData.append("response_format", "b64_json");
-
-  const res = await fetch("https://api.openai.com/v1/images/edits", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}` },
-    body: formData,
-  });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    const msg = (err as { error?: { message?: string } }).error?.message ?? res.statusText;
-    throw new Error(msg);
-  }
-
-  const data = (await res.json()) as { data?: { b64_json?: string }[] };
-  const b64 = data.data?.[0]?.b64_json;
-  if (!b64) throw new Error("No image returned from OpenAI");
-  return `data:image/png;base64,${b64}`;
-}
-
-async function generateTextOnly(prompt: string, size: string, apiKey: string): Promise<string> {
+async function generateImage(prompt: string, size: string, apiKey: string): Promise<string> {
   const res = await fetch("https://api.openai.com/v1/images/generations", {
     method: "POST",
     headers: {
@@ -71,8 +35,6 @@ export async function POST(req: NextRequest) {
   try {
     const {
       prompt,
-      referenceImageBase64,
-      mimeType = "image/jpeg",
       size = "1024x1536",
     } = (await req.json()) as {
       prompt: string;
@@ -91,14 +53,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "OPENAI_API_KEY not configured" }, { status: 500 });
     }
 
-    let imageUrl: string;
-
-    if (referenceImageBase64) {
-      imageUrl = await generateWithEdits(prompt, referenceImageBase64, mimeType, size, apiKey);
-    } else {
-      imageUrl = await generateTextOnly(prompt, size, apiKey);
-    }
-
+    const imageUrl = await generateImage(prompt, size, apiKey);
     return NextResponse.json({ imageUrl });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
