@@ -3,84 +3,25 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-
-function trackerNavActiveIndex(pathname: string): number {
-  const normalized = pathname.replace(/\/$/, "") || "/tracker";
-  if (normalized === "/tracker") return 0;
-  if (pathname.startsWith("/tracker/top-charts")) return 1;
-  if (pathname.startsWith("/tracker/new-releases")) return 2;
-  if (pathname.startsWith("/tracker/search")) return 3;
-  if (
-    pathname.startsWith("/tracker/apps/") ||
-    pathname.startsWith("/tracker/developer/") ||
-    pathname.startsWith("/tracker/widget")
-  ) {
-    return 3;
-  }
-  return 0;
-}
-
-function IconHome({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z"
-      />
-    </svg>
-  );
-}
-
-function IconCharts({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M4 19V5M4 19h16M8 17v-5m4 5V8m4 9v-3"
-      />
-    </svg>
-  );
-}
-
-function IconSpark({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12 3 14 9h6l-5 3.5L17 21l-5-3.5L7 21l2-8.5L4 9h6l2-6Z"
-      />
-    </svg>
-  );
-}
-
-function IconExplore({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.75" />
-      <path fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" d="M12 7v5l3 2" />
-    </svg>
-  );
-}
+import { useEffect, useRef, useState } from "react";
 
 const nav = [
-  { href: "/tracker", label: "Accueil", exact: true, Icon: IconHome },
-  { href: "/tracker/top-charts", label: "Classements", exact: false, Icon: IconCharts },
-  { href: "/tracker/new-releases", label: "Nouveautés", exact: false, Icon: IconSpark },
-  { href: "/tracker/search", label: "Explorer", exact: false, Icon: IconExplore },
+  { href: "/tracker", label: "Accueil", exact: true },
+  { href: "/tracker/top-charts", label: "Classements", exact: false },
+  { href: "/tracker/new-releases", label: "Nouveautés", exact: false },
+  { href: "/tracker/search", label: "Explorer", exact: false },
 ] as const;
+
+function isActive(item: (typeof nav)[number], pathname: string) {
+  if (item.exact) return pathname.replace(/\/$/, "") === item.href;
+  return (
+    pathname.startsWith(item.href) ||
+    (item.href === "/tracker/search" &&
+      (pathname.startsWith("/tracker/apps/") ||
+        pathname.startsWith("/tracker/developer/") ||
+        pathname.startsWith("/tracker/widget")))
+  );
+}
 
 /* ── Search modal ─────────────────────────────────────────────────────────── */
 function SearchModal({ onClose }: { onClose: () => void }) {
@@ -107,7 +48,11 @@ function SearchModal({ onClose }: { onClose: () => void }) {
   return (
     <div
       className="fixed inset-0 z-[200] flex items-start justify-center pt-[12vh]"
-      style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", background: "rgba(5,5,13,0.65)" }}
+      style={{
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
+        background: "rgba(5,5,13,0.65)",
+      }}
       onClick={onClose}
     >
       <div
@@ -178,9 +123,6 @@ function SearchModal({ onClose }: { onClose: () => void }) {
 export function TrackerHeader() {
   const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  const activeIndex = useMemo(() => trackerNavActiveIndex(pathname), [pathname]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -193,95 +135,89 @@ export function TrackerHeader() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  useEffect(() => {
-    function onScroll() {
-      setScrolled(window.scrollY > 12);
-    }
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
     <>
       {searchOpen && <SearchModal onClose={() => setSearchOpen(false)} />}
 
-      <header className={`top-glass-bar${scrolled ? " is-scrolled" : ""}`} aria-label="Navigation App Tracker">
-        {/* Calques réels : backdrop-filter sur pseudo-éléments est souvent cassé (Safari / WebKit prod). */}
-        <div className="top-glass-bar__frost" aria-hidden />
-        <div className="top-glass-bar__sheen" aria-hidden />
-        <div className="top-glass-menu">
-          <Link href="/tracker" className="site-logo site-logo--menu" aria-label="App Tracker — accueil">
-            <Image src="/assets/logo.png" alt="" width={30} height={30} className="site-logo__img" priority />
-          </Link>
-
-          <div id="tracker-liquid-glass" className="tracker-switcher-host">
-            <fieldset
-              className="tracker-switcher"
-              style={
-                {
-                  "--active-index": activeIndex,
-                } as React.CSSProperties
-              }
+      <header className="site-header-bar" aria-label="Navigation Friday Tracker">
+        <div className="site-header-bar__inner">
+          <div className="site-header-liquid">
+            {/* Logo */}
+            <Link
+              href="/tracker"
+              className="group flex shrink-0 items-center gap-2 rounded-full py-1 pl-0.5 pr-1 font-semibold tracking-tight text-white focus-visible:outline-none"
             >
-              <legend className="tracker-switcher__legend">Navigation App Tracker</legend>
+              <span className="relative flex h-9 w-9 shrink-0 overflow-hidden rounded-full ring-1 ring-white/25 transition-transform duration-300 group-hover:scale-[1.04]">
+                <Image
+                  src="/assets/logo.png"
+                  alt="Friday"
+                  width={36}
+                  height={36}
+                  className="h-full w-full object-cover"
+                  priority
+                />
+              </span>
+              <span className="hidden pr-1 text-[0.95rem] sm:inline">Friday</span>
+            </Link>
+
+            <span className="site-header-liquid__divider site-header-liquid__divider--nav" aria-hidden />
+
+            {/* Nav */}
+            <nav className="site-header-liquid__nav" aria-label="Navigation principale">
               {nav.map((item) => {
-                const active = item.exact
-                  ? pathname.replace(/\/$/, "") === item.href
-                  : pathname.startsWith(item.href);
-                const Icon = item.Icon;
+                const active = isActive(item, pathname);
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="tracker-switcher__link"
                     aria-current={active ? "page" : undefined}
+                    className="site-header-liquid__link"
+                    style={
+                      active
+                        ? {
+                            color: "#fff",
+                            backgroundColor: "color-mix(in srgb, #fff 10%, transparent)",
+                          }
+                        : undefined
+                    }
                   >
-                    <Icon className="tracker-switcher__icon" />
-                    <span className="tracker-switcher__text">{item.label}</span>
+                    {item.label}
                   </Link>
                 );
               })}
-            </fieldset>
-          </div>
+            </nav>
 
-          <span className="top-glass-menu__divider hidden min-[420px]:block" aria-hidden />
+            <span className="site-header-liquid__divider hidden sm:block" aria-hidden />
 
-          <div className="top-glass-menu__actions">
-            <button
-              type="button"
-              onClick={() => setSearchOpen(true)}
-              className="site-header-liquid__cta-glass hidden items-center gap-2 min-[420px]:flex"
-              aria-label="Rechercher"
-            >
-              <span className="text-sm">🔍</span>
-              <span className="hidden text-[0.8125rem] lg:inline">Rechercher</span>
-              <kbd
-                className="hidden rounded-md px-1.5 py-0.5 text-[10px] font-semibold lg:inline"
-                style={{
-                  background: "color-mix(in srgb, #fff 10%, transparent)",
-                  color: "rgba(255,255,255,0.45)",
-                }}
+            {/* Actions */}
+            <div className="site-header-liquid__actions">
+              <button
+                type="button"
+                onClick={() => setSearchOpen(true)}
+                className="site-header-liquid__cta-glass hidden items-center gap-2 sm:inline-flex"
+                aria-label="Rechercher"
               >
-                ⌘K
-              </kbd>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setSearchOpen(true)}
-              className="site-header-liquid__cta-glass flex items-center min-[420px]:hidden"
-              aria-label="Rechercher"
-            >
-              <span className="text-sm">🔍</span>
-            </button>
-
-            <Link
-              href="/"
-              className="site-header-liquid__cta-gradient inline-flex items-center justify-center text-center"
-            >
-              Agence
-            </Link>
+                <span className="text-sm">🔍</span>
+                <span className="hidden text-[0.8125rem] lg:inline">Rechercher</span>
+                <kbd
+                  className="hidden rounded-md px-1.5 py-0.5 text-[10px] font-semibold lg:inline"
+                  style={{
+                    background: "color-mix(in srgb, #fff 10%, transparent)",
+                    color: "rgba(255,255,255,0.45)",
+                  }}
+                >
+                  ⌘K
+                </kbd>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSearchOpen(true)}
+                className="site-header-liquid__cta-glass flex items-center sm:hidden"
+                aria-label="Rechercher"
+              >
+                <span className="text-sm">🔍</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>
