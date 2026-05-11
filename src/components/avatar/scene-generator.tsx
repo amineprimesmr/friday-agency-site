@@ -64,8 +64,6 @@ export function SceneGenerator({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             prompt: scenePrompt,
-            referenceImageBase64,
-            mimeType,
             size: "1024x1536",
           }),
         })

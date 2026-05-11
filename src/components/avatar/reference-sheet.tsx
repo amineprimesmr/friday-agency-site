@@ -23,18 +23,12 @@ const ANGLE_ORDER: ReferenceAngle[] = [
 
 async function callGenerateImage(
   prompt: string,
-  referenceImageBase64: string,
-  mimeType: string,
-  previousImageUrls: string[],
 ): Promise<string> {
   const res = await fetch("/api/avatar/generate-image", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       prompt,
-      referenceImageBase64,
-      mimeType,
-      previousImageUrls,
       size: "1024x1536",
     }),
   });
@@ -75,7 +69,7 @@ export function ReferenceSheet({
 
     try {
       const prompt = buildReferencePrompt(masterPrompt, angleId);
-      const url = await callGenerateImage(prompt, referenceImageBase64, mimeType, previousUrls);
+      const url = await callGenerateImage(prompt);
       const next = { ...currentImages, [angleId]: url };
       onImagesChange(next);
       return next;
