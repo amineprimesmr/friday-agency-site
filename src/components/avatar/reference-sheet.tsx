@@ -13,7 +13,6 @@ interface Props {
   referenceImageFileIds: Partial<Record<ReferenceAngle, string>>;
   onMergeImages: (patch: Partial<Record<ReferenceAngle, string>>) => void;
   onMergeFileIds: (patch: Partial<Record<ReferenceAngle, string>>) => void;
-  onRemoveFileId: (angleId: ReferenceAngle) => void;
   onNext: () => void;
 }
 
@@ -51,7 +50,6 @@ export function ReferenceSheet({
   referenceImageFileIds,
   onMergeImages,
   onMergeFileIds,
-  onRemoveFileId,
   onNext,
 }: Props) {
   const [loading, setLoading] = useState<Partial<Record<ReferenceAngle, boolean>>>({});
@@ -116,17 +114,6 @@ export function ReferenceSheet({
     } finally {
       setGeneratingAll(false);
     }
-  }
-
-  async function regenerate(angleId: ReferenceAngle) {
-    const nextFileIds = { ...fileIdsRef.current };
-    delete nextFileIds[angleId];
-    onRemoveFileId(angleId);
-    await generateOne(angleId, nextFileIds);
-  }
-
-  async function generateSingle(angleId: ReferenceAngle) {
-    await generateOne(angleId, { ...fileIdsRef.current });
   }
 
   const hasAll = REFERENCE_ANGLE_ORDER.every((a) => images[a]);
@@ -229,14 +216,6 @@ export function ReferenceSheet({
                   </div>
                 )}
               </div>
-              <button
-                type="button"
-                onClick={() => void (url ? regenerate(angle.id) : generateSingle(angle.id))}
-                disabled={anyLoading}
-                className="rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-xs font-medium text-white/60 transition hover:bg-white/10 hover:text-white disabled:opacity-40"
-              >
-                {url ? "Régénérer" : "Générer"}
-              </button>
             </div>
           );
         })}
@@ -244,8 +223,8 @@ export function ReferenceSheet({
 
       <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
         <p className="text-xs text-amber-400/80">
-          ⚠️ L’ordre des angles compte (dos / profil avant 3/4). Utilise plutôt <strong>Tout générer</strong> pour
-          éviter les trous. Si un visage diverge → <strong>Régénérer</strong> cet angle seulement.
+          ⚠️ L’ordre des angles compte (dos / profil avant 3/4). Utilise <strong>Tout générer</strong> : la chaîne
+          complète garde l’identité cohérente. Tu peux relancer le même bouton pour refaire toute la planche.
         </p>
       </div>
 

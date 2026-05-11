@@ -60,14 +60,6 @@ export function AvatarStudio() {
     setReferenceImageFileIds((prev) => ({ ...prev, ...patch }));
   }, []);
 
-  const removeReferenceFileId = useCallback((angleId: ReferenceAngle) => {
-    setReferenceImageFileIds((prev) => {
-      const next = { ...prev };
-      delete next[angleId];
-      return next;
-    });
-  }, []);
-
   function handlePhotoReady(data: PhotoData) {
     setPhotoData(data);
     setReferenceImages({});
@@ -145,7 +137,6 @@ export function AvatarStudio() {
             referenceImageFileIds={referenceImageFileIds}
             onMergeImages={mergeReferenceImages}
             onMergeFileIds={mergeReferenceFileIds}
-            onRemoveFileId={removeReferenceFileId}
             onNext={() => setStep(3)}
           />
         )}
