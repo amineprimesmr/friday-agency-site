@@ -4,9 +4,19 @@ import {
   openaiUploadBuffer,
 } from "@/lib/openai-avatar";
 
-/** Vercel Pro (or higher) allows up to 300s; GPT Image 2 edits can run a long time. */
+/** Vercel plan often caps ~300s; GPT Image 2 edits scale with pixels, ref count, and quality. */
 export const maxDuration = 300;
 export const runtime = "nodejs";
+
+const DEFAULT_IMAGE_SIZE = process.env.OPENAI_AVATAR_IMAGE_SIZE ?? "1024x1024";
+
+/** low | medium | high | auto — medium balances speed vs fidelity for edits. */
+function editQuality(): string | undefined {
+  const q = (process.env.OPENAI_AVATAR_EDIT_QUALITY ?? "medium").trim().toLowerCase();
+  if (q === "off" || q === "none") return undefined;
+  if (q === "low" || q === "medium" || q === "high" || q === "auto") return q;
+  return "medium";
+}
 
 async function generateFromText(
   prompt: string,
@@ -58,10 +68,11 @@ async function generateFromReferenceEdits(
     prompt,
     n: 1,
     size,
-    quality: "high",
     output_format: "png",
     images: referenceFileIds.map((id) => ({ file_id: id })),
   };
+  const q = editQuality();
+  if (q) body.quality = q;
 
   const res = await fetch("https://api.openai.com/v1/images/edits", {
     method: "POST",
@@ -116,7 +127,7 @@ export async function POST(req: NextRequest) {
   try {
     const {
       prompt,
-      size = "1024x1536",
+      size = DEFAULT_IMAGE_SIZE,
       referenceFileIds,
     } = (await req.json()) as {
       prompt: string;

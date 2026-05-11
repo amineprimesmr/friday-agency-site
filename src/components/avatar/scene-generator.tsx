@@ -63,7 +63,6 @@ export function SceneGenerator({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             prompt: scenePrompt,
-            size: "1024x1536",
             referenceFileIds: sceneReferenceFileIds,
           }),
         }).then(async (r) => {

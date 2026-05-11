@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { REFERENCE_ANGLE_ORDER, ReferenceAngle } from "@/lib/avatar-prompts";
+import { ReferenceAngle } from "@/lib/avatar-prompts";
 import { PhotoUploader } from "./photo-uploader";
 import { ReferenceSheet } from "./reference-sheet";
 import { SceneGenerator } from "./scene-generator";
@@ -13,6 +13,16 @@ interface PhotoData {
   mimeType: string;
   referenceFileId: string;
 }
+
+/** Prefer face-rich angles; cap count to keep OpenAI edits faster (still 1 original + 3 views). */
+const SCENE_REFERENCE_PRIORITY: ReferenceAngle[] = [
+  "front",
+  "close_up",
+  "three_quarters",
+  "left_profile",
+  "back",
+];
+const MAX_SCENE_REFERENCE_FILES = 4;
 
 const STEPS = [
   { id: 1, label: "Photo", sublabel: "Upload & analyse IA" },
@@ -34,7 +44,8 @@ export function AvatarStudio() {
   const sceneReferenceFileIds = useMemo(() => {
     if (!photoData?.referenceFileId) return [];
     const ids = [photoData.referenceFileId];
-    for (const a of REFERENCE_ANGLE_ORDER) {
+    for (const a of SCENE_REFERENCE_PRIORITY) {
+      if (ids.length >= MAX_SCENE_REFERENCE_FILES) break;
       const fid = referenceImageFileIds[a];
       if (fid) ids.push(fid);
     }

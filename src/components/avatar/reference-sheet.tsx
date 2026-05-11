@@ -44,10 +44,8 @@ async function callGenerateImage(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       prompt,
-      size: "1024x1536",
       referenceFileIds,
-    }),
-  });
+    }),  });
   const data = await readApiJson<{
     imageUrl?: string;
     outputFileId?: string;
