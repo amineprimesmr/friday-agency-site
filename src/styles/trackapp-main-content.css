@@ -1,0 +1,264 @@
+/**
+ * Contenu playbook / dashboard à l’intérieur de .app-main (feuille claire Fidelity).
+ * Reprend les blocs Trackapp avec variables adaptées au thème #app-app.
+ */
+#app-app .app-main {
+  --dash-text: var(--app-text);
+  --dash-text-secondary: #334155;
+  --dash-muted: var(--app-text-muted);
+  --dash-muted-light: #64748b;
+  --dash-accent: var(--app-accent);
+  --dash-accent-hover: var(--app-accent-hover);
+  --dash-accent-light: var(--app-accent-light);
+  --dash-accent-glow: rgba(37, 99, 235, 0.28);
+  --dash-accent-subtle: rgba(37, 99, 235, 0.08);
+  --dash-success: #10b981;
+  --dash-success-light: rgba(16, 185, 129, 0.12);
+  --dash-error: #ef4444;
+  --dash-error-light: rgba(239, 68, 68, 0.12);
+  --dash-warning: #f59e0b;
+  --dash-warning-light: rgba(245, 158, 11, 0.12);
+  --dash-purple: #7c3aed;
+  --dash-purple-light: rgba(124, 58, 237, 0.12);
+  --dash-radius: 12px;
+  --dash-radius-lg: 16px;
+  --dash-radius-xl: 20px;
+  --dash-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --dash-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --dash-shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --dash-shadow-lg: 0 8px 28px rgba(15, 23, 42, 0.1);
+  --dash-surface: #fff;
+  --dash-surface-2: #f8fafc;
+  --dash-border: #e2e8f0;
+  --dash-border-light: #cbd5e1;
+}
+
+#app-app .app-main .dashboard-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+}
+
+#app-app .app-main .dashboard-section {
+  margin-bottom: 2rem;
+}
+
+#app-app .app-main .dashboard-error p {
+  color: var(--app-text-muted);
+}
+
+#app-app .app-main .dashboard-hint {
+  font-size: 0.875rem;
+  color: var(--app-text-muted);
+  margin: 0 0 1rem;
+}
+
+#app-app .app-main .trackapp-workspace-hero-kicker {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--dash-purple);
+  margin: 0 0 0.65rem;
+}
+
+#app-app .app-main .trackapp-workspace-hero-title {
+  font-size: clamp(1.55rem, 3.2vw, 2.35rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  color: var(--dash-text);
+  margin: 0 0 0.85rem;
+}
+
+#app-app .app-main .trackapp-workspace-hero-desc {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--dash-muted-light);
+  max-width: 54ch;
+  margin: 0 0 1.75rem;
+}
+
+#app-app .app-main .trackapp-playbook-card {
+  background: var(--dash-surface);
+  border: 1px solid var(--dash-border);
+  border-radius: var(--dash-radius-xl);
+  padding: 1.45rem 1.5rem 1.55rem;
+  box-shadow: var(--dash-shadow);
+  margin-bottom: 1.15rem;
+  transition:
+    border-color var(--dash-transition),
+    box-shadow var(--dash-transition);
+}
+
+#app-app .app-main .trackapp-playbook-card:hover {
+  border-color: var(--dash-border-light);
+  box-shadow: var(--dash-shadow-md);
+}
+
+#app-app .app-main .trackapp-playbook-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem 0.8rem;
+}
+
+#app-app .app-main .trackapp-playbook-idx {
+  font-family: ui-monospace, monospace;
+  font-size: 0.7rem;
+  color: var(--dash-muted);
+  font-weight: 600;
+}
+
+#app-app .app-main .trackapp-playbook-title {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--dash-text);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+#app-app .app-main .trackapp-playbook-summary {
+  font-size: 0.875rem;
+  color: var(--dash-muted-light);
+  margin: 0.55rem 0 0;
+  line-height: 1.55;
+}
+
+#app-app .app-main .trackapp-playbook-pre-wrap {
+  margin-top: 1rem;
+  border-radius: var(--dash-radius-lg);
+  border: 1px solid var(--dash-border);
+  background: var(--dash-surface-2);
+  padding: 0.95rem 1.05rem;
+}
+
+#app-app .app-main .trackapp-playbook-pre-wrap--locked {
+  filter: blur(5px);
+  opacity: 0.92;
+  user-select: none;
+  pointer-events: none;
+}
+
+#app-app .app-main .trackapp-playbook-pre {
+  font-family: ui-monospace, "SF Mono", Menlo, Monaco, monospace;
+  font-size: 0.76rem;
+  line-height: 1.55;
+  color: var(--dash-text-secondary);
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 20rem;
+  overflow: auto;
+}
+
+#app-app .app-main .trackapp-paywall-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 400;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem calc(1rem + env(safe-area-inset-bottom, 0px));
+  background: rgba(11, 13, 16, 0.94);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+}
+
+#app-app .app-main .trackapp-paywall-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.94);
+  margin: 0;
+}
+
+#app-app .app-main .trackapp-paywall-sub {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0.3rem 0 0;
+  max-width: 36rem;
+  line-height: 1.45;
+}
+
+#app-app .app-main .trackapp-btn-primary-dash {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.58rem 1.15rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(180deg, var(--app-accent-hover), var(--app-accent));
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
+  transition: transform 0.15s ease, box-shadow var(--dash-transition);
+}
+
+#app-app .app-main .trackapp-btn-primary-dash:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+#app-app .app-main .trackapp-btn-primary-dash:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+#app-app .app-main .trackapp-btn-ghost-dash {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.46rem 0.9rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.78rem;
+  border: 1px solid var(--dash-border);
+  background: #fff;
+  color: var(--dash-text-secondary);
+  cursor: pointer;
+  transition:
+    border-color var(--dash-transition),
+    color var(--dash-transition);
+}
+
+#app-app .app-main .trackapp-btn-ghost-dash:hover {
+  border-color: rgba(37, 99, 235, 0.35);
+  color: var(--app-accent);
+}
+
+#app-app .app-main .dashboard-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+#app-app .app-main .dashboard-badge-success {
+  background: var(--dash-success-light);
+  color: var(--dash-success);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+#app-app .app-main .dashboard-badge-warning {
+  background: var(--dash-warning-light);
+  color: var(--dash-warning);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+#app-app .app-main .dashboard-badge-purple {
+  background: var(--dash-purple-light);
+  color: var(--dash-purple);
+  border: 1px solid rgba(124, 58, 237, 0.22);
+}

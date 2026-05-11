@@ -1,0 +1,748 @@
+/**
+ * Shell premier accès SaaS : héros sombre + bandeau essai + feuille claire façon onboarding moderne.
+ * Couleurs proches gabarits type Shopify (adaptation Myfidpass).
+ */
+
+:root {
+  --saas-frc-dark: #0d0f0f;
+  --saas-frc-dark-mid: #121a18;
+  --saas-frc-teal-glow: #0f3d32;
+  --saas-frc-sheet: #ffffff;
+  --saas-frc-sheet-muted: #f6f6f7;
+  --saas-frc-text-on-dark: rgba(255, 255, 255, 0.92);
+  --saas-frc-text-muted-dark: rgba(255, 255, 255, 0.64);
+  --saas-frc-cta-black: #0a0a0a;
+  --saas-frc-link-blue: #005bd3;
+  --saas-frc-shopify-green: #008060;
+  --saas-frc-lime-badge: #b8ff57;
+}
+
+#app-app.app-saas-welcome-active {
+  --saas-frc-on: 1;
+  isolation: isolate;
+  /* Dégradé léger partagé — topbar + cluster (alignement visuel sans « couture » verte) */
+  --saas-frc-shell-bg:
+    radial-gradient(ellipse 150% 130% at 50% -35%, rgba(45, 62, 72, 0.16) 0%, transparent 62%),
+    linear-gradient(182deg, #010102 0%, #0c0d0f 55%, #141518 100%);
+}
+
+#app-app.app-saas-welcome-active .app-main {
+  background: #f6f6f7;
+  position: relative;
+  z-index: 140;
+}
+
+/* La feuille (.app-main) ne doit pas recouvrir la barre de navigation fixe (chevauchement visuel). */
+@media (min-width: 901px) {
+  #app-app.app-saas-welcome-active .app-sidebar {
+    z-index: 280;
+  }
+}
+
+/* Héros : aligné au flux — le dégradé commun est sur .app-saas-frc-cluster */
+#app-app.app-saas-welcome-active .app-desktop-topbar {
+  position: fixed;
+  top: var(--app-admin-strip-h, 0px);
+  left: 0;
+  right: 0;
+  z-index: 320;
+  height: auto !important;
+}
+
+#app-app.app-saas-welcome-active .app-desktop-topbar__inner {
+  min-height: var(--app-topbar-height, 56px);
+  position: relative;
+  z-index: 260;
+}
+
+#app-app.app-saas-welcome-active .app-saas-frc-cluster {
+  /* Bloc réellement intégré au header/topbar */
+  padding-top: 0;
+  margin-top: -1px;
+  position: relative;
+  top: auto;
+  z-index: 60;
+  background: var(--saas-frc-shell-bg);
+  background-repeat: no-repeat;
+  box-shadow: none;
+}
+
+@media (min-width: 901px) {
+  #app-app.app-saas-welcome-active .app-desktop-topbar {
+    left: var(--app-sidebar-width);
+    width: calc(100% - var(--app-sidebar-width));
+    box-sizing: border-box;
+  }
+
+  #app-app.app-saas-welcome-active #app-saas-frc-strip {
+    display: none !important;
+  }
+
+  #app-app.app-saas-welcome-active .app-saas-frc-cluster {
+    margin-left: var(--app-sidebar-width);
+    width: calc(100% - var(--app-sidebar-width));
+    box-sizing: border-box;
+  }
+}
+
+/* Top bar : même dégradé léger que la zone héros */
+#app-app.app-saas-welcome-active .app-desktop-topbar {
+  background: var(--saas-frc-shell-bg);
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+.app-saas-frc-cluster {
+  opacity: 0;
+  animation: saasfrcReveal 0.72s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (max-width: 900px) {
+  body.trackapp-fidelity-body:has(#app-app.app-saas-welcome-active.app-saas-frc-scroll-dense) {
+    overflow: hidden;
+    height: 100dvh;
+  }
+
+  #app-app.app-saas-welcome-active.app-saas-frc-scroll-dense {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  body.trackapp-fidelity-body #app-app.app-saas-welcome-active .app-main {
+    margin-top: calc(
+      var(--app-admin-strip-h, 0px) + var(--saas-frc-header-total-h, var(--app-topbar-height, 56px)) + 6px
+    ) !important;
+    padding-top: 1.35rem !important;
+    height: auto !important;
+    min-height: calc(
+      100dvh - (var(--app-admin-strip-h, 0px) + var(--saas-frc-header-total-h, var(--app-topbar-height, 56px)) + 6px)
+    ) !important;
+    overflow: visible;
+  }
+
+  body.trackapp-fidelity-body #app-app.app-saas-welcome-active.app-saas-frc-scroll-dense .app-main {
+    height: calc(
+      100dvh - (var(--app-admin-strip-h, 0px) + var(--saas-frc-header-total-h, var(--app-topbar-height, 56px)) + 6px)
+    ) !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (min-width: 901px) {
+  body.trackapp-fidelity-body #app-app.app-saas-welcome-active .app-main {
+    margin-left: var(--app-sidebar-width) !important;
+    margin-top: calc(
+      var(--app-admin-strip-h, 0px) + var(--saas-frc-header-total-h, var(--app-topbar-height, 52px)) -
+        var(--app-main-sheet-pull, 12px) + 12px
+    ) !important;
+    padding-top: 1.15rem !important;
+    height: auto !important;
+    min-height: calc(
+      100vh - (var(--app-admin-strip-h, 0px) + var(--saas-frc-header-total-h, var(--app-topbar-height, 52px)) + 8px)
+    ) !important;
+    overflow: visible;
+  }
+
+  body.trackapp-fidelity-body #app-app.app-saas-welcome-active.app-saas-frc-scroll-dense .app-main {
+    margin-top: calc(var(--app-admin-strip-h, 0px) + var(--app-topbar-height, 52px) + 16px) !important;
+    height: calc(100vh - (var(--app-admin-strip-h, 0px) + var(--app-topbar-height, 52px) + 16px)) !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+  }
+
+  body.trackapp-fidelity-body:has(#app-app.app-saas-welcome-active.app-saas-frc-scroll-dense) {
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  #app-app.app-saas-welcome-active.app-saas-frc-scroll-dense {
+    height: 100vh;
+    overflow: hidden;
+  }
+}
+
+@keyframes saasfrcReveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.app-saas-frc-hero {
+  position: relative;
+  padding: clamp(1.35rem, 5vw, 2.4rem) 1.35rem clamp(2rem, 7vw, 3.75rem);
+  background: transparent;
+  color: var(--saas-frc-text-on-dark);
+  overflow: hidden;
+  transition:
+    max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.38s ease,
+    padding 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: min(520px, 92vh);
+}
+
+.app-saas-frc-hero::after {
+  content: "";
+  position: absolute;
+  inset: auto 18% -30% auto;
+  width: clamp(240px, 55vw, 420px);
+  height: clamp(240px, 55vw, 420px);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(140, 165, 175, 0.06) 0%, transparent 72%);
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+.app-saas-frc-hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 40rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+@media (min-width: 901px) {
+  /* Centrage visuel global (incluant la sidebar fixe) : ramène le hero un peu vers la gauche. */
+  #app-app.app-saas-welcome-active .app-saas-frc-hero-inner {
+    transform: translateX(calc(var(--app-sidebar-width) * -0.5));
+  }
+}
+
+.app-saas-frc-kicker {
+  display: none;
+}
+
+.app-saas-frc-title {
+  margin: 0;
+  font-size: clamp(1.45rem, 4.8vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.14;
+}
+
+.app-saas-frc-subtitle {
+  margin: 0.95rem auto 1.65rem;
+  max-width: 28rem;
+  font-size: 0.94rem;
+  line-height: 1.52;
+  color: var(--saas-frc-text-muted-dark);
+}
+
+.app-saas-frc-countdown {
+  display: inline-flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.app-saas-frc-countdown__item {
+  min-width: 4.35rem;
+  padding: 0.42rem 0.5rem 0.36rem;
+  border-radius: 0.62rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.22);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-saas-frc-countdown__item strong {
+  font-size: 1.2rem;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+
+.app-saas-frc-countdown__item em {
+  margin-top: 0.16rem;
+  font-style: normal;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.app-saas-frc-countdown__sep {
+  align-self: center;
+  margin: 0 0.02rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.app-saas-frc-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  padding: 0 1.75rem;
+  border: none;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--saas-frc-cta-black);
+  font: inherit;
+  font-size: 0.98rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.28);
+  transition:
+    transform 0.2s cubic-bezier(0.34, 1.2, 0.64, 1),
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+.app-saas-frc-btn-primary:hover {
+  filter: brightness(1.02);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.36);
+}
+
+.app-saas-frc-btn-primary:active {
+  transform: scale(0.98);
+}
+
+.app-saas-frc-support {
+  margin: 1.15rem 0 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.45;
+}
+
+.app-saas-frc-support a {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.app-saas-frc-support-cta-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-saas-frc-support-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 1.2rem;
+  border-radius: 10px;
+  background: #fff;
+  color: #0a0a0a !important;
+  text-decoration: none !important;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.app-saas-frc-support-cta:hover {
+  filter: brightness(1.02);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.34);
+}
+
+.app-saas-frc-support-cta:active {
+  transform: scale(0.98);
+}
+
+.app-saas-frc-support-badge {
+  position: absolute;
+  top: -0.62rem;
+  right: -0.78rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  padding: 0 0.6rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ff42b3 0%, #ff0f8f 100%);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #fff;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  box-shadow:
+    0 8px 18px rgba(255, 15, 143, 0.35),
+    0 1px 0 rgba(255, 255, 255, 0.2) inset;
+  z-index: 2;
+}
+
+@media (max-width: 900px) {
+  .app-saas-frc-support-badge {
+    top: -0.52rem;
+    right: -0.5rem;
+  }
+}
+
+/* Bandeau compact — même lecture que le fond (gris-bleu, peu de vert) */
+.app-saas-frc-strip {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: nowrap;
+  margin: 0;
+  padding: 0.7rem 1rem 0.8rem;
+  background: var(--saas-frc-shell-bg);
+  border-top: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.35);
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  transition:
+    filter 0.22s ease,
+    background 0.22s ease;
+  box-shadow: none;
+  opacity: 1;
+  transform: none;
+}
+
+.app-saas-frc-strip:hover {
+  filter: brightness(1.06);
+}
+
+.app-saas-frc-strip.app-saas-frc-strip--visible {
+  opacity: 1;
+  transform: none;
+  transition:
+    filter 0.22s ease,
+    background 0.22s ease;
+}
+
+.app-saas-frc-strip-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.app-saas-frc-strip-subrow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.app-saas-frc-strip-strong {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.app-saas-frc-strip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--saas-frc-shopify-green);
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(0, 128, 96, 0.25);
+}
+
+.app-saas-frc-strip-status {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.35;
+}
+
+.app-saas-frc-strip-cta-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.app-saas-frc-strip-cta {
+  min-height: 40px;
+  padding: 0 1rem;
+  border-radius: 10px;
+  border: none;
+  background: #fff;
+  color: #0a0a0a;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.25);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.app-saas-frc-strip-cta:hover {
+  filter: brightness(1.02);
+  box-shadow: 0 13px 28px rgba(0, 0, 0, 0.32);
+}
+
+.app-saas-frc-strip-cta:active {
+  transform: scale(0.98);
+}
+
+.app-saas-frc-strip-badge {
+  position: absolute;
+  top: -0.54rem;
+  right: -0.6rem;
+  min-height: 24px;
+  padding: 0 0.52rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ff42b3 0%, #ff0f8f 100%);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  box-shadow:
+    0 8px 18px rgba(255, 15, 143, 0.35),
+    0 1px 0 rgba(255, 255, 255, 0.2) inset;
+}
+
+/* Feuille blanche : rayon porté par .app-main → pas de double carte */
+body.trackapp-fidelity-body #app-app .app-main .app-saas-frc-sheet {
+  margin-top: 0 !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Feuille blanche : chevauche le bloc sombre puis recouvre au scroll */
+.app-saas-frc-sheet {
+  position: relative;
+  margin-top: -26px;
+  padding: 0 0 2.5rem;
+  background: var(--saas-frc-sheet-muted);
+  border-radius: 22px 22px 0 0;
+  box-shadow:
+    0 -16px 48px rgba(0, 0, 0, 0.26),
+    0 -4px 0 rgba(255, 255, 255, 0.04) inset;
+  z-index: 4;
+  transition:
+    margin-top 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+    border-radius 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 900px) {
+  #app-app.app-saas-welcome-active.app-saas-frc-scroll-dense .app-saas-frc-sheet {
+    margin-top: -34px;
+    border-radius: 18px 18px 0 0;
+  }
+}
+
+.app-saas-frc-sheet--empty {
+  padding-top: clamp(1.35rem, 4vw, 2rem);
+  padding-left: clamp(1rem, 4vw, 1.65rem);
+  padding-right: clamp(1rem, 4vw, 1.65rem);
+  animation: saasSheetIn 0.78s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.app-saas-frc-sheet-onboarding-wrap {
+  padding: clamp(1rem, 3.5vw, 1.5rem) clamp(0.85rem, 3vw, 1.35rem) 2rem;
+  animation: saasSheetIn 0.78s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes saasSheetIn {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.app-saas-frc-shop-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.app-saas-frc-shop-row__title {
+  flex: 1;
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
+}
+
+.app-saas-frc-shop-row__edit {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-saas-frc-shop-row__edit:hover {
+  background: rgba(15, 23, 42, 0.06);
+  color: #0f172a;
+}
+
+.app-saas-frc-shop-row__edit:active {
+  transform: scale(0.97);
+}
+
+#app-app.app-saas-welcome-active .app-empty-card {
+  max-width: 36rem;
+  margin: 0 auto;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+#app-app.app-saas-welcome-active .app-empty-title {
+  font-size: clamp(1.08rem, 3.5vw, 1.35rem);
+  font-weight: 700;
+}
+
+#app-app.app-saas-welcome-active .app-empty-text {
+  color: #475569;
+  font-size: 0.93rem;
+  line-height: 1.55;
+}
+
+#app-app.app-saas-welcome-active .app-input {
+  background: #fff;
+  border-radius: 12px;
+  border-color: #e5e7eb;
+}
+
+#app-app.app-saas-welcome-active .app-empty-cta {
+  width: 100%;
+  justify-content: center;
+  margin-top: 0.65rem;
+  border-radius: 10px;
+  min-height: 48px;
+  font-weight: 650;
+}
+
+/* Onboarding cartes façon grille produits */
+#app-app.app-saas-welcome-active .app-dashboard-onboarding-head {
+  text-align: left;
+}
+
+#app-app.app-saas-welcome-active .app-dashboard-onboarding-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+#app-app.app-saas-welcome-active .app-dashboard-onboarding-subtitle {
+  font-size: 0.92rem;
+  color: #64748b;
+}
+
+#app-app.app-saas-welcome-active .app-dashboard-onboarding-grid {
+  gap: 1rem;
+}
+
+#app-app.app-saas-welcome-active .app-dashboard-onboarding-card {
+  background: var(--saas-frc-sheet);
+  border-radius: 16px;
+  border-color: #e9ecef;
+  box-shadow:
+    0 1px 0 rgba(15, 23, 42, 0.04),
+    0 12px 24px rgba(15, 23, 42, 0.07);
+}
+
+#app-app.app-saas-welcome-active .app-dashboard-onboarding-visual {
+  background: #eceef1;
+  border: none;
+  min-height: 150px;
+}
+
+#app-app.app-saas-welcome-active .app-btn-primary:not(.app-empty-cta),
+#app-app.app-saas-welcome-active .app-dashboard-onboarding-actions .app-btn-primary {
+  background: #0a0a0a !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 10px !important;
+  font-weight: 650;
+}
+
+#app-app.app-saas-welcome-active .app-btn-secondary {
+  border-radius: 10px !important;
+  border: 1px solid #d1d5db !important;
+  background: #fff !important;
+  color: #111 !important;
+  font-weight: 600 !important;
+}
+
+/* Top bar : aide + badge vert façon Shopify */
+.app-desktop-topbar__pre-actions {
+  display: none;
+}
+
+#app-app.app-saas-welcome-active .app-desktop-topbar__pre-actions {
+  display: flex;
+  align-items: center;
+}
+
+.app-desktop-topbar__ghost-btn {
+  width: 40px;
+  height: 40px;
+  margin-right: 0.15rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform 0.2s cubic-bezier(0.34, 1.2, 0.64, 1),
+    background 0.22s ease;
+}
+
+.app-desktop-topbar__ghost-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.app-desktop-topbar__ghost-btn:active {
+  transform: scale(0.96);
+}
+
+#app-app.app-saas-welcome-active .app-desktop-topbar__store-badge {
+  background: var(--saas-frc-lime-badge);
+  color: #0c0f0d;
+  font-weight: 800;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-saas-frc-cluster,
+  .app-saas-frc-sheet--empty,
+  .app-saas-frc-sheet-onboarding-wrap {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

@@ -47,11 +47,11 @@ export default async function EspacePage() {
 
   if (!sb) {
     return (
-      <main className="dashboard-main relative z-[1]">
+      <div className="dashboard-main relative z-[1]">
         <div className="dashboard-error">
           <p>Définissez Supabase puis rechargez cet espace.</p>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -66,13 +66,13 @@ export default async function EspacePage() {
 
   if (!profile) {
     return (
-      <main className="dashboard-main relative z-[1]">
+      <div className="dashboard-main relative z-[1]">
         <div className="dashboard-error">
           <p>
             Impossible de lire votre profil Supabase. Vérifiez la migration <code>trackapp_profiles</code>.
           </p>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -136,7 +136,7 @@ export default async function EspacePage() {
   const stripeReady = stripeConfigured();
 
   return (
-    <main className="relative z-[1] dashboard-main">
+    <div className="relative z-[1] dashboard-main">
       <StripeReturnHandler />
       <section className="dashboard-section">
         <p className="trackapp-workspace-hero-kicker">Workspace Trackapp</p>
@@ -153,6 +153,6 @@ export default async function EspacePage() {
         : null}
       </section>
       <TrackappPlaybookDashboard rows={rowsPayload} fullUnlocked={unlocked} stripeReady={stripeReady} />
-    </main>
+    </div>
   );
 }

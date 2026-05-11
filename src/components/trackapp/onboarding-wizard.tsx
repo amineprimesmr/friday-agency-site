@@ -10,7 +10,7 @@ import type { TrackappOnboardingAnswers } from "@/lib/trackapp/playbook";
 const SWATCH = ["#7c3aed", "#a855f7", "#8b5cf6", "#ec4899", "#6366f1"];
 
 function OnboardingSuspenseFallback() {
-  return <div className="text-white/42">Ouverture de l&apos;onboarding…</div>;
+  return <div className="text-[14px] text-slate-400">Ouverture de l&apos;onboarding…</div>;
 }
 
 function OnboardingWizardInner({
@@ -84,7 +84,7 @@ function OnboardingWizardInner({
 
   if (!sb) {
     return (
-      <p className="text-[14px] text-white/50">
+      <p className="text-[14px] text-slate-500">
         Configurer NEXT_PUBLIC_SUPABASE_URL / ANON_KEY pour poursuivre l&apos;onboarding.
       </p>
     );
@@ -92,24 +92,24 @@ function OnboardingWizardInner({
 
   return (
     <form onSubmit={save} className="space-y-6">
-      <p className="text-[13px] text-white/45">{subtitle}</p>
+      <p className="text-[13px] text-slate-500">{subtitle}</p>
 
       <div className="grid gap-6 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-white/36">
+          <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-slate-400">
             Nom projet (fonctionnel)
           </label>
           <input
             required
             value={answers.app_name ?? ""}
             onChange={(e) => setAnswers((a) => ({ ...a, app_name: e.target.value }))}
-            className="w-full rounded-xl border border-white/10 bg-black/35 px-4 py-3 text-[15px] outline-none ring-violet-500/35 focus:border-violet-400/65 focus:ring-2"
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-[15px] text-slate-900 outline-none ring-blue-500/25 focus:border-blue-400 focus:ring-2"
             placeholder="ex. FocusFlow Clone"
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-white/36">Accent UI</label>
+          <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-slate-400">Accent UI</label>
           <div className="flex flex-wrap gap-2">
             {SWATCH.map((c) => (
               <button
@@ -118,7 +118,7 @@ function OnboardingWizardInner({
                 aria-label={`Couleur accent ${c}`}
                 title={c}
                 onClick={() => setAnswers((a) => ({ ...a, accent_color: c }))}
-                className={`relative h-9 w-9 rounded-full shadow-inner ring-offset-4 ring-offset-black ${answers.accent_color === c ? "ring-2 ring-violet-300" : "ring ring-white/10"}`}
+                className={`relative h-9 w-9 rounded-full shadow-inner ring-offset-2 ring-offset-white ${answers.accent_color === c ? "ring-2 ring-violet-500" : "ring ring-slate-200"}`}
                 style={{ background: c }}
               />
             ))}
@@ -126,26 +126,26 @@ function OnboardingWizardInner({
         </div>
 
         <div>
-          <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-white/36">
+          <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-slate-400">
             Audience cible — 1 ligne
           </label>
           <input
             required
             value={answers.audience ?? ""}
             onChange={(e) => setAnswers((a) => ({ ...a, audience: e.target.value }))}
-            className="w-full rounded-xl border border-white/10 bg-black/35 px-4 py-3 text-[15px] outline-none focus:border-violet-400 focus:ring"
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-[15px] text-slate-900 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
             placeholder="ex. étudiants stressés en exam"
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-white/36">
+          <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-slate-400">
             Modèle économique
           </label>
           <select
             value={answers.business_model ?? "freemium"}
             onChange={(e) => setAnswers((a) => ({ ...a, business_model: e.target.value }))}
-            className="w-full rounded-xl border border-white/10 bg-black/35 px-4 py-3 text-[15px] outline-none focus:border-violet-400 focus:ring"
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-[15px] text-slate-900 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
           >
             <option value="freemium">Freemium</option>
             <option value="abonnement">Abonnement</option>
@@ -156,11 +156,11 @@ function OnboardingWizardInner({
         </div>
 
         <div>
-          <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-white/36">Ton de marque</label>
+          <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-slate-400">Ton de marque</label>
           <select
             value={answers.tone ?? "coach"}
             onChange={(e) => setAnswers((a) => ({ ...a, tone: e.target.value }))}
-            className="w-full rounded-xl border border-white/10 bg-black/35 px-4 py-3 text-[15px] outline-none focus:border-violet-400 focus:ring"
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-[15px] text-slate-900 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
           >
             <option value="minimal">Minimal techno</option>
             <option value="coach">Coach positif</option>
@@ -170,13 +170,13 @@ function OnboardingWizardInner({
         </div>
 
         <div>
-          <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-white/36">
+          <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-slate-400">
             Niveau connaissance apps
           </label>
           <select
             value={answers.app_experience ?? "debutant"}
             onChange={(e) => setAnswers((a) => ({ ...a, app_experience: e.target.value }))}
-            className="w-full rounded-xl border border-white/10 bg-black/35 px-4 py-3 text-[15px] outline-none focus:border-violet-400 focus:ring"
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-[15px] text-slate-900 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
           >
             <option value="debutant">Débutant</option>
             <option value="intermediaire">Intermédiaire</option>
@@ -185,16 +185,16 @@ function OnboardingWizardInner({
         </div>
 
         <div className="sm:col-span-2">
-          <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-white/36">
+          <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-slate-400">
             Horizon temps / budget{" "}
-            <span className="font-normal normal-case tracking-normal text-white/40">optionnel — 80 caractères</span>
+            <span className="font-normal normal-case tracking-normal text-slate-400">optionnel — 80 caractères</span>
           </label>
           <input
             maxLength={80}
             value={answers.horizon ?? ""}
             onChange={(e) => setAnswers((a) => ({ ...a, horizon: e.target.value }))}
             placeholder="ex. POC 4 semaines / budget léger Ads"
-            className="w-full rounded-xl border border-white/10 bg-black/35 px-4 py-3 text-[15px] outline-none focus:border-violet-400 focus:ring"
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-[15px] text-slate-900 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
           />
         </div>
       </div>

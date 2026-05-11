@@ -4,8 +4,12 @@ import { createClient as createSb } from "@/lib/supabase/server";
 
 import { TrackappRouteChrome } from "@/components/trackapp/trackapp-route-chrome";
 
+import "@/styles/trackapp-fidelity-tokens.css";
+import "@/styles/fidelity-port/fidelity-app.css";
+import "@/styles/fidelity-port/app-desktop-topbar.css";
+import "@/styles/fidelity-port/app-saas-shell.css";
+import "@/styles/trackapp-main-content.css";
 import "@/styles/trackapp-purple.css";
-import "@/styles/trackapp-fidelity-dashboard.css";
 
 export const metadata: Metadata = {
   title: "Trackapp — Du concept aux prompts Xcode",

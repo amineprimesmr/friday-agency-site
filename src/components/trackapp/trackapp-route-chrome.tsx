@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { TrackappFidelityWorkspaceShell } from "@/components/trackapp/trackapp-fidelity-workspace-shell";
 import { TrackappNav } from "@/components/trackapp/trackapp-nav";
 
 type Props = Readonly<{
@@ -27,44 +28,9 @@ export function TrackappRouteChrome({ children, loggedIn, email, signOutHref }: 
 
   if (workspace) {
     return (
-      <div className="trackapp-fidelity-dash">
-        <header className="dashboard-header">
-          <div className="dashboard-header-inner">
-            <Link href="/trackapp" className="dashboard-logo">
-              Trackapp
-            </Link>
-            <nav className="flex flex-wrap items-center justify-end gap-x-2 gap-y-2 sm:gap-x-4">
-              <Link href="/tracker" className="trackapp-header-link">
-                Tracker
-              </Link>
-              {loggedIn ?
-                <>
-                  {email ?
-                    <span className="dashboard-title hidden max-w-[10rem] truncate sm:inline" title={email}>
-                      {email}
-                    </span>
-                  : null}
-                  <Link href="/trackapp/espace" className="trackapp-btn-ghost-dash">
-                    Espace
-                  </Link>
-                  <Link href={signOutHref} className="trackapp-header-link">
-                    Déconnexion
-                  </Link>
-                </>
-              : <>
-                  <Link href="/trackapp/connexion" className="trackapp-header-link">
-                    Connexion
-                  </Link>
-                  <Link href="/trackapp/inscription" className="trackapp-header-btn-outline">
-                    Inscription
-                  </Link>
-                </>
-              }
-            </nav>
-          </div>
-        </header>
+      <TrackappFidelityWorkspaceShell loggedIn={loggedIn} email={email} signOutHref={signOutHref}>
         {children}
-      </div>
+      </TrackappFidelityWorkspaceShell>
     );
   }
 

@@ -19,11 +19,11 @@ export default async function OnboardingPage({
   const sb = await createClient();
   if (!sb) {
     return (
-      <main className="dashboard-main relative z-[1]">
+      <div className="dashboard-main relative z-[1]">
         <div className="dashboard-error">
           <p>Définissez Supabase avant l&apos;onboarding.</p>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -60,7 +60,7 @@ export default async function OnboardingPage({
   }
 
   return (
-    <main className="dashboard-main relative z-[1]">
+    <div className="dashboard-main relative z-[1]">
       <section className="dashboard-section">
         <p className="trackapp-workspace-hero-kicker">Onboarding express</p>
         <h1 className="trackapp-workspace-hero-title">Cinq infos clés puis on génère.</h1>
@@ -69,6 +69,6 @@ export default async function OnboardingPage({
       <section className="trackapp-playbook-card max-w-4xl">
         <OnboardingWizard defaults={defaults} />
       </section>
-    </main>
+    </div>
   );
 }
