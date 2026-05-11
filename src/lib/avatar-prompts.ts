@@ -80,15 +80,35 @@ export const BIBLE_DEFAULTS: CharacterBible = {
 };
 
 const QUALITY_SUFFIX = `
-Photorealistic, hyperrealistic, ultra-sharp, 8K resolution, RAW photo, DSLR,
-professional studio photography, 85mm prime lens, f/2.0 aperture,
-perfect skin texture, subsurface scattering, physically accurate lighting,
-studio three-point lighting, neutral white background.`.trim();
+Output must read as a REAL photograph, not stylized art. Technical target:
+full-frame mirrorless / DSLR capture quality; tack-sharp focus on the eyes and plane of the face;
+natural micro-contrast and controlled highlight roll-off; physically plausible shadows;
+accurate skin: visible pores where appropriate, subtle subsurface scattering, no wax or plastic sheen;
+true color rendition (no oversaturated candy skin); neutral or intentional studio white balance;
+shot on equivalent 85mm or 50mm prime at wide aperture for gentle subject separation where the scene allows.
+Resolution intent: ultra-high detail, editorial portrait / campaign still, 8K clarity, uncompressed RAW aesthetic.
+`.trim();
 
-const NEGATIVE_SUFFIX = `
-NOT: cartoon, anime, illustration, painting, drawing, sketch, 3D render, CGI,
-artificial-looking, plastic skin, blurry, low quality, distorted face,
-extra limbs, warped proportions, bad anatomy.`.trim();
+export const NEGATIVE_SUFFIX = `
+FORBIDDEN: cartoon, anime, manga, illustration, painting, drawing, sketch, vector, sticker, emoji look,
+3D render, CGI, uncanny Valley doll, synthetic skin, airbrushed plastic face, waxy complexion,
+beauty-filter smoothing, fake HDR glow, oversharpen halos, AI artifact fingers, deformed hands or teeth,
+asymmetric pupils, melted features, duplicated limbs, wrong number of fingers, text or watermarks on image,
+low resolution, heavy JPEG blocks, motion blur on static portraits, muddy chroma noise, wrong ethnicity drift,
+changing outfit or accessories from the reference, inventing jewelry or glasses not in the description.`.trim();
+
+const REFERENCE_IDENTITY_LOCK = `
+IDENTITY (non-negotiable): You MUST reproduce the exact same real human as the uploaded reference images.
+Lock: facial bone structure, nose shape and width, lip shape, ear shape if visible, eye spacing, brow shape and density,
+skin undertone and texture, visible pores and micro-details, hair color, hairline, curl pattern or straight texture,
+facial hair pattern, and every garment exactly as in the references. Do not beautify into a different face.
+`.trim();
+
+const SCENE_IDENTITY_LOCK = `
+IDENTITY LOCK: The reference files depict ONE specific person. Preserve that identity pixel-accurate in face and body:
+same bone structure, skin undertone, hair, facial hair, and the same clothing items and colors as in the references.
+Do not substitute a generic model. Lighting and background change; the person does not.
+`.trim();
 
 export function buildMasterPrompt(b: CharacterBible): string {
   const lines = [
@@ -141,7 +161,7 @@ export const REFERENCE_ANGLES: {
     label: "Face avant",
     icon: "↑",
     suffix:
-      "Full body, perfectly centered front view, standing straight, arms relaxed at sides, feet slightly apart, white studio background, even front lighting.",
+      "Full-body studio shot, dead-center frontal camera, subject standing tall, feet shoulder-width, arms relaxed at sides, neutral shoulders. Seamless white cyclorama (infinity curve) or pure white seamless paper; soft key + fill; ratio about 2:1 to minimize shadows under nose and chin; catchlights small and natural in both eyes. Critical: left and right sides of face must be symmetric in lens distortion only—not mirrored facial asymmetry removed.",
     aspectRatio: "portrait_4_3",
   },
   {
@@ -149,7 +169,7 @@ export const REFERENCE_ANGLES: {
     label: "Dos",
     icon: "↓",
     suffix:
-      "Full body from behind, exact 180° back view, standing straight, same outfit perfectly visible from back, white studio background.",
+      "Full-body, strict 180° rear view; camera at subject’s mid-back height. Same wardrobe read clearly: collar, seams, back pockets, shoe soles orientation. White seamless studio; even soft backlight rim for edge separation; no frontal face visible.",
     aspectRatio: "portrait_4_3",
   },
   {
@@ -157,7 +177,7 @@ export const REFERENCE_ANGLES: {
     label: "Profil gauche",
     icon: "←",
     suffix:
-      "Full body strict left side profile, exactly 90° angle, standing straight, white studio background, perfect side profile lighting.",
+      "Full-body, geometrically true 90° left profile (camera perpendicular to sagittal plane). Single clean profile silhouette; nose tip, lips, chin aligned on one plane; one eye visible as sliver only. Studio white seamless; narrow strip or gridded side light to carve cheek and jaw; preserve exact nose bridge height and lip projection from reference.",
     aspectRatio: "portrait_4_3",
   },
   {
@@ -165,7 +185,7 @@ export const REFERENCE_ANGLES: {
     label: "3/4 avant",
     icon: "↗",
     suffix:
-      "Full body front 3/4 angle, 45° slight body turn to the right, hands casually in pockets, confident relaxed pose, white studio background, slight cinematic crop.",
+      "Full-body three-quarter view: torso turned ~35–45° to camera right, head slightly counter-turned toward lens for eye contact. Hands in pockets or relaxed—no odd finger overlap. Same outfit wrinkles and fabric drape as references. White cyclorama; cinematic but still high-key catalog clarity; subtle directional key from camera left.",
     aspectRatio: "portrait_4_3",
   },
   {
@@ -173,7 +193,7 @@ export const REFERENCE_ANGLES: {
     label: "Portrait close-up",
     icon: "◎",
     suffix:
-      "Extreme portrait close-up, face and shoulders only, front view perfectly centered, neutral expression, razor-sharp focus on eyes and skin pores, white neutral background, beauty dish lighting.",
+      "Tight beauty / editorial portrait: face and upper shoulders only, frontal; both irises and catchlights tack sharp; visible skin micro-texture (no beauty blur). Beauty dish or large softbox very close; shallow depth but ears still plausible; background pure white or very light gray falloff. Lip color and skin undertone must match reference exactly.",
     aspectRatio: "square_hd",
   },
 ];
@@ -183,7 +203,18 @@ export function buildReferencePrompt(
   angle: ReferenceAngle,
 ): string {
   const config = REFERENCE_ANGLES.find((a) => a.id === angle)!;
-  return `${masterPrompt}\n\n${config.suffix}\n\n${NEGATIVE_SUFFIX}`;
+  const body = masterPrompt.trim();
+  return `${REFERENCE_IDENTITY_LOCK}
+
+Production-ready character specification (extract every cue; do not invent features not listed):
+${body}
+
+Shot and lighting brief:
+${config.suffix}
+
+${QUALITY_SUFFIX}
+
+${NEGATIVE_SUFFIX}`;
 }
 
 // ─── Scene Generator ─────────────────────────────────────────────────────────
@@ -265,18 +296,20 @@ export function buildScenePrompt(
   const lightingFinal = scene ? scene.lighting : lighting;
   const shotFinal = scene ? scene.shot : shot;
 
-  return `Use the reference images as the exact same real person — preserve face, skin, hair, body proportions, and outfit details.
+  return `${SCENE_IDENTITY_LOCK}
 
-Character (must match references exactly):
+Full character bible (match every line; wardrobe continuity mandatory):
 ${masterPrompt.trim()}
 
-Cinematic scene:
-The character is ${sceneDesc}.
+Scene action and blocking:
+The same person is ${sceneDesc}
 
-Camera: ${shotFinal}.
-Lighting: ${lightingFinal}.
-Style: cinematic, shallow depth of field, film grain, color graded,
-photorealistic, 8K, high production value, 35mm lens look.
+Cinematography:
+Camera / lens feel: ${shotFinal}. Spherical 35mm or 40mm cinematic portrait look unless scene demands wider; natural perspective, no fisheye.
+Lighting direction and mood: ${lightingFinal}. Motivated sources only—no random rim from nowhere. Preserve skin undertone under colored light.
+Grade: subtle halation on speculars allowed; fine grain; print-film color science; high dynamic range without crushed blacks or clipped neon unless diegetic.
+
+Final quality bar: photoreal live-action film still, IMAX-grade clarity, no AI sheen, no wax skin.
 
 ${NEGATIVE_SUFFIX}`;
 }

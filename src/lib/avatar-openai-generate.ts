@@ -3,15 +3,16 @@ import {
   openaiUploadBuffer,
 } from "@/lib/openai-avatar";
 
+/** Portrait default — override with OPENAI_AVATAR_IMAGE_SIZE=e.g. 1024x1024 for speed. */
 export const DEFAULT_AVATAR_IMAGE_SIZE =
-  process.env.OPENAI_AVATAR_IMAGE_SIZE ?? "1024x1024";
+  process.env.OPENAI_AVATAR_IMAGE_SIZE ?? "1024x1536";
 
-/** low | medium | high | auto — medium balances speed vs fidelity for edits. */
+/** low | medium | high | auto — default high for photorealistic edits; set medium locally for speed. */
 export function avatarEditQuality(): string | undefined {
-  const q = (process.env.OPENAI_AVATAR_EDIT_QUALITY ?? "medium").trim().toLowerCase();
+  const q = (process.env.OPENAI_AVATAR_EDIT_QUALITY ?? "high").trim().toLowerCase();
   if (q === "off" || q === "none") return undefined;
   if (q === "low" || q === "medium" || q === "high" || q === "auto") return q;
-  return "medium";
+  return "high";
 }
 
 export async function generateAvatarFromText(

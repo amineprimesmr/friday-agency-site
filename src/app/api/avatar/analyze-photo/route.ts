@@ -3,22 +3,36 @@ import Anthropic from "@anthropic-ai/sdk";
 
 export const maxDuration = 60;
 
-const ANALYSIS_PROMPT = `Analyze the visual design elements of this image to create a detailed character art prompt for a digital artist.
+const ANALYSIS_PROMPT = `You are a forensic-level visual describer for photorealistic image synthesis. Study the attached photo.
 
-Describe ALL visible elements in a single dense paragraph starting with "A [approximate age]-year-old [gender] character with":
-- Skin tone and texture (warm/cool/neutral undertone, specific shade)
-- Face shape, jawline, cheekbones, chin
-- Eyes: color, shape, distinctive features; eyebrows: thickness, arch, color
-- Nose, lips (fullness, color), overall expression
-- Hair: exact style, length, texture, color, styling details
-- Facial hair if any
-- ALL accessories: glasses (frame shape, material, color), earrings, other jewelry
-- Outfit: every visible garment with fabric, exact color, cut, fit
-- Body type and posture if visible
+Write ONE dense English paragraph (no bullet points, no preamble) that begins exactly:
+"A [approximate age]-year-old [gender] person with"
 
-End with: ", photorealistic, hyperrealistic, ultra-sharp detail, 8K resolution, professional studio photography, 85mm lens, f/2.0, perfect lighting, neutral white background."
+You MUST faithfully describe only what is visible—never invent accessories or clothing not in frame. Include where applicable:
 
-Output ONLY the description paragraph. No intro, no commentary.`;
+FACE & SKIN: exact skin undertone (warm/cool/neutral), shade, visible texture (pores, matte vs dewy), any moles/freckles/scars, asymmetry that defines identity.
+
+STRUCTURE: face shape; jaw width and angle; chin shape; cheekbone placement; nose bridge width, tip shape, nostril visibility in this angle.
+
+EYES & BROWS: iris color and limbal ring; eye shape; eyelid fold; eyebrow thickness, arch, color, grooming.
+
+MOUTH: lip fullness, color, philtrum; teeth visibility if any.
+
+HAIR: accurate length, part, texture (straight/wavy/coily), density, hairline shape, color, fading or edges if visible.
+
+FACIAL HAIR: exact pattern, length, color—or state cleanly if none.
+
+ACCESSORIES: eyewear (exact frame geometry, material, color, temple details); earrings/chain/piercings/watches—only if visible.
+
+WARDROBE: each garment with fabric (knit, denim, leather…), weave if apparent, exact colors, fit (tight/oversized), logos only if present.
+
+BODY & POSE: visible build, shoulder width, neck length, posture.
+
+AMBIENT: if background affects read (e.g. rim light on face), note it in one short clause at the end of the wardrobe section—not a separate paragraph.
+
+Closing clause (must be part of the same paragraph): tie to photoreal capture—editorial RAW still, natural color science, tack-sharp on eyes, authentic micro-detail, no beauty-filter smoothing.
+
+Output ONLY that single paragraph. No title, no quotes, no "Here is".`;
 
 export async function POST(req: NextRequest) {
   try {
@@ -40,7 +54,7 @@ export async function POST(req: NextRequest) {
 
     const response = await client.messages.create({
       model: "claude-haiku-4-5",
-      max_tokens: 800,
+      max_tokens: 1400,
       messages: [
         {
           role: "user",
