@@ -1,13 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import {
-  buildReferencePrompt,
-  REFERENCE_ANGLES,
-  REFERENCE_ANGLE_ORDER,
-  ReferenceAngle,
-} from "@/lib/avatar-prompts";
-import { readApiJson } from "@/lib/read-api-json";
+import { buildReferencePrompt, REFERENCE_ANGLES, REFERENCE_ANGLE_ORDER, ReferenceAngle } from "@/lib/avatar-prompts";
+import { requestAvatarImageGeneration } from "@/lib/avatar-image-client";
 
 interface Props {
   masterPrompt: string;
@@ -39,22 +34,11 @@ async function callGenerateImage(
   prompt: string,
   referenceFileIds: string[],
 ): Promise<{ imageUrl: string; outputFileId: string }> {
-  const res = await fetch("/api/avatar/generate-image", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      prompt,
-      referenceFileIds,
-    }),  });
-  const data = await readApiJson<{
-    imageUrl?: string;
-    outputFileId?: string;
-    error?: string;
-  }>(res);
-  if (!res.ok || !data.imageUrl || !data.outputFileId) {
-    throw new Error(data.error ?? "Generation failed");
+  const r = await requestAvatarImageGeneration(prompt, referenceFileIds);
+  if (!r.outputFileId) {
+    throw new Error("outputFileId manquant — vérifie la génération par édition (refs fichiers).");
   }
-  return { imageUrl: data.imageUrl, outputFileId: data.outputFileId };
+  return { imageUrl: r.imageUrl, outputFileId: r.outputFileId };
 }
 
 export function ReferenceSheet({
@@ -199,8 +183,8 @@ export function ReferenceSheet({
                     <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-violet-500" />
                     <span className="text-center text-xs text-white/30 px-2">
                       {prevCount > 0
-                        ? `Édition avec ${prevCount + 1} ref. fichier(s)…`
-                        : "Édition photo source…"}
+                        ? `Édition ${prevCount + 1} fichier(s) — génération serveur (polling)…`
+                        : "Édition photo source — génération serveur (polling)…"}
                     </span>
                   </div>
                 ) : url ? (

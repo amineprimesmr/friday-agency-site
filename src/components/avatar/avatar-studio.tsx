@@ -69,7 +69,7 @@ export function AvatarStudio() {
           Avatar Generator
         </h1>
         <p className="mt-3 text-sm text-white/40">
-          Upload une photo → analyse Claude → GPT Image 2 (éditions haute fidélité) → vidéo Kling.
+          Upload → analyse → génération image en <strong className="text-white/55">file async</strong> (Upstash + OpenAI) → vidéo Kling.
         </p>
       </div>
 

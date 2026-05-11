@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { buildScenePrompt, SCENE_PRESETS, ScenePreset } from "@/lib/avatar-prompts";
-import { readApiJson } from "@/lib/read-api-json";
+import { requestAvatarImageGeneration } from "@/lib/avatar-image-client";
 
 interface Props {
   masterPrompt: string;
@@ -58,18 +58,7 @@ export function SceneGenerator({
     setGeneratedImages([]);
     try {
       const promises = [0, 1].map(() =>
-        fetch("/api/avatar/generate-image", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            prompt: scenePrompt,
-            referenceFileIds: sceneReferenceFileIds,
-          }),
-        }).then(async (r) => {
-          const d = await readApiJson<{ imageUrl?: string; error?: string }>(r);
-          if (!r.ok) throw new Error(d.error ?? `HTTP ${r.status}`);
-          return d.imageUrl ?? null;
-        }),
+        requestAvatarImageGeneration(scenePrompt, sceneReferenceFileIds).then((out) => out.imageUrl),
       );
       const results = await Promise.all(promises);
       const valid = results.filter(Boolean) as string[];
@@ -199,7 +188,9 @@ export function SceneGenerator({
         disabled={!canGenerate || loading}
         className="w-full rounded-xl bg-violet-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-900/40 transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-40 active:scale-[0.98]"
       >
-        {loading ? "Génération des 2 variantes…" : "Générer 2 variantes"}
+        {loading
+          ? "Génération des 2 variantes (async, plusieurs min possible)…"
+          : "Générer 2 variantes"}
       </button>
 
       {generatedImages.length > 0 && (
