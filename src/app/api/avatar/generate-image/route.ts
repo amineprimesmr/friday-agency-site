@@ -45,7 +45,7 @@ async function generateWithResponses(
     body: JSON.stringify({
       model: "gpt-image-2",
       input: [{ role: "user", content }],
-      tools: [{ type: "image_generation", quality: "high", size, output_format: "url" }],
+      tools: [{ type: "image_generation", quality: "high", size, output_format: "png" }],
     }),
   });
 
@@ -62,11 +62,10 @@ async function generateWithResponses(
     }>;
   };
 
-  // Extract image URL from various possible response shapes
+  // result is base64 PNG data — wrap as data URL
   for (const item of data.output ?? []) {
     if (item.type === "image_generation_call" && item.result) {
-      // result is either a URL or base64
-      return item.result;
+      return `data:image/png;base64,${item.result}`;
     }
     for (const c of item.content ?? []) {
       if (c.url) return c.url;
