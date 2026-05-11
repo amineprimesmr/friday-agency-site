@@ -51,13 +51,13 @@ async function generateFromReferenceEdits(
   referenceFileIds: string[],
   apiKey: string,
 ): Promise<{ imageUrl: string; outputFileId: string }> {
+  // gpt-image-2 rejects input_fidelity (supported on some older GPT image edit models only).
   const body: Record<string, unknown> = {
     model: "gpt-image-2",
     prompt,
     n: 1,
     size,
     quality: "high",
-    input_fidelity: "high",
     output_format: "png",
     images: referenceFileIds.map((id) => ({ file_id: id })),
   };

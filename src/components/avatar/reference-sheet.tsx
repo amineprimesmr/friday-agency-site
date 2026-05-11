@@ -151,7 +151,7 @@ export function ReferenceSheet({
           <p className="text-sm font-semibold text-white/80">Photo de référence (upload OpenAI)</p>
           <p className="mt-1 text-xs text-white/45 leading-relaxed">
             Chaque angle appelle <strong className="text-white/55">GPT Image 2 /images/edits</strong> avec ta
-            photo en fichier + les rendus précédents (<code className="text-white/40">input_fidelity: high</code>) pour verrouiller l’identité.
+            photo en fichier + les rendus précédents (références multiples) pour verrouiller l’identité.
           </p>
           <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] text-white/30">
             {REFERENCE_ANGLE_ORDER.map((id, i) => {
