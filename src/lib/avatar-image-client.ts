@@ -45,6 +45,7 @@ export async function requestAvatarImageGeneration(
 async function pollAvatarImageJobUntilDone(
   jobId: string,
 ): Promise<{ imageUrl: string; outputFileId: string | undefined }> {
+  await new Promise((r) => setTimeout(r, 350));
   const deadline = Date.now() + MAX_WAIT_MS;
   while (Date.now() < deadline) {
     const r = await fetch(

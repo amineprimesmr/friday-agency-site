@@ -8,6 +8,7 @@ import { DEFAULT_AVATAR_IMAGE_SIZE, runAvatarImageGeneration } from "@/lib/avata
 /** Full worker budget after quick JSON response (Fluid / Pro typical). */
 export const maxDuration = 300;
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {

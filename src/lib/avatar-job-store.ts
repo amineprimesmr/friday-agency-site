@@ -44,11 +44,17 @@ export async function saveAvatarJob(jobId: string, job: AvatarImageJobRecord): P
 export async function loadAvatarJob(jobId: string): Promise<AvatarImageJobRecord | null> {
   const redis = getAvatarJobRedis();
   if (!redis) return null;
-  const raw = await redis.get<string>(avatarJobKey(jobId));
-  if (!raw || typeof raw !== "string") return null;
-  try {
-    return JSON.parse(raw) as AvatarImageJobRecord;
-  } catch {
-    return null;
+  const raw: unknown = await redis.get(avatarJobKey(jobId));
+  if (raw == null) return null;
+  if (typeof raw === "string") {
+    try {
+      return JSON.parse(raw) as AvatarImageJobRecord;
+    } catch {
+      return null;
+    }
   }
+  if (typeof raw === "object" && raw !== null && "status" in raw) {
+    return raw as AvatarImageJobRecord;
+  }
+  return null;
 }
