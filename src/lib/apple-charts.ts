@@ -326,11 +326,12 @@ export async function fetchRecentlyRanked(country = "us", limit = 10): Promise<A
 }
 
 export async function fetchCountryRankings(appId: string): Promise<CountryRanking[]> {
+  const canonicalId = String(appId);
   const results = await Promise.all(
     COUNTRIES.map(async (c) => {
       const apps = await fetchTopCharts(c.code, "top-free", 100);
-      const found = apps.find((a) => a.id === appId);
-      return { country: c.code, flag: c.flag, name: c.name, rank: found?.rank ?? null };
+      const idx = apps.findIndex((a) => String(a.id) === canonicalId);
+      return { country: c.code, flag: c.flag, name: c.name, rank: idx >= 0 ? idx + 1 : null };
     }),
   );
   return results;
@@ -382,6 +383,16 @@ export function timeAgo(dateStr: string): string {
 }
 
 /**
+ * Part relative dans le plateau Top gratuit **que nous chargeons** (`plateauSize` entrées, rang 1 en tête).
+ * Ce n’est pas une part de marché : c’est une façon de comparer visuellement les rangs (#1 → 100 %, #100 → 1 % avec 100 lignes).
+ */
+export function rankPresencePercent(rank: number, plateauSize = 100): number {
+  if (!Number.isFinite(rank) || plateauSize < 1) return 0;
+  const r = Math.min(Math.max(Math.round(rank), 1), plateauSize);
+  return Math.round(((plateauSize + 1 - r) / plateauSize) * 100);
+}
+
+/**
  * Estimations basées sur les benchmarks publics Sensor Tower / data.ai 2024.
  * Formule: downloads = BASE / rank^EXPONENT
  * Calibrée sur les données publiées dans leurs rapports annuels.
@@ -405,7 +416,12 @@ export function estimateMonthlyDownloads(rank: number, country = "us"): string {
   return formatMillions(base);
 }
 
-export function estimateMonthlyRevenue(rank: number, price = 0, categoryId = "", country = "us"): string {
+function computeMonthlyRevenueUsd(
+  rank: number,
+  price = 0,
+  categoryId = "",
+  country = "us",
+): number {
   const countryFactor: Record<string, number> = {
     us: 1.0, jp: 0.85, gb: 0.55, au: 0.40, de: 0.38,
     fr: 0.30, ca: 0.30, kr: 0.25, it: 0.20, es: 0.18,
@@ -414,18 +430,27 @@ export function estimateMonthlyRevenue(rank: number, price = 0, categoryId = "",
   const catMultiplier = CATEGORY_REVENUE_MULTIPLIER[categoryId] ?? 1.0;
   const factor = countryFactor[country] ?? 0.2;
 
-  let base: number;
+  const downloads = 2_500_000 * factor / Math.pow(rank, 0.82);
   if (price > 0) {
-    // Paid app: downloads × price × 0.7 (Apple cut)
-    const downloads = 2_500_000 * factor / Math.pow(rank, 0.82);
-    base = Math.round(downloads * price * 0.7);
-  } else {
-    // Free app: IAP + ads revenue model (SensorTower methodology)
-    // ARPU moyen app gratuite top-chart: ~$0.15-0.80/download selon catégorie
-    const downloads = 2_500_000 * factor / Math.pow(rank, 0.82);
-    const arpu = 0.25 * catMultiplier; // revenue per download
-    base = Math.round(downloads * arpu);
+    return Math.round(downloads * price * 0.7);
   }
+  const arpu = 0.25 * catMultiplier;
+  return Math.round(downloads * arpu);
+}
+
+/** Revenu mensuel estimé en USD (nombre brut, pour agrégations / graphiques). */
+export function estimateMonthlyRevenueUsd(
+  rank: number,
+  price = 0,
+  categoryId = "",
+  country = "us",
+): number {
+  if (!Number.isFinite(rank) || rank < 1) return 0;
+  return computeMonthlyRevenueUsd(rank, price, categoryId, country);
+}
+
+export function estimateMonthlyRevenue(rank: number, price = 0, categoryId = "", country = "us"): string {
+  const base = computeMonthlyRevenueUsd(rank, price, categoryId, country);
   return formatMillionsDollar(base);
 }
 

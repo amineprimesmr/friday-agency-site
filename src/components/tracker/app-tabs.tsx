@@ -5,7 +5,6 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 const TABS = [
   { id: "overview", label: "Vue d'ensemble" },
   { id: "ads", label: "Publicités" },
-  { id: "rankings", label: "Classements" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];

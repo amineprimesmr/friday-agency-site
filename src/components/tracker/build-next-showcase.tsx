@@ -96,17 +96,19 @@ export function BuildNextShowcase({ videoSrcs }: { videoSrcs: string[] }) {
     let paused = false;
     let running = false;
 
+    const scrollEl = el;
+
     function isCarouselMode() {
-      return el.scrollWidth > el.clientWidth + 6;
+      return scrollEl.scrollWidth > scrollEl.clientWidth + 6;
     }
 
     function tick(now: number) {
       if (!running) return;
       if (!paused && lastTime !== null) {
         const dt = Math.min(now - lastTime, 100);
-        el.scrollLeft += SPEED * dt;
-        if (el.scrollLeft >= el.scrollWidth - el.clientWidth - 1) {
-          el.scrollLeft = 0;
+        scrollEl.scrollLeft += SPEED * dt;
+        if (scrollEl.scrollLeft >= scrollEl.scrollWidth - scrollEl.clientWidth - 1) {
+          scrollEl.scrollLeft = 0;
         }
       }
       lastTime = paused ? null : now;
@@ -132,7 +134,7 @@ export function BuildNextShowcase({ videoSrcs }: { videoSrcs: string[] }) {
             else stop();
           })
         : null;
-    ro?.observe(el);
+    ro?.observe(scrollEl);
 
     if (isCarouselMode()) start();
 
@@ -143,15 +145,15 @@ export function BuildNextShowcase({ videoSrcs }: { videoSrcs: string[] }) {
       else { paused = false; }
     };
 
-    el.addEventListener("touchstart", onTouchStart, { passive: true });
-    el.addEventListener("touchend", onTouchEnd, { passive: true });
+    scrollEl.addEventListener("touchstart", onTouchStart, { passive: true });
+    scrollEl.addEventListener("touchend", onTouchEnd, { passive: true });
     document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
       stop();
       ro?.disconnect();
-      el.removeEventListener("touchstart", onTouchStart);
-      el.removeEventListener("touchend", onTouchEnd);
+      scrollEl.removeEventListener("touchstart", onTouchStart);
+      scrollEl.removeEventListener("touchend", onTouchEnd);
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [reduceMotion, videoSrcs]);

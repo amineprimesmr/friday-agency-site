@@ -16,6 +16,15 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: APPLE_MZSTATIC_PATTERNS,
   },
+  /** Autoriser l’embedding cross-origin des snippets /embed/* dans des iframes (CSP niveau cadre uniquement). */
+  async headers() {
+    return [
+      {
+        source: "/embed/:path*",
+        headers: [{ key: "Content-Security-Policy", value: "frame-ancestors *" }],
+      },
+    ];
+  },
   async redirects() {
     return [
       { source: "/", destination: "/tracker", permanent: true },
