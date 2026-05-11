@@ -14,7 +14,6 @@ async function generateImage(prompt: string, size: string, apiKey: string): Prom
       prompt,
       n: 1,
       size,
-      quality: "high",
     }),
   });
 
