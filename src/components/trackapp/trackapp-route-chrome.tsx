@@ -11,6 +11,8 @@ type Props = Readonly<{
   loggedIn: boolean;
   email?: string | undefined;
   signOutHref: string;
+  planUnlocked: boolean;
+  stripeReady: boolean;
 }>;
 
 function isWorkspacePath(pathname: string): boolean {
@@ -22,13 +24,26 @@ function isWorkspacePath(pathname: string): boolean {
   );
 }
 
-export function TrackappRouteChrome({ children, loggedIn, email, signOutHref }: Props) {
+export function TrackappRouteChrome({
+  children,
+  loggedIn,
+  email,
+  signOutHref,
+  planUnlocked,
+  stripeReady,
+}: Props) {
   const pathname = usePathname() ?? "";
   const workspace = isWorkspacePath(pathname);
 
   if (workspace) {
     return (
-      <TrackappFidelityWorkspaceShell loggedIn={loggedIn} email={email} signOutHref={signOutHref}>
+      <TrackappFidelityWorkspaceShell
+        loggedIn={loggedIn}
+        email={email}
+        signOutHref={signOutHref}
+        planUnlocked={planUnlocked}
+        stripeReady={stripeReady}
+      >
         {children}
       </TrackappFidelityWorkspaceShell>
     );

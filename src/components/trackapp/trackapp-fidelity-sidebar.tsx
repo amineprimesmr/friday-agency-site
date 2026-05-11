@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useState } from "react";
 import { motion } from "framer-motion";
 
+import { formatTrialMsLeft } from "@/components/trackapp/trackapp-trial-countdown";
 import { cn } from "@/lib/utils";
 
 const IconDashboard = () => (
@@ -51,10 +52,18 @@ export function TrackappFidelitySidebar({
   pathname,
   mobileMenuOpen,
   onNavigate,
+  showTrialCard,
+  trialMsLeft,
+  stripeReady,
+  onSubscribeCheckout,
 }: Readonly<{
   pathname: string;
   mobileMenuOpen: boolean;
   onNavigate?: () => void;
+  showTrialCard: boolean;
+  trialMsLeft: number;
+  stripeReady: boolean;
+  onSubscribeCheckout: () => void;
 }>) {
   const [isHovered, setIsHovered] = useState(false);
   const [open, setOpen] = useState(false);
@@ -64,6 +73,8 @@ export function TrackappFidelitySidebar({
     const app = document.getElementById("app-app");
     if (app) app.dataset.sidebarExpanded = ex ? "true" : "false";
   }, []);
+
+  const { compact } = formatTrialMsLeft(trialMsLeft);
 
   return (
     <motion.aside
@@ -92,6 +103,16 @@ export function TrackappFidelitySidebar({
       <span id="app-business-name" className="app-business-name-hidden" aria-hidden="true">
         Trackapp
       </span>
+
+      <div className="app-sidebar-brand">
+        <Link href="/trackapp/espace" className="app-sidebar-logo" aria-label="Trackapp" onClick={() => onNavigate?.()}>
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-[12px] font-extrabold text-white">
+            TA
+          </span>
+          <span className="app-sidebar-logo-text">Trackapp</span>
+        </Link>
+      </div>
+
       <nav className="app-sidebar-nav flex-1 overflow-y-auto px-3 py-4" aria-label="Navigation principale">
         {LINKS.map((link) => {
           const Icon = link.Icon;
@@ -118,6 +139,7 @@ export function TrackappFidelitySidebar({
         })}
       </nav>
       <div className="app-sidebar-footer border-t border-[var(--app-sidebar-border)] px-5 py-4">
+        <span id="app-user-email" className="visually-hidden" aria-hidden="true" />
         <Link
           href="/trackapp"
           data-section="accueil"
@@ -133,6 +155,26 @@ export function TrackappFidelitySidebar({
           </span>
           <span className="app-sidebar-link-text">Accueil Trackapp</span>
         </Link>
+
+        <div
+          id="app-sidebar-trial-subscribe-card"
+          className={showTrialCard ? "app-sidebar-trial-subscribe-card" : "app-sidebar-trial-subscribe-card hidden"}
+          aria-hidden={!showTrialCard}
+        >
+          <p id="app-sidebar-trial-subscribe-remaining" className="app-sidebar-trial-subscribe-card__remaining">
+            Accès complet · {compact}
+          </p>
+          <p className="app-sidebar-trial-subscribe-card__title">Débloquer tout le playbook</p>
+          <button
+            type="button"
+            id="app-sidebar-trial-subscribe-btn"
+            className="app-sidebar-trial-subscribe-card__button"
+            disabled={!stripeReady}
+            onClick={onSubscribeCheckout}
+          >
+            Paiement sécurisé
+          </button>
+        </div>
       </div>
     </motion.aside>
   );
