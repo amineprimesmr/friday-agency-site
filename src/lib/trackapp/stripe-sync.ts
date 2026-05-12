@@ -36,13 +36,18 @@ export async function persistTrackappPremium(opts: {
   if (!admin) return false;
 
   const unlockedAtIso = new Date().toISOString();
-  await admin.from("trackapp_profiles").upsert({
+  const { error } = await admin.from("trackapp_profiles").upsert({
     id: opts.userId,
     plan_unlocked_at: unlockedAtIso,
     stripe_customer_id: opts.stripeCustomerId ?? null,
     stripe_subscription_id: opts.stripeSubscriptionId ?? null,
     updated_at: unlockedAtIso,
   });
+
+  if (error) {
+    console.warn("[trackapp-premium-persist]", error);
+    return false;
+  }
 
   return true;
 }
@@ -75,11 +80,20 @@ export async function unlockTrackappFromCheckoutSession(sess: Stripe.Checkout.Se
   });
 }
 
+export function isTrackappPaidCheckoutSession(sess: Stripe.Checkout.Session): boolean {
+  const paid =
+    sess.payment_status === "paid"
+    || sess.payment_status === "no_payment_required"
+    || sess.status === "complete";
+
+  return sess.metadata?.product === "trackapp_full_playbook" && paid;
+}
+
 export async function lockTrackappOnSubscriptionEnded(subscription: Stripe.Subscription): Promise<void> {
   const admin = createAdminClient();
   if (!admin) return;
 
-  await admin
+  const { error } = await admin
     .from("trackapp_profiles")
     .update({
       plan_unlocked_at: null,
@@ -87,4 +101,8 @@ export async function lockTrackappOnSubscriptionEnded(subscription: Stripe.Subsc
       updated_at: new Date().toISOString(),
     })
     .eq("stripe_subscription_id", subscription.id);
+
+  if (error) {
+    throw new Error(`Unable to lock Trackapp subscription ${subscription.id}: ${error.message}`);
+  }
 }

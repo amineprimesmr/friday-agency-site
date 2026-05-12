@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 
-import { unlockTrackappFromCheckoutSession, lockTrackappOnSubscriptionEnded } from "@/lib/trackapp/stripe-sync";
+import {
+  isTrackappPaidCheckoutSession,
+  unlockTrackappFromCheckoutSession,
+  lockTrackappOnSubscriptionEnded,
+} from "@/lib/trackapp/stripe-sync";
 import { getStripe } from "@/lib/stripe";
 
 export async function POST(req: Request) {
@@ -29,7 +33,10 @@ export async function POST(req: Request) {
   try {
     if (evt.type === "checkout.session.completed") {
       const sess = evt.data.object as Stripe.Checkout.Session;
-      await unlockTrackappFromCheckoutSession(sess);
+      const unlocked = await unlockTrackappFromCheckoutSession(sess);
+      if (isTrackappPaidCheckoutSession(sess) && !unlocked) {
+        throw new Error(`Unable to unlock Trackapp checkout session ${sess.id}`);
+      }
     }
 
     if (evt.type === "customer.subscription.deleted") {
@@ -38,6 +45,7 @@ export async function POST(req: Request) {
     }
   } catch (hookErr) {
     console.warn("[stripe-webhook-trackapp]", hookErr);
+    return NextResponse.json({ error: "Webhook processing failed" }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });
