@@ -99,7 +99,7 @@ export async function POST(req: Request) {
   if (!persisted) {
     return NextResponse.json(
       {
-        detail: "SUPABASE_SERVICE_ROLE_KEY absent : impossible de consigner la souscription Trackapp.",
+        detail: "Impossible de consigner la souscription Trackapp. Réessayez dans un instant.",
       },
       { status: 503 },
     );
