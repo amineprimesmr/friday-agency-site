@@ -42,6 +42,94 @@ export default function TikTokPortalHelperPage() {
         <strong className="text-white/80">200</strong> sur la prod avant soumission.
       </p>
 
+      <section className="mt-10 space-y-4 rounded-xl border border-white/12 bg-white/[0.04] p-5">
+        <h2 className="text-sm font-bold uppercase tracking-wide text-emerald-200/90">
+          Commercial Content API — ce que dit la doc officielle
+        </h2>
+        <p className="text-[13px] text-white/55">
+          Résumé de{" "}
+          <a
+            href="https://developers.tiktok.com/doc/commercial-content-api-getting-started"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-violet-300 underline-offset-2 hover:underline"
+          >
+            Getting Started
+          </a>{" "}
+          +{" "}
+          <a
+            href="https://developers.tiktok.com/products/commercial-content-api"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-violet-300 underline-offset-2 hover:underline"
+          >
+            produit Commercial Content API
+          </a>
+          . Trackapp implémente déjà le flux technique (serveur) dans{" "}
+          <code className="rounded bg-black/30 px-1 text-[11px]">src/lib/tiktok-ad-library.ts</code> — à brancher après approbation
+          TikTok.
+        </p>
+        <ol className="list-decimal space-y-2 ps-5 text-[13px] text-white/70 marker:text-white/45">
+          <li>
+            Compte développeur :{" "}
+            <a href="https://developers.tiktok.com/signup" className="text-violet-300 underline-offset-2 hover:underline" target="_blank" rel="noopener noreferrer">
+              inscription
+            </a>
+            .
+          </li>
+          <li>
+            <strong className="text-white/85">Demande d&apos;accès obligatoire</strong> : remplis le formulaire officiel{" "}
+            <a
+              href="https://developers.tiktok.com/application/commercial-content-api"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-[12px] text-sky-300 underline-offset-2 hover:underline"
+            >
+              developers.tiktok.com/application/commercial-content-api
+            </a>
+            . Réponse sous ~2 jours ouvrés (email possible depuis commercial-research-questions@tiktok.com).
+          </li>
+          <li>
+            Une fois <strong className="text-white/85">approuvé</strong> : un{" "}
+            <strong className="text-white/85">research client</strong> est créé. Va sur{" "}
+            <a href="https://developers.tiktok.com/research/" target="_blank" rel="noopener noreferrer" className="text-violet-300 underline-offset-2 hover:underline">
+              developers.tiktok.com/research/
+            </a>
+            , ouvre ton projet → récupère <strong className="text-white/85">Client key</strong> +{" "}
+            <strong className="text-white/85">Client secret</strong> (icône œil).
+          </li>
+          <li>
+            <strong className="text-white/85">Jeton</strong> : obtention via OAuth{" "}
+            <code className="rounded bg-black/30 px-1 text-[11px]">client_credentials</code> (voir{" "}
+            <a href="https://developers.tiktok.com/doc/client-access-token-management" target="_blank" rel="noopener noreferrer" className="text-violet-300 underline-offset-2 hover:underline">
+              Client Access Token Management
+            </a>
+            ). Trackapp le fait automatiquement avec{" "}
+            <code className="rounded bg-black/30 px-1 text-[11px]">TIKTOK_CLIENT_KEY</code> /{" "}
+            <code className="rounded bg-black/30 px-1 text-[11px]">TIKTOK_CLIENT_SECRET</code>.
+          </li>
+          <li>
+            <strong className="text-white/85">Requête ads</strong> :{" "}
+            <code className="rounded bg-black/30 px-1 text-[11px]">POST</code>{" "}
+            <code className="break-all rounded bg-black/30 px-1 text-[11px]">
+              https://open.tiktokapis.com/v2/research/adlib/ad/query/
+            </code>{" "}
+            avec header <code className="rounded bg-black/30 px-1 text-[11px]">Authorization: Bearer &lt;token&gt;</code>, corps JSON{" "}
+            <code className="rounded bg-black/30 px-1 text-[11px]">filters.ad_published_date_range</code>,{" "}
+            <code className="rounded bg-black/30 px-1 text-[11px]">country_code</code>,{" "}
+            <code className="rounded bg-black/30 px-1 text-[11px]">search_term</code>, pagination{" "}
+            <code className="rounded bg-black/30 px-1 text-[11px]">search_id</code>. Identique à ton endpoint{" "}
+            <code className="rounded bg-black/30 px-1 text-[11px]">/api/tiktok/ad-library</code>.
+          </li>
+        </ol>
+        <p className="rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-[12px] text-amber-50/95">
+          TikTok indique qu&apos;en phase actuelle les données commerciales exposées concernent surtout les pubs ayant touché l&apos;
+          <strong>UE</strong> ; élargissement géographique annoncé progressivement. Pour les tests API, privilégie un{" "}
+          <code className="rounded bg-black/25 px-1">country_code</code> UE (ex. <code className="rounded bg-black/25 px-1">FR</code>
+          , <code className="rounded bg-black/25 px-1">IT</code>) comme dans leurs exemples.
+        </p>
+      </section>
+
       <section className="mt-10 space-y-3">
         <h2 className="text-sm font-bold uppercase tracking-wide text-white/55">App details — Description (≤120)</h2>
         <pre className="overflow-x-auto whitespace-pre-wrap rounded-xl border border-white/12 bg-black/40 p-4 text-[13px] text-emerald-100/90">
