@@ -156,7 +156,7 @@ export function PromoPanel({
       <div className="ta-auth-promo-bg">
         {hero ?
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element — configurateur */}
+            {/* eslint-disable-next-line @next/next/no-img-element -- URL hero dynamique */}
             <img src={hero} alt="" className="h-full w-full object-cover" />
             <div className="ta-auth-promo-grad" />
           </>

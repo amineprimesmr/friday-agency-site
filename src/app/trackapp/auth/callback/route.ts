@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
   if (!code || !supabaseUrl || !anon) return failRedirect;
 
-  let response = NextResponse.redirect(new URL(nextPath, origin));
+  const response = NextResponse.redirect(new URL(nextPath, origin));
 
   const supabase = createServerClient(supabaseUrl, anon, {
     cookies: {

@@ -109,6 +109,8 @@ function FinTapStepsScrollDesktop({ measureRef }: { measureRef: MutableRefObject
     const section = measureRef?.current;
     if (!section) return;
 
+    const panelEl = panelRef.current;
+
     const cardEls = (): HTMLElement[] =>
       Array.from(
         section.querySelectorAll(".fintap-steps-scroll__desktop-row .fintap-steps-scroll__right article"),
@@ -202,10 +204,9 @@ function FinTapStepsScrollDesktop({ measureRef }: { measureRef: MutableRefObject
       window.removeEventListener("resize", schedule);
       window.visualViewport?.removeEventListener("resize", schedule);
       ro?.disconnect();
-      const panel = panelRef.current;
-      if (panel) {
-        panel.classList.remove("is-left-pinned", "is-left-docked");
-        panel.style.cssText = "";
+      if (panelEl) {
+        panelEl.classList.remove("is-left-pinned", "is-left-docked");
+        panelEl.style.cssText = "";
       }
     };
   }, [measureRef, rightH]);
