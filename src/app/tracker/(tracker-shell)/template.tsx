@@ -10,14 +10,21 @@ export default function TrackerTemplate({ children }: { children: React.ReactNod
   return (
     <motion.div
       key={pathname}
-      initial={reducedMotion ? false : { opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={
+        reducedMotion
+          ? false
+          : { opacity: 0, y: 6 }
+      }
+      animate={{
+        opacity: 1,
+        y: 0,
+      }}
       transition={
         reducedMotion
           ? { duration: 0 }
-          : { type: "spring", stiffness: 420, damping: 38, mass: 0.9 }
+          : { type: "spring", stiffness: 520, damping: 38, mass: 0.85 }
       }
-      className="will-change-[transform,opacity]"
+      className="will-change-[opacity,transform]"
     >
       {children}
     </motion.div>

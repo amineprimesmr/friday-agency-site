@@ -2,32 +2,39 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { TrackerNavLink } from "@/components/tracker/tracker-navigation";
 import {
   fetchAppDetail,
   fetchCountryRankings,
-  fetchCategoryApps,
-  fetchSensorTowerApp,
   COUNTRY_MAP,
   rankPresencePercent,
-  estimateMonthlyRevenueUsd,
-  type CountryCode,
-  type CountryRanking,
-  type AppEntry,
   formatRatingCount,
   formatBytes,
   estimateMonthlyDownloads,
   estimateMonthlyRevenue,
   timeAgo,
   daysSince,
+  normalizeTrackerCountryParam,
+  type CountryCode,
+  type CountryRanking,
+  type AppEntry,
 } from "@/lib/apple-charts";
-import { CategoryRevenueShare } from "@/components/tracker/category-revenue-share";
+import { loadTrackerAppEmbedContext } from "@/lib/tracker-app-embed-data";
+import {
+  buildAppStoreTrackerSimilarEmbedSrc,
+  buildEmbedCountriesIframeSrc,
+  buildEmbedMarketIframeSrc,
+} from "@/lib/embed-url";
 import { AppMetricCards } from "@/components/tracker/app-metric-cards";
-import { WatchButton } from "@/components/tracker/watch-button";
 import { AppScreenshots } from "@/components/tracker/app-screenshots";
 import { AppCreatives } from "@/components/tracker/app-creatives";
-import { AppAds } from "@/components/tracker/app-ads";
+import { AdIntelligenceHub, SimilarShopsCarousel } from "@/components/tracker/ad-intelligence-hub";
+import { extractSocialProfiles } from "@/lib/social-presence";
+import type { AdIntelPlatform } from "@/components/tracker/app-ads";
+
+/** Meta (Ad Library) + TikTok Research API (Commercial Content / ad lib) — clés dans .env.local. */
+const AD_INTEL_PLATFORMS_PHASE1: AdIntelPlatform[] = ["meta", "tiktok"];
 import { AppTabs } from "@/components/tracker/app-tabs";
-import { EmbedCountriesModalTrigger } from "@/components/tracker/embed-countries-modal";
 import { Suspense } from "react";
 
 export const revalidate = 900;
@@ -42,8 +49,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const app = await fetchAppDetail(id);
   if (!app) return {};
   return {
-    title: `${app.name} — App Intelligence · App Store Tracker`,
-    description: `Classements, estimations téléchargements & revenus, publicités Meta/TikTok. ${app.description?.slice(0, 120)}`,
+    title: `${app.name} — App Store Tracker`,
+    description: `Classements App Store et aperçu marketing. ${app.description?.slice(0, 120)}`,
   };
 }
 
@@ -88,6 +95,32 @@ function shortFreshnessBadge(dateStr: string): string | undefined {
 }
 
 /* ── Sidebar panels ─────────────────────────────────────────────────────────── */
+
+function CountryRankingsPanelSkeleton() {
+  return (
+    <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-5">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="tracker-shimmer h-3 w-40 rounded-full" />
+        <div className="tracker-shimmer h-5 w-16 rounded-full opacity-70" />
+      </div>
+      <div className="space-y-2">
+        {Array.from({ length: 8 }, (_, i) => (
+          <div key={i} className="flex items-center gap-3 rounded-xl px-3 py-2.5">
+            <div className="tracker-shimmer size-4 shrink-0 rounded opacity-60" />
+            <div className="tracker-shimmer h-3 flex-1 max-w-[7rem] rounded opacity-50" />
+            <div className="tracker-shimmer ml-auto h-5 w-10 shrink-0 rounded-full opacity-40" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+async function CountryRankingsAside({ appId }: { appId: string }) {
+  const countryRankings = await fetchCountryRankings(appId);
+  const rankedCount = countryRankings.filter((r) => r.rank !== null).length;
+  return <CountryRankingsPanel rankings={countryRankings} rankedCount={rankedCount} />;
+}
 
 function CountryRankingsPanel({ rankings, rankedCount }: { rankings: CountryRanking[]; rankedCount: number }) {
   const sorted = [...rankings].sort((a, b) => {
@@ -142,7 +175,7 @@ function CountryRankingsPanel({ rankings, rankedCount }: { rankings: CountryRank
 function CompetitorsPanel({ apps, currentId, country, category }: {
   apps: AppEntry[];
   currentId: string;
-  country: string;
+  country: CountryCode;
   category: string;
 }) {
   return (
@@ -153,7 +186,7 @@ function CompetitorsPanel({ apps, currentId, country, category }: {
       </div>
       <div className="space-y-1.5">
         {apps.map((app) => (
-          <Link
+          <TrackerNavLink
             key={app.id}
             href={`/tracker/apps/${app.id}?country=${country}`}
             className={`group flex items-center gap-3 rounded-xl px-3 py-2 transition hover:bg-white/[0.06] ${app.id === currentId ? "bg-white/[0.08]" : ""}`}
@@ -172,7 +205,7 @@ function CompetitorsPanel({ apps, currentId, country, category }: {
               {app.name}
             </span>
             <span className="shrink-0 text-[11px] text-white/30">{estimateMonthlyDownloads(app.rank, country)}</span>
-          </Link>
+          </TrackerNavLink>
         ))}
         {apps.length === 0 && (
           <p className="py-6 text-center text-xs text-white/25">Aucun concurrent trouvé</p>
@@ -186,65 +219,35 @@ function CompetitorsPanel({ apps, currentId, country, category }: {
 
 export default async function AppDetailPage({ params, searchParams }: PageProps) {
   const { id } = await params;
-  const { country = "us", tab = "overview" } = await searchParams;
+  const sp = await searchParams;
+  const country = normalizeTrackerCountryParam(sp.country);
+  const tab = sp.tab ?? "overview";
 
-  const [app, countryRankings, competitors, stData] = await Promise.all([
-    fetchAppDetail(id, country as CountryCode),
-    fetchCountryRankings(id),
-    fetchCategoryApps("", country, id, 12),
-    fetchSensorTowerApp(id),
-  ]);
+  const ctx = await loadTrackerAppEmbedContext(id, country as CountryCode);
+  if (!ctx) notFound();
 
-  if (!app) notFound();
+  const {
+    app,
+    sidebarApps,
+    overallRank,
+    displayRank,
+    rankHeroMode,
+    aggregateMetrics: agg,
+  } = ctx;
 
-  const categoryPeers = await fetchCategoryApps(app.primaryGenreId, country, id, 28);
-  const sidebarApps = categoryPeers.length >= 5 ? categoryPeers.slice(0, 12) : competitors;
+  const useAggregateMetrics = Boolean(
+    agg && agg.downloadsString !== "—" && agg.revenueString !== "—",
+  );
 
-  const currentRanking = countryRankings.find((r) => r.country === country);
-  const currentRank = currentRanking?.rank ?? null;
-
-  let mergedForMarket = [...categoryPeers];
-  if (currentRank !== null && !mergedForMarket.some((p) => p.id === id)) {
-    mergedForMarket = [
-      {
-        id: app.id,
-        name: app.name,
-        artworkUrl: app.artworkUrl,
-        artistName: app.artistName,
-        category: app.primaryGenreName,
-        categoryId: app.primaryGenreId,
-        url: app.trackViewUrl,
-        releaseDate: app.releaseDate,
-        rank: currentRank,
-      },
-      ...mergedForMarket,
-    ];
-  }
-
-  const marketRowsRaw = mergedForMarket.map((peer) => {
-    const gid = peer.categoryId || app.primaryGenreId;
-    const price = peer.id === app.id ? app.price : 0;
-    const revenueUsd = estimateMonthlyRevenueUsd(peer.rank, price, gid, country);
-    return {
-      id: peer.id,
-      name: peer.name,
-      artworkUrl: peer.artworkUrl,
-      rank: peer.rank,
-      revenueUsd,
-      sharePct: 0,
-    };
+  const embedCountriesSrc = buildEmbedCountriesIframeSrc(id, {
+    theme: "dark",
+    view: "list",
+    country,
   });
-  const totalMarketUsd = marketRowsRaw.reduce((s, r) => s + r.revenueUsd, 0);
-  const marketRows = marketRowsRaw.map((r) => ({
-    ...r,
-    sharePct: totalMarketUsd > 0 ? (r.revenueUsd / totalMarketUsd) * 100 : 0,
-  }));
+  const embedSimilarSrc = buildAppStoreTrackerSimilarEmbedSrc(id, { theme: "system", country });
+  const embedMarketSrc = buildEmbedMarketIframeSrc(id, { theme: "dark", country });
 
   const countryData = COUNTRY_MAP[country as CountryCode];
-  const rankedCount = countryRankings.filter((r) => r.rank !== null).length;
-
-  const now = new Date();
-  const monthLabel = now.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
   const ageYears = app.releaseDate ? Math.floor(daysSince(app.releaseDate) / 365) : null;
 
   const activeTab: "overview" | "ads" = tab === "ads" ? "ads" : "overview";
@@ -253,6 +256,8 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
     app.currentVersionReleaseDate && app.averageUserRating > 0
       ? shortFreshnessBadge(app.currentVersionReleaseDate)
       : undefined;
+
+  const detectedSocial = extractSocialProfiles(app.description, app.releaseNotes ?? "");
 
   return (
     <div className="mx-auto max-w-[1380px] px-4 py-8 sm:px-6">
@@ -269,7 +274,6 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
           <span>/</span>
           <span className="text-white/55">{app.name}</span>
         </nav>
-        <EmbedCountriesModalTrigger appId={id} appName={app.name} />
       </div>
 
       {/* Hero : flux uniquement — plus de badges en absolute sur le titre */}
@@ -291,9 +295,8 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
               prefetch={false}
               className="rounded-full bg-violet-600/90 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-white shadow-[0_8px_30px_-6px_rgba(124,58,237,.45)] hover:bg-violet-500"
             >
-              Copier cette app avec Trackapp
+              Copier cette app pour le workspace
             </Link>
-            <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-400/92">Intelligence boutique</span>
           </div>
         </header>
 
@@ -312,7 +315,7 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
             <div className="min-w-0 flex-1 space-y-3">
               <div>
                 <h1 className="text-balance text-2xl font-bold leading-tight tracking-tight text-white sm:text-3xl">{app.name}</h1>
-                <Link
+                <TrackerNavLink
                   href={`/tracker/developer/${encodeURIComponent(app.artistName)}?country=${country}`}
                   className="mt-1 inline-flex max-w-full items-center gap-1 text-sm text-sky-300/95 transition hover:text-sky-200 break-words"
                 >
@@ -320,7 +323,7 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
                   <span aria-hidden className="shrink-0 text-xs opacity-75">
                     ↗
                   </span>
-                </Link>
+                </TrackerNavLink>
               </div>
 
               <div className="flex flex-wrap gap-2">
@@ -366,7 +369,6 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
           </div>
 
           <div className="flex w-full shrink-0 flex-col gap-2 sm:flex-row sm:flex-wrap lg:flex-col lg:items-stretch lg:justify-start lg:w-56 xl:w-[13.5rem]">
-            <WatchButton id={app.id} name={app.name} artworkUrl={app.artworkUrl ?? ""} category={app.primaryGenreName} />
             {app.trackViewUrl ? (
               <a
                 href={app.trackViewUrl}
@@ -377,20 +379,26 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
                 Voir sur App Store ↗
               </a>
             ) : null}
-            <Link
+            <TrackerNavLink
               href={`/tracker/developer/${encodeURIComponent(app.artistName)}?country=${country}`}
               className="flex items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/[0.06] px-4 py-2.5 text-center text-sm font-medium text-white/75 transition hover:border-white/22 hover:bg-white/[0.1] hover:text-white"
             >
               Profil développeur
-            </Link>
+            </TrackerNavLink>
           </div>
         </div>
 
         <div className="mt-8 border-t border-white/[0.07] pt-6 sm:mt-10 sm:pt-8">
           <AppMetricCards
-            rankMain={currentRank ? `#${currentRank}` : "—"}
-            rankSubtitle={`Top Gratuit · ${countryData?.name ?? country.toUpperCase()}`}
-            showRankLive={currentRank !== null}
+            rankMain={displayRank !== null ? `#${displayRank}` : "—"}
+            rankSubtitle={
+              rankHeroMode === "overall"
+                ? `Top gratuit · ${countryData?.name ?? country.toUpperCase()}`
+                : rankHeroMode === "genre"
+                  ? `${app.primaryGenreName} · dans le top 100 gratuit · ${countryData?.name ?? country.toUpperCase()}`
+                  : `Hors top 100 gratuit · ${countryData?.name ?? country.toUpperCase()}`
+            }
+            showRankLive={rankHeroMode === "overall"}
             ratingsMain={app.averageUserRating > 0 ? app.averageUserRating.toFixed(1) : "—"}
             ratingsSubtitle={
               app.averageUserRating > 0
@@ -399,25 +407,25 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
             }
             ratingsFreshBadge={notesFreshBadge}
             downloadsMain={
-              stData
-                ? stData.downloadsString.toUpperCase()
-                : currentRank
-                  ? estimateMonthlyDownloads(currentRank, country)
+              useAggregateMetrics && agg
+                ? agg.downloadsString.toUpperCase()
+                : overallRank !== null
+                  ? estimateMonthlyDownloads(overallRank, country)
                   : "—"
             }
-            downloadsSubtitle={`/mois · ${stData ? "données réelles" : "estimation"}`}
-            downloadsSourceLabel={stData ? "⚡ SensorTower · Monde" : `Estimation · ${monthLabel}`}
-            downloadsSourceAccent={Boolean(stData)}
+            downloadsSubtitle="/mois"
+            downloadsSourceLabel={useAggregateMetrics ? "Agrégé · monde" : null}
+            downloadsSourceAccent={useAggregateMetrics}
             revenueMain={
-              stData
-                ? stData.revenueString.toUpperCase()
-                : currentRank
-                  ? estimateMonthlyRevenue(currentRank, app.price, app.primaryGenreId, country)
+              useAggregateMetrics && agg
+                ? agg.revenueString.toUpperCase()
+                : overallRank !== null
+                  ? estimateMonthlyRevenue(overallRank, app.price, app.primaryGenreId, country)
                   : "—"
             }
-            revenueSubtitle={`/mois · ${stData ? "données réelles" : "estimation"}`}
-            revenueSourceLabel={stData ? "⚡ SensorTower · Monde" : `Estimation · ${monthLabel}`}
-            revenueSourceAccent={Boolean(stData)}
+            revenueSubtitle="/mois"
+            revenueSourceLabel={useAggregateMetrics ? "Agrégé · monde" : null}
+            revenueSourceAccent={useAggregateMetrics}
           />
         </div>
       </div>
@@ -441,58 +449,6 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
                 </div>
               )}
 
-              {totalMarketUsd > 0 ? (
-                <CategoryRevenueShare
-                  rows={marketRows}
-                  totalUsd={totalMarketUsd}
-                  currentAppId={id}
-                  country={country}
-                />
-              ) : null}
-
-              {/* Informations */}
-              <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5">
-                <h2 className="mb-4 text-[11px] font-bold uppercase tracking-[0.22em] text-white/40">Informations</h2>
-                <div className="divide-y divide-white/[0.05]">
-                  {[
-                    { label: "Éditeur", value: app.sellerName || app.artistName },
-                    { label: "Bundle ID", value: app.bundleId },
-                    { label: "Version", value: app.version },
-                    { label: "Taille", value: formatBytes(app.fileSizeBytes) },
-                    { label: "Catégorie", value: app.primaryGenreName },
-                    { label: "Prix", value: app.price > 0 ? `${app.price}€` : "Gratuit" },
-                    { label: "Compatibilité", value: app.minimumOsVersion ? `iOS ${app.minimumOsVersion}+` : "—" },
-                    { label: "Âge", value: app.trackContentRating || "—" },
-                    {
-                      label: "Mis à jour",
-                      value: app.currentVersionReleaseDate
-                        ? new Date(app.currentVersionReleaseDate).toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })
-                        : "—",
-                    },
-                    {
-                      label: "Sorti",
-                      value: app.releaseDate
-                        ? new Date(app.releaseDate).toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })
-                        : "—",
-                    },
-                    {
-                      label: "Langues",
-                      value: app.languageCodesISO2A.length > 0
-                        ? `${app.languageCodesISO2A.slice(0, 6).join(", ")}${app.languageCodesISO2A.length > 6 ? ` +${app.languageCodesISO2A.length - 6}` : ""}`
-                        : "—",
-                    },
-                  ]
-                    .filter((r) => r.value && r.value !== "—")
-                    .map(({ label, value }) => (
-                      <div key={label} className="flex items-start justify-between gap-4 py-2.5 text-sm">
-                        <span className="shrink-0 text-white/40">{label}</span>
-                        <span className="text-right font-medium text-white/75 break-all">{value}</span>
-                      </div>
-                    ))}
-                </div>
-              </div>
-
-              {/* Creatives */}
               {app.screenshotUrls.length > 0 && (
                 <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5">
                   <AppCreatives appName={app.name} urls={app.screenshotUrls} />
@@ -502,18 +458,20 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
           )}
 
           {activeTab === "ads" && (
-            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5">
-              <div className="mb-5">
-                <h2 className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/40">Intelligence Publicitaire</h2>
-                <p className="mt-0.5 text-xs text-white/30">
-                  Pubs actives Meta, TikTok, Google liées à {app.name}
-                </p>
-              </div>
-              <AppAds
+            <div className="space-y-6">
+              <AdIntelligenceHub
                 appName={app.name}
                 developerName={app.sellerName || app.artistName}
                 bundleId={app.bundleId}
                 countryCode={country}
+                detectedSocial={detectedSocial}
+                enabledPlatforms={AD_INTEL_PLATFORMS_PHASE1}
+              />
+              <SimilarShopsCarousel
+                apps={sidebarApps}
+                currentId={id}
+                country={country}
+                categoryLabel={`${app.primaryGenreName} · même classement`}
               />
             </div>
           )}
@@ -521,7 +479,9 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
 
         {/* ── RIGHT SIDEBAR ── */}
         <div className="space-y-5 lg:sticky lg:top-6 lg:self-start">
-          <CountryRankingsPanel rankings={countryRankings} rankedCount={rankedCount} />
+          <Suspense fallback={<CountryRankingsPanelSkeleton />}>
+            <CountryRankingsAside appId={id} />
+          </Suspense>
           <CompetitorsPanel
             apps={sidebarApps}
             currentId={id}
@@ -530,6 +490,47 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
           />
         </div>
       </div>
+
+      <section className="mt-10 space-y-5 border-t border-white/[0.07] pt-10">
+        <div>
+          <h2 className="text-lg font-semibold text-white">Vues embarquées</h2>
+          <p className="mt-1 max-w-3xl text-sm text-white/45">
+            Les blocs pays et marché utilisent les routes <span className="font-mono text-[13px] text-white/60">/embed/…</span>{" "}
+            de ce site ; «&nbsp;Apps proches&nbsp;» charge l’embed public{" "}
+            <span className="font-mono text-[13px] text-white/60">www.appstoretracker.com/embed/similar/{id}</span> (pays&nbsp;:{" "}
+            {countryData?.flag} {countryData?.name ?? country}).
+          </p>
+        </div>
+        <div className="grid gap-5 lg:grid-cols-2">
+          <div className="space-y-2">
+            <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/40">Classements par pays</h3>
+            <iframe
+              title="Classements par pays — embed"
+              src={embedCountriesSrc}
+              className="h-[min(480px,62vh)] w-full rounded-2xl border border-white/[0.08] bg-black"
+              loading="lazy"
+            />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/40">Apps proches</h3>
+            <iframe
+              title="Apps proches — embed"
+              src={embedSimilarSrc}
+              className="appstoretracker-embed appstoretracker-similar h-[min(520px,65vh)] w-full rounded-[12px] border-0 bg-black"
+              loading="lazy"
+            />
+          </div>
+          <div className="space-y-2 lg:col-span-2">
+            <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/40">Part de marché (échantillon)</h3>
+            <iframe
+              title="Marché — embed"
+              src={embedMarketSrc}
+              className="h-[min(620px,78vh)] w-full rounded-2xl border border-white/[0.08] bg-black"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

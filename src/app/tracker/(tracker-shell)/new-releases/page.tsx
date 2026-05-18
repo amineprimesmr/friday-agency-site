@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
-import { fetchRecentlyRanked, COUNTRIES, COUNTRY_MAP, type CountryCode } from "@/lib/apple-charts";
+import { TrackerNavLink } from "@/components/tracker/tracker-navigation";
+import { fetchRecentlyRanked, COUNTRIES, COUNTRY_MAP, normalizeTrackerCountryParam } from "@/lib/apple-charts";
 
 export const metadata: Metadata = { title: "Nouveautés App Store" };
 export const revalidate = 900;
@@ -21,7 +21,7 @@ function formatDate(dateStr: string) {
 
 export default async function NewReleasesPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const country = (params.country ?? "us") as CountryCode;
+  const country = normalizeTrackerCountryParam(params.country);
   const countryData = COUNTRY_MAP[country];
 
   const allApps = await fetchRecentlyRanked(country, 100);
@@ -69,7 +69,7 @@ export default async function NewReleasesPage({ searchParams }: PageProps) {
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {newApps.map((app) => (
-              <Link
+              <TrackerNavLink
                 key={app.id}
                 href={`/tracker/apps/${app.id}?country=${country}`}
                 className="group flex flex-col gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 transition hover:border-white/15 hover:bg-white/[0.05]"
@@ -104,7 +104,7 @@ export default async function NewReleasesPage({ searchParams }: PageProps) {
                 <p className="text-center text-[11px] text-white/30">
                   {formatDate(app.releaseDate)}
                 </p>
-              </Link>
+              </TrackerNavLink>
             ))}
           </div>
         </section>
@@ -118,7 +118,7 @@ export default async function NewReleasesPage({ searchParams }: PageProps) {
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {newGames.map((app) => (
-              <Link
+              <TrackerNavLink
                 key={app.id}
                 href={`/tracker/apps/${app.id}?country=${country}`}
                 className="group flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 transition hover:border-white/15 hover:bg-white/[0.05]"
@@ -150,7 +150,7 @@ export default async function NewReleasesPage({ searchParams }: PageProps) {
                     {formatDate(app.releaseDate)}
                   </p>
                 </div>
-              </Link>
+              </TrackerNavLink>
             ))}
           </div>
         </section>

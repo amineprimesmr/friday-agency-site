@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { TrackerNavLink } from "@/components/tracker/tracker-navigation";
 import {
   searchApps,
   COUNTRY_MAP,
-  type CountryCode,
   estimateMonthlyDownloads,
   estimateMonthlyRevenue,
   formatRatingCount,
+  normalizeTrackerCountryParam,
 } from "@/lib/apple-charts";
 
 export const dynamic = "force-dynamic";
@@ -38,9 +39,10 @@ function Stars({ value }: { value: number }) {
 
 export default async function DeveloperPage({ params, searchParams }: PageProps) {
   const { name } = await params;
-  const { country = "us" } = await searchParams;
+  const sp = await searchParams;
+  const country = normalizeTrackerCountryParam(sp.country);
   const developerName = decodeURIComponent(name);
-  const countryData = COUNTRY_MAP[country as CountryCode];
+  const countryData = COUNTRY_MAP[country];
 
   // Search all apps by this developer
   const apps = await searchApps(developerName, country, 50);
@@ -169,7 +171,7 @@ export default async function DeveloperPage({ params, searchParams }: PageProps)
         </h2>
         <div className="space-y-2">
           {displayApps.map((app, i) => (
-            <Link
+            <TrackerNavLink
               key={app.id}
               href={`/tracker/apps/${app.id}?country=${country}`}
               className="group flex items-start gap-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 transition hover:border-white/15 hover:bg-white/[0.05]"
@@ -207,7 +209,7 @@ export default async function DeveloperPage({ params, searchParams }: PageProps)
                   <span className="text-[11px] text-emerald-300">{estimateMonthlyRevenue(i + 1, app.price, app.categoryId, country)}/mois</span>
                 </div>
               </div>
-            </Link>
+            </TrackerNavLink>
           ))}
         </div>
 

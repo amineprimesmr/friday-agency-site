@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { fetchTopCharts, COUNTRY_MAP, type CountryCode } from "@/lib/apple-charts";
+import { fetchTopCharts, COUNTRY_MAP, type CountryCode, normalizeTrackerCountryParam } from "@/lib/apple-charts";
 import { AppTable } from "@/components/tracker/app-table";
 
 export const metadata: Metadata = { title: "Classements App Store" };
@@ -38,7 +38,7 @@ async function ChartsContent({ country, chart, category }: { country: string; ch
 
 export default async function TopChartsPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const country = params.country ?? "us";
+  const country = normalizeTrackerCountryParam(params.country);
   const chart = params.chart ?? "top-free";
   const category = params.category ?? "all";
 
