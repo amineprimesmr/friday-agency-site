@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import type { Transition as MotionTransition } from "framer-motion";
 import { useEffect, useState } from "react";
 
 const COUNTRIES = [
@@ -47,7 +48,14 @@ export function TrackappPaiementOrderForm({
   }, [plan]);
 
   const continueLabel = busy ? "Ouverture du paiement..." : "Rejoindre";
-  const transition = reduceMotion ? { duration: 0 } : { duration: 0.32, ease: [0.25, 0.46, 0.45, 0.94] };
+  /** Courbe identique mais `as const` pour le tuple Bézier attendu par framer-motion. */
+  const transition: MotionTransition =
+    reduceMotion ?
+      { duration: 0 }
+    : {
+        duration: 0.32,
+        ease: [0.25, 0.46, 0.45, 0.94] as const,
+      };
 
   const stepVariants = {
     initial: reduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 },
