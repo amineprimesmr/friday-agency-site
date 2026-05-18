@@ -22,8 +22,10 @@ export default async function TrackappAccueilPage({
   const sp = await searchParams;
   const q = typeof sp.q === "string" ? sp.q.trim() : "";
   const country = normalizeTrackerCountryParam(sp.country);
-  const results = q ? await cachedTrackappApptrackerSearch(q, country) : [];
-  const { loggedIn, appIds } = await getTrackappProfileFavorites();
+  const [results, { loggedIn, appIds }] = await Promise.all([
+    q ? cachedTrackappApptrackerSearch(q, country) : Promise.resolve([]),
+    getTrackappProfileFavorites(),
+  ]);
 
   return (
     <div className="trackapp-accueil-page">

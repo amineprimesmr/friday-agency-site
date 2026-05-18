@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { createClient } from "@/lib/supabase/server";
 
 export type TrackappProfileFavorites = Readonly<{
@@ -7,7 +9,7 @@ export type TrackappProfileFavorites = Readonly<{
   adsKeys: string[];
 }>;
 
-export async function getTrackappProfileFavorites(): Promise<TrackappProfileFavorites> {
+export const getTrackappProfileFavorites = cache(async (): Promise<TrackappProfileFavorites> => {
   const sb = await createClient();
   if (!sb) return { loggedIn: false, designIds: [], appIds: [], adsKeys: [] };
 
@@ -31,4 +33,4 @@ export async function getTrackappProfileFavorites(): Promise<TrackappProfileFavo
     appIds: asStrings(data?.app_favorites),
     adsKeys: asStrings(data?.ads_favorites),
   };
-}
+});

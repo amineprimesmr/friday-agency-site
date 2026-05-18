@@ -166,6 +166,14 @@ button.tracker-search-pill.tracker-search-pill--trigger:focus-visible {
     0 6px 18px 0 color-mix(in srgb, var(--c-dark) 8%, transparent);
 }
 
+@media (max-width: 768px), (prefers-reduced-motion: reduce) {
+  .tracker-search-pill,
+  .tracker-switcher-host[data-search-surface="light"] .tracker-search-pill {
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    backdrop-filter: blur(14px) saturate(130%);
+  }
+}
+
 .tracker-search-icon {
   flex-shrink: 0;
   width: 18px;

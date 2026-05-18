@@ -162,7 +162,7 @@ export function SimilarShopsCarousel({
               <div className="flex items-center gap-2 border-b border-neutral-100 px-3 py-2">
                 <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg ring-1 ring-neutral-200">
                   {app.artworkUrl ? (
-                    <Image src={app.artworkUrl} alt="" fill className="object-cover" sizes="36px" unoptimized />
+                    <Image src={app.artworkUrl} alt="" fill className="object-cover" sizes="36px" />
                   ) : (
                     <span className="flex h-full w-full items-center justify-center bg-neutral-200 text-xs font-bold text-neutral-600">
                       {app.name.charAt(0)}
@@ -177,7 +177,7 @@ export function SimilarShopsCarousel({
               </div>
               <div className="relative mx-2 mt-2 aspect-[16/10] overflow-hidden rounded-xl bg-neutral-200">
                 {app.artworkUrl ? (
-                  <Image src={app.artworkUrl} alt="" fill className="object-cover" sizes="220px" unoptimized />
+                  <Image src={app.artworkUrl} alt="" fill className="object-cover" sizes="220px" />
                 ) : null}
               </div>
               <div className="mt-auto flex flex-wrap gap-1.5 px-3 py-3">

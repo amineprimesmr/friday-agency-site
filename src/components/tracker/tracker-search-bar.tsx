@@ -14,7 +14,6 @@ import {
   useMemo,
   useRef,
   useState,
-  useTransition,
 } from "react";
 
 import "@/styles/tracker-search-bar.css";
@@ -103,7 +102,6 @@ export function TrackerSearchBar({
   const stackRef = useRef<HTMLDivElement>(null);
   const mobileSheetRef = useRef<HTMLDivElement>(null);
   const startTrackerNav = useTrackerNavStart();
-  const [, startNavTransition] = useTransition();
 
   const [query, setQuery] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
@@ -280,25 +278,19 @@ export function TrackerSearchBar({
     const q = trimmed;
     if (!q) {
       startTrackerNav?.();
-      startNavTransition(() => {
-        router.push(`/tracker/search?country=${TRACKER_DEFAULT_COUNTRY}`);
-      });
+      router.push(`/tracker/search?country=${TRACKER_DEFAULT_COUNTRY}`);
       onClose();
       return;
     }
     startTrackerNav?.();
-    startNavTransition(() => {
-      router.push(`/tracker/search?q=${encodeURIComponent(q)}&country=${TRACKER_DEFAULT_COUNTRY}`);
-    });
+    router.push(`/tracker/search?q=${encodeURIComponent(q)}&country=${TRACKER_DEFAULT_COUNTRY}`);
     onClose();
   }
 
   function goHit(href: string) {
     onClose();
     startTrackerNav?.();
-    startNavTransition(() => {
-      router.push(href);
-    });
+    router.push(href);
   }
 
   function onInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {

@@ -7,7 +7,6 @@ import {
   COUNTRY_MAP,
   daysSince,
   estimateMonthlyDownloads,
-  fetchAppDetail,
   formatBytes,
   formatEstimatedMonthlyRevenuePrecise,
   formatRatingCount,
@@ -18,6 +17,7 @@ import {
 import { getTrackappProfileFavorites } from "@/lib/trackapp-profile-favorites";
 import { extractSocialProfiles } from "@/lib/social-presence";
 import { buildTrackerMetaAdLibraryContext } from "@/lib/tracker-meta-ad-resolution";
+import { fetchAppDetailCached } from "@/lib/tracker-server-cache";
 import { TrackappAppFavoriteButton } from "@/components/trackapp/trackapp-app-favorite-button";
 
 export const revalidate = 900;
@@ -29,7 +29,7 @@ type PageProps = Readonly<{
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const app = await fetchAppDetail(id);
+  const app = await fetchAppDetailCached(id);
   return {
     title: app ? `${app.name} — Apptracker` : "Apptracker — Trackapp",
     description: app?.description?.slice(0, 150),
@@ -66,11 +66,10 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
   const { id } = await params;
   const sp = await searchParams;
   const country = normalizeTrackerCountryParam(sp.country);
-  const app = await fetchAppDetail(id, country);
+  const appPromise = fetchAppDetailCached(id, country as CountryCode);
+  const favoritesPromise = getTrackappProfileFavorites();
+  const app = await appPromise;
   if (!app) notFound();
-
-  const { loggedIn, appIds } = await getTrackappProfileFavorites();
-  const appFav = appIds.includes(app.id);
 
   const countryData = COUNTRY_MAP[country as CountryCode];
   const dlEst = estimateMonthlyDownloads(50, country);
@@ -78,15 +77,19 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
   const appAge = app.releaseDate ? daysSince(app.releaseDate) : Number.NaN;
   const screenshots = [...(app.screenshotUrls ?? []), ...(app.ipadScreenshotUrls ?? [])].slice(0, 6);
   const socialFromStore = extractSocialProfiles(app.description, app.releaseNotes ?? "");
-  const metaLibraryContext = await buildTrackerMetaAdLibraryContext({
-    appName: app.name,
-    developerName: app.sellerName || app.artistName,
-    genre: app.primaryGenreName,
-    description: app.description ?? "",
-    releaseNotes: app.releaseNotes ?? "",
-    socialFromStore,
-    country,
-  });
+  const [metaLibraryContext, { loggedIn, appIds }] = await Promise.all([
+    buildTrackerMetaAdLibraryContext({
+      appName: app.name,
+      developerName: app.sellerName || app.artistName,
+      genre: app.primaryGenreName,
+      description: app.description ?? "",
+      releaseNotes: app.releaseNotes ?? "",
+      socialFromStore,
+      country,
+    }),
+    favoritesPromise,
+  ]);
+  const appFav = appIds.includes(app.id);
 
   return (
     <div className="relative z-[1] dashboard-main pb-16">

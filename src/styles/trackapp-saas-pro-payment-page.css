@@ -628,6 +628,61 @@ button.saas-pay-checkout-back {
   color: #ff6d7c;
 }
 
+/* Bon de commande : étape 1 coordonnées (champs + animation sans recharger la page) */
+.saas-pay-identity-step {
+  margin-top: 0.5rem;
+  padding: 0 0 0.35rem;
+}
+
+.saas-pay-identity-step > .saas-pay-wallet-divider {
+  margin-bottom: 0.35rem;
+}
+
+.saas-pay-identity-hint {
+  margin: -0.35rem 0 0;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  color: #8f97a9;
+}
+
+.tpl-paiement-order-steps .saas-pay-field--editable {
+  padding: 0 0.82rem;
+}
+
+.tpl-paiement-order-steps .saas-pay-field--editable .saas-pay-native-input {
+  width: 100%;
+  min-height: 3rem;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #f4f5f8;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.tpl-paiement-order-steps .saas-pay-field--editable .saas-pay-native-input::placeholder {
+  color: #6f7481;
+}
+
+.saas-pay-step-back {
+  display: inline-block;
+  width: fit-content;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: rgba(233, 236, 243, 0.58);
+  font-family: inherit;
+  font-size: 0.72rem;
+  text-decoration: underline;
+  cursor: pointer;
+  text-underline-offset: 0.12em;
+}
+
+.saas-pay-step-back:hover {
+  color: rgba(233, 236, 243, 0.88);
+}
+
 .saas-pay-continue {
   margin-top: 0.85rem;
   width: 100%;
@@ -651,7 +706,8 @@ button.saas-pay-checkout-back {
 }
 
 .saas-pay-checkout .saas-pay-method > button.saas-pay-continue,
-.saas-pay-order-inset .saas-pay-method > button.saas-pay-continue {
+.saas-pay-order-inset .saas-pay-method > button.saas-pay-continue,
+.saas-pay-order-inset .saas-pay-identity-step > button.saas-pay-continue {
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -668,12 +724,14 @@ button.saas-pay-checkout-back {
 }
 
 .saas-pay-checkout .saas-pay-method > button.saas-pay-continue:hover:not(:disabled),
-.saas-pay-order-inset .saas-pay-method > button.saas-pay-continue:hover:not(:disabled) {
+.saas-pay-order-inset .saas-pay-method > button.saas-pay-continue:hover:not(:disabled),
+.saas-pay-order-inset .saas-pay-identity-step > button.saas-pay-continue:hover:not(:disabled) {
   background-color: #f4f4f5;
 }
 
 .saas-pay-checkout .saas-pay-method > button.saas-pay-continue .saas-pay-continue-label,
-.saas-pay-order-inset .saas-pay-method > button.saas-pay-continue .saas-pay-continue-label {
+.saas-pay-order-inset .saas-pay-method > button.saas-pay-continue .saas-pay-continue-label,
+.saas-pay-order-inset .saas-pay-identity-step > button.saas-pay-continue .saas-pay-continue-label {
   font-size: clamp(1.08rem, 3.85vw, 1.38rem);
   font-weight: 800;
   letter-spacing: -0.025em;

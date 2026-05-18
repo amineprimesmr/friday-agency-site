@@ -29,7 +29,7 @@ function PotentialAppTileContent({
     <>
       <div className="relative h-12 w-12 overflow-hidden rounded-xl ring-1 ring-white/10">
         {app.artworkUrl ? (
-          <Image src={app.artworkUrl} alt={imageAlt} fill className="object-cover" sizes="48px" unoptimized />
+          <Image src={app.artworkUrl} alt={imageAlt} fill className="object-cover" sizes="48px" />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-white/5 text-base font-bold text-white/40">
             {app.name.charAt(0)}

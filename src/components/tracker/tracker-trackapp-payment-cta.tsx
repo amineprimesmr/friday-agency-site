@@ -1,11 +1,16 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 
-import { TrackappPaymentOverlay } from "@/components/trackapp/trackapp-payment-overlay";
 import { prepareTrackappPaiementSlideEnter } from "@/lib/trackapp-paiement-navigation";
 import { cn } from "@/lib/utils";
+
+const TrackappPaymentOverlay = dynamic(
+  () => import("@/components/trackapp/trackapp-payment-overlay").then((mod) => mod.TrackappPaymentOverlay),
+  { ssr: false },
+);
 
 /**
  * Depuis la page Tracker : bureau ouvre une modale ; mobile / tablette suit le lien vers la page

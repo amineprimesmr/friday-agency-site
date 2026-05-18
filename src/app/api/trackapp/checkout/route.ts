@@ -13,11 +13,28 @@ export async function POST(req: Request) {
 
   type BillingPlan = "monthly" | "yearly";
   let plan: BillingPlan = "monthly";
+  let billingFirstName = "";
+  let billingLastName = "";
+  let billingEmailFromClient = "";
   try {
     const ct = req.headers.get("content-type") ?? "";
     if (ct.includes("application/json")) {
-      const body = (await req.json()) as { plan?: unknown };
+      const body = (await req.json()) as {
+        plan?: unknown;
+        billingFirstName?: unknown;
+        billingLastName?: unknown;
+        billingEmail?: unknown;
+      };
       if (body?.plan === "yearly") plan = "yearly";
+      if (typeof body?.billingFirstName === "string") {
+        billingFirstName = body.billingFirstName.trim().slice(0, 80);
+      }
+      if (typeof body?.billingLastName === "string") {
+        billingLastName = body.billingLastName.trim().slice(0, 80);
+      }
+      if (typeof body?.billingEmail === "string") {
+        billingEmailFromClient = body.billingEmail.trim().slice(0, 320);
+      }
     }
   } catch {
     plan = "monthly";
@@ -76,6 +93,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Connexion Trackapp requise." }, { status: 401 });
   }
 
+  if (!billingFirstName || !billingLastName) {
+    return NextResponse.json({ error: "Prénom et nom sont requis pour continuer." }, { status: 400 });
+  }
+  const clientEmail = billingEmailFromClient.toLowerCase();
+  const accountEmail = user.email.trim().toLowerCase();
+  if (!clientEmail || clientEmail !== accountEmail) {
+    return NextResponse.json(
+      { error: "Utilise l’adresse e-mail de ton compte Trackapp (celle avec laquelle tu es connecté)." },
+      { status: 400 },
+    );
+  }
+
   const origin =
     originRaw ?
       /^https?:\/\//i.test(originRaw) ?
@@ -87,6 +116,8 @@ export async function POST(req: Request) {
     supabase_user_id: user.id,
     product: "trackapp_full_access",
     trackapp_plan: plan === "yearly" ? "subscription_yearly" : "subscription_monthly",
+    billing_first_name: billingFirstName,
+    billing_last_name: billingLastName,
   };
 
   const refCode = cookieStore.get(AFFILIATE_REF_COOKIE)?.value?.trim();

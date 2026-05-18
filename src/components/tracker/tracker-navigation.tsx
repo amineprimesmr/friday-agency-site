@@ -1,12 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
   useState,
-  useTransition,
   Suspense,
   type AnchorHTMLAttributes,
   type MouseEvent,
@@ -83,46 +83,38 @@ export function TrackerNavLink({
 }: TrackerNavLinkProps) {
   const ctx = useContext(NavCtx);
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
 
-  const navigate = useCallback(
+  const shouldIgnoreClick = useCallback(
     (e: MouseEvent<HTMLAnchorElement>) => {
-      if (e.defaultPrevented) return;
-      if (e.button !== 0) return;
-      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (e.defaultPrevented) return true;
+      if (e.button !== 0) return true;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return true;
       const t = e.currentTarget.getAttribute("target");
-      if (t && t !== "_self") return;
-      e.preventDefault();
-      ctx?.startNav();
-      startTransition(() => {
-        router.push(href, { scroll });
-      });
+      return Boolean(t && t !== "_self");
     },
-    [ctx, href, router, scroll],
+    [],
   );
 
   const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
     onClick?.(e);
-    if (e.defaultPrevented) return;
-    navigate(e);
+    if (shouldIgnoreClick(e)) return;
+    ctx?.startNav();
   };
 
   return (
-    <a
+    <Link
       href={href}
+      scroll={scroll}
+      prefetch={prefetchOnHover ? undefined : false}
       onClick={handleClick}
       onMouseEnter={(e) => {
         onMouseEnter?.(e);
         if (prefetchOnHover) void router.prefetch(href);
       }}
-      className={cn(
-        className,
-        pending && "tracker-nav-link-pending",
-      )}
-      aria-busy={pending || undefined}
+      className={cn(className)}
       {...rest}
     >
       {children}
-    </a>
+    </Link>
   );
 }

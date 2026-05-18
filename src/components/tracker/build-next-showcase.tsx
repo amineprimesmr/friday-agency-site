@@ -51,7 +51,6 @@ function PhoneSlide({ ariaLabel, item, reduceMotion }: PhoneSlideProps) {
   const moneyLine = item?.monthlyRevenueLabel ?? null;
 
   useEffect(() => {
-    if (mediaActive) return;
     const el = frameRef.current;
     if (!el) return;
 
@@ -62,15 +61,13 @@ function PhoneSlide({ ariaLabel, item, reduceMotion }: PhoneSlideProps) {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (!entry?.isIntersecting) return;
-        setMediaActive(true);
-        observer.disconnect();
+        setMediaActive(Boolean(entry?.isIntersecting));
       },
-      { rootMargin: "900px 0px" },
+      { rootMargin: "160px 0px", threshold: 0.01 },
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [mediaActive]);
+  }, []);
 
   return (
     <div className="flex shrink-0 flex-col items-center">
@@ -117,7 +114,6 @@ function PhoneSlide({ ariaLabel, item, reduceMotion }: PhoneSlideProps) {
                             fill
                             className="object-cover"
                             sizes="40px"
-                            unoptimized
                           />
                         </span>
                         <p className="build-next-video-foot__title">{title}</p>
@@ -170,7 +166,8 @@ export function BuildNextShowcase({ videos }: { videos: AppShowcaseVideoItemEnri
 
     let rafId = 0;
     let lastTime: number | null = null;
-    let paused = false;
+    let paused = true;
+    let inViewport = !("IntersectionObserver" in window);
 
     const loopLength = () => {
       const w = el.scrollWidth;
@@ -179,7 +176,7 @@ export function BuildNextShowcase({ videos }: { videos: AppShowcaseVideoItemEnri
     };
 
     function tick(now: number) {
-      rafId = requestAnimationFrame(tick);
+      rafId = 0;
       const half = loopLength();
       if (half <= 40 || paused) {
         lastTime = null;
@@ -187,30 +184,37 @@ export function BuildNextShowcase({ videos }: { videos: AppShowcaseVideoItemEnri
       }
       if (lastTime === null) {
         lastTime = now;
+        rafId = requestAnimationFrame(tick);
         return;
       }
       const dt = Math.min(now - lastTime, 64);
       el.scrollLeft += MARQUEE_PX_PER_MS * dt;
       if (el.scrollLeft >= half - 2) el.scrollLeft -= half;
       lastTime = now;
+      rafId = requestAnimationFrame(tick);
     }
-
-    rafId = requestAnimationFrame(tick);
 
     const pause = () => {
       paused = true;
       lastTime = null;
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = 0;
+      }
     };
     const resume = () => {
       paused = false;
       lastTime = null;
+      if (!rafId) rafId = requestAnimationFrame(tick);
     };
 
     const onPointerDown = () => pause();
-    const onPointerUp = () => window.setTimeout(resume, 400);
+    const onPointerUp = () => window.setTimeout(() => {
+      if (inViewport && document.visibilityState === "visible") resume();
+    }, 400);
     const onVisibility = () => {
-      paused = document.visibilityState !== "visible";
-      lastTime = null;
+      if (document.visibilityState === "visible" && inViewport) resume();
+      else pause();
     };
 
     track.addEventListener("pointerdown", onPointerDown);
@@ -219,6 +223,20 @@ export function BuildNextShowcase({ videos }: { videos: AppShowcaseVideoItemEnri
     track.addEventListener("touchstart", onPointerDown, { passive: true });
     track.addEventListener("touchend", onPointerUp, { passive: true });
     document.addEventListener("visibilitychange", onVisibility);
+
+    const io =
+      "IntersectionObserver" in window
+        ? new IntersectionObserver(
+            ([entry]) => {
+              inViewport = Boolean(entry?.isIntersecting);
+              if (inViewport && document.visibilityState === "visible") resume();
+              else pause();
+            },
+            { rootMargin: "120px 0px", threshold: 0.01 },
+          )
+        : null;
+    if (io) io.observe(el);
+    else resume();
 
     const ro =
       typeof ResizeObserver !== "undefined"
@@ -237,6 +255,7 @@ export function BuildNextShowcase({ videos }: { videos: AppShowcaseVideoItemEnri
       track.removeEventListener("touchstart", onPointerDown);
       track.removeEventListener("touchend", onPointerUp);
       document.removeEventListener("visibilitychange", onVisibility);
+      io?.disconnect();
       ro?.disconnect();
     };
   }, [loop]);

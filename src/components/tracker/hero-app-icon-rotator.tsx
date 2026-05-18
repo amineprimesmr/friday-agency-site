@@ -58,32 +58,26 @@ export function HeroAppIconRotator({
                   ? { opacity: 1 }
                   : {
                       opacity: 0,
-                      rotateY: -82,
-                      scale: 0.68,
-                      filter: "blur(12px)",
-                      z: -48,
+                      rotateY: -42,
+                      scale: 0.82,
                     }
               }
               animate={{
                 opacity: 1,
                 rotateY: 0,
                 scale: 1,
-                filter: "blur(0px)",
-                z: 0,
               }}
               exit={
                 reduceMotion
                   ? { opacity: 0 }
                   : {
                       opacity: 0,
-                      rotateY: 82,
-                      scale: 0.68,
-                      filter: "blur(12px)",
-                      z: -48,
+                      rotateY: 42,
+                      scale: 0.82,
                     }
               }
               transition={{
-                duration: 0.58,
+                duration: 0.42,
                 ease: [0.16, 1, 0.3, 1],
               }}
               style={{ transformStyle: "preserve-3d", backfaceVisibility: "hidden" }}
@@ -95,7 +89,6 @@ export function HeroAppIconRotator({
                   fill
                   className="object-cover"
                   sizes="120px"
-                  unoptimized
                 />
               ) : (
                 <span className="select-none text-[clamp(1.1rem,4vw,1.65rem)] font-bold text-white/35">

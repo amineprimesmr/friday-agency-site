@@ -17,9 +17,10 @@ export function AppTabs({ active }: { active: TabId }) {
   const reducedMotion = useReducedMotion();
 
   function go(tab: TabId) {
+    if (tab === active) return;
     const params = new URLSearchParams(searchParams.toString());
     params.set("tab", tab);
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }
 
   return (

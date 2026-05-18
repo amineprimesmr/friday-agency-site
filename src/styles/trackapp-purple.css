@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap");
-
 @property --ta-beam {
   syntax: "<angle>";
   initial-value: 0deg;
@@ -7,7 +5,7 @@
 }
 
 .ta-font {
-  font-family: "Sora", var(--font-heading), system-ui, sans-serif;
+  font-family: var(--font-heading), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 /* CTA primaire violet (remplace la lumière bleue / vert lime du bouton Tracker) */

@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 
@@ -7,7 +8,11 @@ import { TrackerLiquidGlassFilterSvg } from "@/components/tracker/tracker-liquid
 import { TrackappBodyClass } from "@/components/trackapp/trackapp-body-class";
 import { TrackappFidelitySidebar } from "@/components/trackapp/trackapp-fidelity-sidebar";
 import { TrackappFidelityTopbar } from "@/components/trackapp/trackapp-fidelity-topbar";
-import { TrackappTopbarSearchModal } from "@/components/trackapp/trackapp-topbar-search-modal";
+
+const TrackappTopbarSearchModal = dynamic(
+  () => import("@/components/trackapp/trackapp-topbar-search-modal").then((mod) => mod.TrackappTopbarSearchModal),
+  { ssr: false },
+);
 
 export function TrackappFidelityWorkspaceShell({
   children,

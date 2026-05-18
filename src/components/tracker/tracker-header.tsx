@@ -1,16 +1,21 @@
 "use client";
 
 import type { TrackerSearchSurface } from "@/components/tracker/tracker-search-bar";
-import { TrackerSearchBar } from "@/components/tracker/tracker-search-bar";
 import { TrackerLiquidGlassFilterSvg } from "@/components/tracker/tracker-liquid-glass-filter-svg";
 import { TrackerNavLink } from "@/components/tracker/tracker-navigation";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useId, useState, type CSSProperties } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 
 import "@/styles/tracker-header.css";
+
+const TrackerSearchBar = dynamic(
+  () => import("@/components/tracker/tracker-search-bar").then((mod) => mod.TrackerSearchBar),
+  { ssr: false },
+);
 
 /** Sections à fond clair derrière lesquelles le menu passe en encre noire */
 const LIGHT_SURFACE_SELECTORS = ["#comment-ca-marche", ".tt-affiliate-shell"] as const;
@@ -46,57 +51,51 @@ export function TrackerHeader({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [onLightSurface, setOnLightSurface] = useState(false);
-
-  const onScroll = useCallback(() => {
-    const y = window.scrollY || document.documentElement.scrollTop;
-    setScrollProgress(Math.min(1, y / 120));
-  }, []);
+  const lightSurfaceRefs = useRef<Element[]>([]);
 
   useEffect(() => {
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [onScroll]);
+    lightSurfaceRefs.current = LIGHT_SURFACE_SELECTORS.flatMap((sel) => Array.from(document.querySelectorAll(sel)));
+    let raf = 0;
 
-  const updateLightSurface = useCallback(() => {
-    const header = document.querySelector<HTMLElement>(".tracker-header-bar");
-    if (!header) return;
-    const hr = header.getBoundingClientRect();
-    const midY = hr.top + hr.height * 0.38;
-    const midX = Math.min(Math.max(window.innerWidth * 0.5, 8), window.innerWidth - 8);
-    let hit = false;
-    for (const sel of LIGHT_SURFACE_SELECTORS) {
-      for (const el of document.querySelectorAll(sel)) {
+    const update = () => {
+      raf = 0;
+      const y = window.scrollY || document.documentElement.scrollTop;
+      const nextProgress = Math.min(1, y / 120);
+      setScrollProgress((prev) => (Math.abs(prev - nextProgress) > 0.02 ? nextProgress : prev));
+
+      const header = document.querySelector<HTMLElement>(".tracker-header-bar");
+      if (!header) return;
+      const hr = header.getBoundingClientRect();
+      const midY = hr.top + hr.height * 0.38;
+      const midX = Math.min(Math.max(window.innerWidth * 0.5, 8), window.innerWidth - 8);
+      const hit = lightSurfaceRefs.current.some((el) => {
         const r = el.getBoundingClientRect();
-        if (r.height < 4) continue;
-        if (midY < r.top || midY > r.bottom) continue;
-        if (midX < r.left || midX > r.right) continue;
-        hit = true;
-        break;
-      }
-      if (hit) break;
-    }
-    setOnLightSurface((v) => (v === hit ? v : hit));
-  }, []);
-
-  useEffect(() => {
-    updateLightSurface();
-    window.addEventListener("scroll", updateLightSurface, { passive: true });
-    window.addEventListener("resize", updateLightSurface, { passive: true });
-    const t = window.setTimeout(updateLightSurface, 80);
-    return () => {
-      window.removeEventListener("scroll", updateLightSurface);
-      window.removeEventListener("resize", updateLightSurface);
-      window.clearTimeout(t);
+        return r.height >= 4 && midY >= r.top && midY <= r.bottom && midX >= r.left && midX <= r.right;
+      });
+      setOnLightSurface((prev) => (prev === hit ? prev : hit));
     };
-  }, [updateLightSurface, pathname, mobileOpen, searchOpen]);
+
+    const schedule = () => {
+      if (raf) return;
+      raf = window.requestAnimationFrame(update);
+    };
+
+    schedule();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
+    const t = window.setTimeout(schedule, 80);
+    return () => {
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      window.clearTimeout(t);
+      if (raf) window.cancelAnimationFrame(raf);
+    };
+  }, [pathname, mobileOpen, searchOpen]);
 
   const k = reduceMotion ? 1 : 1 + scrollProgress * 0.45;
-  const blurA = reduceMotion ? 16 : 20 * k;
-  const blurB = reduceMotion ? 11 : 12 * k;
-  const blurC = reduceMotion ? 7 : 8 * k;
-  const blurD = reduceMotion ? 4 : 5 * k;
-  const blurE = reduceMotion ? 2 : 2.5 * k;
+  const blurA = reduceMotion ? 14 : 18 * k;
+  const blurB = reduceMotion ? 8 : 9 * k;
+  const blurC = reduceMotion ? 4 : 5 * k;
 
   const blurTransition = reduceMotion
     ? undefined
@@ -135,8 +134,6 @@ export function TrackerHeader({
           <div className="tracker-header-blur-a" style={layerStyle(blurA)} />
           <div className="tracker-header-blur-b" style={layerStyle(blurB)} />
           <div className="tracker-header-blur-c" style={layerStyle(blurC)} />
-          <div className="tracker-header-blur-d" style={layerStyle(blurD)} />
-          <div className="tracker-header-blur-e" style={layerStyle(blurE)} />
         </div>
         <div
           className={cn(

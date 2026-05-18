@@ -6,12 +6,12 @@
     "node": ">=20.9.0"
   },
   "scripts": {
-    "dev": "node scripts/free-port.mjs 3000 && next dev --hostname 127.0.0.1 -p 3000",
+    "dev": "node scripts/launch-next-dev.mjs --turbo",
     "dev:open": "node scripts/run-dev-open.mjs",
     "dev:tracker": "node scripts/free-port.mjs 3001 && node scripts/print-dev-tracker-url.mjs 3001 && next dev --hostname 127.0.0.1 -p 3001",
-    "dev:turbo": "node scripts/free-port.mjs 3000 && next dev --turbo --hostname 127.0.0.1 -p 3000",
+    "dev:turbo": "node scripts/launch-next-dev.mjs --turbo",
     "dev:homebrew-node22": "PATH=/opt/homebrew/opt/node@22/bin:${PATH} node scripts/free-port.mjs 3000 && PATH=/opt/homebrew/opt/node@22/bin:${PATH} next dev --turbo --hostname 127.0.0.1 -p 3000",
-    "dev:webpack": "node scripts/free-port.mjs 3000 && next dev --hostname 127.0.0.1 -p 3000",
+    "dev:webpack": "node scripts/launch-next-dev.mjs",
     "clean": "rm -rf .next node_modules/.cache",
     "reset:dev": "bash scripts/dev-reset.sh",
     "dev:fresh": "npm run clean && npm run dev",

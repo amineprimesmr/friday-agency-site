@@ -131,7 +131,5 @@ export const config = {
     "/api/trackapp/favorites/:path*",
     "/api/trackapp/affiliate",
     "/api/trackapp/affiliate/:path*",
-    "/tracker",
-    "/tracker/:path*",
   ],
 };

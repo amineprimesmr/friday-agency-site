@@ -171,7 +171,6 @@ export function TrackerSaleNotificationsStack({ className }: { className?: strin
                         fill
                         className="tracker-sale-notif-icon-img object-contain select-none pointer-events-none"
                         sizes="48px"
-                        unoptimized
                       />
                     </div>
                   </div>

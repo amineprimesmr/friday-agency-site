@@ -191,7 +191,7 @@ function CompetitorsPanel({ apps, currentId, country, category }: {
             <span className="font-mono text-xs font-semibold text-white/35">#{app.rank}</span>
             <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg ring-1 ring-white/10">
               {app.artworkUrl ? (
-                <Image src={app.artworkUrl} alt={app.name} fill className="object-cover" sizes="32px" unoptimized />
+                <Image src={app.artworkUrl} alt={app.name} fill className="object-cover" sizes="32px" />
               ) : (
                 <span className="flex h-full w-full items-center justify-center bg-white/5 text-xs font-bold text-white/40">
                   {app.name.charAt(0)}
@@ -299,7 +299,7 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
           <div className="flex min-w-0 gap-4 sm:gap-5">
             <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[22px] shadow-[0_18px_40px_rgba(0,0,0,0.45)] ring-1 ring-white/12 sm:h-28 sm:w-28">
               {app.artworkUrl ? (
-                <Image src={app.artworkUrl} alt={app.name} fill className="object-cover" sizes="112px" unoptimized priority />
+                <Image src={app.artworkUrl} alt={app.name} fill className="object-cover" sizes="112px" priority />
               ) : (
                 <span className="flex h-full w-full items-center justify-center bg-white/5 text-3xl font-bold text-white/40">
                   {app.name.charAt(0)}

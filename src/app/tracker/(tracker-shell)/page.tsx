@@ -42,7 +42,7 @@ function TopMoversGridSkeleton() {
 }
 
 export default async function TrackerDashboard() {
-  const heroApps = await Promise.race([
+  const heroAppsPromise = Promise.race([
     getTrackerHeroApps().catch((err) => {
       console.error("[tracker] getTrackerHeroApps:", err);
       return [] as Awaited<ReturnType<typeof getTrackerHeroApps>>;
@@ -51,7 +51,7 @@ export default async function TrackerDashboard() {
       setTimeout(() => resolve([]), HERO_APPS_BUDGET_MS),
     ),
   ]);
-  const appShowcaseVideos = await Promise.race([
+  const appShowcaseVideosPromise = Promise.race([
     listAppShowcaseVideoItemsEnriched().catch((err) => {
       console.error("[tracker] listAppShowcaseVideoItemsEnriched:", err);
       return listAppShowcaseVideoItemsFallbackEnriched();
@@ -63,6 +63,7 @@ export default async function TrackerDashboard() {
       ),
     ),
   ]);
+  const [heroApps, appShowcaseVideos] = await Promise.all([heroAppsPromise, appShowcaseVideosPromise]);
 
   return (
     <>

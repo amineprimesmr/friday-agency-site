@@ -11,24 +11,24 @@ const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 const VARIANTS = {
   "fade-up": {
-    hidden: { opacity: 0, y: 40, filter: "blur(8px)" },
-    show: { opacity: 1, y: 0, filter: "blur(0px)" },
+    hidden: { opacity: 0, y: 28 },
+    show: { opacity: 1, y: 0 },
   },
   "fade-in": {
     hidden: { opacity: 0 },
     show: { opacity: 1 },
   },
   "scale-up": {
-    hidden: { opacity: 0, scale: 0.92, filter: "blur(4px)" },
-    show: { opacity: 1, scale: 1, filter: "blur(0px)" },
+    hidden: { opacity: 0, scale: 0.96 },
+    show: { opacity: 1, scale: 1 },
   },
   "slide-left": {
-    hidden: { opacity: 0, x: -48, filter: "blur(4px)" },
-    show: { opacity: 1, x: 0, filter: "blur(0px)" },
+    hidden: { opacity: 0, x: -32 },
+    show: { opacity: 1, x: 0 },
   },
   "slide-right": {
-    hidden: { opacity: 0, x: 48, filter: "blur(4px)" },
-    show: { opacity: 1, x: 0, filter: "blur(0px)" },
+    hidden: { opacity: 0, x: 32 },
+    show: { opacity: 1, x: 0 },
   },
 } as const;
 

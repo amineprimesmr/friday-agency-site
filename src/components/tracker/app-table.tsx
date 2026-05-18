@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Image from "next/image";
 import { TrackerNavLink } from "@/components/tracker/tracker-navigation";
@@ -10,7 +10,6 @@ import {
   APPLE_CATEGORIES,
   type AppEntry,
 } from "@/lib/apple-charts";
-import { cn } from "@/lib/utils";
 
 interface Props {
   apps: AppEntry[];
@@ -23,15 +22,12 @@ export function AppTable({ apps, country, chart, category }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
   const [search, setSearch] = useState("");
 
   function updateParam(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString());
     params.set(key, value);
-    startTransition(() => {
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
-    });
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }
 
   const filtered = search.trim()
@@ -95,12 +91,7 @@ export function AppTable({ apps, country, chart, category }: Props) {
       </div>
 
       {/* Table */}
-      <div
-        className={cn(
-          "overflow-x-auto rounded-2xl border border-white/[0.06] transition-opacity",
-          isPending && "opacity-60",
-        )}
-      >
+      <div className="overflow-x-auto rounded-2xl border border-white/[0.06]">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/[0.06] bg-white/[0.02]">
@@ -142,7 +133,6 @@ export function AppTable({ apps, country, chart, category }: Props) {
                           fill
                           className="object-cover"
                           sizes="40px"
-                          unoptimized
                         />
                       ) : (
                         <span className="flex h-full w-full items-center justify-center bg-white/5 text-sm font-bold text-white/40">
