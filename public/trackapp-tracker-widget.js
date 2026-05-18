@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════
-//  Friday App Tracker — Widget Scriptable
+//  Trackapp App Tracker — Widget Scriptable
 //  Aperçu téléchargements & revenus (source agrégée publique)
 //  frid4y.agency/tracker
 //
@@ -8,7 +8,7 @@
 // ══════════════════════════════════════════════════════════════
 
 const TRACKER   = "https://frid4y.agency/tracker";
-const COUNTRY   = "us";
+const COUNTRY   = "fr";
 const RSS_LIMIT = { small: 1, medium: 4, large: 8 };
 
 // ─── Palette ─────────────────────────────────────────────────
@@ -138,7 +138,7 @@ function buildHeader(widget, subtitle) {
   logo.cornerRadius = 8;
   logo.setPadding(4, 8, 4, 8);
   label(logo, "◆ ", Font.boldSystemFont(9), C.cyan);
-  label(logo, "Friday", Font.boldSystemFont(9), C.cyan);
+  label(logo, "Trackapp", Font.boldSystemFont(9), C.cyan);
 
   row.addSpacer(10);
 
