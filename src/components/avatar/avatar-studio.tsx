@@ -11,6 +11,7 @@ import {
   type PhotoDataPersisted,
   type SceneDraftPersisted,
 } from "@/lib/avatar-studio-persistence";
+import { createDefaultContentBrief, type ContentBriefPersisted } from "@/lib/avatar-content-brief";
 import { PhotoUploader } from "./photo-uploader";
 import { ReferenceSheet } from "./reference-sheet";
 import { SceneGenerator } from "./scene-generator";
@@ -38,6 +39,7 @@ const SAVE_DEBOUNCE_MS = 450;
 export function AvatarStudio() {
   const [hydrated, setHydrated] = useState(false);
   const [step, setStep] = useState(1);
+  const [contentBrief, setContentBrief] = useState<ContentBriefPersisted | null>(null);
   const [photoData, setPhotoData] = useState<PhotoDataPersisted | null>(null);
   const [referenceImages, setReferenceImages] = useState<Partial<Record<ReferenceAngle, string>>>({});
   const [referenceImageFileIds, setReferenceImageFileIds] = useState<
@@ -79,6 +81,7 @@ export function AvatarStudio() {
         setSelectedScene(snap.selectedScene);
         setSelectedScenePresetId(snap.selectedScenePresetId);
         setSceneDraft(snap.sceneDraft);
+        setContentBrief(snap.contentBrief ?? null);
       }
       setHydrated(true);
     })();
@@ -93,6 +96,7 @@ export function AvatarStudio() {
       const payload: AvatarStudioSnapshotV1 = {
         version: 1,
         step,
+        contentBrief,
         photoData,
         referenceImages,
         referenceImageFileIds,
@@ -107,6 +111,7 @@ export function AvatarStudio() {
   }, [
     hydrated,
     step,
+    contentBrief,
     photoData,
     referenceImages,
     referenceImageFileIds,
@@ -128,6 +133,7 @@ export function AvatarStudio() {
   async function handleNewSession() {
     await clearAvatarStudioSnapshot();
     setStep(1);
+    setContentBrief(null);
     setPhotoData(null);
     setReferenceImages({});
     setReferenceImageFileIds({});
@@ -234,6 +240,7 @@ export function AvatarStudio() {
             {step === 3 && photoData && (
               <SceneGenerator
                 masterPrompt={photoData.masterPrompt}
+                contentBrief={contentBrief ?? createDefaultContentBrief()}
                 sceneReferenceFileIds={sceneReferenceFileIds}
                 sceneDraft={sceneDraft}
                 setSceneDraft={setSceneDraft}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build App Stats.shortcut (binary plist) for Sensor Tower JSON (scalar humanized fields)."""
+"""Build App Stats.shortcut (binary plist) from public app metrics JSON."""
 
 from __future__ import annotations
 
@@ -161,7 +161,7 @@ def build_workflow() -> dict:
         ],
         "WFWorkflowMinimumClientVersion": 900,
         "WFWorkflowMinimumClientVersionString": "900",
-        "WFWorkflowName": "Friday · App Stats (import test mai 2026)",
+        "WFWorkflowName": "Trackapp · App Stats (import test mai 2026)",
         "WFWorkflowNoInputBehavior": {"Name": "GetClipboard", "Parameters": {}},
         "WFWorkflowTypes": ["ActionExtension"],
     }
@@ -193,8 +193,8 @@ def _sign_shortcut(unsigned: Path, signed: Path) -> None:
 
 def main() -> None:
     root = Path(__file__).resolve().parents[1]
-    out = root / "public" / "friday-app-stats.shortcut"
-    signed = root / "public" / "friday-app-stats-signed.shortcut"
+    out = root / "public" / "trackapp-app-stats.shortcut"
+    signed = root / "public" / "trackapp-app-stats-signed.shortcut"
     data = build_workflow()
     out.parent.mkdir(parents=True, exist_ok=True)
     with out.open("wb") as f:

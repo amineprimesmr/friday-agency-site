@@ -14,10 +14,11 @@ export function SuspendInscription() {
   );
 }
 
-function buildOnboardingQs(mode: string, appId: string): string {
+function buildSignupExtrasQs(mode: string, appId: string, ref: string): string {
   const p = new URLSearchParams();
   if (mode) p.set("mode", mode);
   if (appId) p.set("app", appId);
+  if (ref) p.set("ref", ref);
   const s = p.toString();
   return s ? `?${s}` : "";
 }
@@ -28,13 +29,14 @@ function InscriptionInner() {
   const sp = useSearchParams();
   const mode = sp?.get("mode") ?? "";
   const appId = sp?.get("app") ?? "";
+  const ref = sp?.get("ref")?.trim() ?? "";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const onboardingQs = useMemo(() => buildOnboardingQs(mode, appId), [mode, appId]);
+  const signupExtrasQs = useMemo(() => buildSignupExtrasQs(mode, appId, ref), [mode, appId, ref]);
 
   const disabled = busy || email.length < 3 || password.length < 8;
 
@@ -53,7 +55,7 @@ function InscriptionInner() {
       email,
       password,
       options: {
-        emailRedirectTo: `${origin ?? ""}/trackapp/onboarding${onboardingQs}`,
+        emailRedirectTo: `${origin ?? ""}/trackapp/accueil${signupExtrasQs}`,
         data:
           appId ?
             {
@@ -70,8 +72,14 @@ function InscriptionInner() {
     }
 
     if (authData.session) {
+      await fetch("/api/trackapp/affiliate/attach", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(ref ? { referralCode: ref } : {}),
+      }).catch(() => {});
       router.refresh();
-      router.push(`/trackapp/onboarding${onboardingQs}`);
+      router.push(`/trackapp/accueil${signupExtrasQs}`);
       return;
     }
 

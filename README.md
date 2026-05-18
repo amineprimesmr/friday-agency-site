@@ -1,4 +1,4 @@
-# Friday — vitrine + App Tracker + SaaS
+# Trackapp — vitrine + App Tracker + SaaS
 
 Monorepo [Next.js](https://nextjs.org) 15 (App Router, React 19, Tailwind CSS v4) : réécriture de la racine vers la **vitrine statique** (`public/legacy-agency/`), **App Store Tracker** (`/tracker`), routes API (Stripe, auth JWT), et assets statiques (`public/`).
 
@@ -48,7 +48,7 @@ Configurer les variables de `.env.example` dans le projet Vercel. `NEXT_PUBLIC_A
 
 ### Git branchée sur le bon repo
 
-Dans **Vercel → Project → Settings → Git**, le dépôt doit être **`amineprimesmr/friday-agency-site`** (branche **`main`**). Sinon les `git push` ne déclenchent aucun déploiement : le tableau affiche un ancien commit (`5915fa0`, etc.) alors que GitHub est déjà sur un commit plus récent.
+Dans **Vercel → Project → Settings → Git**, le dépôt Git doit être **celui de ce monorepo** (branche **`main`**). Sinon les `git push` ne déclenchent aucun déploiement : le tableau affiche un ancien commit (`5915fa0`, etc.) alors que GitHub est déjà sur un commit plus récent.
 
 ### Aperçu « 403 Forbidden » dans le dashboard Vercel
 

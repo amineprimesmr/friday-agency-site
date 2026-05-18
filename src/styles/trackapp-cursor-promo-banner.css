@@ -1,0 +1,183 @@
+/**
+ * Bandeau partenaire Cursor — haut de l’accueil SaaS (inspiré Trendtrack / Shopify strip).
+ */
+.trackapp-cursor-promo {
+  /* Même fond que .saas-pay-checkout (page paiement) */
+  --flyer-canvas: #0e1113;
+  --flyer-glow-depth: rgb(36, 45, 59);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.35rem;
+  padding: 0.65rem 1rem;
+  margin: 0;
+  overflow: hidden;
+  flex-shrink: 0;
+  z-index: 2;
+  text-decoration: none;
+  cursor: pointer;
+  background:
+    radial-gradient(
+      ellipse 130% 95% at 50% 6%,
+      color-mix(in srgb, var(--flyer-glow-depth) 65%, transparent) 0%,
+      color-mix(in srgb, var(--flyer-glow-depth) 28%, transparent) 42%,
+      rgba(14, 17, 19, 0) 68%
+    ),
+    var(--flyer-canvas);
+  background-color: var(--flyer-canvas);
+  border-radius: 0;
+  border-bottom: 1px solid #262d3a;
+}
+
+.trackapp-cursor-promo__pattern {
+  position: absolute;
+  inset: -12% -4%;
+  pointer-events: none;
+  opacity: 0.14;
+  background-image: url("/assets/cursor.png");
+  background-repeat: repeat;
+  background-size: 5.75rem auto;
+  background-position: center;
+  filter: brightness(0) invert(1);
+  transform: rotate(-4deg) scale(1.08);
+}
+
+.trackapp-cursor-promo__glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 90% 110% at 50% 0%, rgba(163, 180, 212, 0.2), transparent 58%),
+    radial-gradient(ellipse 50% 90% at 85% 55%, rgba(3, 213, 255, 0.07), transparent 52%);
+}
+
+.trackapp-cursor-promo:focus-visible {
+  outline: 2px solid #0f172a;
+  outline-offset: -2px;
+}
+
+.trackapp-cursor-promo:hover .trackapp-cursor-promo__pill {
+  transform: translateY(-1px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 16px 36px -14px rgba(15, 23, 42, 0.32),
+    0 4px 10px rgba(15, 23, 42, 0.1);
+}
+
+.trackapp-cursor-promo__pill {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  max-width: 100%;
+  padding: 0.42rem 0.95rem 0.42rem 0.42rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  background: #fff;
+  color: #0f172a;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 10px 28px -12px rgba(15, 23, 42, 0.28),
+    0 2px 6px rgba(15, 23, 42, 0.08);
+  transition:
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.2s ease;
+}
+
+.trackapp-cursor-promo__icon {
+  display: block;
+  flex-shrink: 0;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 0.42rem;
+  object-fit: cover;
+}
+
+.trackapp-cursor-promo__label {
+  padding-right: 0.15rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* Feuille accueil : le bandeau épouse les coins arrondis de .app-main sans halo blanc */
+body.trackapp-fidelity-body #app-app .app-main:has(.trackapp-accueil-page) {
+  padding: 0 !important;
+  padding-bottom: calc(2.5rem + env(safe-area-inset-bottom, 0px)) !important;
+  overflow: hidden;
+  /* Retire le liseré blanc inset du desktop (visible dans les coins arrondis) */
+  box-shadow: 0 -14px 44px rgba(0, 0, 0, 0.16) !important;
+}
+
+body.trackapp-fidelity-body #app-app .app-main:has(.trackapp-accueil-page) .trackapp-cursor-promo {
+  border-top-left-radius: clamp(18px, 5vw, 24px);
+  border-top-right-radius: clamp(18px, 5vw, 24px);
+}
+
+body.trackapp-fidelity-body #app-app .app-main:has(.trackapp-accueil-page) > .app-content {
+  padding: 0;
+  max-width: none;
+}
+
+#app-app .trackapp-accueil-page {
+  --trackapp-accueil-pad-x: 1.25rem;
+}
+
+@media (min-width: 981px) {
+  #app-app .trackapp-accueil-page {
+    --trackapp-accueil-pad-x: 1.5rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  #app-app .trackapp-accueil-page {
+    --trackapp-accueil-pad-x: 2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .trackapp-cursor-promo {
+    min-height: 3.1rem;
+    padding: 0.55rem 0.75rem;
+  }
+
+  .trackapp-cursor-promo__pattern {
+    background-size: 4.5rem auto;
+    opacity: 0.16;
+  }
+
+  .trackapp-cursor-promo__label {
+    font-size: 0.78rem;
+  }
+}
+
+#app-app .trackapp-accueil-page {
+  display: flex;
+  flex-direction: column;
+  min-height: min(100%, calc(100dvh - var(--app-topbar-height, 56px) - 2rem));
+  width: 100%;
+}
+
+#app-app .trackapp-accueil-page__body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  padding: 1.25rem var(--trackapp-accueil-pad-x, 1rem) 3rem;
+}
+
+@media (min-width: 640px) {
+  #app-app .trackapp-accueil-page__body {
+    padding-top: 1.75rem;
+    padding-bottom: 4rem;
+  }
+}
+

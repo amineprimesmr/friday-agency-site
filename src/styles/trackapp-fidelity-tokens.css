@@ -1,9 +1,7 @@
 /* Tokens manquants du bundle Fidelity (style.css / landing) — injectés sur #app-app */
-@import url("https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap");
-
 #app-app {
   --fidpass-surface: #f5f5f7;
-  --font: "Inter", system-ui, -apple-system, sans-serif;
+  --font: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
 }
 
 .visually-hidden {

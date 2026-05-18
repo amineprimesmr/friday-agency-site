@@ -29,13 +29,13 @@ export function TrackappPromoModal({
         >
           ✕
         </button>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-400/90">Trackapp</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-400/90">Workspace</p>
         <h2 id="trackapp-promo-title" className="mt-3 text-2xl font-semibold tracking-tight text-white">
           Un seul endroit pour passer à la construction
         </h2>
         <p className="mt-4 text-[14px] leading-relaxed text-white/55">
-          L’invite « extension gratuite » laisse place à un espace où tu suis des étapes claires pour iOS, avec des prompts
-          découpés. Tu gardes gratuitement une partie du plan ; tout le playbook se déverrouille quand tu actives Stripe.
+          Un espace où tu enchaînes des étapes claires pour iOS, avec des prompts découpés. Une partie du plan reste
+          visible sans abonnement ; le playbook complet se débloque via Stripe.
         </p>
         <ul className="mt-5 space-y-2 text-[13px] text-white/45">
           <li>● Onboarding ultra court (+ ton niveau en apps mobiles)</li>

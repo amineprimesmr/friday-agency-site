@@ -1,6 +1,14 @@
+import {
+  createDefaultContentBrief,
+  isContentBriefComplete,
+  type ContentBriefPersisted,
+} from "@/lib/avatar-content-brief";
 import type { ReferenceAngle } from "@/lib/avatar-prompts";
 
 export const AVATAR_STUDIO_SNAPSHOT_VERSION = 1 as const;
+
+/** 1 = brief → 5 = vidéo */
+export const AVATAR_STUDIO_STEP_MAX = 5 as const;
 
 /** Aligné sur `PhotoData` côté client (sans champs non sérialisables). */
 export interface PhotoDataPersisted {
@@ -23,6 +31,8 @@ export interface SceneDraftPersisted {
 export interface AvatarStudioSnapshotV1 {
   version: typeof AVATAR_STUDIO_SNAPSHOT_VERSION;
   step: number;
+  /** Questionnaire créateur — obligatoire avant la photo (sessions anciennes sans champ → null). */
+  contentBrief: ContentBriefPersisted | null;
   photoData: PhotoDataPersisted | null;
   referenceImages: Partial<Record<ReferenceAngle, string>>;
   referenceImageFileIds: Partial<Record<ReferenceAngle, string>>;
@@ -32,7 +42,7 @@ export interface AvatarStudioSnapshotV1 {
   savedAt: number;
 }
 
-const DB_NAME = "friday-avatar-studio";
+const DB_NAME = "trackapp-avatar-studio";
 const DB_VERSION = 1;
 const OSTORE = "snapshot";
 const KEY = "studio";
@@ -46,6 +56,29 @@ export function createDefaultSceneDraft(): SceneDraftPersisted {
     generatedImages: [],
     selectedImageUrl: null,
     showPrompt: false,
+  };
+}
+
+function sanitizeContentBrief(raw: unknown): ContentBriefPersisted | null {
+  if (!raw || typeof raw !== "object") return null;
+  const o = raw as Record<string, unknown>;
+  const d = createDefaultContentBrief();
+  const pl = o.platforms && typeof o.platforms === "object" ? (o.platforms as Record<string, unknown>) : {};
+  return {
+    personaRole: typeof o.personaRole === "string" ? o.personaRole : d.personaRole,
+    nicheTopic: typeof o.nicheTopic === "string" ? o.nicheTopic : d.nicheTopic,
+    credibilityNotes:
+      typeof o.credibilityNotes === "string" ? o.credibilityNotes : d.credibilityNotes,
+    tone: typeof o.tone === "string" ? o.tone : d.tone,
+    platforms: {
+      tiktok: pl.tiktok === true,
+      reels: pl.reels === true,
+      shorts: pl.shorts === true,
+    },
+    inspirationAccounts:
+      typeof o.inspirationAccounts === "string" ? o.inspirationAccounts : d.inspirationAccounts,
+    contentPillars: typeof o.contentPillars === "string" ? o.contentPillars : d.contentPillars,
+    topicsToAvoid: typeof o.topicsToAvoid === "string" ? o.topicsToAvoid : d.topicsToAvoid,
   };
 }
 
@@ -76,12 +109,17 @@ function isSnapshotShape(x: unknown): x is StoredSnapshotShape {
 export function sanitizeSnapshot(raw: unknown): AvatarStudioSnapshotV1 | null {
   if (!isSnapshotShape(raw)) return null;
   const photoData = isPhotoData(raw.photoData) ? raw.photoData : null;
+  const contentBrief = sanitizeContentBrief(raw.contentBrief);
+  const briefOk = isContentBriefComplete(contentBrief);
 
   let step = raw.step;
   if (step < 1) step = 1;
-  if (step > 4) step = 4;
-  if (!photoData && step > 1) step = 1;
-  if (step === 4 && typeof raw.selectedScene !== "string") step = 3;
+  if (step > AVATAR_STUDIO_STEP_MAX) step = AVATAR_STUDIO_STEP_MAX;
+
+  if (!briefOk && step > 1) step = 1;
+  else if (!photoData && step > 2) step = 2;
+  else if (step === 5 && typeof raw.selectedScene !== "string") step = 4;
+
   const sd = raw.sceneDraft as Record<string, unknown>;
   const sceneDraft: SceneDraftPersisted = {
     ...createDefaultSceneDraft(),
@@ -102,6 +140,7 @@ export function sanitizeSnapshot(raw: unknown): AvatarStudioSnapshotV1 | null {
   return {
     version: 1,
     step,
+    contentBrief,
     photoData,
     referenceImages:
       raw.referenceImages && typeof raw.referenceImages === "object"

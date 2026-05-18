@@ -3,10 +3,12 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 
+import { processCheckoutSessionCommission } from "@/lib/trackapp/affiliate/commissions";
 import {
   billingIdsFromCheckoutSession,
   persistTrackappPremium,
 } from "@/lib/trackapp/stripe-sync";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe";
 
 export async function POST(req: Request) {
@@ -103,6 +105,11 @@ export async function POST(req: Request) {
       },
       { status: 503 },
     );
+  }
+
+  const admin = createAdminClient();
+  if (admin) {
+    await processCheckoutSessionCommission(admin, session);
   }
 
   return NextResponse.json({ ok: true });

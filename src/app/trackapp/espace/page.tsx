@@ -8,13 +8,12 @@ import { TrackappPlaybookDashboard } from "@/components/trackapp/playbook-dashbo
 
 import { fetchAppDetail } from "@/lib/apple-charts";
 import type { TrackappOnboardingAnswers } from "@/lib/trackapp/playbook";
-import {
-  buildPlaybookSteps,
-  interpolatePrompt,
-  previewUnlockCount,
-} from "@/lib/trackapp/playbook";
-import { stripeConfigured } from "@/lib/stripe";
+import { buildPlaybookSteps, interpolatePrompt } from "@/lib/trackapp/playbook";
+import { TrackappDevMockPlaybookView } from "@/lib/trackapp/dev-mock-playbook";
 import { createClient } from "@/lib/supabase/server";
+
+const LOCAL_UI_WITHOUT_ACCOUNT = process.env.NODE_ENV !== "production";
+const APP_DETAIL_RENDER_BUDGET_MS = 350;
 
 export const metadata: Metadata = {
   title: "Espace playbook — Trackapp",
@@ -42,8 +41,30 @@ function coerceAnswers(payload: TrackappOnboardingAnswers | Record<string, unkno
   };
 }
 
-export default async function EspacePage() {
+async function fetchAppDetailWithinRenderBudget(sourceId: string) {
+  if (!sourceId) return null;
+
+  return Promise.race([
+    fetchAppDetail(sourceId),
+    new Promise<null>((resolve) => {
+      setTimeout(() => resolve(null), APP_DETAIL_RENDER_BUDGET_MS);
+    }),
+  ]);
+}
+
+export default async function EspacePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ app?: string | undefined }>;
+}) {
+  const sp = await searchParams;
+  const qsApp = typeof sp?.app === "string" ? sp.app.trim() : "";
+
   const sb = await createClient();
+
+  if (LOCAL_UI_WITHOUT_ACCOUNT && !sb) {
+    return <TrackappDevMockPlaybookView />;
+  }
 
   if (!sb) {
     return (
@@ -58,11 +79,14 @@ export default async function EspacePage() {
   const {
     data: { user },
   } = await sb.auth.getUser();
-  if (!user) redirect("/trackapp/connexion?next=/trackapp/espace");
+  if (!user) {
+    if (LOCAL_UI_WITHOUT_ACCOUNT) return <TrackappDevMockPlaybookView />;
+    redirect("/trackapp/connexion?next=/trackapp/espace");
+  }
 
   await sb.from("trackapp_profiles").upsert({ id: user.id }).select("*").maybeSingle();
 
-  const { data: profile } = await sb.from("trackapp_profiles").select("*").eq("id", user.id).maybeSingle();
+  let { data: profile } = await sb.from("trackapp_profiles").select("*").eq("id", user.id).maybeSingle();
 
   if (!profile) {
     return (
@@ -76,16 +100,40 @@ export default async function EspacePage() {
     );
   }
 
-  if (!profile.onboarding_completed_at) {
-    redirect("/trackapp/onboarding");
+  const meta =
+    user.user_metadata && typeof user.user_metadata.source_app_store_id === "string"
+      ? user.user_metadata.source_app_store_id.trim()
+      : "";
+
+  const existingSource =
+    typeof profile.source_app_store_id === "string" && profile.source_app_store_id.trim() ?
+      profile.source_app_store_id.trim()
+    : "";
+
+  const resolvedSource = qsApp || existingSource || meta || "";
+  const incomingExplicit = qsApp || meta || "";
+
+  const needsPatch =
+    !profile.onboarding_completed_at || Boolean(incomingExplicit && incomingExplicit !== existingSource);
+
+  if (needsPatch) {
+    await sb.from("trackapp_profiles").upsert({
+      id: user.id,
+      ...(resolvedSource ? { source_app_store_id: resolvedSource } : {}),
+      ...(!profile.onboarding_completed_at ?
+        { onboarding_completed_at: new Date().toISOString() }
+      : {}),
+    });
+    const { data: refetched } = await sb.from("trackapp_profiles").select("*").eq("id", user.id).maybeSingle();
+    if (refetched) profile = refetched;
   }
 
   const pTyped = profile as ProfileShape;
 
   const answers = coerceAnswers((pTyped.onboarding ?? {}) as Record<string, unknown>);
 
-  const sourceId = typeof pTyped.source_app_store_id === "string" ? pTyped.source_app_store_id : null;
-  const appSnap = sourceId ? await fetchAppDetail(sourceId) : null;
+  const sourceId = typeof pTyped.source_app_store_id === "string" ? pTyped.source_app_store_id.trim() : "";
+  const appSnap = await fetchAppDetailWithinRenderBudget(sourceId);
 
   const sourceLines = [];
   sourceLines.push(
@@ -102,12 +150,6 @@ export default async function EspacePage() {
 
   const steps = buildPlaybookSteps();
 
-  const unlocked = Boolean(pTyped.plan_unlocked_at);
-  const previewLimit =
-    unlocked ? steps.length : (
-      previewUnlockCount(steps.length)
-    );
-
   const ctx: Record<string, string> = {
     app_name: String(answers.app_name ?? ""),
     accent_color: String(answers.accent_color ?? ""),
@@ -121,7 +163,7 @@ export default async function EspacePage() {
     source_app_bundle: "",
   };
 
-  const rowsPayload: VisibleRowPayload[] = steps.map((step, idx) => {
+  const rowsPayload: VisibleRowPayload[] = steps.map((step) => {
     const rendered = interpolatePrompt(step.prompt_template, ctx);
     return {
       id: step.id,
@@ -129,11 +171,9 @@ export default async function EspacePage() {
       summary: step.summary,
       prompt_template: step.prompt_template,
       promptRendered: rendered,
-      visible: idx < previewLimit,
+      visible: true,
     };
   });
-
-  const stripeReady = stripeConfigured();
 
   return (
     <div className="relative z-[1] dashboard-main">
@@ -143,16 +183,9 @@ export default async function EspacePage() {
         <h1 className="trackapp-workspace-hero-title">{answers.app_name}</h1>
         <p className="trackapp-workspace-hero-desc">
           Checklist Xcode / App Store découpée en prompts prêts à coller ({steps.length} blocs).
-          {!unlocked ? " Tu vois un aperçu gratuit (environ 10 %) jusqu'à l'activation Stripe." : ""}
         </p>
-        {!stripeReady ?
-          <p className="dashboard-hint" style={{ color: "var(--dash-warning)" }}>
-            Aucune clé Stripe serveur : configurez STRIPE_SECRET_KEY + STRIPE_PRICE_ID_TRACKAPP (ou
-            STRIPE_PRICE_ID_MONTHLY) sur l&apos;hébergeur.
-          </p>
-        : null}
       </section>
-      <TrackappPlaybookDashboard rows={rowsPayload} fullUnlocked={unlocked} stripeReady={stripeReady} />
+      <TrackappPlaybookDashboard rows={rowsPayload} />
     </div>
   );
 }

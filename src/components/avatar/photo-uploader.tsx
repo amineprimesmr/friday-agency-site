@@ -111,8 +111,10 @@ export function PhotoUploader({ onReady, restoredSession = null }: Props) {
   return (
     <div className="flex flex-col gap-6">
       <p className="text-sm text-white/50">
-        Upload une photo claire de la personne — de face de préférence, visage bien visible.
-        Claude analysera chaque détail et générera le prompt maître automatiquement.
+        <strong className="text-white/65">Base obligatoire : une vraie personne</strong> (photo que tu as le droit
+        d’utiliser). De face de préférence, visage bien lisible — on ne crée pas un visage « inventé » : on part
+        toujours de cette identité pour le contenu vertical.
+        L’IA analyse les détails et construit le prompt maître.
       </p>
 
       {/* Drop zone */}

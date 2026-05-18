@@ -1,0 +1,190 @@
+.trackapp-affiliate-dash {
+  margin: 0 0 2rem;
+  padding: 1.25rem 1.35rem 1.5rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(165deg, rgba(36, 45, 59, 0.35) 0%, rgba(14, 17, 19, 0.95) 55%);
+  color: #f5f7fb;
+}
+
+.trackapp-affiliate-dash--loading,
+.trackapp-affiliate-dash--error {
+  padding: 2rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.9rem;
+}
+
+.trackapp-affiliate-dash__head h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.trackapp-affiliate-dash__head p {
+  margin: 0 0 1.1rem;
+  font-size: 0.85rem;
+  color: rgba(209, 217, 232, 0.82);
+  line-height: 1.45;
+}
+
+.trackapp-affiliate-dash__stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 1.1rem;
+}
+
+@media (min-width: 640px) {
+  .trackapp-affiliate-dash__stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.trackapp-affiliate-dash__stat {
+  padding: 0.75rem 0.85rem;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.trackapp-affiliate-dash__stat-label {
+  display: block;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 0.25rem;
+}
+
+.trackapp-affiliate-dash__stat strong {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.trackapp-affiliate-dash__stat strong.is-highlight {
+  color: #a8c4ff;
+}
+
+.trackapp-affiliate-dash__stat-hint {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.trackapp-affiliate-dash__link-box {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(120, 168, 255, 0.2);
+}
+
+.trackapp-affiliate-dash__link-label {
+  margin: 0 0 0.45rem;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.trackapp-affiliate-dash__link-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.trackapp-affiliate-dash__link-row code {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.72rem;
+  word-break: break-all;
+  color: #d1d9e8;
+}
+
+.trackapp-affiliate-dash__link-row button {
+  flex-shrink: 0;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.trackapp-affiliate-dash__code {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.trackapp-affiliate-dash__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.trackapp-affiliate-dash__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 1rem;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s ease;
+}
+
+.trackapp-affiliate-dash__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.trackapp-affiliate-dash__btn--primary {
+  background: linear-gradient(135deg, #5b8def 0%, #3d6fd4 100%);
+  color: #fff;
+}
+
+.trackapp-affiliate-dash__btn--ghost {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.trackapp-affiliate-dash__msg {
+  margin: 0.75rem 0 0;
+  font-size: 0.8rem;
+  color: #a8c4ff;
+}
+
+.trackapp-affiliate-dash__table-wrap {
+  margin-top: 1.25rem;
+}
+
+.trackapp-affiliate-dash__table-wrap h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.trackapp-affiliate-dash__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.72rem;
+}
+
+.trackapp-affiliate-dash__table th,
+.trackapp-affiliate-dash__table td {
+  padding: 0.45rem 0.35rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.trackapp-affiliate-dash__table th {
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 500;
+}

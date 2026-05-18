@@ -3,35 +3,55 @@ import {
   openaiUploadBuffer,
 } from "@/lib/openai-avatar";
 
-/** Portrait default — override with OPENAI_AVATAR_IMAGE_SIZE=e.g. 1024x1024 for speed. */
+/** Default square for lower latency & cost vs portrait — override with OPENAI_AVATAR_IMAGE_SIZE (e.g. 1024x1536). */
 export const DEFAULT_AVATAR_IMAGE_SIZE =
-  process.env.OPENAI_AVATAR_IMAGE_SIZE ?? "1024x1536";
+  process.env.OPENAI_AVATAR_IMAGE_SIZE ?? "1024x1024";
 
-/** low | medium | high | auto — default high for photorealistic edits; set medium locally for speed. */
+function normalizeGenerationQuality(explicit?: string | null): "low" | "medium" | "high" | "auto" {
+  const fromEnv = process.env.OPENAI_IMAGE_GEN_QUALITY?.trim().toLowerCase();
+  const raw = (explicit?.trim().toLowerCase() || fromEnv || "high") as string;
+  if (raw === "low" || raw === "medium" || raw === "high" || raw === "auto") return raw;
+  return "high";
+}
+
+function imageApiModeration(): "auto" | "low" {
+  return process.env.OPENAI_IMAGE_MODERATION?.trim().toLowerCase() === "low" ? "low" : "auto";
+}
+
+/** low | medium | high | auto — default medium balances quality & cost; set OPENAI_AVATAR_EDIT_QUALITY=high if needed. */
 export function avatarEditQuality(): string | undefined {
-  const q = (process.env.OPENAI_AVATAR_EDIT_QUALITY ?? "high").trim().toLowerCase();
+  const q = (process.env.OPENAI_AVATAR_EDIT_QUALITY ?? "medium").trim().toLowerCase();
   if (q === "off" || q === "none") return undefined;
   if (q === "low" || q === "medium" || q === "high" || q === "auto") return q;
-  return "high";
+  return "medium";
 }
 
 export async function generateAvatarFromText(
   prompt: string,
   size: string,
   apiKey: string,
+  qualityOverride?: string | null,
 ): Promise<string> {
+  const quality = normalizeGenerationQuality(qualityOverride);
+  const body: Record<string, unknown> = {
+    model: "gpt-image-2",
+    prompt,
+    n: 1,
+    size,
+    quality,
+    output_format: "png",
+  };
+  if (imageApiModeration() === "low") {
+    body.moderation = "low";
+  }
+
   const res = await fetch("https://api.openai.com/v1/images/generations", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      model: "gpt-image-2",
-      prompt,
-      n: 1,
-      size,
-    }),
+    body: JSON.stringify(body),
   });
 
   const text = await res.text();
@@ -58,6 +78,7 @@ export async function generateAvatarFromReferenceEdits(
   size: string,
   referenceFileIds: string[],
   apiKey: string,
+  qualityOverride?: string | null,
 ): Promise<{ imageUrl: string; outputFileId: string }> {
   const body: Record<string, unknown> = {
     model: "gpt-image-2",
@@ -67,8 +88,15 @@ export async function generateAvatarFromReferenceEdits(
     output_format: "png",
     images: referenceFileIds.map((id) => ({ file_id: id })),
   };
-  const q = avatarEditQuality();
+  const o = qualityOverride?.trim().toLowerCase();
+  const q =
+    o === "low" || o === "medium" || o === "high" || o === "auto"
+      ? o
+      : avatarEditQuality();
   if (q) body.quality = q;
+  if (imageApiModeration() === "low") {
+    body.moderation = "low";
+  }
 
   const res = await fetch("https://api.openai.com/v1/images/edits", {
     method: "POST",
@@ -124,6 +152,7 @@ export async function runAvatarImageGeneration(args: {
   size: string;
   referenceFileIds: string[];
   apiKey: string;
+  quality?: string | null;
 }): Promise<{ imageUrl: string; outputFileId?: string }> {
   const ids = args.referenceFileIds.filter(Boolean);
   if (ids.length > 0) {
@@ -132,12 +161,14 @@ export async function runAvatarImageGeneration(args: {
       args.size,
       ids,
       args.apiKey,
+      args.quality,
     );
   }
   const imageUrl = await generateAvatarFromText(
     args.prompt,
     args.size,
     args.apiKey,
+    args.quality,
   );
   return { imageUrl };
 }

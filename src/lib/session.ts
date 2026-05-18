@@ -1,6 +1,6 @@
 import { SignJWT, jwtVerify } from "jose";
 
-const COOKIE = "friday_member";
+const COOKIE = "trackapp_member";
 
 function getSecret() {
   const raw = process.env.SUBSCRIPTION_SECRET;
@@ -8,7 +8,7 @@ function getSecret() {
     return new TextEncoder().encode(raw);
   }
   if (process.env.NODE_ENV !== "production") {
-    return new TextEncoder().encode("dev-only-friday-session-secret-min-32!");
+    return new TextEncoder().encode("dev-only-trackapp-session-secret-min-32!");
   }
   throw new Error("SUBSCRIPTION_SECRET manquant ou trop court (min 16 caractères).");
 }

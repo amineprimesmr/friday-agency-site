@@ -30,9 +30,9 @@ export function TrackappTopbarSearchModal({ open, onClose }: Readonly<{ open: bo
     onClose();
     setQ("");
     if (term.length > 0) {
-      router.push(`/tracker/search?q=${encodeURIComponent(term)}`);
+      router.push(`/trackapp/apptracker?q=${encodeURIComponent(term)}`);
     } else {
-      router.push("/tracker/search");
+      router.push("/trackapp/apptracker");
     }
   }, [q, onClose, router]);
 
@@ -99,7 +99,7 @@ export function TrackappTopbarSearchModal({ open, onClose }: Readonly<{ open: bo
               </svg>
             </div>
             <p className="app-topbar-search-empty-text" id="app-topbar-search-empty-text">
-              Entre un nom d&apos;app puis Entrée — tu seras redirigé vers le Tracker App Store.
+              Entre un nom d&apos;app puis Entrée — les résultats s&apos;ouvriront dans Apptracker.
             </p>
           </div>
         </div>

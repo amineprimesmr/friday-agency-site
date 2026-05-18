@@ -13,6 +13,9 @@ const APPLE_MZSTATIC_PATTERNS = Array.from({ length: 18 }, (_, i) => ({
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname),
+  experimental: {
+    optimizePackageImports: ["framer-motion"],
+  },
   images: {
     remotePatterns: APPLE_MZSTATIC_PATTERNS,
   },

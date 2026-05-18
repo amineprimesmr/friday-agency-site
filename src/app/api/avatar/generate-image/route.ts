@@ -16,10 +16,15 @@ export async function POST(req: NextRequest) {
       prompt?: string;
       referenceFileIds?: string[];
       size?: string;
+      quality?: string;
     };
     const prompt = body.prompt;
     const size = body.size ?? DEFAULT_AVATAR_IMAGE_SIZE;
     const referenceFileIds = body.referenceFileIds?.filter(Boolean) ?? [];
+    const quality =
+      typeof body.quality === "string" && body.quality.trim()
+        ? body.quality.trim().toLowerCase()
+        : undefined;
 
     if (!prompt) {
       return NextResponse.json({ error: "prompt required" }, { status: 400 });
@@ -38,6 +43,7 @@ export async function POST(req: NextRequest) {
         prompt,
         referenceFileIds,
         size,
+        ...(quality ? { quality } : {}),
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -55,6 +61,7 @@ export async function POST(req: NextRequest) {
       size,
       referenceFileIds,
       apiKey,
+      quality: quality ?? null,
     });
     return NextResponse.json({
       imageUrl: result.imageUrl,

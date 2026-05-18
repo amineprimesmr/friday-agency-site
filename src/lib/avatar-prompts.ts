@@ -1,3 +1,5 @@
+import type { ContentBriefPersisted } from "@/lib/avatar-content-brief";
+
 // ─── Character Bible — prompt builder ───────────────────────────────────────
 
 export interface CharacterBible {
@@ -285,20 +287,58 @@ export const SCENE_PRESETS: ScenePreset[] = [
   },
 ];
 
+export function buildContentBriefContext(brief: ContentBriefPersisted): string {
+  const platforms = [
+    brief.platforms.tiktok && "TikTok (vertical 9:16)",
+    brief.platforms.reels && "Instagram Reels",
+    brief.platforms.shorts && "YouTube Shorts",
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  const lines = [
+    "CREATOR CONTENT BRIEF (editorial — the still must feel like a believable frame from vertical social video, not a generic stock portrait):",
+    `Persona / role: ${brief.personaRole.trim()}`,
+    `Core topic & niche: ${brief.nicheTopic.trim()}`,
+    brief.credibilityNotes.trim()
+      ? `Credibility / proof points the audience should sense: ${brief.credibilityNotes.trim()}`
+      : "",
+    `On-camera energy & tone: ${brief.tone.trim()}`,
+    `Target surfaces: ${platforms}. Favor vertical-native framing and subject scale when the shot type allows.`,
+    brief.inspirationAccounts.trim()
+      ? `Style inspiration only (hooks, pacing, setting vibes — never copy another person's face or trademark looks): ${brief.inspirationAccounts.trim()}`
+      : "",
+    brief.contentPillars.trim()
+      ? `Content pillars to lean into in this frame: ${brief.contentPillars.trim()}`
+      : "",
+    brief.topicsToAvoid.trim()
+      ? `Do not depict or imply: ${brief.topicsToAvoid.trim()}`
+      : "",
+  ].filter(Boolean);
+
+  return lines.join("\n");
+}
+
 export function buildScenePrompt(
   masterPrompt: string,
   scene: ScenePreset | null,
   customScene: string,
   lighting: string,
   shot: string,
+  contentBrief?: ContentBriefPersisted | null,
 ): string {
   const sceneDesc = scene ? scene.description : customScene;
   const lightingFinal = scene ? scene.lighting : lighting;
   const shotFinal = scene ? scene.shot : shot;
 
+  const briefBlock =
+    contentBrief && contentBrief.personaRole.trim() && contentBrief.nicheTopic.trim()
+      ? `${buildContentBriefContext(contentBrief)}\n\n`
+      : "";
+
   return `${SCENE_IDENTITY_LOCK}
 
-Full character bible (match every line; wardrobe continuity mandatory):
+${briefBlock}Full character bible (match every line; wardrobe continuity mandatory):
 ${masterPrompt.trim()}
 
 Scene action and blocking:

@@ -24,7 +24,7 @@ html:has(body.trackapp-fidelity-body) {
   --app-shell-top-bg: linear-gradient(180deg, #070809 0%, #111317 100%);
   --app-shell-top-bg-solid: #0b0d10;
   --app-main-sheet-bg: #f3f4f6;
-  --app-bg: var(--app-shell-top-bg);
+  --app-bg: #0b0d10;
   --app-surface: var(--fidpass-surface);
   --app-surface-hover: #f0f2f5;
   --app-border: #e8ecf1;
@@ -33,7 +33,7 @@ html:has(body.trackapp-fidelity-body) {
   --app-accent: #2563eb;
   --app-accent-hover: #1d4ed8;
   --app-accent-light: rgba(37, 99, 235, 0.12);
-  --app-sidebar-width: 234px;
+  --app-sidebar-width: 200px;
   --app-sidebar-bg: #000;
   --app-sidebar-text: rgba(255, 255, 255, 0.9);
   --app-sidebar-text-muted: rgba(255, 255, 255, 0.55);
@@ -124,7 +124,7 @@ html:has(body.trackapp-fidelity-body) {
 }
 
 .app-sidebar-brand {
-  padding: 0.24rem 0.75rem 0.65rem;
+  padding: 0.18rem 0.5rem 0.5rem;
   border-bottom: 1px solid var(--app-sidebar-border);
 }
 
@@ -145,7 +145,7 @@ html:has(body.trackapp-fidelity-body) {
 
 .app-sidebar-logo {
   font-weight: 800;
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   color: var(--app-sidebar-text);
   text-decoration: none;
   display: flex;
@@ -177,7 +177,7 @@ html:has(body.trackapp-fidelity-body) {
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 767px) {
   .app-sidebar-brand {
     display: none !important;
   }
@@ -1042,37 +1042,10 @@ html:has(body.trackapp-fidelity-body) {
   transition: none;
 }
 
-@media (max-width: 900px) {
-  .app-sidebar {
-    width: 72px;
-    min-width: 88px;
-    padding: 0;
-  }
-  .app-sidebar-link-active::before { display: none; }
-  .app-sidebar-brand,
-  .app-sidebar-footer { padding: 1rem 0.5rem; }
-  .app-sidebar-trial-subscribe-card { display: none; }
-  .app-sidebar-link-text,
-  .app-sidebar-user { display: none; }
-  .app-sidebar-link {
-    justify-content: center;
-    padding: 0.85rem;
-  }
-  .app-sidebar-link .app-sidebar-icon { width: 1.5rem; height: 1.5rem; }
-  .app-sidebar-nav { padding: 0.5rem; }
-  .app-main {
-    margin-left: 72px;
-    margin-right: 10px;
-    margin-top: 0;
-    margin-bottom: 10px;
-    min-height: calc(100vh - 10px);
-    padding: 1.5rem 1rem;
-    border-top-left-radius: clamp(18px, 5vw, 24px);
-    border-top-right-radius: clamp(18px, 5vw, 24px);
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-}
+/**
+ * Ancienne sidebar « icônes seules » en ≤900px — retirée : sous md la sidebar est masquée (Tailwind),
+ * au-delà la colonne reste à pleine largeur (--app-sidebar-width).
+ */
 
 @media (max-width: 600px) {
   #app-app { flex-direction: column; }

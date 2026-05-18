@@ -17,7 +17,7 @@ export async function GET(req: Request) {
   const email =
     session.customer_details?.email ??
     (typeof session.customer_email === "string" ? session.customer_email : null) ??
-    "member@friday.app";
+    "member@trackapp.app";
 
   const token = await signMemberSession(email);
 

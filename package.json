@@ -1,14 +1,17 @@
 {
-  "name": "friday-saas",
+  "name": "trackapp",
   "version": "1.0.0",
   "private": true,
   "engines": {
     "node": ">=20.9.0"
   },
   "scripts": {
-    "dev": "node scripts/free-port.mjs 3000 && next dev --hostname 127.0.0.1",
-    "dev:turbo": "node scripts/free-port.mjs 3000 && next dev --turbo --hostname 127.0.0.1",
-    "dev:webpack": "node scripts/free-port.mjs 3000 && next dev --hostname 127.0.0.1",
+    "dev": "node scripts/free-port.mjs 3000 && next dev --hostname 127.0.0.1 -p 3000",
+    "dev:open": "node scripts/run-dev-open.mjs",
+    "dev:tracker": "node scripts/free-port.mjs 3001 && node scripts/print-dev-tracker-url.mjs 3001 && next dev --hostname 127.0.0.1 -p 3001",
+    "dev:turbo": "node scripts/free-port.mjs 3000 && next dev --turbo --hostname 127.0.0.1 -p 3000",
+    "dev:homebrew-node22": "PATH=/opt/homebrew/opt/node@22/bin:${PATH} node scripts/free-port.mjs 3000 && PATH=/opt/homebrew/opt/node@22/bin:${PATH} next dev --turbo --hostname 127.0.0.1 -p 3000",
+    "dev:webpack": "node scripts/free-port.mjs 3000 && next dev --hostname 127.0.0.1 -p 3000",
     "clean": "rm -rf .next node_modules/.cache",
     "reset:dev": "bash scripts/dev-reset.sh",
     "dev:fresh": "npm run clean && npm run dev",
@@ -16,7 +19,12 @@
     "build": "next build",
     "start": "next start --hostname 127.0.0.1",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "deploy": "npx vercel deploy --yes",
+    "deploy:prod": "npx vercel deploy --prod --yes",
+    "deploy:watch": "node scripts/watch-deploy.mjs",
+    "ship": "npm run typecheck && npm run deploy:prod",
+    "tiktok:compress-demo": "bash scripts/compress-tiktok-demo-video.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.1",
@@ -25,9 +33,12 @@
     "@upstash/redis": "^1.38.0",
     "@vercel/functions": "^3.5.1",
     "clsx": "^2.1.1",
+    "enhanced-resolve": "^5.21.3",
     "framer-motion": "^12.38.0",
+    "geist": "^1.7.0",
     "jose": "^6.2.3",
-    "next": "15.5.18",
+    "next": "^15.5.18",
+    "qrcode": "^1.5.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "stripe": "^22.1.1",
@@ -36,10 +47,14 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "15.5.18",
+    "chokidar": "^4.0.3",
+    "es-abstract": "^1.24.2",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^15.5.18",
+    "eslint-plugin-react": "^7.37.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

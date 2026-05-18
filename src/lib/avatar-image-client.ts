@@ -20,11 +20,17 @@ type StatusResponse = {
 export async function requestAvatarImageGeneration(
   prompt: string,
   referenceFileIds: string[],
+  options?: { size?: string; quality?: string },
 ): Promise<{ imageUrl: string; outputFileId: string | undefined }> {
   const res = await fetch("/api/avatar/generate-image", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt, referenceFileIds }),
+    body: JSON.stringify({
+      prompt,
+      referenceFileIds,
+      ...(options?.size ? { size: options.size } : {}),
+      ...(options?.quality ? { quality: options.quality } : {}),
+    }),
   });
   const data = await readApiJson<StartResponse>(res);
   if (!res.ok) {

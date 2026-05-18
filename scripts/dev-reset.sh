@@ -37,6 +37,7 @@ npm install
 
 echo ""
 echo "✓ Reset terminé."
-echo "  Lance ensuite : npm run dev   (Webpack — stable sur plusieurs heures)"
+echo "  Puis : npm run dev     — puis ouvre http://127.0.0.1:3000"
+echo "  Ou  : npm run dev:open — démarre et ouvre le navigateur (défaut /tracker)"
 echo "  Variante rapide : npm run dev:turbo   (Turbopack — peut crasher en longue session)"
 echo ""

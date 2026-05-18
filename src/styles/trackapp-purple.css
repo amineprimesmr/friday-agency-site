@@ -7,7 +7,7 @@
 }
 
 .ta-font {
-  font-family: "Sora", var(--font-friday), system-ui, sans-serif;
+  font-family: "Sora", var(--font-heading), system-ui, sans-serif;
 }
 
 /* CTA primaire violet (remplace la lumière bleue / vert lime du bouton Tracker) */

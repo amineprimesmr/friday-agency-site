@@ -17,11 +17,27 @@ type Props = Readonly<{
 
 function isWorkspacePath(pathname: string): boolean {
   return (
-    pathname === "/trackapp/espace"
+    pathname === "/trackapp/accueil"
+    || pathname.startsWith("/trackapp/accueil/")
+    || pathname === "/trackapp/apptracker"
+    || pathname.startsWith("/trackapp/apptracker/")
+    || pathname === "/trackapp/creer-mon-app"
+    || pathname.startsWith("/trackapp/creer-mon-app/")
+    || pathname === "/trackapp/espace"
     || pathname.startsWith("/trackapp/espace/")
-    || pathname === "/trackapp/onboarding"
-    || pathname.startsWith("/trackapp/onboarding/")
+    || pathname === "/trackapp/logiciels"
+    || pathname.startsWith("/trackapp/logiciels/")
+    || pathname === "/trackapp/ressources"
+    || pathname.startsWith("/trackapp/ressources/")
+    || pathname === "/trackapp/favoris"
+    || pathname.startsWith("/trackapp/favoris/")
+    || pathname === "/trackapp/gagner-240"
+    || pathname.startsWith("/trackapp/gagner-240/")
   );
+}
+
+function isStandalonePaymentPath(pathname: string): boolean {
+  return pathname === "/trackapp/paiement" || pathname.startsWith("/trackapp/paiement/");
 }
 
 export function TrackappRouteChrome({
@@ -34,6 +50,10 @@ export function TrackappRouteChrome({
 }: Props) {
   const pathname = usePathname() ?? "";
   const workspace = isWorkspacePath(pathname);
+
+  if (isStandalonePaymentPath(pathname)) {
+    return <>{children}</>;
+  }
 
   if (workspace) {
     return (

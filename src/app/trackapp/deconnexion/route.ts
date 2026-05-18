@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     await sb.auth.signOut();
   }
   const url = request.nextUrl.clone();
-  url.pathname = "/trackapp";
+  url.pathname = "/tracker";
   url.search = "";
   return NextResponse.redirect(url);
 }

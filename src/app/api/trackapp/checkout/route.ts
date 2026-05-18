@@ -2,6 +2,9 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
+import { AFFILIATE_REF_COOKIE } from "@/lib/trackapp/affiliate/config";
+import { attachReferrerIfEligible, resolveReferrerByCode } from "@/lib/trackapp/affiliate/referral";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe";
 
 export async function POST() {
@@ -62,18 +65,31 @@ export async function POST() {
       : `http://${originRaw.replace(/\/$/, "")}`
     : "http://127.0.0.1:3000";
 
+  const metadata: Record<string, string> = {
+    supabase_user_id: user.id,
+    product: "trackapp_full_playbook",
+  };
+
+  const refCode = cookieStore.get(AFFILIATE_REF_COOKIE)?.value?.trim();
+  const admin = createAdminClient();
+  if (refCode && admin) {
+    const referrer = await resolveReferrerByCode(admin, refCode);
+    if (referrer && referrer.id !== user.id) {
+      metadata.referrer_user_id = referrer.id;
+      metadata.referral_code = refCode.toLowerCase();
+      await attachReferrerIfEligible(admin, user.id, refCode);
+    }
+  }
+
   try {
     const sessionStripe = await stripe.checkout.sessions.create({
       mode: "subscription",
       customer_email: user.email,
       line_items: [{ price, quantity: 1 }],
       success_url: `${origin}/trackapp/espace?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/trackapp/espace`,
+      cancel_url: `${origin}/trackapp/accueil`,
       allow_promotion_codes: true,
-      metadata: {
-        supabase_user_id: user.id,
-        product: "trackapp_full_playbook",
-      },
+      metadata,
     });
 
     if (!sessionStripe.url) {

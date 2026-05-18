@@ -1,9 +1,11 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap");
 @import "tailwindcss";
 
 :root {
   color-scheme: dark;
-  --font-friday: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  /* --font-heading et --font-geist-sans : next/font sur <html> (layout racine) */
+  --font-system-ui:
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "Noto Sans", sans-serif;
   /* Fonds noir / anthracite (plus de dégradé bleu plein écran) */
   --bg-agency-a: #000000;
   --bg-agency-b: #050508;
@@ -24,8 +26,8 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-friday);
-  --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
 }
 
 html {
@@ -34,10 +36,19 @@ html {
 
 body {
   min-height: 100dvh;
-  font-family: var(--font-friday);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   color: rgba(255, 255, 255, 0.94);
   background-color: #000000;
   background-image: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading), ui-sans-serif, system-ui, sans-serif;
 }
 
 ::selection {
@@ -49,4 +60,9 @@ body {
   html {
     scroll-behavior: auto;
   }
+}
+
+/** Routes : /avatar, /studio — corps de texte aligné sur Geist (titres : balises h* ou styles locaux) */
+.studio-system-ui {
+  font-family: var(--font-geist-sans), var(--font-system-ui);
 }

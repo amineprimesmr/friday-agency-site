@@ -30,6 +30,7 @@ export async function processAvatarImageJob(jobId: string): Promise<void> {
       size: processing.size,
       referenceFileIds: processing.referenceFileIds,
       apiKey,
+      quality: processing.quality,
     });
     await saveAvatarJob(jobId, {
       ...processing,

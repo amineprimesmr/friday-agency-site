@@ -2,12 +2,14 @@
 
 import type { Dispatch, SetStateAction } from "react";
 import { useMemo, useState } from "react";
+import type { ContentBriefPersisted } from "@/lib/avatar-content-brief";
 import { buildScenePrompt, SCENE_PRESETS, ScenePreset } from "@/lib/avatar-prompts";
 import { requestAvatarImageGeneration } from "@/lib/avatar-image-client";
 import type { SceneDraftPersisted } from "@/lib/avatar-studio-persistence";
 
 interface Props {
   masterPrompt: string;
+  contentBrief: ContentBriefPersisted;
   sceneReferenceFileIds: string[];
   sceneDraft: SceneDraftPersisted;
   setSceneDraft: Dispatch<SetStateAction<SceneDraftPersisted>>;
@@ -36,6 +38,7 @@ const SHOT_OPTIONS = [
 
 export function SceneGenerator({
   masterPrompt,
+  contentBrief,
   sceneReferenceFileIds,
   sceneDraft,
   setSceneDraft,
@@ -59,21 +62,26 @@ export function SceneGenerator({
     return SCENE_PRESETS.find((p) => p.id === selectedPresetId) ?? null;
   }, [selectedPresetId]);
 
-  const scenePrompt = buildScenePrompt(masterPrompt, selectedPreset, customScene, lighting, shot);
+  const scenePrompt = buildScenePrompt(
+    masterPrompt,
+    selectedPreset,
+    customScene,
+    lighting,
+    shot,
+    contentBrief,
+  );
 
-  async function generateVariants() {
+  async function generateSingleScene() {
     setLoading(true);
-    setSceneDraft((d) => ({ ...d, generatedImages: [] }));
+    setSceneDraft((d) => ({ ...d, generatedImages: [], selectedImageUrl: null }));
     try {
-      const promises = [0, 1].map(() =>
-        requestAvatarImageGeneration(scenePrompt, sceneReferenceFileIds).then((out) => out.imageUrl),
-      );
-      const results = await Promise.all(promises);
-      const valid = results.filter(Boolean) as string[];
+      const out = await requestAvatarImageGeneration(scenePrompt, sceneReferenceFileIds);
+      const url = out.imageUrl;
+      if (!url) throw new Error("Pas d'image dans la réponse");
       setSceneDraft((d) => ({
         ...d,
-        generatedImages: valid,
-        selectedImageUrl: valid[0] ?? null,
+        generatedImages: [url],
+        selectedImageUrl: url,
       }));
     } catch (e) {
       alert(`Erreur: ${e instanceof Error ? e.message : String(e)}`);
@@ -89,12 +97,14 @@ export function SceneGenerator({
   }
 
   const canGenerate = selectedPreset !== null || customScene.trim().length > 10;
+  const generatedUrl = generatedImages[0];
 
   return (
     <div className="flex flex-col gap-6">
       <p className="text-sm text-white/50">
-        Choisis une scène — génération par <strong className="text-white/60">édition</strong> (GPT Image 2) avec{" "}
-        {sceneReferenceFileIds.length} fichier(s) image OpenAI : photo uploadée + feuille de refs.
+        Une seule génération par clic — <strong className="text-white/60">édition GPT Image</strong> avec{" "}
+        {sceneReferenceFileIds.length} fichier(s) référence. Le brief créateur du début oriente le cadrage et
+        l&apos;ambiance (vertical social).
       </p>
 
       {/* Preset grid */}
@@ -106,6 +116,7 @@ export function SceneGenerator({
           {SCENE_PRESETS.map((preset) => (
             <button
               key={preset.id}
+              type="button"
               onClick={() => {
                 setSceneDraft((d) => ({ ...d, selectedPresetId: preset.id, customScene: "" }));
               }}
@@ -123,6 +134,7 @@ export function SceneGenerator({
             </button>
           ))}
           <button
+            type="button"
             onClick={() => setSceneDraft((d) => ({ ...d, selectedPresetId: null }))}
             className={`rounded-xl border p-3 text-left transition ${
               selectedPreset === null
@@ -159,7 +171,9 @@ export function SceneGenerator({
                 className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-violet-500/60"
               >
                 {LIGHTING_OPTIONS.map((l) => (
-                  <option key={l} value={l} className="bg-neutral-900">{l}</option>
+                  <option key={l} value={l} className="bg-neutral-900">
+                    {l}
+                  </option>
                 ))}
               </select>
             </div>
@@ -171,7 +185,9 @@ export function SceneGenerator({
                 className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-violet-500/60"
               >
                 {SHOT_OPTIONS.map((s) => (
-                  <option key={s} value={s} className="bg-neutral-900">{s}</option>
+                  <option key={s} value={s} className="bg-neutral-900">
+                    {s}
+                  </option>
                 ))}
               </select>
             </div>
@@ -182,6 +198,7 @@ export function SceneGenerator({
       {/* Prompt preview */}
       <div className="rounded-xl border border-white/8 bg-white/3">
         <button
+          type="button"
           className="flex w-full items-center justify-between px-4 py-3 text-left"
           onClick={() => setSceneDraft((d) => ({ ...d, showPrompt: !d.showPrompt }))}
         >
@@ -198,50 +215,48 @@ export function SceneGenerator({
       </div>
 
       <button
-        onClick={generateVariants}
+        type="button"
+        onClick={generateSingleScene}
         disabled={!canGenerate || loading}
         className="w-full rounded-xl bg-violet-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-900/40 transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-40 active:scale-[0.98]"
       >
         {loading
-          ? "Génération des 2 variantes (async, plusieurs min possible)…"
-          : "Générer 2 variantes"}
+          ? "Génération en cours (async, quelques minutes possibles)…"
+          : generatedUrl
+            ? "Régénérer une nouvelle image (1 appel)"
+            : "Générer l’image de scène (1 appel)"}
       </button>
 
-      {generatedImages.length > 0 && (
+      {generatedUrl ? (
         <div className="flex flex-col gap-4">
           <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-violet-400">
-            Choisir la meilleure variante
+            Résultat
           </h3>
-          <div className="grid grid-cols-2 gap-4">
-            {generatedImages.map((url, i) => (
-              <div key={i} className="flex flex-col gap-2">
-                <div
-                  className={`relative cursor-pointer overflow-hidden rounded-xl border-2 transition ${
-                    selectedImageUrl === url ? "border-violet-500" : "border-white/10 hover:border-white/30"
-                  }`}
-                  onClick={() => setSceneDraft((d) => ({ ...d, selectedImageUrl: url }))}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt={`Variante ${i + 1}`} className="w-full object-cover" />
-                  {selectedImageUrl === url && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-violet-600/20">
-                      <span className="rounded-full bg-violet-600 px-3 py-1 text-xs font-semibold text-white">
-                        Sélectionnée ✓
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <button
-                  onClick={() => handleSelectAndNext(url)}
-                  className="rounded-lg bg-violet-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-violet-500"
-                >
-                  Animer cette scène →
-                </button>
+          <div
+            className={`relative cursor-pointer overflow-hidden rounded-xl border-2 transition ${
+              selectedImageUrl === generatedUrl ? "border-violet-500" : "border-white/10"
+            }`}
+            onClick={() => setSceneDraft((d) => ({ ...d, selectedImageUrl: generatedUrl }))}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={generatedUrl} alt="Scène générée" className="w-full object-cover" />
+            {selectedImageUrl === generatedUrl ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-violet-600/20">
+                <span className="rounded-full bg-violet-600 px-3 py-1 text-xs font-semibold text-white">
+                  Prête pour la vidéo ✓
+                </span>
               </div>
-            ))}
+            ) : null}
           </div>
+          <button
+            type="button"
+            onClick={() => handleSelectAndNext(generatedUrl)}
+            className="rounded-lg bg-violet-600 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500"
+          >
+            Animer cette scène →
+          </button>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

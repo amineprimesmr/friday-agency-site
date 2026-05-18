@@ -1,0 +1,296 @@
+/* Bas de sidebar — carte gains + profil (réf. Trendtrack) */
+.trackapp-sidebar-footer {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.75rem 0.85rem 1rem;
+  border-top: 1px solid var(--app-sidebar-border);
+}
+
+/* —— Carte gains : mêmes tokens que .saas-pay-checkout (page paiement) —— */
+.trackapp-sidebar-earnings {
+  --flyer-canvas: #0e1113;
+  --flyer-glow-depth: rgb(36, 45, 59);
+  --flyer-glow-vivid: rgb(72, 118, 198);
+  --flyer-glow-bright: rgb(120, 168, 255);
+  --earnings-accent: #b8cff5;
+  --earnings-accent-bright: #e8f0ff;
+
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 22px;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+  border: 1px solid color-mix(in srgb, var(--flyer-glow-vivid) 55%, var(--flyer-glow-depth));
+  background:
+    radial-gradient(
+      ellipse 130% 95% at 50% 8%,
+      color-mix(in srgb, var(--flyer-glow-vivid) 52%, transparent) 0%,
+      color-mix(in srgb, var(--flyer-glow-depth) 38%, transparent) 38%,
+      rgba(14, 17, 19, 0) 70%
+    ),
+    radial-gradient(
+      ellipse 100% 75% at 50% 108%,
+      color-mix(in srgb, var(--flyer-glow-vivid) 28%, transparent) 0%,
+      transparent 58%
+    ),
+    var(--flyer-canvas);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--flyer-glow-bright) 22%, transparent),
+    0 0 36px color-mix(in srgb, var(--flyer-glow-vivid) 45%, transparent),
+    0 4px 24px rgba(0, 0, 0, 0.5);
+}
+
+.trackapp-sidebar-earnings:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--flyer-glow-vivid) 72%, var(--flyer-glow-depth));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--flyer-glow-bright) 32%, transparent),
+    0 0 42px color-mix(in srgb, var(--flyer-glow-vivid) 52%, transparent),
+    0 6px 28px rgba(0, 0, 0, 0.55);
+}
+
+.trackapp-sidebar-earnings:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--flyer-glow-bright) 75%, transparent);
+  outline-offset: 3px;
+}
+
+/* Anneau lumineux intérieur (bord → centre) */
+.trackapp-sidebar-earnings__glow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 102% 102% at 50% 50%,
+    var(--flyer-canvas) 0%,
+    #0a0d0f 36%,
+    color-mix(in srgb, var(--flyer-glow-vivid) 32%, transparent) 64%,
+    color-mix(in srgb, var(--flyer-glow-vivid) 58%, transparent) 84%,
+    color-mix(in srgb, var(--flyer-glow-bright) 72%, transparent) 93%,
+    color-mix(in srgb, var(--flyer-glow-vivid) 28%, transparent) 98%,
+    transparent 100%
+  );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--flyer-glow-bright) 48%, transparent),
+    inset 0 0 22px 4px color-mix(in srgb, var(--flyer-glow-vivid) 50%, transparent),
+    inset 0 0 48px 12px color-mix(in srgb, var(--flyer-glow-vivid) 28%, transparent),
+    inset 0 0 80px 24px color-mix(in srgb, var(--flyer-glow-depth) 14%, transparent);
+}
+
+/* Dégradés d’ambiance sur les bords (lumière qui entre par les côtés) */
+.trackapp-sidebar-earnings__vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 130% 90% at 50% 0%,
+      color-mix(in srgb, var(--flyer-glow-vivid) 55%, transparent) 0%,
+      transparent 48%
+    ),
+    radial-gradient(
+      ellipse 110% 85% at 0% 55%,
+      color-mix(in srgb, var(--flyer-glow-vivid) 38%, transparent) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse 110% 85% at 100% 55%,
+      color-mix(in srgb, var(--flyer-glow-vivid) 34%, transparent) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse 120% 75% at 50% 100%,
+      color-mix(in srgb, var(--flyer-glow-vivid) 30%, transparent) 0%,
+      transparent 50%
+    ),
+    radial-gradient(ellipse 70% 55% at 50% 50%, rgba(0, 0, 0, 0.5) 0%, transparent 72%);
+  opacity: 0.9;
+}
+
+.trackapp-sidebar-earnings__content {
+  position: relative;
+  z-index: 2;
+  padding: 1.05rem 1.1rem 1.1rem;
+}
+
+.trackapp-sidebar-earnings__label {
+  margin: 0 0 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: 0.005em;
+}
+
+.trackapp-sidebar-earnings__value {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--earnings-accent-bright);
+  text-shadow:
+    0 0 22px color-mix(in srgb, var(--flyer-glow-vivid) 80%, transparent),
+    0 0 44px color-mix(in srgb, var(--flyer-glow-bright) 40%, transparent);
+}
+
+.trackapp-sidebar-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+  padding: 0.15rem 0;
+}
+
+.trackapp-sidebar-profile__avatar {
+  position: relative;
+  flex-shrink: 0;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(125, 211, 252, 0.85);
+  background: #1e293b;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.4);
+}
+
+.trackapp-sidebar-profile__avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.trackapp-sidebar-profile__avatar-fallback {
+  display: grid;
+  height: 100%;
+  width: 100%;
+  place-items: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(145deg, #334155, #0f172a);
+}
+
+.trackapp-sidebar-profile__meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.trackapp-sidebar-profile__name {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trackapp-sidebar-profile__email {
+  margin: 0.12rem 0 0;
+  font-size: 0.68rem;
+  font-weight: 500;
+  line-height: 1.25;
+  color: rgba(255, 255, 255, 0.42);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trackapp-sidebar-profile__menu-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.trackapp-sidebar-profile__menu-btn {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.trackapp-sidebar-profile__menu-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.trackapp-sidebar-profile__menu-btn:focus-visible {
+  outline: 2px solid color-mix(in srgb, rgb(36, 45, 59) 85%, #d1d9e8);
+  outline-offset: 2px;
+}
+
+.trackapp-sidebar-profile__menu-dots {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.trackapp-sidebar-profile__menu-dots span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.trackapp-sidebar-profile__dropdown {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.35rem);
+  z-index: 120;
+  min-width: 11.5rem;
+  padding: 0.35rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #141414;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+}
+
+.trackapp-sidebar-profile__dropdown a,
+.trackapp-sidebar-profile__dropdown button {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.88);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.trackapp-sidebar-profile__dropdown a:hover,
+.trackapp-sidebar-profile__dropdown button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.trackapp-sidebar-profile__dropdown button.danger {
+  color: #f87171;
+}

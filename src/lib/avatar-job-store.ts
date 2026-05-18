@@ -8,6 +8,8 @@ export type AvatarImageJobRecord = {
   prompt: string;
   referenceFileIds: string[];
   size: string;
+  /** low | medium | high | auto — optionnel, sinon env par défaut */
+  quality?: string;
   imageUrl?: string;
   outputFileId?: string;
   error?: string;

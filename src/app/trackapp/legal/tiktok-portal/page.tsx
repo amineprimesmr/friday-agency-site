@@ -15,17 +15,19 @@ function baseUrl() {
 const DESCRIPTION_120 =
   "Trackapp is a web app for mobile app intelligence: rankings & optional public ad insights via TikTok Research API.";
 
-const PRODUCT_SCOPE_1000 = `Trackapp is a web dashboard for mobile app analysts (trackapp.fr).
+const PRODUCT_SCOPE_1000 = `Trackapp (trackapp.fr): mobile competitive intelligence (web).
 
-Integration: TikTok Commercial Content / Research API — server-side only. Our backend exchanges client credentials for an access token and queries allowed Ad Library endpoints (scope research.adlib.basic when approved). Public commercial ad metadata appears in authenticated Trackapp screens (competitive creatives). Client secrets stay on the server.
+Product: TikTok Commercial Content API — Research Ad Library. Scope: research.adlib.basic.
 
-Auth: Trackapp uses Supabase for user login. TikTok Login Kit is not required for this library view.
+Server: Env holds Client Key/Secret. OAuth client_credentials → Bearer; POST open.tiktokapis.com/v2/research/adlib/ad/query/ with ad_published_date_range, country_code (EU e.g. FR), search_term, max_count; pagination via search_id.
 
-Compliance: We follow TikTok rate limits, field restrictions, and storage rules for API output.
+UI: Users sign in via Trackapp (Supabase). Tracker → app → Ads → TikTok: browser hits /api/tiktok/ad-library only; we display returned public ad metadata. No TikTok Login/Share/Display/Content Posting — no TikTok user OAuth in-browser for this.
 
-Demo video: HTTPS site → sign in → open Ads intelligence tab with TikTok results (or clear sandbox/API message). Show network calls to our domain only; never film .env or secrets.
+Compliance: Rate limits + TikTok data rules.
 
-If Products/Scopes change, update this text and re-record the demo.`;
+Demo: HTTPS → login → Ads → TikTok end-to-end (sandbox/API message OK). Hide secrets.
+
+Align portal Products with this text; if you add products, update both.`;
 
 export default function TikTokPortalHelperPage() {
   const origin = baseUrl();
@@ -169,12 +171,47 @@ export default function TikTokPortalHelperPage() {
       </section>
 
       <section className="mt-10 space-y-3 rounded-xl border border-amber-400/25 bg-amber-400/10 p-4 text-[13px] text-amber-50/95">
-        <h2 className="font-semibold text-amber-100">Vidéo démo (tu dois la faire)</h2>
-        <ol className="mt-2 list-decimal space-y-1.5 ps-5">
-          <li>mp4 ou mov, ≤50 Mo — montre l’URL HTTPS réelle (trackapp.fr ou preview Vercel).</li>
-          <li>Connexion → page où les pubs TikTok s’affichent (ou message d’erreur API si sandbox).</li>
-          <li>Ne filme jamais Client Secret / .env.local.</li>
+        <h2 className="font-semibold text-amber-100">Vidéo démo — exigences TikTok</h2>
+        <p className="text-[12px] text-amber-50/80">
+          Formats mp4/mov, max 5 fichiers × 50 Mo. Montre le site HTTPS réel où l’intégration vivra (pas une maquette isolée). Si l’app n’a jamais été approuvée, utilise un environnement sandbox pour la démo.
+        </p>
+        <p className="text-[12px] font-medium text-amber-100/95">
+          Script suggéré (≤2–3 min) :
+        </p>
+        <ol className="mt-1 list-decimal space-y-1.5 ps-5">
+          <li>Ouvre trackapp.fr (ou preview Vercel) — barre d’adresse visible.</li>
+          <li>Connexion compte démo Trackapp (Supabase).</li>
+          <li>Tracker → choisir une app → onglet Ads → panneau TikTok : chargement puis résultats ou message clair (sandbox / API).</li>
+          <li>
+            Optionnel : DevTools → Network filtré pour montrer uniquement des appels vers ton domaine (
+            <code className="rounded bg-black/25 px-1">/api/tiktok/ad-library</code>), sans jetons ni secrets.
+          </li>
         </ol>
+        <p className="text-[12px] text-amber-50/85">
+          Ne filme jamais Client Secret, .env ou jetons Bearer. Si le portail TikTok liste des produits que tu n’implémentes pas (ex. Login Kit), décoche-les ou refais la vidéo pour les montrer — sinon le texte ci-dessus et la vidéo ne correspondront pas.
+        </p>
+        <div className="mt-4 rounded-lg border border-white/15 bg-black/35 p-3 text-[12px] text-white/70">
+          <p className="font-semibold text-white/90">Fichier refusé (&gt; 50 Mo) ?</p>
+          <p className="mt-1 text-white/55">
+            Dans le repo Trackapp, avec{" "}
+            <a
+              href="https://brew.sh"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sky-300 underline-offset-2 hover:underline"
+            >
+              ffmpeg
+            </a>{" "}
+            (<code className="rounded bg-black/40 px-1">brew install ffmpeg</code>) :
+          </p>
+          <pre className="mt-2 overflow-x-auto whitespace-pre-wrap rounded-md bg-black/50 p-3 font-mono text-[11px] text-emerald-100/90">
+            npm run tiktok:compress-demo -- /chemin/vers/trackapp.mov
+          </pre>
+          <p className="mt-2 text-[11px] text-white/45">
+            Sortie par défaut : <code className="rounded bg-black/40 px-1">trackapp_tiktok_under50mb.mp4</code> dans le même dossier
+            que la source. Ré-upload ce .mp4 sur TikTok.
+          </p>
+        </div>
       </section>
 
       <section className="mt-10 space-y-2 text-[13px] text-white/45">
