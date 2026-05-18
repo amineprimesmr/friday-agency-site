@@ -19,13 +19,6 @@ const INCLUDED = [
   "Mises à jour produit incluses dans ton accès",
 ];
 
-const DETAIL_ROWS: { label: string; badge?: string; accent?: "pink" | "lime" }[] = [
-  { label: "Sans engagement sur l’abonnement mensuel — résiliation en un clic", badge: "Flexible" },
-  { label: "Annuel : 99 € / an facturés en une fois — renouvellement chaque année", badge: "Annuel", accent: "pink" },
-  { label: "Paiements via Stripe — CB, Apple Pay selon device", badge: "Stripe" },
-  { label: "Espace personnel pour suivre ton abonnement", badge: "Compte" },
-];
-
 const TESTIMONIALS = [
   {
     title: "Trois outils en un",
@@ -184,45 +177,6 @@ export function TrackappPaiementMarketing() {
                   ✓
                 </span>
                 <span>{line}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="tpl-section tpl-section--tight" aria-labelledby="detail-title">
-          <p className="tpl-section__kicker">Détail de l&apos;offre</p>
-          <h3 className="tpl-section__title" id="detail-title">
-            Transparence totale avant Stripe
-          </h3>
-          <ul className="tpl-detail-list">
-            {DETAIL_ROWS.map((row) => (
-              <li key={row.label} className="tpl-detail-list__row">
-                <span
-                  className={
-                    row.accent === "pink"
-                      ? "tpl-check tpl-check--pink"
-                      : row.accent === "lime"
-                        ? "tpl-check tpl-check--lime"
-                        : "tpl-check"
-                  }
-                  aria-hidden
-                >
-                  ✓
-                </span>
-                <span className="tpl-detail-list__text">{row.label}</span>
-                {row.badge ? (
-                  <span
-                    className={
-                      row.accent === "pink"
-                        ? "tpl-pill tpl-pill--pink"
-                        : row.accent === "lime"
-                          ? "tpl-pill tpl-pill--lime"
-                          : "tpl-pill tpl-pill--muted"
-                    }
-                  >
-                    {row.badge}
-                  </span>
-                ) : null}
               </li>
             ))}
           </ul>

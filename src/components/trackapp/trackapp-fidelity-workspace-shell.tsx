@@ -19,9 +19,6 @@ export function TrackappFidelityWorkspaceShell({
   loggedIn: boolean;
   email?: string | undefined;
   signOutHref: string;
-  /** Conservés pour compat layout ; paywall UI retiré. */
-  planUnlocked: boolean;
-  stripeReady: boolean;
 }>) {
   const pathname = usePathname() ?? "";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

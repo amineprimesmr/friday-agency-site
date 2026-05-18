@@ -732,10 +732,6 @@
   padding-top: 0.25rem;
 }
 
-.tpl-section--tight {
-  margin-top: 1.75rem;
-}
-
 .tpl-section__kicker {
   margin: 0;
   font-size: 0.65rem;
@@ -780,60 +776,6 @@
   font-size: 0.75rem;
   font-weight: 700;
   margin-top: 0.12rem;
-}
-
-.tpl-check--pink {
-  color: #f472b6;
-}
-
-.tpl-check--lime {
-  color: #bef264;
-}
-
-.tpl-detail-list {
-  margin: 0.75rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.tpl-detail-list__row {
-  display: grid;
-  grid-template-columns: 1.1rem 1fr auto;
-  gap: 0.45rem 0.55rem;
-  align-items: start;
-  padding: 0.55rem 0;
-  font-size: 0.82rem;
-  line-height: 1.45;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.tpl-detail-list__text {
-  color: rgba(226, 232, 240, 0.9);
-}
-
-.tpl-pill {
-  justify-self: end;
-  padding: 0.18rem 0.45rem;
-  border-radius: 999px;
-  font-size: 0.58rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-}
-
-.tpl-pill--lime {
-  background: #d4ff3f;
-  color: #0c0c10;
-}
-
-.tpl-pill--pink {
-  background: linear-gradient(135deg, #ec4899, #db2777);
-  color: #fff;
-}
-
-.tpl-pill--muted {
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(226, 232, 240, 0.88);
 }
 
 /* Community — titre + double bandeau témoignages (marquee) */
