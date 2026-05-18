@@ -4,6 +4,8 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
+import { cn } from "@/lib/utils";
+
 export type HeroRotatorApp = {
   id: string;
   name: string;
@@ -12,7 +14,13 @@ export type HeroRotatorApp = {
 
 const INTERVAL_MS = 3000;
 
-export function HeroAppIconRotator({ apps }: { apps: HeroRotatorApp[] }) {
+export function HeroAppIconRotator({
+  apps,
+  className,
+}: {
+  apps: HeroRotatorApp[];
+  className?: string;
+}) {
   const reduceMotion = useReducedMotion();
   const pool = apps.length > 0 ? apps : [{ id: "placeholder", name: "App", artworkUrl: undefined }];
   const [index, setIndex] = useState(0);
@@ -29,7 +37,10 @@ export function HeroAppIconRotator({ apps }: { apps: HeroRotatorApp[] }) {
 
   return (
     <span
-      className="relative ml-1 mr-[0.65rem] inline-flex align-middle sm:mr-3 md:mr-3.5 [--hero-icon:2.85rem] sm:[--hero-icon:3.35rem] md:[--hero-icon:3.75rem]"
+      className={cn(
+        "relative ml-1 mr-[0.65rem] inline-flex align-middle sm:mr-3 md:mr-3.5 [--hero-icon:2.85rem] sm:[--hero-icon:3.35rem] md:[--hero-icon:3.75rem]",
+        className,
+      )}
       style={{ perspective: "960px" }}
       aria-hidden
     >

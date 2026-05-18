@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import { TrackerNavLink } from "@/components/tracker/tracker-navigation";
 import {
   searchApps,
@@ -11,13 +12,13 @@ import {
   type SearchResult,
   formatRatingCount,
   estimateMonthlyDownloads,
-  estimateMonthlyRevenue,
+  formatEstimatedMonthlyRevenuePrecise,
   normalizeTrackerCountryParam,
   type CountryCode,
 } from "@/lib/apple-charts";
 
 export const metadata: Metadata = { title: "Recherche — App Store Tracker" };
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 interface PageProps {
   searchParams: Promise<{ q?: string; country?: string; category?: string }>;
@@ -39,7 +40,13 @@ function Stars({ value }: { value: number }) {
 
 function AppCard({ app, country }: { app: SearchResult; country: CountryCode }) {
   const dlEst = estimateMonthlyDownloads(app.rank || 50, country);
-  const revEst = estimateMonthlyRevenue(app.rank || 50, app.price, app.categoryId, country);
+  const revEst = formatEstimatedMonthlyRevenuePrecise(
+    app.rank || 50,
+    app.price,
+    app.categoryId,
+    country,
+    app.id,
+  );
 
   return (
     <TrackerNavLink
@@ -48,7 +55,7 @@ function AppCard({ app, country }: { app: SearchResult; country: CountryCode }) 
     >
       <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl ring-1 ring-white/10">
         {app.artworkUrl ? (
-          <Image src={app.artworkUrl} alt={app.name} fill className="object-cover" sizes="64px" unoptimized />
+          <Image src={app.artworkUrl} alt={app.name} fill className="object-cover" sizes="64px" />
         ) : (
           <span className="flex h-full w-full items-center justify-center bg-white/5 text-xl font-bold text-white/40">
             {app.name.charAt(0)}
@@ -105,13 +112,19 @@ function AppCard({ app, country }: { app: SearchResult; country: CountryCode }) 
   );
 }
 
+const cachedSearchAppsForPage = unstable_cache(
+  async (q: string, country: CountryCode, category: string) => searchApps(q, country, 24, category),
+  ["tracker-search-page-v1"],
+  { revalidate: 300 },
+);
+
 export default async function SearchPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const q = params.q ?? "";
   const country = normalizeTrackerCountryParam(params.country);
   const category = params.category ?? "all";
 
-  const results = q ? await searchApps(q, country, 40, category) : [];
+  const results = q ? await cachedSearchAppsForPage(q, country, category) : [];
   const countryData = COUNTRY_MAP[country];
 
   return (

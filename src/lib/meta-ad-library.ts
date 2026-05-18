@@ -44,14 +44,34 @@ const AD_FIELDS = [
 
 function normalizeCountries(input: string[]): string[] {
   const iso = input.map((c) => c.trim().toUpperCase()).filter((c) => /^[A-Z]{2}$/.test(c));
-  return iso.length > 0 ? iso : ["US"];
+  return iso.length > 0 ? iso : ["FR"];
+}
+
+function normalizeSearchPageIds(raw: string[] | undefined): string[] {
+  if (!raw?.length) return [];
+  const out: string[] = [];
+  for (const s of raw) {
+    const id = String(s).trim();
+    if (!/^\d+$/.test(id)) continue;
+    if (out.includes(id)) continue;
+    out.push(id);
+    if (out.length >= 10) break;
+  }
+  return out;
 }
 
 /**
  * Appelle `GET /ads_archive` (serveur uniquement — token en env).
+ *
+ * - Mode **page** : `searchPageIds` (IDs Page Facebook numériques) → filtre Ad Library à la page / marque uniquement.
+ * - Mode **mot-clé** : `searchTerms` + `KEYWORD_UNORDERED` (réservé aux recherches manuelles / legacy).
+ *
+ * @see https://developers.facebook.com/docs/graph-api/reference/ads_archive/
  */
 export async function fetchAdsArchive(params: {
-  searchTerms: string;
+  searchTerms?: string;
+  /** Jusqu’à 10 IDs Page Facebook (chiffres uniquement, sans préfixe). */
+  searchPageIds?: string[];
   countries: string[];
   limit?: number;
   after?: string;
@@ -61,9 +81,11 @@ export async function fetchAdsArchive(params: {
     return { data: [], metaError: { message: "META_AD_LIBRARY_ACCESS_TOKEN non configuré" } };
   }
 
-  const q = params.searchTerms.trim().slice(0, 100);
-  if (!q) {
-    return { data: [], metaError: { message: "Terme de recherche vide" } };
+  const pageIds = normalizeSearchPageIds(params.searchPageIds);
+  const q = (params.searchTerms ?? "").trim().slice(0, 100);
+
+  if (pageIds.length === 0 && !q) {
+    return { data: [], metaError: { message: "Fournis des searchPageIds ou un terme de recherche" } };
   }
 
   const version = process.env.META_GRAPH_API_VERSION?.trim() || DEFAULT_GRAPH_VERSION;
@@ -72,14 +94,19 @@ export async function fetchAdsArchive(params: {
 
   const url = new URL(`https://graph.facebook.com/${version}/ads_archive`);
   url.searchParams.set("access_token", token);
-  url.searchParams.set("search_terms", q);
-  url.searchParams.set("search_type", "KEYWORD_UNORDERED");
   url.searchParams.set("ad_type", "ALL");
   url.searchParams.set("ad_active_status", "ACTIVE");
   url.searchParams.set("fields", AD_FIELDS);
   url.searchParams.set("limit", String(limit));
   /** Format JSON array attendu par Meta : ["US","FR"] */
   url.searchParams.set("ad_reached_countries", JSON.stringify(countries));
+
+  if (pageIds.length > 0) {
+    url.searchParams.set("search_page_ids", JSON.stringify(pageIds));
+  } else {
+    url.searchParams.set("search_terms", q);
+    url.searchParams.set("search_type", "KEYWORD_UNORDERED");
+  }
 
   if (params.after) {
     url.searchParams.set("after", params.after);
@@ -111,4 +138,17 @@ export async function fetchAdsArchive(params: {
     data: Array.isArray(json.data) ? json.data : [],
     paging: json.paging,
   };
+}
+
+/**
+ * URL web officielle Ad Library : filtre par **page** (`view_all_page_id`) si on a un ID Page Meta,
+ * sinon ouvre une recherche **manuelle** par mot-clé (ne doit pas alimenter l'UI page-only).
+ */
+export function metaAdLibraryWebUrl(params: { searchPageIds: string[]; keywordFallback: string }): string {
+  const rawId = params.searchPageIds.find((id) => /^\d+$/.test(id));
+  if (rawId) {
+    return `https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&view_all_page_id=${encodeURIComponent(rawId)}&media_type=all`;
+  }
+  const q = encodeURIComponent(params.keywordFallback.trim().slice(0, 100) || " ");
+  return `https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&q=${q}&search_type=keyword_unordered&media_type=all`;
 }

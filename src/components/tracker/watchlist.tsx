@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { TrackerNavLink } from "@/components/tracker/tracker-navigation";
 
 interface WatchedApp {
   id: string;
@@ -11,7 +11,7 @@ interface WatchedApp {
   category: string;
 }
 
-const KEY = "friday_watchlist";
+const KEY = "trackapp_watchlist";
 
 function load(): WatchedApp[] {
   try {
@@ -62,7 +62,7 @@ export function Watchlist() {
               className="tracker-rise flex items-center gap-3"
               style={{ animationDelay: `${Math.min(i, 28) * 40}ms` }}
             >
-              <Link
+              <TrackerNavLink
                 href={`/tracker/apps/${app.id}`}
                 className="tracker-touch flex flex-1 items-center gap-2.5 overflow-hidden"
               >
@@ -90,7 +90,7 @@ export function Watchlist() {
                     {app.category}
                   </p>
                 </div>
-              </Link>
+              </TrackerNavLink>
               <button
                 type="button"
                 onClick={() => remove(app.id)}
@@ -123,6 +123,15 @@ export function Watchlist() {
       </div>
     </div>
   );
+}
+
+export function removeFromWatchlist(id: string) {
+  try {
+    const current = load().filter((a) => a.id !== id);
+    localStorage.setItem(KEY, JSON.stringify(current));
+  } catch {
+    // ignore
+  }
 }
 
 /** Utilitaire exporté pour ajouter une app à la watchlist depuis n'importe quelle page */

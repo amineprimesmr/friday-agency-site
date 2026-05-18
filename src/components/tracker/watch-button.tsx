@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { addToWatchlist, isInWatchlist } from "./watchlist";
+import { addToWatchlist, isInWatchlist, removeFromWatchlist } from "./watchlist";
 
 interface Props {
   id: string;
@@ -19,18 +19,7 @@ export function WatchButton({ id, name, artworkUrl, category }: Props) {
 
   function toggle() {
     if (watching) {
-      try {
-        const key = "friday_watchlist";
-        const current = JSON.parse(localStorage.getItem(key) ?? "[]") as {
-          id: string;
-        }[];
-        localStorage.setItem(
-          key,
-          JSON.stringify(current.filter((a) => a.id !== id)),
-        );
-      } catch {
-        // ignore
-      }
+      removeFromWatchlist(id);
       setWatching(false);
     } else {
       addToWatchlist({ id, name, artworkUrl, category });

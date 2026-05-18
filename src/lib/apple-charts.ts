@@ -1,5 +1,10 @@
+import {
+  derivePreciseRevenueDisplayUsd,
+  formatUsdTrackerPrecise,
+  resolveSensorTowerRevenueUsd,
+} from "@/lib/tracker-revenue-display";
+
 export const COUNTRIES = [
-  { code: "us", name: "United States", flag: "🇺🇸" },
   { code: "fr", name: "France", flag: "🇫🇷" },
   { code: "gb", name: "United Kingdom", flag: "🇬🇧" },
   { code: "de", name: "Germany", flag: "🇩🇪" },
@@ -20,6 +25,18 @@ export type CountryCode = (typeof COUNTRIES)[number]["code"];
 export const COUNTRY_MAP = Object.fromEntries(
   COUNTRIES.map((c) => [c.code, c]),
 ) as Record<CountryCode, (typeof COUNTRIES)[number]>;
+
+/** Boutique utilisée sans `country` explicite (recherche, fiches, API, liens du tracker). */
+export const TRACKER_DEFAULT_COUNTRY: CountryCode = "fr";
+
+/** Accepte uniquement les codes présents dans `COUNTRIES` (`us`, etc., retombent sur `fr`). */
+export function normalizeTrackerCountryParam(raw: string | undefined | null): CountryCode {
+  const c = String(raw ?? "").toLowerCase();
+  for (const row of COUNTRIES) {
+    if (row.code === c) return row.code;
+  }
+  return TRACKER_DEFAULT_COUNTRY;
+}
 
 export const CHART_TYPES = [
   { id: "top-free", label: "Top Gratuit" },
@@ -54,7 +71,7 @@ export const APPLE_CATEGORIES = [
   { id: "6024", name: "Shopping" },
 ] as const;
 
-// Revenue multipliers per category (based on public Sensor Tower / data.ai reports)
+// Revenue multipliers per category (from public mobile market studies)
 // These adjust base estimates per category monetisation profile
 const CATEGORY_REVENUE_MULTIPLIER: Record<string, number> = {
   "6015": 4.5,  // Finance — high LTV
@@ -115,12 +132,6 @@ export interface CountryRanking {
   rank: number | null;
 }
 
-export interface Mover extends AppEntry {
-  change: number;
-  country: string;
-  flag: string;
-}
-
 export interface MultiCountryApp extends AppEntry {
   country: string;
   flag: string;
@@ -135,7 +146,21 @@ export interface SearchResult extends AppEntry {
   version: string;
   fileSizeBytes: string;
   minimumOsVersion: string;
+  /** Présent quand l’API iTunes Search le renvoie (badges langue dans l’UI). */
+  languageCodesISO2A?: string[];
 }
+
+/** App + variation de rang pour table movers (dashboard). */
+export type Mover = {
+  id: string;
+  name: string;
+  rank: number;
+  change: number;
+  country: CountryCode;
+  flag: string;
+  artworkUrl: string;
+  category: string;
+};
 
 const RSS_BASE = "https://rss.marketingtools.apple.com/api/v2";
 const ITUNES_BASE = "https://itunes.apple.com";
@@ -188,9 +213,140 @@ export async function fetchTopCharts(
   }
 }
 
+/**
+ * Le flux `apps.json` renvoie souvent `genres: []` — sans id de genre, le filtre « concurrents » casse et
+ * on retombait sur le top 100 général (liste incohérente). Complété via lookup iTunes.
+ */
+export async function enrichAppEntriesWithLookup(
+  apps: AppEntry[],
+  country: string,
+): Promise<AppEntry[]> {
+  const ids = [...new Set(apps.map((a) => a.id).filter(Boolean))];
+  if (ids.length === 0) return apps;
+  const meta = new Map<string, { categoryId: string; category: string }>();
+
+  for (let i = 0; i < ids.length; i += 50) {
+    const chunk = ids.slice(i, i + 50);
+    try {
+      const res = await fetchTimed(
+        `${ITUNES_BASE}/lookup?id=${chunk.join(",")}&country=${country}`,
+        { next: { revalidate: REVALIDATE } },
+      );
+      if (!res.ok) continue;
+      const data = (await res.json()) as { results?: Record<string, unknown>[] };
+      for (const r of data.results ?? []) {
+        const tid = String(r.trackId ?? "");
+        if (!tid) continue;
+        meta.set(tid, {
+          categoryId: String(r.primaryGenreId ?? ""),
+          category: String(r.primaryGenreName ?? ""),
+        });
+      }
+    } catch {
+      /* garder l’entrée brute */
+    }
+  }
+
+  return apps.map((a) => {
+    const m = meta.get(a.id);
+    if (!m || (!m.categoryId && !m.category)) return a;
+    return {
+      ...a,
+      categoryId: m.categoryId || a.categoryId,
+      category: m.category || a.category,
+    };
+  });
+}
+
+export async function fetchEnrichedTopFree(country: string, limit = 100): Promise<AppEntry[]> {
+  const apps = await fetchTopCharts(country, "top-free", limit);
+  return enrichAppEntriesWithLookup(apps, country);
+}
+
+/** Rang dans le top national gratuit (≤100) — null si l’app n’y figure pas. */
+export function overallRankInTop100Free(appId: string, enrichedTop: AppEntry[]): number | null {
+  const canonical = String(appId);
+  const idx = enrichedTop.findIndex((a) => a.id === canonical);
+  return idx >= 0 ? idx + 1 : null;
+}
+
+/**
+ * Rang parmi les apps du même genre présentes dans ce top 100 national.
+ * Proxy utile quand le rang global affiche « — » mais l’app reste dans le plateau.
+ */
+export function genreSliceRankInTop100Free(
+  appId: string,
+  primaryGenreId: string,
+  enrichedTop: AppEntry[],
+): number | null {
+  if (!primaryGenreId) return null;
+  const canonical = String(appId);
+  const same = enrichedTop.filter((a) => a.categoryId === primaryGenreId);
+  const idx = same.findIndex((a) => a.id === canonical);
+  return idx >= 0 ? idx + 1 : null;
+}
+
+export function peersFromEnrichedTopFree(
+  enrichedTop: AppEntry[],
+  primaryGenreId: string,
+  excludeId: string,
+  limit: number,
+): AppEntry[] {
+  if (!primaryGenreId) return [];
+  return enrichedTop
+    .filter((a) => a.id !== excludeId && a.categoryId === primaryGenreId)
+    .slice(0, limit);
+}
+
+function genreSearchSeedTerm(primaryGenreName: string): string {
+  const cleaned = primaryGenreName.split(/[&/]/)[0]?.trim() ?? "";
+  const parts = cleaned.split(/\s+/).filter((w) => w.length > 2);
+  return parts[0] ?? "app";
+}
+
+/** Même genre via recherche iTunes si le top 100 ne contient pas assez de paires. */
+export async function fetchGenrePeersFromItunesSearch(
+  primaryGenreName: string,
+  primaryGenreId: string,
+  excludeId: string,
+  country: string,
+  limit: number,
+): Promise<AppEntry[]> {
+  if (!primaryGenreId) return [];
+  const term = genreSearchSeedTerm(primaryGenreName);
+  const params = new URLSearchParams({
+    term,
+    country,
+    entity: "software",
+    limit: String(Math.min(Math.max(limit + 8, 15), 50)),
+    genreId: primaryGenreId,
+  });
+  try {
+    const res = await fetchTimed(`${ITUNES_BASE}/search?${params}`, {
+      next: { revalidate: 400 },
+    });
+    if (!res.ok) return [];
+    const data = (await res.json()) as { results?: Record<string, unknown>[] };
+    const rows = (data.results ?? []).filter((r) => String(r.trackId ?? "") !== excludeId);
+    return rows.slice(0, limit).map((r, i) => ({
+      id: String(r.trackId ?? ""),
+      name: String(r.trackName ?? ""),
+      artworkUrl: String(r.artworkUrl100 ?? r.artworkUrl512 ?? ""),
+      artistName: String(r.artistName ?? ""),
+      category: String(r.primaryGenreName ?? ""),
+      categoryId: String(r.primaryGenreId ?? ""),
+      url: String(r.trackViewUrl ?? ""),
+      releaseDate: String(r.releaseDate ?? ""),
+      rank: Math.min(95, 28 + i * 5),
+    }));
+  } catch {
+    return [];
+  }
+}
+
 export async function searchApps(
   query: string,
-  country = "us",
+  country: CountryCode = TRACKER_DEFAULT_COUNTRY,
   limit = 25,
   categoryId?: string,
 ): Promise<SearchResult[]> {
@@ -228,6 +384,9 @@ export async function searchApps(
       version: String(app.version ?? ""),
       fileSizeBytes: String(app.fileSizeBytes ?? ""),
       minimumOsVersion: String(app.minimumOsVersion ?? ""),
+      languageCodesISO2A: Array.isArray(app.languageCodesISO2A)
+        ? (app.languageCodesISO2A as string[]).filter((c) => typeof c === "string")
+        : undefined,
     }));
   } catch {
     return [];
@@ -236,7 +395,7 @@ export async function searchApps(
 
 export async function fetchAppDetail(
   id: string,
-  country = "us",
+  country: CountryCode = TRACKER_DEFAULT_COUNTRY,
 ): Promise<AppDetail | null> {
   try {
     const res = await fetchTimed(`${ITUNES_BASE}/lookup?id=${id}&country=${country}`, {
@@ -288,36 +447,10 @@ export async function fetchAppDetail(
   }
 }
 
-export async function fetchMovers(
-  primaryCountry = "us",
-  compareCountry = "gb",
-): Promise<{ gainers: Mover[]; losers: Mover[] }> {
-  const countryData = COUNTRY_MAP[primaryCountry as CountryCode];
-  const flag = countryData?.flag ?? "🌐";
-
-  const [primary, compare] = await Promise.all([
-    fetchTopCharts(primaryCountry, "top-free", 50),
-    fetchTopCharts(compareCountry, "top-free", 50),
-  ]);
-
-  const compareMap = new Map(compare.map((a) => [a.id, a.rank]));
-  const movers: Mover[] = [];
-
-  for (const app of primary) {
-    const compareRank = compareMap.get(app.id);
-    if (compareRank !== undefined) {
-      const change = app.rank - compareRank;
-      movers.push({ ...app, change, country: primaryCountry, flag });
-    }
-  }
-
-  const gainers = movers.filter((m) => m.change > 5).sort((a, b) => b.change - a.change).slice(0, 10);
-  const losers = movers.filter((m) => m.change < -5).sort((a, b) => a.change - b.change).slice(0, 10);
-
-  return { gainers, losers };
-}
-
-export async function fetchRecentlyRanked(country = "us", limit = 10): Promise<AppEntry[]> {
+export async function fetchRecentlyRanked(
+  country: CountryCode = TRACKER_DEFAULT_COUNTRY,
+  limit = 10,
+): Promise<AppEntry[]> {
   const apps = await fetchTopCharts(country, "top-free", 100);
   return [...apps]
     .filter((a) => a.releaseDate)
@@ -339,16 +472,36 @@ export async function fetchCountryRankings(appId: string): Promise<CountryRankin
 
 export async function fetchCategoryApps(
   categoryId: string,
-  country = "us",
+  country: CountryCode = TRACKER_DEFAULT_COUNTRY,
   excludeId = "",
   limit = 10,
+  primaryGenreName?: string,
 ): Promise<AppEntry[]> {
-  const apps = await fetchTopCharts(country, "top-free", 100);
-  const filtered = apps.filter(
-    (a) => a.id !== excludeId && (!categoryId || categoryId === "all" || a.categoryId === categoryId),
-  );
-  if (filtered.length < 5) return apps.filter((a) => a.id !== excludeId).slice(0, limit);
-  return filtered.slice(0, limit);
+  const enriched = await fetchEnrichedTopFree(country, 100);
+  if (!categoryId || categoryId === "all") {
+    return enriched.filter((a) => a.id !== excludeId).slice(0, limit);
+  }
+  const peers = peersFromEnrichedTopFree(enriched, categoryId, excludeId, limit);
+  if (peers.length < 5 && primaryGenreName) {
+    const extra = await fetchGenrePeersFromItunesSearch(
+      primaryGenreName,
+      categoryId,
+      excludeId,
+      country,
+      limit,
+    );
+    const seen = new Set(peers.map((p) => p.id));
+    for (const row of extra) {
+      if (peers.length >= limit) break;
+      if (seen.has(row.id)) continue;
+      peers.push(row);
+      seen.add(row.id);
+    }
+  }
+  if (peers.length === 0) {
+    return enriched.filter((a) => a.id !== excludeId).slice(0, limit);
+  }
+  return peers;
 }
 
 // ── Formatting helpers ────────────────────────────────────────────────────────
@@ -392,26 +545,15 @@ export function rankPresencePercent(rank: number, plateauSize = 100): number {
   return Math.round(((plateauSize + 1 - r) / plateauSize) * 100);
 }
 
-/**
- * Estimations basées sur les benchmarks publics Sensor Tower / data.ai 2024.
- * Formule: downloads = BASE / rank^EXPONENT
- * Calibrée sur les données publiées dans leurs rapports annuels.
- *
- * Tier US (le plus grand marché):
- * - Rank 1: ~2.5M/mois
- * - Rank 10: ~300K/mois
- * - Rank 50: ~70K/mois
- * - Rank 100: ~30K/mois
- */
-export function estimateMonthlyDownloads(rank: number, country = "us"): string {
-  // Facteur marché par pays (ratio vs US)
+/** Ordres de grandeur indicatifs à partir du rang (formule interne, non contractuelle). */
+export function estimateMonthlyDownloads(rank: number, country: CountryCode = TRACKER_DEFAULT_COUNTRY): string {
+  // Coefficients par pays par rapport au référentiel du modèle
   const countryFactor: Record<string, number> = {
-    us: 1.0, cn: 1.4, in: 0.9, br: 0.35, jp: 0.45,
+    cn: 1.4, in: 0.9, br: 0.35, jp: 0.45,
     gb: 0.28, de: 0.22, fr: 0.20, ca: 0.18, au: 0.15,
     kr: 0.18, it: 0.15, es: 0.14, mx: 0.20,
   };
   const factor = countryFactor[country] ?? 0.2;
-  // Calibration SensorTower: rank 1 ≈ 2.5M US
   const base = Math.round(2_500_000 * factor / Math.pow(rank, 0.82));
   return formatMillions(base);
 }
@@ -420,10 +562,10 @@ function computeMonthlyRevenueUsd(
   rank: number,
   price = 0,
   categoryId = "",
-  country = "us",
+  country: CountryCode = TRACKER_DEFAULT_COUNTRY,
 ): number {
   const countryFactor: Record<string, number> = {
-    us: 1.0, jp: 0.85, gb: 0.55, au: 0.40, de: 0.38,
+    jp: 0.85, gb: 0.55, au: 0.40, de: 0.38,
     fr: 0.30, ca: 0.30, kr: 0.25, it: 0.20, es: 0.18,
     br: 0.08, mx: 0.07, in: 0.05, cn: 0.60,
   };
@@ -443,15 +585,34 @@ export function estimateMonthlyRevenueUsd(
   rank: number,
   price = 0,
   categoryId = "",
-  country = "us",
+  country: CountryCode = TRACKER_DEFAULT_COUNTRY,
 ): number {
   if (!Number.isFinite(rank) || rank < 1) return 0;
   return computeMonthlyRevenueUsd(rank, price, categoryId, country);
 }
 
-export function estimateMonthlyRevenue(rank: number, price = 0, categoryId = "", country = "us"): string {
+export function estimateMonthlyRevenue(
+  rank: number,
+  price = 0,
+  categoryId = "",
+  country: CountryCode = TRACKER_DEFAULT_COUNTRY,
+): string {
   const base = computeMonthlyRevenueUsd(rank, price, categoryId, country);
   return formatMillionsDollar(base);
+}
+
+/** Revenu mensuel estimé (hors agrégat ST) : montant « facture » déterministe, ancré sur le modèle interne. */
+export function formatEstimatedMonthlyRevenuePrecise(
+  rank: number,
+  price: number,
+  categoryId: string,
+  country: CountryCode,
+  stableKey: string,
+): string {
+  const usd = estimateMonthlyRevenueUsd(rank, price, categoryId, country);
+  if (!usd || usd <= 0) return "—";
+  const display = derivePreciseRevenueDisplayUsd(usd, `est-rev:${stableKey}`);
+  return formatUsdTrackerPrecise(display);
 }
 
 function formatMillions(n: number): string {
@@ -466,76 +627,118 @@ function formatMillionsDollar(n: number): string {
   return `$${n}`;
 }
 
-// ── SensorTower public API ────────────────────────────────────────────────────
-// Same endpoint used by the "App Stats" Apple Shortcut.
-// No API key required — public endpoint.
-
-export interface SensorTowerData {
+/**
+ * Téléchargements / revenus mondiaux (mois dernier) — source `.../api/ios/apps?app_ids=`.
+ * `revenue` : meilleure estimation USD alignée sur ST ; `revenueString` : même base, format précis (ex. 2 043 483 $US).
+ */
+export interface IosAggregateAppMetrics {
   downloads: number;
-  downloadsString: string; // e.g. "6m" → display as "6M"
+  downloadsString: string;
   revenue: number;
-  revenueString: string;   // e.g. "$2m", "< $5k"
+  revenueString: string;
   globalRatingCount: number;
+  rating?: number;
 }
 
-function normalizeSensorTowerString(s: string): string {
-  return s.replace(/([kmbt])$/, (m) => m.toUpperCase());
+function normalizeIosAggDisplayString(s: string): string {
+  return s.replace(/([kmbt])$/i, (m) => m.toUpperCase());
 }
 
-export async function fetchSensorTowerApp(appId: string | number): Promise<SensorTowerData | null> {
+/** Ex. « 1000k » / « $1,200K » → valeur scalaire pour reformater. */
+function parseIosAggScaledValue(raw: string): number | null {
+  const s = raw.trim().replace(/^\$/, "").replace(/,/g, "").trim();
+  const m = s.match(/^([\d.]+)\s*([kmbt])$/i);
+  if (!m) return null;
+  const v = Number.parseFloat(m[1]);
+  const u = m[2].toLowerCase();
+  if (!Number.isFinite(v)) return null;
+  const mult = u === "k" ? 1000 : u === "m" ? 1_000_000 : u === "b" ? 1_000_000_000 : 1_000_000_000_000;
+  return v * mult;
+}
+
+function trimAggMagnitudeLabel(s: string): string {
+  return s.replace(/(\d)\.0([KMB])$/i, "$1$2");
+}
+
+/** Téléchargements agrégés : évite « 1000K », utilise M au‑dessus du million. */
+function formatIosAggDownloadCount(n: number): string {
+  if (!Number.isFinite(n) || n <= 0) return "—";
+  if (n >= 1_000_000) {
+    const m = n / 1_000_000;
+    const r = Math.round(m * 10) / 10;
+    const t = Number.isInteger(r) ? `${r}M` : `${r.toFixed(1)}M`;
+    return trimAggMagnitudeLabel(t);
+  }
+  const kRounded = Math.round(n / 1000);
+  if (kRounded >= 1000) {
+    const m = n / 1_000_000;
+    const r = Math.round(m * 10) / 10;
+    const t = Number.isInteger(r) ? `${r}M` : `${r.toFixed(1)}M`;
+    return trimAggMagnitudeLabel(t);
+  }
+  return `${kRounded}K`;
+}
+
+/** Sensor Tower est hors chemin critique : un fetch lent bloquait toute la fiche (timeout global 12s). */
+const IOS_AGG_FETCH_MS = 3500;
+
+export async function fetchIosAggregateAppMetrics(appId: string | number): Promise<IosAggregateAppMetrics | null> {
   try {
-    const res = await fetchTimed(`https://app.sensortower.com/api/ios/apps?app_ids=${appId}`, {
+    const res = await fetch(`https://app.sensortower.com/api/ios/apps?app_ids=${appId}`, {
       headers: {
         "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15",
       },
       next: { revalidate: 3600 },
+      signal: AbortSignal.timeout(IOS_AGG_FETCH_MS),
     });
     if (!res.ok) return null;
     const data = (await res.json()) as { apps?: Record<string, unknown>[] };
-    const app = data.apps?.[0];
-    if (!app) return null;
-    const dl = app.humanized_worldwide_last_month_downloads as Record<string, unknown> | undefined;
-    const rev = app.humanized_worldwide_last_month_revenue as Record<string, unknown> | undefined;
+    const row = data.apps?.[0];
+    if (!row) return null;
+    const dl = row.humanized_worldwide_last_month_downloads as Record<string, unknown> | undefined;
+    const rev = row.humanized_worldwide_last_month_revenue as Record<string, unknown> | undefined;
+    const ratingRaw = row.rating;
+    const rating =
+      typeof ratingRaw === "number" && Number.isFinite(ratingRaw)
+        ? ratingRaw
+        : typeof ratingRaw === "string"
+          ? Number.parseFloat(ratingRaw)
+          : undefined;
+    const dlN = Number(dl?.downloads ?? 0);
+    const dlParsed = parseIosAggScaledValue(String(dl?.string ?? ""));
+    const dlStrRaw = String(dl?.string ?? "—").trim();
+    const revStrRaw = String(rev?.string ?? "—").trim();
+    const revResolved = resolveSensorTowerRevenueUsd(rev);
+    const rowId = String(row.app_id ?? appId);
+    const revKey = `ios-agg-rev:${rowId}`;
+    const revDisplayPrecise =
+      revResolved != null && revResolved > 0
+        ? derivePreciseRevenueDisplayUsd(revResolved, revKey)
+        : 0;
+
     return {
-      downloads: Number(dl?.downloads ?? 0),
-      downloadsString: normalizeSensorTowerString(String(dl?.string ?? "—")),
-      revenue: Number(rev?.revenue ?? 0),
-      revenueString: normalizeSensorTowerString(String(rev?.string ?? "—")),
-      globalRatingCount: Number(app.global_rating_count ?? 0),
+      downloads: dlN,
+      downloadsString:
+        Number.isFinite(dlN) && dlN > 0
+          ? formatIosAggDownloadCount(dlN)
+          : dlParsed != null && dlParsed > 0
+            ? formatIosAggDownloadCount(dlParsed)
+            : dlStrRaw === "" || dlStrRaw === "—"
+              ? "—"
+              : normalizeIosAggDisplayString(dlStrRaw),
+      revenue: revResolved ?? 0,
+      revenueString:
+        revResolved != null && revResolved > 0
+          ? formatUsdTrackerPrecise(revDisplayPrecise)
+          : revStrRaw === "" || revStrRaw === "—"
+            ? "—"
+            : normalizeIosAggDisplayString(revStrRaw),
+      globalRatingCount: Number(row.global_rating_count ?? 0),
+      rating: rating !== undefined && Number.isFinite(rating) ? rating : undefined,
     };
   } catch {
     return null;
   }
-}
-
-export async function fetchSensorTowerApps(appIds: (string | number)[]): Promise<Map<string, SensorTowerData>> {
-  const result = new Map<string, SensorTowerData>();
-  if (appIds.length === 0) return result;
-  try {
-    const res = await fetchTimed(`https://app.sensortower.com/api/ios/apps?app_ids=${appIds.join(",")}`, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15",
-      },
-      next: { revalidate: 3600 },
-    });
-    if (!res.ok) return result;
-    const data = (await res.json()) as { apps?: Record<string, unknown>[] };
-    for (const app of data.apps ?? []) {
-      const id = String(app.app_id ?? "");
-      const dl = app.humanized_worldwide_last_month_downloads as Record<string, unknown> | undefined;
-      const rev = app.humanized_worldwide_last_month_revenue as Record<string, unknown> | undefined;
-      result.set(id, {
-        downloads: Number(dl?.downloads ?? 0),
-        downloadsString: normalizeSensorTowerString(String(dl?.string ?? "—")),
-        revenue: Number(rev?.revenue ?? 0),
-        revenueString: normalizeSensorTowerString(String(rev?.string ?? "—")),
-        globalRatingCount: Number(app.global_rating_count ?? 0),
-      });
-    }
-  } catch {
-    // return empty map
-  }
-  return result;
 }
 
 /** Check where an app appears across all countries' top-free chart */
@@ -544,7 +747,10 @@ export async function fetchAllCountryRankings(appId: string): Promise<CountryRan
 }
 
 /** Trending apps: top movers by download velocity (rank improvement vs yesterday-proxy) */
-export async function fetchTrendingApps(country = "us", limit = 20): Promise<AppEntry[]> {
+export async function fetchTrendingApps(
+  country: CountryCode = TRACKER_DEFAULT_COUNTRY,
+  limit = 20,
+): Promise<AppEntry[]> {
   const apps = await fetchTopCharts(country, "top-free", 50);
   // Apps that entered top charts recently (proxy: newest release date in top 50)
   return apps.slice(0, limit);

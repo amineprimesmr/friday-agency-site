@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { TrackerNavLink } from "@/components/tracker/tracker-navigation";
 import { useMemo, useState } from "react";
 
 export type MarketRow = {
@@ -96,7 +96,7 @@ export function CategoryRevenueShare({ rows, totalUsd, currentAppId, country }: 
   return (
     <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-5">
       <div className="mb-5">
-        <h2 className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/40">Partage des revenus (estimé)</h2>
+        <h2 className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/40">Partage des revenus</h2>
       </div>
 
       <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-between">
@@ -104,7 +104,7 @@ export function CategoryRevenueShare({ rows, totalUsd, currentAppId, country }: 
           <div
             className="relative mx-auto aspect-square w-[min(15rem,78vw)] rounded-full p-[10px] shadow-[0_0_0_1px_rgba(255,255,255,0.06)]"
             role="img"
-            aria-label={`Répartition estimée du marché échantillon : total ${formatUsdFr(totalUsd)}`}
+            aria-label={`Répartition du marché échantillon : total ${formatUsdFr(totalUsd)}`}
           >
             <div className="h-full w-full rounded-full" style={{ background: gradient }} />
             <div className="absolute inset-[20%] flex flex-col items-center justify-center rounded-full bg-neutral-950/95 text-center ring-1 ring-white/[0.08]">
@@ -124,7 +124,7 @@ export function CategoryRevenueShare({ rows, totalUsd, currentAppId, country }: 
               const dim = hoverId !== null && hoverId !== row.id;
               return (
                 <li key={row.id}>
-                  <Link
+                  <TrackerNavLink
                     href={`/tracker/apps/${row.id}?country=${country}`}
                     className={`tracker-touch flex items-center gap-3 rounded-xl px-2 py-2 transition ${
                       row.id === currentAppId ? "bg-white/[0.08] ring-1 ring-white/15" : "hover:bg-white/[0.05]"
@@ -161,7 +161,7 @@ export function CategoryRevenueShare({ rows, totalUsd, currentAppId, country }: 
                       <p className="text-sm font-semibold tabular-nums text-white/90">{formatUsdFr(row.revenueUsd)}</p>
                       <p className="text-[11px] tabular-nums text-white/42">{row.sharePct.toFixed(1).replace(".", ",")} %</p>
                     </div>
-                  </Link>
+                  </TrackerNavLink>
                 </li>
               );
             })}

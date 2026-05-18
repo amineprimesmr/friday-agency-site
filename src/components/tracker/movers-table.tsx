@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import { TrackerNavLink } from "@/components/tracker/tracker-navigation";
 import type { Mover } from "@/lib/apple-charts";
 
 export function MoversTable({
@@ -66,7 +66,7 @@ export function MoversTable({
                 </td>
                 <td className="px-3 py-2.5 text-base">{app.flag}</td>
                 <td className="px-3 py-2.5">
-                  <Link
+                  <TrackerNavLink
                     href={`/tracker/apps/${app.id}?country=${app.country}`}
                     className="tracker-touch flex items-center gap-2 hover:underline"
                   >
@@ -89,7 +89,7 @@ export function MoversTable({
                     <span className="line-clamp-1 text-xs font-medium text-white/80 group-hover:text-white">
                       {app.name}
                     </span>
-                  </Link>
+                  </TrackerNavLink>
                 </td>
                 <td className="hidden px-3 py-2.5 text-xs text-white/45 md:table-cell">
                   {app.category}

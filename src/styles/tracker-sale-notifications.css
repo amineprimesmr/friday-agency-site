@@ -1,0 +1,280 @@
+/* Pile notifications « nouvelle vente » — fonds opaques (sans backdrop-blur sous la pile, pour lecture nette) */
+
+.tracker-sale-notifs {
+  --c-glass: #bbbbbc;
+  --c-light: #fff;
+  --c-dark: #000;
+  --glass-reflex-dark: 2;
+  --glass-reflex-light: 0.32;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  isolation: isolate;
+}
+
+.tracker-sale-notifs-stack {
+  position: relative;
+  width: min(21.5rem, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  isolation: isolate;
+}
+
+.tracker-sale-notif-shell {
+  position: relative;
+  width: 100%;
+  perspective: 800px;
+  transform-style: preserve-3d;
+}
+
+/* Chevauchements gérés côté JS (margin-top par profondeur) */
+
+.tracker-sale-notif-visual {
+  width: 100%;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.tracker-sale-notif {
+  position: relative;
+  transform: translateZ(0);
+  display: grid;
+  grid-template-columns: 3.125rem minmax(0, 1fr);
+  gap: 0.75rem 0.875rem;
+  align-items: center;
+  padding: 0.7rem 0.95rem 0.7rem 0.72rem;
+  border-radius: 1.375rem;
+  width: 100%;
+  overflow: hidden;
+  text-align: left;
+  border: none;
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
+
+  transform-origin: 50% 0%;
+  transition: filter 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  isolation: isolate;
+  pointer-events: none;
+
+  /* Fond quasi opaque — sans backdrop-filter pour éviter que le texte des cartes en dessous se lise au travers */
+  background:
+    linear-gradient(
+      132deg,
+      rgba(255, 255, 255, 0.07) 0%,
+      rgba(255, 255, 255, 0) 52%
+    ),
+    linear-gradient(to bottom, #26262e, #141418);
+
+  background-color: #16161b;
+
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 10%), transparent),
+    inset 1.8px 3px 0 -2px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 82%), transparent),
+    inset -2px -3px 0 -2px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 78%), transparent),
+    inset -0.3px -1px 4px 0 color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
+    inset 0 2px 3px -1px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 14%), transparent),
+    0 12px 40px rgba(0, 0, 0, 0.38),
+    0 4px 16px rgba(0, 0, 0, 0.18);
+}
+
+.tracker-sale-notif-shell[data-depth="3"] .tracker-sale-notif {
+  filter: brightness(0.985) saturate(0.97);
+}
+
+.tracker-sale-notif-shell[data-depth="4"] .tracker-sale-notif {
+  filter: brightness(0.97) saturate(0.94);
+}
+
+.tracker-sale-notif-shell[data-depth="5"] .tracker-sale-notif,
+.tracker-sale-notif-shell[data-depth="6"] .tracker-sale-notif {
+  background-image:
+    linear-gradient(
+      132deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0) 52%
+    ),
+    linear-gradient(to bottom, #1e1e24, #0e0e12);
+  background-color: #0f0f13;
+}
+
+.tracker-sale-notif-shell[data-depth="5"] .tracker-sale-notif {
+  filter: brightness(0.96) saturate(0.92);
+}
+
+.tracker-sale-notif-shell[data-depth="6"] .tracker-sale-notif {
+  filter: brightness(0.94) saturate(0.91);
+}
+
+/* Icône — halo violet façon paiement Stripe */
+.tracker-sale-notif-icon-wrap {
+  position: relative;
+  width: 3.125rem;
+  height: 3.125rem;
+  border-radius: 1rem;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  overflow: visible;
+}
+
+.tracker-sale-notif-icon-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -2px -1px -1px -2px;
+  border-radius: 1.02rem;
+  background: radial-gradient(
+    ellipse 88% 78% at 38% 30%,
+    rgba(216, 180, 254, 0.45),
+    rgba(167, 139, 250, 0.22) 40%,
+    rgba(124, 58, 237, 0.1) 58%,
+    transparent 74%
+  );
+  filter: blur(8px);
+  opacity: 0.82;
+  z-index: 0;
+}
+
+.tracker-sale-notif-shell[data-depth="6"] .tracker-sale-notif-icon-wrap::before,
+.tracker-sale-notif-shell[data-depth="5"] .tracker-sale-notif-icon-wrap::before {
+  opacity: 0.4;
+}
+
+.tracker-sale-notif-shell[data-depth="4"] .tracker-sale-notif-icon-wrap::before,
+.tracker-sale-notif-shell[data-depth="3"] .tracker-sale-notif-icon-wrap::before {
+  opacity: 0.62;
+}
+
+.tracker-sale-notif-icon-surface {
+  position: relative;
+  z-index: 1;
+  width: 2.875rem;
+  height: 2.875rem;
+  border-radius: 0.9rem;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 32% 24%, #a855f7 0%, #6d28d9 52%, #4c1d95 96%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.32),
+    inset 0 -2px 12px rgba(0, 0, 0, 0.32),
+    0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.tracker-sale-notif-shell[data-depth="6"] .tracker-sale-notif-icon-surface,
+.tracker-sale-notif-shell[data-depth="5"] .tracker-sale-notif-icon-surface {
+  opacity: 1;
+}
+
+.notif-accent-a .tracker-sale-notif-icon-surface:not(.tracker-sale-notif-icon-surface--brand) {
+  background: radial-gradient(circle at 30% 22%, #c084fc 0%, #7c3aed 55%, #5b21b6);
+}
+
+.notif-accent-b .tracker-sale-notif-icon-surface:not(.tracker-sale-notif-icon-surface--brand) {
+  background: radial-gradient(circle at 28% 26%, #818cf8 0%, #6366f1 48%, #4338ca);
+}
+
+.tracker-sale-notif-icon-surface.tracker-sale-notif-icon-surface--brand {
+  background-color: #121214 !important;
+  background-image: none !important;
+  padding: 0.22rem;
+  overflow: hidden;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.tracker-sale-notif-icon-img {
+  object-fit: contain;
+  object-position: center;
+}
+
+.notif-accent-a .tracker-sale-notif-icon-surface.tracker-sale-notif-icon-surface--brand,
+.notif-accent-b .tracker-sale-notif-icon-surface.tracker-sale-notif-icon-surface--brand {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 0 0 1px rgba(0, 0, 0, 0.42);
+}
+.tracker-sale-notif-body {
+  min-width: 0;
+}
+
+.tracker-sale-notif-head {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.93);
+}
+
+.tracker-sale-notif-sub {
+  margin-top: 0.1875rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.38;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* Reflet subtil façade */
+.tracker-sale-notif::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.17;
+  background: linear-gradient(
+    128deg,
+    rgba(255, 255, 255, 0.16) 0%,
+    rgba(255, 255, 255, 0) 38%,
+    rgba(255, 255, 255, 0.04) 58%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+.tracker-sale-notif-shell[data-depth="6"] .tracker-sale-notif::after {
+  opacity: 0.1;
+}
+
+.tracker-sale-notif-shell[data-depth="5"] .tracker-sale-notif::after {
+  opacity: 0.12;
+}
+
+.tracker-sale-notif-shell[data-depth="4"] .tracker-sale-notif::after,
+.tracker-sale-notif-shell[data-depth="3"] .tracker-sale-notif::after {
+  opacity: 0.17;
+}
+
+.tracker-sale-notif-shell[data-depth="2"] .tracker-sale-notif::after,
+.tracker-sale-notif-shell[data-depth="1"] .tracker-sale-notif::after {
+  opacity: 0.2;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tracker-sale-notif-shell[data-depth="0"] .tracker-sale-notif {
+    animation: tracker-sale-front-hold 5.2s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes tracker-sale-front-hold {
+  0% {
+    transform: scale(1) translateY(-0.5px);
+  }
+  100% {
+    transform: scale(1) translateY(-3.75px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tracker-sale-notif {
+    transition: none;
+    animation: none !important;
+  }
+
+  .tracker-sale-notif-visual {
+    will-change: auto;
+  }
+}

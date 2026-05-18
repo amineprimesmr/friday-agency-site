@@ -187,7 +187,7 @@ export function EmbedCountriesShell({ appId, appName, artworkUrl, rankings, them
       <footer
         className={`mt-4 flex flex-wrap items-center justify-between gap-2 border-t pt-4 text-[10px] ${resolvedTheme === "light" ? "border-slate-200 text-slate-500" : "border-white/[0.06] text-white/35"}`}
       >
-        <span>Powered by Friday · App Store Tracker</span>
+        <span>App Store Tracker</span>
         <Link
           href={`/tracker/apps/${appId}`}
           target="_blank"

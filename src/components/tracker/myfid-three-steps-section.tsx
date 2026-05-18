@@ -1,333 +1,214 @@
 "use client";
 
-import { Inter } from "next/font/google";
-import Image from "next/image";
-import { motion, useReducedMotion, useInView, type Variants } from "framer-motion";
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type MutableRefObject } from "react";
+/**
+ * Section « 3 étapes » — alignée sur fidelity/frontend/src/landing-cinematic/
+ * FinTapStepsScrollSection + Desktop + Mobile (+ StepVisual).
+ * Données : fintap-steps-data.js
+ */
+import { useEffect, useLayoutEffect, useRef, useState, type MutableRefObject, useSyncExternalStore } from "react";
 
 import "@/styles/myfid-three-steps.css";
 
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-});
+import { ScrollReveal } from "@/components/tracker/scroll-reveal";
 
-/** Données & visuels alignés sur myfidpass (landing chunk). */
-const STEPS = [
+/** fidelity/frontend/src/landing-cinematic/fintap-steps-data.js */
+const FINTAP_STEPS = [
   {
-    cardTitle: "Copiez une app",
+    cardTitle: "Connectez votre commerce",
     cardDesc:
-      "Repérez une app qui performe, étudiez pubs et classements — dupliquez ce qui fonctionne.",
+      "Recherchez votre établissement, validez l’adresse : Myfidpass prépare votre espace et votre carte Wallet.",
   },
   {
-    cardTitle: "Créez votre avatar IA",
+    cardTitle: "Personnalisez votre carte",
     cardDesc:
-      "À partir d’une photo, générez un avatar parlant pour vos créas et votre contenu vidéo.",
+      "Couleurs, récompenses, tampons ou points : adaptez la carte à votre image et à votre offre.",
   },
   {
-    cardTitle: "Postez sur TikTok",
+    cardTitle: "Fidélisez chaque client",
     cardDesc:
-      "Construisez vos hooks et votre calendrier : publiez plus vite avec des formats qui convertissent.",
+      "Partagez le QR, les clients ajoutent la carte au Wallet : chaque passage compte, sans friction.",
   },
 ] as const;
 
-const STEP_IMAGES = ["/assets/etape1.png", "/assets/etape2.png", "/assets/etape3.png"] as const;
+const ETAPE_ASSETS = ["/assets/etape1.png", "/assets/etape2.png", "/assets/etape3.png"] as const;
 
-const STEP_ALTS = [
-  "Étape 1 : copiez une app",
-  "Étape 2 : créez votre avatar IA",
-  "Étape 3 : postez sur TikTok",
+const ETAPE_ALTS = [
+  "Étape 1 : connectez votre commerce",
+  "Étape 2 : personnalisez votre carte",
+  "Étape 3 : fidélisez chaque client",
 ] as const;
 
-const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const MOTION_VARIANTS: Record<string, Variants> = {
-  "fade-up": {
-    hidden: { opacity: 0, y: 40, filter: "blur(8px)" },
-    show: { opacity: 1, y: 0, filter: "blur(0px)" },
-  },
-  "fade-in": {
-    hidden: { opacity: 0 },
-    show: { opacity: 1 },
-  },
-  "scale-up": {
-    hidden: { opacity: 0, scale: 0.92, filter: "blur(4px)" },
-    show: { opacity: 1, scale: 1, filter: "blur(0px)" },
-  },
-  "slide-left": {
-    hidden: { opacity: 0, x: -48, filter: "blur(4px)" },
-    show: { opacity: 1, x: 0, filter: "blur(0px)" },
-  },
-};
-
-const VIEWPORT_AMOUNT = { amount: 0.15, margin: "0px 0px -8% 0px" } as const;
-
-const MEDIA_DESKTOP = "(min-width: 901px)";
-
-/** Équivalent `C()` du landing — révélations entrée vue. */
-function RevealMotion({
-  children,
-  className,
-  variant = "fade-up",
-  delay = 0,
-}: {
-  children: ReactNode;
-  className?: string;
-  variant?: keyof typeof MOTION_VARIANTS;
-  delay?: number;
-}) {
-  const reduceMotion = useReducedMotion();
-  const ref = useRef(null);
-  const inView = useInView(ref, VIEWPORT_AMOUNT);
-  const show = !!reduceMotion || inView;
-
-  const variants = MOTION_VARIANTS[variant] ?? MOTION_VARIANTS["fade-up"];
-
-  if (reduceMotion) {
-    return <div className={className}>{children}</div>;
-  }
-
-  return (
-    <motion.div
-      ref={ref}
-      className={className}
-      variants={variants}
-      initial="hidden"
-      animate={show ? "show" : "hidden"}
-      transition={{ duration: 0.7, ease: EASE, delay: show ? delay : 0 }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-function RevealMotionArticle({
-  children,
-  className,
-  variant = "fade-up",
-  delay = 0,
-}: {
-  children: ReactNode;
-  className?: string;
-  variant?: keyof typeof MOTION_VARIANTS;
-  delay?: number;
-}) {
-  const reduceMotion = useReducedMotion();
-  const ref = useRef(null);
-  const inView = useInView(ref, VIEWPORT_AMOUNT);
-  const show = !!reduceMotion || inView;
-
-  const variants = MOTION_VARIANTS[variant] ?? MOTION_VARIANTS["fade-up"];
-
-  if (reduceMotion) {
-    return <article className={className}>{children}</article>;
-  }
-
-  return (
-    <motion.article
-      ref={ref}
-      className={className}
-      variants={variants}
-      initial="hidden"
-      animate={show ? "show" : "hidden"}
-      transition={{ duration: 0.7, ease: EASE, delay: show ? delay : 0 }}
-    >
-      {children}
-    </motion.article>
-  );
-}
-
-function RevealMotionLi({
-  children,
-  className,
-  variant = "scale-up",
-  delay = 0,
-}: {
-  children: ReactNode;
-  className?: string;
-  variant?: keyof typeof MOTION_VARIANTS;
-  delay?: number;
-}) {
-  const reduceMotion = useReducedMotion();
-  const ref = useRef(null);
-  const inView = useInView(ref, VIEWPORT_AMOUNT);
-  const show = !!reduceMotion || inView;
-
-  const variants = MOTION_VARIANTS[variant] ?? MOTION_VARIANTS["scale-up"];
-
-  if (reduceMotion) {
-    return <li className={className}>{children}</li>;
-  }
-
-  return (
-    <motion.li
-      ref={ref}
-      className={className}
-      variants={variants}
-      initial="hidden"
-      animate={show ? "show" : "hidden"}
-      transition={{ duration: 0.7, ease: EASE, delay: show ? delay : 0 }}
-    >
-      {children}
-    </motion.li>
-  );
-}
-
-function StepMockFigure({ index }: { index: number }) {
+function StepVisualByIndex({ index }: { index: number }) {
   const i = Math.min(2, Math.max(0, index));
   return (
     <figure className="fintap-steps-mock fintap-steps-mock--etape">
       <div className="fintap-steps-mock-etape__frame">
-        <Image
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           className="fintap-steps-mock-etape__img"
-          src={STEP_IMAGES[i]}
-          alt={STEP_ALTS[i]}
+          src={ETAPE_ASSETS[i]}
+          alt={ETAPE_ALTS[i]}
           width={1024}
           height={1024}
-          sizes="(max-width:900px) 100vw, 460px"
+          loading="lazy"
+          decoding="async"
         />
       </div>
     </figure>
   );
 }
 
-/** Colonne titre + ligne pointillée + cartes avec étape « active » au scroll — copie comportement prod. */
-function StepsDesktopScroll({ measureRef }: { measureRef: MutableRefObject<HTMLElement | null> }) {
+const DESKTOP_MQ = "(min-width: 901px)";
+
+function subscribeDesktopMql(cb: () => void) {
+  if (typeof window === "undefined") return () => {};
+  const mq = window.matchMedia(DESKTOP_MQ);
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+}
+
+function snapshotDesktopMatches() {
+  return typeof window !== "undefined" && window.matchMedia(DESKTOP_MQ).matches;
+}
+
+function snapshotDesktopServer() {
+  return false;
+}
+
+function FinTapStepsScrollDesktop({ measureRef }: { measureRef: MutableRefObject<HTMLElement | null> }) {
   const leftColRef = useRef<HTMLDivElement>(null);
-  const rightInnerRef = useRef<HTMLDivElement>(null);
-  const stickyInnerRef = useRef<HTMLDivElement>(null);
-  const stickyTopPx = useRef(104);
-  const [rightInnerHeight, setRightInnerHeight] = useState(0);
-  const [activeIdx, setActiveIdx] = useState(0);
+  const rightRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const pinTopRef = useRef(104);
+  const [rightH, setRightH] = useState(0);
+  const [active, setActive] = useState(0);
 
   useLayoutEffect(() => {
-    const el = stickyInnerRef.current;
-    if (!el) return;
-    const prevCss = el.style.cssText;
-    el.style.position = "sticky";
-    el.style.top = "var(--fintap-steps-nav-clear)";
-    const raw = parseFloat(getComputedStyle(el).top);
-    if (!Number.isNaN(raw) && raw > 0) stickyTopPx.current = raw;
-    el.style.cssText = prevCss;
+    const panel = panelRef.current;
+    if (!panel) return;
+    const prev = panel.style.cssText;
+    panel.style.position = "sticky";
+    panel.style.top = "var(--fintap-steps-nav-clear)";
+    const v = Number.parseFloat(getComputedStyle(panel).top);
+    if (!Number.isNaN(v) && v > 0) pinTopRef.current = v;
+    panel.style.cssText = prev;
   }, []);
 
   useEffect(() => {
-    const col = rightInnerRef.current;
-    if (!col || typeof ResizeObserver === "undefined") return;
-    const ro = new ResizeObserver(() => setRightInnerHeight(Math.round(col.offsetHeight)));
-    ro.observe(col);
-    setRightInnerHeight(Math.round(col.offsetHeight));
+    const right = rightRef.current;
+    if (!right || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => {
+      setRightH(Math.round(right.offsetHeight));
+    });
+    ro.observe(right);
+    setRightH(Math.round(right.offsetHeight));
     return () => ro.disconnect();
   }, []);
 
-  useLayoutEffect(() => {
-    const section = measureRef.current;
+  useEffect(() => {
+    const section = measureRef?.current;
     if (!section) return;
-    const stickyCleanupTarget = stickyInnerRef.current;
 
-    const getArticles = () =>
+    const cardEls = (): HTMLElement[] =>
       Array.from(
         section.querySelectorAll(".fintap-steps-scroll__desktop-row .fintap-steps-scroll__right article"),
-      ) as HTMLElement[];
+      );
 
     let ticking = false;
-
-    const measureStickyMode = () => {
+    const applyPin = () => {
       ticking = false;
-      const sticky = stickyInnerRef.current;
-      const col = leftColRef.current;
-      if (!sticky || !col) return;
-      const clearance = stickyTopPx.current;
-      const hSticky = sticky.offsetHeight;
-      const colRect = col.getBoundingClientRect();
-      let mode: "flow" | "pinned" | "docked";
-      if (colRect.top <= clearance && colRect.bottom >= hSticky + clearance + 8) {
-        mode = "pinned";
-      } else if (colRect.top <= clearance) {
-        mode = "docked";
-      } else {
-        mode = "flow";
-      }
+      const panel = panelRef.current;
+      const leftCol = leftColRef.current;
+      if (!panel || !leftCol) return;
+
+      const pt = pinTopRef.current;
+      const ph = panel.offsetHeight;
+      const lc = leftCol.getBoundingClientRect();
+      let mode = "flow";
+      if (lc.top <= pt && lc.bottom >= pt + ph + 8) mode = "pinned";
+      else if (lc.top <= pt) mode = "docked";
+
       if (mode === "flow") {
-        sticky.classList.remove("is-left-pinned", "is-left-docked");
-        sticky.style.position = "";
-        sticky.style.top = "";
-        sticky.style.left = "";
-        sticky.style.width = "";
-        sticky.style.right = "";
-        sticky.style.bottom = "";
+        panel.classList.remove("is-left-pinned", "is-left-docked");
+        panel.style.position = "";
+        panel.style.top = "";
+        panel.style.left = "";
+        panel.style.width = "";
+        panel.style.right = "";
+        panel.style.bottom = "";
       } else if (mode === "pinned") {
-        sticky.classList.add("is-left-pinned");
-        sticky.classList.remove("is-left-docked");
-        sticky.style.position = "fixed";
-        sticky.style.top = `${clearance}px`;
-        sticky.style.left = `${colRect.left}px`;
-        sticky.style.width = `${colRect.width}px`;
-        sticky.style.right = "";
-        sticky.style.bottom = "";
+        panel.classList.add("is-left-pinned");
+        panel.classList.remove("is-left-docked");
+        panel.style.position = "fixed";
+        panel.style.top = `${String(pt)}px`;
+        panel.style.left = `${String(lc.left)}px`;
+        panel.style.width = `${String(lc.width)}px`;
+        panel.style.right = "";
+        panel.style.bottom = "";
       } else {
-        sticky.classList.remove("is-left-pinned");
-        sticky.classList.add("is-left-docked");
-        sticky.style.position = "absolute";
-        sticky.style.top = "auto";
-        sticky.style.bottom = "0";
-        sticky.style.left = "0";
-        sticky.style.right = "0";
-        sticky.style.width = "";
+        panel.classList.remove("is-left-pinned");
+        panel.classList.add("is-left-docked");
+        panel.style.position = "absolute";
+        panel.style.top = "auto";
+        panel.style.bottom = "0";
+        panel.style.left = "0";
+        panel.style.right = "0";
+        panel.style.width = "";
       }
     };
 
-    const pickActiveCard = () => {
-      const articles = getArticles();
-      if (articles.length === 0) return;
-      const vvH = window.visualViewport?.height ?? window.innerHeight ?? 800;
-      const clearance = stickyTopPx.current;
-      const midpointY = clearance + (vvH - clearance) * 0.42;
-      let best = 0;
+    const tickActive = () => {
+      const list = cardEls();
+      if (list.length === 0) return;
+      const ih = window.visualViewport?.height ?? window.innerHeight ?? 800;
+      const pt = pinTopRef.current;
+      const focalY = pt + (ih - pt) * 0.42;
+      let bestIdx = 0;
       let bestDist = Infinity;
-      articles.forEach((art, gi) => {
-        const r = art.getBoundingClientRect();
-        const cy = (r.top + r.bottom) / 2;
-        const d = Math.abs(cy - midpointY);
+      list.forEach((el, idx) => {
+        const r = el.getBoundingClientRect();
+        const mid = (r.top + r.bottom) / 2;
+        const d = Math.abs(mid - focalY);
         if (d < bestDist) {
           bestDist = d;
-          best = gi;
+          bestIdx = idx;
         }
       });
-      setActiveIdx((v) => (v === best ? v : best));
+      setActive((prev) => (prev === bestIdx ? prev : bestIdx));
     };
 
-    const onScrollResize = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        measureStickyMode();
-        pickActiveCard();
-      });
-    };
-
-    onScrollResize();
-
-    window.addEventListener("scroll", onScrollResize, { passive: true });
-    window.addEventListener("resize", onScrollResize, { passive: true });
-    window.visualViewport?.addEventListener("resize", onScrollResize, { passive: true });
-
-    const roSection = typeof ResizeObserver !== "undefined" ? new ResizeObserver(onScrollResize) : null;
-    roSection?.observe(section);
-    const lc = leftColRef.current;
-    if (lc) roSection?.observe(lc);
-
-    return () => {
-      window.removeEventListener("scroll", onScrollResize);
-      window.removeEventListener("resize", onScrollResize);
-      window.visualViewport?.removeEventListener("resize", onScrollResize);
-      roSection?.disconnect();
-      if (stickyCleanupTarget) {
-        stickyCleanupTarget.classList.remove("is-left-pinned", "is-left-docked");
-        stickyCleanupTarget.style.cssText = "";
+    const schedule = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(() => {
+          applyPin();
+          tickActive();
+        });
       }
     };
-  }, [measureRef, rightInnerHeight]);
+
+    schedule();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
+    window.visualViewport?.addEventListener("resize", schedule, { passive: true });
+
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(schedule) : null;
+    ro?.observe(section);
+    const lc = leftColRef.current;
+    if (lc) ro?.observe(lc);
+
+    return () => {
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      window.visualViewport?.removeEventListener("resize", schedule);
+      ro?.disconnect();
+      const panel = panelRef.current;
+      if (panel) {
+        panel.classList.remove("is-left-pinned", "is-left-docked");
+        panel.style.cssText = "";
+      }
+    };
+  }, [measureRef, rightH]);
 
   return (
     <div className="fintap-steps-scroll__track">
@@ -335,51 +216,52 @@ function StepsDesktopScroll({ measureRef }: { measureRef: MutableRefObject<HTMLE
         <div
           ref={leftColRef}
           className="fintap-steps-scroll__left-col"
-          style={rightInnerHeight > 0 ? { minHeight: rightInnerHeight } : undefined}
+          style={rightH > 0 ? { minHeight: rightH } : undefined}
         >
-          <div ref={stickyInnerRef} className="fintap-steps-scroll__left-sticky">
+          <div ref={panelRef} className="fintap-steps-scroll__left-sticky">
             <div className="fintap-steps-scroll__left">
-              <RevealMotion variant="slide-left">
-                <h2 id="fintap-steps-heading" className={`fintap-steps-scroll__h2 ${inter.className}`}>
+              <ScrollReveal variant="slide-left">
+                <h2 id="fintap-steps-heading" className="fintap-steps-scroll__h2">
                   Lancez-vous en 3 étapes simples.
                 </h2>
-              </RevealMotion>
-              <RevealMotion variant="slide-left" delay={0.1}>
-                <p className={`fintap-steps-scroll__intro ${inter.className}`}>
+              </ScrollReveal>
+              <ScrollReveal variant="slide-left" delay={0.1}>
+                <p className="fintap-steps-scroll__intro">
                   Du commerce à la carte Wallet : tout est pensé pour vous faire gagner du temps et garder vos clients
                   engagés.
                 </p>
-              </RevealMotion>
+              </ScrollReveal>
             </div>
           </div>
         </div>
 
         <div className="fintap-steps-scroll__rail" aria-hidden="true">
           <span className="fintap-steps-scroll__rail-line" />
-          <span className="fintap-steps-scroll__badge">{activeIdx + 1}</span>
+          <span className="fintap-steps-scroll__badge">{active + 1}</span>
         </div>
 
-        <div ref={rightInnerRef} className="fintap-steps-scroll__right">
+        <div ref={rightRef} className="fintap-steps-scroll__right">
           <div className="fintap-steps-scroll__cards" role="list" aria-live="polite">
-            {STEPS.map((step, fi) => (
-              <RevealMotionArticle
+            {FINTAP_STEPS.map((step, idx) => (
+              <ScrollReveal
                 key={step.cardTitle}
+                tag="article"
+                className={`fintap-steps-card fintap-steps-card--etape-media${active === idx ? " is-active" : ""}`}
                 variant="fade-up"
-                delay={0.06 * fi}
-                className={`fintap-steps-card fintap-steps-card--etape-media${activeIdx === fi ? " is-active" : ""}`}
+                delay={0.06 * idx}
               >
                 <div
                   className="fintap-steps-card__grey-panel"
                   role="listitem"
-                  aria-current={activeIdx === fi ? "step" : undefined}
+                  aria-current={active === idx ? "step" : undefined}
                 >
                   <div className="fintap-steps-card__grey-panel-media">
-                    <StepMockFigure index={fi} />
+                    <StepVisualByIndex index={idx} />
                   </div>
-                  <h3 className={`fintap-steps-card__title ${inter.className}`}>{step.cardTitle}</h3>
-                  <p className={`fintap-steps-card__desc ${inter.className}`}>{step.cardDesc}</p>
+                  <h3 className="fintap-steps-card__title">{step.cardTitle}</h3>
+                  <p className="fintap-steps-card__desc">{step.cardDesc}</p>
                 </div>
-              </RevealMotionArticle>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -388,73 +270,53 @@ function StepsDesktopScroll({ measureRef }: { measureRef: MutableRefObject<HTMLE
   );
 }
 
-function StepsMobileStatic() {
+function FinTapStepsScrollMobile() {
   return (
     <div className="fintap-steps-scroll__mobile">
-      <RevealMotion>
-        <h2 id="fintap-steps-heading" className={`fintap-steps-scroll__h2 ${inter.className}`}>
+      <ScrollReveal>
+        <h2 id="fintap-steps-heading" className="fintap-steps-scroll__h2">
           Lancez-vous en 3 étapes simples.
         </h2>
-      </RevealMotion>
-      <RevealMotion variant="fade-up" delay={0.1}>
-        <p className={`fintap-steps-scroll__intro ${inter.className}`}>
-          Du commerce à la carte Wallet : tout est pensé pour vous faire gagner du temps et garder vos clients
-          engagés.
+      </ScrollReveal>
+      <ScrollReveal delay={0.1}>
+        <p className="fintap-steps-scroll__intro">
+          Du commerce à la carte Wallet : tout est pensé pour vous faire gagner du temps et garder vos clients engagés.
         </p>
-      </RevealMotion>
-
-      <ol className={`fintap-steps-mobile__list ${inter.className}`}>
-        {STEPS.map((step, n) => (
-          <RevealMotionLi
-            key={step.cardTitle}
-            variant="scale-up"
-            delay={0.1 * n}
-            className="fintap-steps-mobile__step"
-          >
+      </ScrollReveal>
+      <ol className="fintap-steps-mobile__list">
+        {FINTAP_STEPS.map((step, idx) => (
+          <ScrollReveal key={step.cardTitle} tag="li" className="fintap-steps-mobile__step" variant="scale-up" delay={0.1 * idx}>
             <div className="fintap-steps-card__grey-panel fintap-steps-mobile__grey-panel">
               <span className="fintap-steps-card__footer-num fintap-steps-mobile__badge" aria-hidden="true">
-                {n + 1}
+                {idx + 1}
               </span>
               <div className="fintap-steps-card__grey-panel-media">
-                <StepMockFigure index={n} />
+                <StepVisualByIndex index={idx} />
               </div>
-              <h4 className={`fintap-steps-card__title fintap-steps-mobile__card-title ${inter.className}`}>
-                {step.cardTitle}
-              </h4>
-              <p className={`fintap-steps-card__desc ${inter.className}`}>{step.cardDesc}</p>
+              <h4 className="fintap-steps-card__title fintap-steps-mobile__card-title">{step.cardTitle}</h4>
+              <p className="fintap-steps-card__desc">{step.cardDesc}</p>
             </div>
-          </RevealMotionLi>
+          </ScrollReveal>
         ))}
       </ol>
     </div>
   );
 }
 
-/**
- * Section identique au bloc myfidpass « Comment ça marche » (#comment-ca-marche) :
- * titre sticky + ligne + badge dynamique + cartes avec highlight au scroll sur desktop.
- */
 export function MyfidThreeStepsSection() {
   const sectionRef = useRef<HTMLElement>(null);
 
-  const [isDesktop, setIsDesktop] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia(MEDIA_DESKTOP);
-    const apply = () => setIsDesktop(mq.matches);
-    apply();
-    mq.addEventListener("change", apply);
-    return () => mq.removeEventListener("change", apply);
-  }, []);
+  const isDesktop = useSyncExternalStore(subscribeDesktopMql, snapshotDesktopMatches, snapshotDesktopServer);
 
   return (
     <section
       ref={sectionRef}
-      className={`tracker-fintap-steps fintap-steps-scroll ${inter.className}`}
+      className="tracker-fintap-steps fintap-steps-scroll"
       id="comment-ca-marche"
       aria-labelledby="fintap-steps-heading"
       lang="fr"
     >
-      {isDesktop ? <StepsDesktopScroll measureRef={sectionRef} /> : <StepsMobileStatic />}
+      {isDesktop ? <FinTapStepsScrollDesktop measureRef={sectionRef} /> : <FinTapStepsScrollMobile />}
     </section>
   );
 }

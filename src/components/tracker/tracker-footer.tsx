@@ -2,10 +2,10 @@ import Link from "next/link";
 
 export function TrackerFooter() {
   return (
-    <footer className="border-t border-white/[0.08] bg-black/15 py-12 text-sm text-white/60 backdrop-blur-md supports-[backdrop-filter]:bg-black/10">
+    <footer className="border-t border-white/[0.08] bg-black py-12 text-sm text-white/60">
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 sm:flex-row sm:items-start sm:justify-between sm:px-6">
         <div className="max-w-sm space-y-3">
-          <p className="text-base font-semibold text-white">Friday — App Store Tracker</p>
+          <p className="text-base font-semibold text-white">Trackapp — App Store Tracker</p>
           <p className="leading-relaxed">
             Classements iOS en temps réel : Top Charts, nouveautés, mouvements de rangs par pays et
             catégorie, creatives et publicités Meta &amp; TikTok.

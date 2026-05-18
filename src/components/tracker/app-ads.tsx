@@ -1,10 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { MetaArchivedAd } from "@/lib/meta-ad-library";
 import type { TikTokAdLibraryRow } from "@/lib/tiktok-ad-library";
+import { metaAdLibraryWebUrl } from "@/lib/meta-ad-library";
+import { excerptMetaBodies, formatMetaDate, labelMetaPlatform } from "@/lib/meta-ad-display";
+import type { TrackerMetaAdLibraryContext } from "@/lib/tracker-meta-ad-library-context";
+import { useMetaAdLibrary, type MetaAdLibraryState } from "@/components/tracker/use-meta-ad-library";
 
-type Platform = "meta" | "tiktok" | "google";
+export type AdIntelPlatform = "meta" | "tiktok" | "google";
+
+type Platform = AdIntelPlatform;
 
 const PLATFORMS: { id: Platform; label: string; icon: string; color: string }[] = [
   { id: "meta", label: "Meta Ads", icon: "🟦", color: "text-white/70" },
@@ -12,142 +17,72 @@ const PLATFORMS: { id: Platform; label: string; icon: string; color: string }[] 
   { id: "google", label: "Google UAC", icon: "🔴", color: "text-red-400" },
 ];
 
-function formatMetaDate(iso?: string) {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleDateString("fr-FR", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  } catch {
-    return "—";
-  }
-}
-
-function labelPlatform(p: string) {
-  const x = p.toLowerCase();
-  if (x === "facebook") return "Facebook";
-  if (x === "instagram") return "Instagram";
-  if (x === "messenger") return "Messenger";
-  if (x === "audience_network") return "Audience Network";
-  if (x === "threads") return "Threads";
-  return p;
-}
-
-function excerptBodies(bodies?: string[], max = 220) {
-  if (!bodies?.length) return "";
-  const t = bodies.filter(Boolean).join(" · ");
-  if (t.length <= max) return t;
-  return `${t.slice(0, max)}…`;
-}
-
-type AdLibraryApiResponse = {
-  configured: boolean;
-  searchQuery: string;
-  countries: string[];
-  ads: MetaArchivedAd[];
-  paging: { cursors?: { before?: string; after?: string } } | null;
-  error: string | null;
-  errorCode: number | null;
-};
+export type { MetaAdLibraryState };
 
 function MetaAdsPanel({
-  developerName,
   appName,
   countryCode,
+  metaLibraryContext,
+  sharedLibrary,
 }: {
-  developerName: string;
   appName: string;
   countryCode: string;
+  metaLibraryContext: TrackerMetaAdLibraryContext;
+  sharedLibrary?: MetaAdLibraryState;
 }) {
-  const primaryTerms = (developerName.trim() || appName.trim()).slice(0, 100);
-  const webSearchQ = encodeURIComponent(primaryTerms || appName);
-  const metaLibraryWebUrl = `https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&q=${webSearchQ}&search_type=keyword_unordered&media_type=all`;
+  const fb = metaLibraryContext.keywordFallback || appName;
+  const hasResolvedMetaPage = metaLibraryContext.searchPageIds.length > 0;
+  const metaLibraryWebUrl = metaAdLibraryWebUrl({
+    searchPageIds: metaLibraryContext.searchPageIds,
+    keywordFallback: fb,
+  });
 
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [configured, setConfigured] = useState(true);
-  const [apiError, setApiError] = useState<string | null>(null);
-  const [ads, setAds] = useState<MetaArchivedAd[]>([]);
-  const [nextAfter, setNextAfter] = useState<string | null>(null);
+  const internal = useMetaAdLibrary({
+    searchTerms: metaLibraryContext.keywordFallback,
+    searchPageIds: metaLibraryContext.searchPageIds,
+    countryCode,
+    pageSize: 12,
+    enabled: sharedLibrary === undefined,
+  });
+  const { loading, loadingMore, configured, apiError, ads, nextAfter, loadMore, searchMode } =
+    sharedLibrary ?? internal;
 
-  const fetchPage = useCallback(
-    async (afterCursor?: string | null) => {
-      const params = new URLSearchParams();
-      params.set("q", primaryTerms || appName);
-      params.set("countries", countryCode.toUpperCase());
-      params.set("limit", "12");
-      if (afterCursor) params.set("after", afterCursor);
-
-      const res = await fetch(`/api/meta/ad-library?${params.toString()}`);
-      const json = (await res.json()) as AdLibraryApiResponse;
-      return json;
-    },
-    [primaryTerms, appName, countryCode],
-  );
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setApiError(null);
-      setAds([]);
-      setNextAfter(null);
-      try {
-        const json = await fetchPage();
-        if (cancelled) return;
-        setConfigured(json.configured);
-        setApiError(json.error);
-        setAds(json.ads ?? []);
-        setNextAfter(json.paging?.cursors?.after ?? null);
-      } catch (e) {
-        if (!cancelled) {
-          setApiError(e instanceof Error ? e.message : "Erreur réseau");
-          setAds([]);
-          setNextAfter(null);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [fetchPage]);
-
-  async function handleLoadMore() {
-    if (!nextAfter || loadingMore) return;
-    setLoadingMore(true);
-    try {
-      const json = await fetchPage(nextAfter);
-      setApiError(json.error);
-      setAds((prev) => [...prev, ...(json.ads ?? [])]);
-      setNextAfter(json.paging?.cursors?.after ?? null);
-    } catch (e) {
-      setApiError(e instanceof Error ? e.message : "Erreur réseau");
-    } finally {
-      setLoadingMore(false);
-    }
-  }
+  const pageLabel =
+    metaLibraryContext.entries[0]?.pageName ||
+    (metaLibraryContext.entries[0] ? `ID ${metaLibraryContext.entries[0].pageId}` : null);
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-xs text-white/50">
-            Meta Ad Library — recherche{" "}
-            <span className="font-semibold text-white/85">{primaryTerms || appName}</span>
+        <div className="min-w-0">
+          <div className="text-xs text-white/50">
+            Meta Ad Library —{" "}
+            {searchMode === "page" && metaLibraryContext.searchPageIds.length > 0 ? (
+              <>
+                filtré à la page{" "}
+                      <span className="font-semibold text-white/85">{pageLabel ?? "Meta"}</span>
+                <span className="text-white/35"> ({metaLibraryContext.searchPageIds.join(", ")})</span>
+              </>
+            ) : (
+              <>
+                Page Meta officielle non résolue
+              </>
+            )}
             {countryCode ? (
               <span className="text-white/35"> · pays {countryCode.toUpperCase()}</span>
             ) : null}
-          </p>
+          </div>
+          {metaLibraryContext.mode === "unresolved" ? (
+            <p className="mt-2 text-[11px] leading-relaxed text-amber-200/80">
+              Aucune Page Facebook fiable n’a été validée. Les résultats par mot-clé sont volontairement bloqués pour
+              éviter de mélanger les pubs d’autres marques.
+            </p>
+          ) : null}
           <p className="mt-0.5 text-[11px] text-white/30">
-            Données Graph API <code className="rounded bg-white/[0.06] px-1 text-[10px]">ads_archive</code> — créatives
-            publiques
+            Données Graph API <code className="rounded bg-white/[0.06] px-1 text-[10px]">ads_archive</code>
+            {searchMode === "page" ? " · mode page (`search_page_ids`)" : " · en attente de Page Meta validée"}
           </p>
-        </div>
-        <a
+        </div>        <a
           href={metaLibraryWebUrl}
           target="_blank"
           rel="noopener noreferrer"
@@ -157,7 +92,34 @@ function MetaAdsPanel({
         </a>
       </div>
 
-      {!configured && (
+      {!hasResolvedMetaPage ? (
+        <div className="rounded-xl border border-amber-400/25 bg-amber-400/10 px-4 py-4 text-[13px] text-amber-100/90">
+          <p className="font-semibold">Page Meta officielle non trouvée</p>
+          <p className="mt-1 text-[12px] leading-relaxed text-amber-100/75">
+            La recherche automatique a détecté les réseaux disponibles, mais aucune Page Facebook/Meta fiable n’a pu être
+            convertie en ID publicitaire. La librairie reste donc en pause au lieu d’afficher des résultats par mot-clé.
+          </p>
+          {metaLibraryContext.rejectedCandidates.length > 0 ? (
+            <ul className="mt-3 space-y-1 text-[11px] text-amber-100/65">
+              {metaLibraryContext.rejectedCandidates.slice(0, 3).map((candidate) => (
+                <li key={`${candidate.source}-${candidate.url}`}>
+                  {candidate.reason} · {candidate.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <a
+            href={metaLibraryContext.manualSearchUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-flex rounded-lg border border-amber-100/25 bg-amber-100/10 px-3 py-2 text-xs font-semibold text-amber-50 hover:bg-amber-100/15"
+          >
+            Recherche manuelle Meta ↗
+          </a>
+        </div>
+      ) : null}
+
+      {!configured && hasResolvedMetaPage && (
         <div className="rounded-xl border border-amber-400/25 bg-amber-400/10 px-4 py-3 text-[13px] text-amber-100/90">
           <p className="font-semibold">Token Meta non configuré</p>
           <p className="mt-1 text-[12px] text-amber-100/75">
@@ -185,7 +147,7 @@ function MetaAdsPanel({
         </div>
       )}
 
-      {apiError && configured && (
+      {apiError && configured && hasResolvedMetaPage && (
         <div className="rounded-xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-[12px] text-red-100/90">
           <span className="font-semibold">Meta API</span> — {apiError}
         </div>
@@ -216,11 +178,18 @@ function MetaAdsPanel({
                 />
               ))}
             </div>
+          ) : !hasResolvedMetaPage ? (
+            <div className="rounded-xl border border-white/[0.06] bg-black/40 px-4 py-10 text-center">
+              <p className="text-sm text-white/55">Résolution Meta requise avant de charger les créatives.</p>
+              <p className="mt-2 text-[12px] text-white/35">
+                Les résultats mot-clé sont désactivés pour garantir une librairie ads uniquement liée à la marque.
+              </p>
+            </div>
           ) : ads.length === 0 ? (
             <div className="rounded-xl border border-white/[0.06] bg-black/40 px-4 py-10 text-center">
               <p className="text-sm text-white/55">Aucune pub trouvée pour cette recherche.</p>
               <p className="mt-2 text-[12px] text-white/35">
-                Essaie la bibliothèque web Meta ou vérifie le nom du développeur / les pays ciblés.
+                La Page Meta est bien résolue, mais aucune créative active n’est retournée pour le pays choisi.
               </p>
               <a
                 href={metaLibraryWebUrl}
@@ -254,13 +223,13 @@ function MetaAdsPanel({
                           key={p}
                           className="rounded-full border border-white/10 bg-white/[0.05] px-2 py-0.5 text-[10px] font-medium text-white/55"
                         >
-                          {labelPlatform(p)}
+                          {labelMetaPlatform(p)}
                         </span>
                       ))}
                     </div>
 
                     <p className="mb-3 flex-1 text-[12px] leading-relaxed text-white/45 line-clamp-5">
-                      {excerptBodies(ad.ad_creative_bodies) || excerptBodies(ad.ad_creative_link_titles) || "—"}
+                      {excerptMetaBodies(ad.ad_creative_bodies) || excerptMetaBodies(ad.ad_creative_link_titles) || "—"}
                     </p>
 
                     <p className="mb-3 text-[10px] text-white/30">
@@ -288,7 +257,7 @@ function MetaAdsPanel({
                 <div className="mt-4 flex justify-center">
                   <button
                     type="button"
-                    onClick={() => void handleLoadMore()}
+                    onClick={() => void loadMore()}
                     disabled={loadingMore}
                     className="rounded-xl border border-white/15 bg-white/[0.06] px-5 py-2.5 text-xs font-semibold text-white/80 transition hover:bg-white/[0.1] disabled:opacity-50"
                   >
@@ -717,40 +686,67 @@ export function AppAds({
   appName,
   developerName,
   bundleId,
-  countryCode = "US",
+  countryCode = "FR",
+  enabledPlatforms = ["meta", "tiktok", "google"],
+  metaLibraryContext,
+  metaAdLibrary,
 }: {
   appName: string;
   developerName: string;
   bundleId: string;
   /** Code pays App Store (ex. `us`, `fr`) — aligné sur la requête tracker pour filtrer les pubs par pays atteint */
   countryCode?: string;
+  /** Phase produit : ex. uniquement <code>["meta"]</code> avant connexion TikTok */
+  enabledPlatforms?: AdIntelPlatform[];
+  metaLibraryContext: TrackerMetaAdLibraryContext;
+  /** Données Meta Ad Library déjà chargées par le parent (un seul fetch). */
+  metaAdLibrary?: MetaAdLibraryState;
 }) {
-  const [platform, setPlatform] = useState<Platform>("meta");
-  const metaCountry = (countryCode || "US").trim() || "US";
+  const tabList = PLATFORMS.filter((p) => enabledPlatforms.includes(p.id));
+  const [platform, setPlatform] = useState<Platform>(() => tabList[0]?.id ?? "meta");
+  const metaCountry = (countryCode || "FR").trim() || "FR";
+
+  const enabledKey = [...enabledPlatforms].sort().join(",");
+
+  useEffect(() => {
+    const ids = PLATFORMS.filter((p) => enabledPlatforms.includes(p.id)).map((p) => p.id);
+    if (ids.length > 0 && !ids.includes(platform)) {
+      setPlatform(ids[0]!);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- enabledKey résume le contenu de enabledPlatforms
+  }, [enabledKey, platform]);
 
   return (
     <div className="space-y-5">
       {/* Platform tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-        {PLATFORMS.map((p) => (
-          <button
-            key={p.id}
-            onClick={() => setPlatform(p.id)}
-            className={`flex shrink-0 items-center gap-2 rounded-xl border px-4 py-2 text-xs font-semibold transition ${
-              platform === p.id
-                ? "border-white/20 bg-white/10 text-white"
-                : "border-white/[0.06] bg-white/[0.02] text-white/45 hover:border-white/15 hover:text-white/80"
-            }`}
-          >
-            <span>{p.icon}</span>
-            {p.label}
-          </button>
-        ))}
-      </div>
+      {tabList.length > 1 ? (
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {tabList.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => setPlatform(p.id)}
+              className={`flex shrink-0 items-center gap-2 rounded-xl border px-4 py-2 text-xs font-semibold transition ${
+                platform === p.id
+                  ? "border-white/20 bg-white/10 text-white"
+                  : "border-white/[0.06] bg-white/[0.02] text-white/45 hover:border-white/15 hover:text-white/80"
+              }`}
+            >
+              <span>{p.icon}</span>
+              {p.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       {/* Panel content */}
       {platform === "meta" && (
-        <MetaAdsPanel developerName={developerName} appName={appName} countryCode={metaCountry} />
+        <MetaAdsPanel
+          appName={appName}
+          countryCode={metaCountry}
+          metaLibraryContext={metaLibraryContext}
+          sharedLibrary={metaAdLibrary}
+        />
       )}
       {platform === "tiktok" && (
         <TikTokAdsPanel developerName={developerName} appName={appName} countryCode={metaCountry} />

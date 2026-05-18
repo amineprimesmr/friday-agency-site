@@ -105,9 +105,6 @@ export function AppCreatives({
             </div>
           ))}
         </div>
-        <p className="mt-2 text-[11px] text-white/25">
-          Estimations basées sur la présence dans les classements et la catégorie de l&apos;app.
-        </p>
       </div>
     </div>
   );

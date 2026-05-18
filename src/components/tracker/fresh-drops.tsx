@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import { TrackerNavLink } from "@/components/tracker/tracker-navigation";
 import type { AppEntry } from "@/lib/apple-charts";
 
 function formatDate(dateStr: string) {
@@ -42,7 +42,7 @@ export function FreshDrops({ apps }: { apps: AppEntry[] }) {
                 style={{ animationDelay: `${Math.min(i, 20) * 34}ms` }}
               >
                 <td className="px-4 py-3">
-                  <Link
+                  <TrackerNavLink
                     href={`/tracker/apps/${app.id}`}
                     className="tracker-touch flex items-center gap-3 hover:underline"
                   >
@@ -65,7 +65,7 @@ export function FreshDrops({ apps }: { apps: AppEntry[] }) {
                     <span className="line-clamp-1 text-sm font-medium text-white/80 group-hover:text-white">
                       {app.name}
                     </span>
-                  </Link>
+                  </TrackerNavLink>
                 </td>
                 <td className="hidden px-4 py-3 text-xs text-white/45 sm:table-cell">
                   {app.artistName}

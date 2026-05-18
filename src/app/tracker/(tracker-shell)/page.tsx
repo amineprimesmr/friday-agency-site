@@ -1,11 +1,6 @@
 import type { Metadata } from "next";
-import {
-  fetchTopCharts,
-  COUNTRY_MAP,
-  TRACKER_DEFAULT_COUNTRY,
-  type CountryCode,
-  type MultiCountryApp,
-} from "@/lib/apple-charts";
+import { Suspense } from "react";
+import { getTrackerHeroApps } from "@/lib/tracker-server-cache";
 import { TopMoversGrid } from "@/components/tracker/top-movers-grid";
 import { BuildNextShowcase } from "@/components/tracker/build-next-showcase";
 import { MyfidLaunchStepsSection } from "@/components/tracker/myfid-launch-steps-section";
@@ -13,10 +8,19 @@ import { MyfidThreeStepsSection } from "@/components/tracker/myfid-three-steps-s
 import { HeroAppIconRotator } from "@/components/tracker/hero-app-icon-rotator";
 import { TrackerHeroTrackappCtas } from "@/components/tracker/tracker-hero-trackapp-ctas";
 import { TrackerSaleNotificationsStack } from "@/components/tracker/tracker-sale-notifications-stack";
-import { listAppShowcaseVideoItems } from "@/lib/app-videos";
+import {
+  listAppShowcaseVideoItemsEnriched,
+  listAppShowcaseVideoItemsFallbackEnriched,
+} from "@/lib/showcase-app-videos-enrich";
 
 const TRACKER_ANCHOR_SCROLL =
   "scroll-mt-[calc(var(--tracker-header-offset)+1rem)]";
+
+/** Au-delà de ce délai, on affiche les CA dérivés localement pour ne pas laisser `/tracker` en chargement infini. */
+const SHOWCASE_ENRICH_BUDGET_MS = 8000;
+
+/** Filet de sécurité si `unstable_cache` / réseau reste bloqué au-delà du timeout fetch RSS (12s). */
+const HERO_APPS_BUDGET_MS = 15_000;
 
 export const metadata: Metadata = {
   title: "App Store Tracker — Copiez une app et monétisez-la",
@@ -24,45 +28,41 @@ export const metadata: Metadata = {
 
 export const revalidate = 900;
 
-const DASHBOARD_COUNTRIES: CountryCode[] = ["fr", "gb", "de", "jp", "br", "mx"];
-
-type DashboardData = Awaited<ReturnType<typeof getDashboardDataCore>>;
-
-async function getDashboardDataCore() {
-  const countryResults = await Promise.all(
-    DASHBOARD_COUNTRIES.map((c) =>
-      fetchTopCharts(c, "top-free", 6).then((apps) =>
-        apps.map(
-          (app): MultiCountryApp => ({
-            ...app,
-            country: c,
-            flag: COUNTRY_MAP[c]?.flag ?? "🌐",
-          }),
-        ),
-      ),
-    ),
+function TopMoversGridSkeleton() {
+  return (
+    <section aria-busy="true" aria-label="Chargement de la sélection d'apps" className="mx-auto max-w-xl sm:max-w-2xl">
+      <div className="tracker-shimmer mx-auto mb-8 h-8 w-64 rounded-lg" aria-hidden />
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        {Array.from({ length: 6 }, (_, i) => (
+          <div key={i} className="tracker-shimmer aspect-[4/5] rounded-2xl opacity-80" style={{ animationDelay: `${i * 40}ms` }} />
+        ))}
+      </div>
+    </section>
   );
-
-  const topMoversGrid: MultiCountryApp[] = countryResults.flat();
-
-  return { topMoversGrid };
-}
-
-/** Données classements : ne fait jamais planter la page (réseau / Apple / cache Turbopack). */
-async function getDashboardData(): Promise<DashboardData> {
-  try {
-    return await getDashboardDataCore();
-  } catch (err) {
-    console.error("[tracker] getDashboardData:", err);
-    return { topMoversGrid: [] };
-  }
 }
 
 export default async function TrackerDashboard() {
-  const { topMoversGrid } = await getDashboardData();
-  const appShowcaseVideos = listAppShowcaseVideoItems();
-
-  const heroApps = topMoversGrid.filter((a) => a.country === TRACKER_DEFAULT_COUNTRY).slice(0, 3);
+  const heroApps = await Promise.race([
+    getTrackerHeroApps().catch((err) => {
+      console.error("[tracker] getTrackerHeroApps:", err);
+      return [] as Awaited<ReturnType<typeof getTrackerHeroApps>>;
+    }),
+    new Promise<Awaited<ReturnType<typeof getTrackerHeroApps>>>((resolve) =>
+      setTimeout(() => resolve([]), HERO_APPS_BUDGET_MS),
+    ),
+  ]);
+  const appShowcaseVideos = await Promise.race([
+    listAppShowcaseVideoItemsEnriched().catch((err) => {
+      console.error("[tracker] listAppShowcaseVideoItemsEnriched:", err);
+      return listAppShowcaseVideoItemsFallbackEnriched();
+    }),
+    new Promise<Awaited<ReturnType<typeof listAppShowcaseVideoItemsEnriched>>>((resolve) =>
+      setTimeout(
+        () => resolve(listAppShowcaseVideoItemsFallbackEnriched()),
+        SHOWCASE_ENRICH_BUDGET_MS,
+      ),
+    ),
+  ]);
 
   return (
     <>
@@ -106,7 +106,9 @@ export default async function TrackerDashboard() {
       </div>
 
       <div className="mx-auto max-w-7xl space-y-10 px-4 py-10 sm:px-6">
-        <TopMoversGrid />
+        <Suspense fallback={<TopMoversGridSkeleton />}>
+          <TopMoversGrid />
+        </Suspense>
       </div>
 
       <MyfidLaunchStepsSection />

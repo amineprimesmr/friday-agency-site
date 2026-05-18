@@ -8,8 +8,7 @@ const SHORTCUT_URL =
 
 export const metadata: Metadata = {
   title: "Raccourci iOS — Trackapp",
-  description:
-    "Ouvre directement le raccourci iOS sur iPhone — sinon affiche un QR à scanner.",
+  description: "Scanne le QR code avec ton iPhone pour ouvrir le raccourci Trackapp.",
 };
 
 function isMobileUserAgent(ua: string | null): boolean {
@@ -29,20 +28,13 @@ export default async function WidgetPage() {
     type: "svg",
     margin: 1,
     errorCorrectionLevel: "M",
-    width: 360,
+    width: 280,
     color: { dark: "#000000", light: "#ffffff" },
   });
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-6 bg-black p-8">
-      <div
-        className="rounded-2xl bg-white p-5 shadow-2xl"
-        aria-label="QR code vers le raccourci iOS"
-        dangerouslySetInnerHTML={{ __html: qrSvg }}
-      />
-      <p className="max-w-xs text-center text-sm text-white/70">
-        Scanne ce QR code avec ton iPhone pour ouvrir le raccourci
-      </p>
+    <div className="flex min-h-dvh items-center justify-center bg-white">
+      <div dangerouslySetInnerHTML={{ __html: qrSvg }} aria-label="QR code raccourci iOS" />
     </div>
   );
 }

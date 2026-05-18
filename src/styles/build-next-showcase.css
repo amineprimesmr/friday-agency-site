@@ -1,11 +1,272 @@
-/* Scroll horizontal mobile : pas de scrollbar visible */
-@media (max-width: 767.98px) {
-  .build-next-scroller {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+/* Bloc titre — même hiérarchie visuelle que le hero affiliation (Trendtrack) */
+.build-next-hero {
+  position: relative;
+  margin: 0 calc(-50vw + 50%) 0;
+  width: 100vw;
+  max-width: 100vw;
+  /* Gouttière alignée usages type container (cf. Tailwind px-4 → px-6 → ~px-8) */
+  padding: clamp(2.25rem, 7vw, 4.25rem) clamp(1.5rem, 4.2vw + 0.85rem, 5rem)
+    clamp(2rem, 6vw, 3.5rem);
+  text-align: left;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.build-next-hero--contained {
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+  padding-inline: 0;
+  box-sizing: border-box;
+}
+
+.build-next-hero--align-center {
+  text-align: center;
+}
+
+.build-next-hero--align-center .build-next-hero-inner {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.build-next-hero--align-center .build-next-hero-title__sub {
+  justify-content: center;
+}
+
+.build-next-hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 44rem;
+  margin: 0;
+}
+
+/* Typo du badge : tracker-bracket-badge.css (import via tracker-ux) */
+.build-next-hero-kicker {
+  margin: 0 0 1rem;
+}
+
+.build-next-hero-title {
+  margin: 0;
+  font-size: clamp(2.15rem, 6.5vw, 3.35rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+  color: #ffffff;
+}
+
+.build-next-hero-title__sub {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  margin-top: 0;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(0.92rem, 2.6vw, 1.08rem);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.build-next-hero-title + .build-next-hero-title__sub {
+  margin-top: 0.55rem;
+}
+
+.build-next-hero-title__sub--above-title {
+  margin-bottom: 0.4rem;
+}
+
+.build-next-hero-title__sub--above-title + .build-next-hero-title {
+  margin-top: 0;
+}
+
+/* Showcase vidéos : moins d’air sous le bloc titre avant le carrousel */
+.build-next-hero--compact-carousel {
+  padding-top: clamp(1.65rem, 5vw, 2.85rem);
+  padding-bottom: clamp(0.55rem, 2vw, 1rem);
+}
+
+.build-next-hero-tagline {
+  margin: 0.75rem 0 0;
+  font-size: clamp(1rem, 2.85vw, 1.38rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.build-next-hero-tagline + .build-next-hero-title__sub {
+  margin-top: 0.45rem;
+}
+
+.build-next-hero-status-dot {
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: rgb(74 222 128);
+  box-shadow: 0 0 10px rgb(74 222 128 / 0.45);
+  animation: build-next-hero-dot-blink 1.15s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .build-next-hero-status-dot {
+    animation: none;
+  }
+}
+
+@keyframes build-next-hero-dot-blink {
+  0%,
+  100% {
+    opacity: 1;
   }
 
-  .build-next-scroller::-webkit-scrollbar {
-    display: none;
+  50% {
+    opacity: 0.28;
+  }
+}
+
+/* Carrousel vidéos — ruban horizontal unique, défilement JS (boucle avec piste doublée) */
+.build-next-carousel {
+  width: 100%;
+}
+
+.build-next-carousel__track {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: flex-start;
+  gap: clamp(1.15rem, 3vw, 1.75rem);
+  padding-bottom: 0.4rem;
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.build-next-carousel__track::-webkit-scrollbar {
+  display: none;
+}
+
+/* Bandeau bas : dégradé noir très étendu, typo lisible sur vidéo */
+.build-next-video-foot {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 72%;
+  padding: 0 0.7rem 0.55rem;
+}
+
+@media (min-width: 640px) {
+  .build-next-video-foot {
+    padding: 0 0.8rem 0.62rem;
+  }
+}
+
+.build-next-video-foot__gradient {
+  position: absolute;
+  inset: 0;
+  top: 0;
+  background: linear-gradient(
+    to top,
+    #000000 0%,
+    #000000 32%,
+    rgba(0, 0, 0, 0.96) 48%,
+    rgba(0, 0, 0, 0.68) 62%,
+    rgba(0, 0, 0, 0.28) 80%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  pointer-events: none;
+}
+
+.build-next-video-foot__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-align: left;
+  padding-top: 2rem;
+}
+
+.build-next-video-foot__head {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.build-next-video-foot__icon-ring {
+  position: relative;
+  flex-shrink: 0;
+  width: 2.45rem;
+  height: 2.45rem;
+  overflow: hidden;
+  border-radius: 0.65rem;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 0 1px rgb(255 255 255 / 0.18),
+    0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.build-next-video-foot__title {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-size: 0.94rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  color: rgba(255, 255, 255, 0.99);
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.55),
+    0 10px 28px rgba(0, 0, 0, 0.52);
+}
+
+@media (min-width: 640px) {
+  .build-next-video-foot__title {
+    font-size: 1.02rem;
+  }
+}
+
+.build-next-video-foot__money {
+  margin: 0;
+  font-size: clamp(1.22rem, 4.95vw, 1.92rem);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1.06;
+  font-variant-numeric: tabular-nums;
+  color: #fafafa;
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.75),
+    0 16px 44px rgba(0, 0, 0, 0.58);
+}
+
+.build-next-video-foot__updated {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.42rem;
+  margin: 0;
+  padding-top: 0.05rem;
+  font-size: 0.615rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.52);
+}
+
+.build-next-video-foot__status-dot {
+  flex-shrink: 0;
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 9999px;
+  background: rgb(74 222 128);
+  box-shadow: 0 0 8px rgb(74 222 128 / 0.5);
+  animation: build-next-hero-dot-blink 1.15s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .build-next-video-foot__status-dot {
+    animation: none;
   }
 }

@@ -6,7 +6,7 @@ import {
   searchApps,
   COUNTRY_MAP,
   estimateMonthlyDownloads,
-  estimateMonthlyRevenue,
+  formatEstimatedMonthlyRevenuePrecise,
   formatRatingCount,
   normalizeTrackerCountryParam,
 } from "@/lib/apple-charts";
@@ -206,7 +206,9 @@ export default async function DeveloperPage({ params, searchParams }: PageProps)
                     <span className="text-[11px] text-white/30">{formatRatingCount(app.userRatingCount)} avis</span>
                   )}
                   <span className="text-[11px] text-violet-300">{estimateMonthlyDownloads(i + 1, country)}/mois</span>
-                  <span className="text-[11px] text-emerald-300">{estimateMonthlyRevenue(i + 1, app.price, app.categoryId, country)}/mois</span>
+                  <span className="text-[11px] text-emerald-300">
+                    {formatEstimatedMonthlyRevenuePrecise(i + 1, app.price, app.categoryId, country, app.id)}/mois
+                  </span>
                 </div>
               </div>
             </TrackerNavLink>

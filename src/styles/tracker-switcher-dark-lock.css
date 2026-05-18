@@ -27,19 +27,18 @@
   max-width: min(28rem, calc(100vw - 2rem));
   padding: 8px 8px;
   gap: 4px;
-  font-family: "DM Sans", system-ui, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
   font-size: var(--fz);
   z-index: 900;
-  will-change: backdrop-filter;
   transform: translateZ(0);
   box-sizing: border-box;
   isolation: isolate;
 
   align-items: stretch;
-  -webkit-backdrop-filter: blur(var(--tracker-glass-blur))
-    url(#tracker-liquid-glass-fr)
-    saturate(var(--saturation));
-  backdrop-filter: blur(var(--tracker-glass-blur)) url(#tracker-liquid-glass-fr) saturate(var(--saturation));
+  -webkit-backdrop-filter: blur(var(--tracker-glass-blur)) saturate(var(--saturation))
+    url(#tracker-liquid-glass-fr);
+  backdrop-filter: blur(var(--tracker-glass-blur)) saturate(var(--saturation))
+    url(#tracker-liquid-glass-fr);
   background-color: color-mix(in srgb, var(--c-glass) 14%, transparent);
 }
 
@@ -88,8 +87,8 @@
   border-radius: 99em;
 
   /** Pastille sélection : même famille de filtres mais plus doux pour limiter les artefacts sur une zone étroite */
-  -webkit-backdrop-filter: blur(14px) url(#tracker-liquid-glass-fr) saturate(138%);
-  backdrop-filter: blur(14px) url(#tracker-liquid-glass-fr) saturate(138%);
+  -webkit-backdrop-filter: blur(14px) saturate(138%) url(#tracker-liquid-glass-fr);
+  backdrop-filter: blur(14px) saturate(138%) url(#tracker-liquid-glass-fr);
 
   background-color: color-mix(in srgb, var(--c-glass) 40%, transparent);
 

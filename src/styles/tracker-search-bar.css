@@ -4,8 +4,21 @@
   --c-glass: #bbbbbc;
   --c-light: #fff;
   --c-dark: #000;
+  --glass-reflex-dark: 2;
+  --glass-reflex-light: 0.3;
   --saturation: 155%;
   --tracker-glass-blur: 26px;
+}
+
+/* Filtre SVG hors flux ; définit #tracker-liquid-glass-fr pour backdrop-filter (Chromium). */
+.tracker-liquid-glass-filter-svg {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .tracker-search-fixed {
@@ -21,6 +34,25 @@
   pointer-events: none;
 }
 
+/* Recherche ouverte depuis le header — sous la barre, au-dessus du contenu */
+.tracker-search-under-header {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: var(--tracker-header-offset, calc(4rem + env(safe-area-inset-top, 0px)));
+  z-index: 915;
+  display: flex;
+  justify-content: center;
+  padding-left: max(1rem, env(safe-area-inset-left, 0px));
+  padding-right: max(1rem, env(safe-area-inset-right, 0px));
+  padding-bottom: 0.75rem;
+  pointer-events: none;
+}
+
+.tracker-search-under-header .tracker-search-stack {
+  width: min(28rem, calc(100vw - 2rem));
+}
+
 .tracker-search-stack {
   pointer-events: auto;
   position: relative;
@@ -28,9 +60,70 @@
   touch-action: manipulation;
 }
 
-/* Pilule glass — thème sombre (défaut) */
+.tracker-search-desktop-host {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  pointer-events: none;
+}
+
+.tracker-search-desktop-host .tracker-search-stack {
+  pointer-events: auto;
+  width: 100%;
+  max-width: none;
+}
+
+.tracker-search-stack--desktop {
+  width: 100%;
+}
+
+.tracker-search-desktop-host .tracker-search-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 10px);
+  z-index: 940;
+  width: 100%;
+  max-height: min(70vh, 520px);
+}
+
+/* Pilule liquid glass — aligné fooontic / kube.io (feDisplacementMap via url(#tracker-liquid-glass-fr)) */
+button.tracker-search-pill.tracker-search-pill--trigger {
+  width: 100%;
+  margin: 0;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+}
+
+button.tracker-search-pill.tracker-search-pill--trigger:focus-visible {
+  outline: 2px solid rgba(200, 255, 61, 0.55);
+  outline-offset: 2px;
+}
+
+.tracker-search-pill-placeholder {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.52);
+  pointer-events: none;
+  user-select: none;
+}
+
+.tracker-switcher-host[data-search-surface="light"] .tracker-search-pill-placeholder {
+  color: rgba(10, 10, 10, 0.55);
+}
+
 .tracker-search-pill {
-  font-family: "DM Sans", system-ui, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -38,24 +131,39 @@
   padding: 8px 16px;
   box-sizing: border-box;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background-color: color-mix(in srgb, var(--c-glass) 14%, transparent);
-  -webkit-backdrop-filter: blur(var(--tracker-glass-blur)) saturate(var(--saturation));
-  backdrop-filter: blur(var(--tracker-glass-blur)) saturate(var(--saturation));
+  border: none;
+  /* Pas will-change: backdrop-filter — peut réduire la zone d’échantillon du backdrop en Chromium (effet « blob » au centre). */
+  transform: translateZ(0);
+  background-color: color-mix(in srgb, var(--c-glass) 12%, transparent);
+  /* Ordre : flou/sat puis réfraction SVG (Chrome). */
+  -webkit-backdrop-filter: blur(var(--tracker-glass-blur)) saturate(var(--saturation))
+    url(#tracker-liquid-glass-fr);
+  backdrop-filter: blur(var(--tracker-glass-blur)) saturate(var(--saturation))
+    url(#tracker-liquid-glass-fr);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-    0 8px 28px rgba(0, 0, 0, 0.35);
+    inset 0 0 0 1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 10%), transparent),
+    inset 1.8px 3px 0 -2px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 90%), transparent),
+    inset -2px -2px 0 -2px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 80%), transparent),
+    inset -3px -8px 1px -6px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 60%), transparent),
+    inset -0.3px -1px 4px 0 color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 12%), transparent),
+    inset -1.5px 2.5px 0 -2px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 20%), transparent),
+    inset 0 3px 4px -2px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 20%), transparent),
+    inset 2px -6.5px 1px -4px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
+    0 1px 5px 0 color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
+    0 6px 16px 0 color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 8%), transparent);
 }
 
 /* Variante lecture sur fond clair — texte / icônes foncés */
 .tracker-switcher-host[data-search-surface="light"] .tracker-search-pill {
-  border-color: rgba(0, 0, 0, 0.1);
-  background-color: rgba(255, 255, 255, 0.78);
-  -webkit-backdrop-filter: blur(22px) saturate(var(--saturation));
-  backdrop-filter: blur(22px) saturate(var(--saturation));
+  background-color: color-mix(in srgb, var(--c-light) 78%, transparent);
+  -webkit-backdrop-filter: blur(22px) saturate(var(--saturation)) url(#tracker-liquid-glass-fr);
+  backdrop-filter: blur(22px) saturate(var(--saturation)) url(#tracker-liquid-glass-fr);
   box-shadow:
-    inset 0 0 0 1px rgba(0, 0, 0, 0.06),
-    0 6px 20px rgba(0, 0, 0, 0.12);
+    inset 0 0 0 1px color-mix(in srgb, var(--c-dark) 6%, transparent),
+    inset 1.2px 2px 0 -1px color-mix(in srgb, var(--c-light) 70%, transparent),
+    inset -1.5px -1.5px 0 -1px color-mix(in srgb, var(--c-dark) 8%, transparent),
+    0 1px 4px 0 color-mix(in srgb, var(--c-dark) 10%, transparent),
+    0 6px 18px 0 color-mix(in srgb, var(--c-dark) 8%, transparent);
 }
 
 .tracker-search-icon {
@@ -78,7 +186,7 @@
   border-radius: 0;
   background: transparent !important;
   color: rgba(255, 255, 255, 0.96);
-  font-family: "DM Sans", system-ui, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
   font-size: 16px !important;
   font-weight: 500;
   letter-spacing: 0.01em;
@@ -99,6 +207,27 @@
 
 .tracker-switcher-host[data-search-surface="light"] .tracker-search-input::placeholder {
   color: rgba(10, 10, 10, 0.38);
+}
+
+/* Trackapp accueil — contraste renforcé (texte et placeholder foncés) */
+.trackapp-accueil-search-host[data-search-surface="light"] .tracker-search-input {
+  color: #0a0a0a;
+  caret-color: #0a0a0a;
+}
+
+.trackapp-accueil-search-host[data-search-surface="light"] .tracker-search-input::placeholder {
+  color: #0a0a0a;
+  opacity: 0.62;
+}
+
+.trackapp-accueil-search-host[data-search-surface="light"] .tracker-search-icon {
+  color: #0a0a0a;
+}
+
+.trackapp-accueil-search-host[data-search-surface="light"] .tracker-search-input:-webkit-autofill,
+.trackapp-accueil-search-host[data-search-surface="light"] .tracker-search-input:-webkit-autofill:hover,
+.trackapp-accueil-search-host[data-search-surface="light"] .tracker-search-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #0a0a0a;
 }
 
 .tracker-search-input:-webkit-autofill,
@@ -125,10 +254,31 @@
 .tracker-search-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 898;
-  background: rgba(0, 0, 0, 0.4);
+  z-index: 910;
+  background: rgba(0, 0, 0, 0.45);
   pointer-events: auto;
   -webkit-tap-highlight-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tracker-search-backdrop {
+    animation: none;
+  }
+}
+
+@keyframes tracker-search-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tracker-search-backdrop {
+    animation: tracker-search-backdrop-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
 }
 
 /* Panneau type “store” — fond clair, texte foncé */
@@ -294,4 +444,295 @@
 
 .tracker-search-panel-footer a:hover {
   text-decoration: underline;
+}
+
+/* ── Panneau recherche sombre (instantané + résultats type App Store Tracker) ── */
+
+.tracker-search-panel--dark {
+  background: #121212;
+  color: #fafafa;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.tracker-search-panel--dark .tracker-search-row {
+  border-bottom-color: rgba(255, 255, 255, 0.07);
+}
+
+.tracker-search-panel--dark .tracker-search-row:hover,
+.tracker-search-panel--dark .tracker-search-row:focus-visible {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tracker-search-row--active {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.tracker-search-row-main--grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.tracker-search-row-headline {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.tracker-search-row-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  max-width: 46%;
+}
+
+@media (max-width: 520px) {
+  .tracker-search-row-headline {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .tracker-search-row-badges {
+    max-width: none;
+    justify-content: flex-start;
+  }
+}
+
+.tracker-search-row-title--dark {
+  color: #fafafa;
+}
+
+.tracker-search-row-dev--dark {
+  color: #a1a1aa;
+}
+
+.tracker-search-chip--dark {
+  background: rgba(255, 255, 255, 0.08);
+  color: #d4d4d8;
+}
+
+.tracker-search-meta--dark {
+  color: #888888;
+}
+
+.tracker-search-stat-col--dark {
+  gap: 4px;
+}
+
+.tracker-search-stat-num--dark {
+  color: #ffffff;
+}
+
+.tracker-search-stat-sub--dark {
+  color: #71717a;
+}
+
+.tracker-search-chevron--dark {
+  color: #52525b;
+}
+
+.tracker-search-panel-footer--dark {
+  padding: 12px 14px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.tracker-search-kbd-hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  justify-content: center;
+  font-size: 11px;
+  color: #71717a;
+  margin-bottom: 10px;
+}
+
+.tracker-kbd-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+kbd.tracker-kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #a1a1aa;
+}
+
+.tracker-search-advanced-link {
+  display: block;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #93c5fd;
+  text-decoration: none;
+}
+
+.tracker-search-advanced-link:hover {
+  text-decoration: underline;
+}
+
+/* Skeleton shimmer (dès la frappe) */
+
+@keyframes tracker-search-skel-wave {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.tracker-search-row--skeleton {
+  pointer-events: none;
+}
+
+.tracker-search-skel-icon {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.14) 45%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  background-size: 220% 100%;
+  animation: tracker-search-skel-wave 1.15s ease-in-out infinite;
+}
+
+.tracker-search-skel-line,
+.tracker-search-skel-pill {
+  min-height: 11px;
+  height: 11px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.11) 42%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  background-size: 220% 100%;
+  animation: tracker-search-skel-wave 1.05s ease-in-out infinite;
+}
+
+.tracker-search-skel-pill {
+  height: 22px;
+  border-radius: 999px;
+}
+
+/* ── Recherche mobile : overlay plein écran + colonne résultats (above header z-920) */
+.tracker-mobile-search-backdrop-fixed {
+  position: fixed;
+  inset: 0;
+  z-index: 938;
+  margin: 0;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  background: rgba(5, 5, 10, 0.5);
+  -webkit-backdrop-filter: blur(18px) saturate(145%);
+  backdrop-filter: blur(18px) saturate(145%);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tracker-mobile-search-sheet-fixed {
+  position: fixed;
+  inset: 0;
+  z-index: 939;
+  display: flex;
+  flex-direction: column;
+  padding-left: max(12px, env(safe-area-inset-left, 0px));
+  padding-right: max(12px, env(safe-area-inset-right, 0px));
+  padding-top: max(8px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(14px, env(safe-area-inset-bottom, 0px));
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.tracker-mobile-search-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tracker-mobile-search-sheet-fixed .tracker-mobile-search-body {
+  pointer-events: auto;
+  width: min(600px, 100%);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Croix fermeture dans la pilule — mobile uniquement (rendu depuis TSX) */
+.tracker-search-pill-dismiss {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: -4px -4px -4px -2px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tracker-search-pill-dismiss:active {
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tracker-switcher-host[data-search-surface="light"] .tracker-search-pill-dismiss {
+  color: rgba(10, 10, 10, 0.45);
+}
+
+.tracker-switcher-host[data-search-surface="light"] .tracker-search-pill-dismiss:active {
+  color: rgba(10, 10, 10, 0.9);
+  background: rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tracker-mobile-search-sheet-fixed {
+    overscroll-behavior: auto;
+  }
+}
+
+.tracker-search-stack--mobile-takeover {
+  width: 100% !important;
+  max-width: none !important;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.tracker-search-stack--mobile-takeover .tracker-search-pill {
+  flex-shrink: 0;
+}
+
+@media (max-width: 1023px) {
+  .tracker-search-stack--mobile-takeover .tracker-search-panel {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    width: 100%;
+    flex: 1;
+    margin-top: 10px;
+    min-height: 200px;
+    max-height: min(calc(100dvh - 160px), 560px);
+    animation: none;
+  }
 }

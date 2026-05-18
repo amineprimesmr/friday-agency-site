@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
+import { TrackerNavLink } from "@/components/tracker/tracker-navigation";
 import {
   COUNTRIES,
   CHART_TYPES,
@@ -130,7 +130,7 @@ export function AppTable({ apps, country, chart, category }: Props) {
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <Link
+                  <TrackerNavLink
                     href={`/tracker/apps/${app.id}?country=${country}`}
                     className="tracker-touch flex items-center gap-3"
                   >
@@ -158,7 +158,7 @@ export function AppTable({ apps, country, chart, category }: Props) {
                         {app.artistName}
                       </p>
                     </div>
-                  </Link>
+                  </TrackerNavLink>
                 </td>
                 <td className="hidden px-4 py-3 text-xs text-white/50 md:table-cell">
                   {app.artistName}

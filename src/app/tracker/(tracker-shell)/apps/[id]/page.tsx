@@ -4,14 +4,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TrackerNavLink } from "@/components/tracker/tracker-navigation";
 import {
-  fetchAppDetail,
-  fetchCountryRankings,
   COUNTRY_MAP,
   rankPresencePercent,
   formatRatingCount,
   formatBytes,
   estimateMonthlyDownloads,
-  estimateMonthlyRevenue,
+  formatEstimatedMonthlyRevenuePrecise,
   timeAgo,
   daysSince,
   normalizeTrackerCountryParam,
@@ -19,7 +17,12 @@ import {
   type CountryRanking,
   type AppEntry,
 } from "@/lib/apple-charts";
-import { loadTrackerAppEmbedContext } from "@/lib/tracker-app-embed-data";
+import { AppAdIntelligenceSection } from "@/components/tracker/app-ad-intelligence-section";
+import {
+  fetchAppDetailCached,
+  fetchCountryRankingsCached,
+  loadTrackerAppEmbedContextCached,
+} from "@/lib/tracker-server-cache";
 import {
   buildAppStoreTrackerSimilarEmbedSrc,
   buildEmbedCountriesIframeSrc,
@@ -28,12 +31,6 @@ import {
 import { AppMetricCards } from "@/components/tracker/app-metric-cards";
 import { AppScreenshots } from "@/components/tracker/app-screenshots";
 import { AppCreatives } from "@/components/tracker/app-creatives";
-import { AdIntelligenceHub, SimilarShopsCarousel } from "@/components/tracker/ad-intelligence-hub";
-import { extractSocialProfiles } from "@/lib/social-presence";
-import type { AdIntelPlatform } from "@/components/tracker/app-ads";
-
-/** Meta (Ad Library) + TikTok Research API (Commercial Content / ad lib) — clés dans .env.local. */
-const AD_INTEL_PLATFORMS_PHASE1: AdIntelPlatform[] = ["meta", "tiktok"];
 import { AppTabs } from "@/components/tracker/app-tabs";
 import { Suspense } from "react";
 
@@ -46,7 +43,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const app = await fetchAppDetail(id);
+  const app = await fetchAppDetailCached(id);
   if (!app) return {};
   return {
     title: `${app.name} — App Store Tracker`,
@@ -117,7 +114,7 @@ function CountryRankingsPanelSkeleton() {
 }
 
 async function CountryRankingsAside({ appId }: { appId: string }) {
-  const countryRankings = await fetchCountryRankings(appId);
+  const countryRankings = await fetchCountryRankingsCached(appId);
   const rankedCount = countryRankings.filter((r) => r.rank !== null).length;
   return <CountryRankingsPanel rankings={countryRankings} rankedCount={rankedCount} />;
 }
@@ -223,7 +220,7 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
   const country = normalizeTrackerCountryParam(sp.country);
   const tab = sp.tab ?? "overview";
 
-  const ctx = await loadTrackerAppEmbedContext(id, country as CountryCode);
+  const ctx = await loadTrackerAppEmbedContextCached(id, country as CountryCode);
   if (!ctx) notFound();
 
   const {
@@ -256,8 +253,6 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
     app.currentVersionReleaseDate && app.averageUserRating > 0
       ? shortFreshnessBadge(app.currentVersionReleaseDate)
       : undefined;
-
-  const detectedSocial = extractSocialProfiles(app.description, app.releaseNotes ?? "");
 
   return (
     <div className="mx-auto max-w-[1380px] px-4 py-8 sm:px-6">
@@ -418,9 +413,15 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
             downloadsSourceAccent={useAggregateMetrics}
             revenueMain={
               useAggregateMetrics && agg
-                ? agg.revenueString.toUpperCase()
+                ? agg.revenueString
                 : overallRank !== null
-                  ? estimateMonthlyRevenue(overallRank, app.price, app.primaryGenreId, country)
+                  ? formatEstimatedMonthlyRevenuePrecise(
+                      overallRank,
+                      app.price,
+                      app.primaryGenreId,
+                      country,
+                      id,
+                    )
                   : "—"
             }
             revenueSubtitle="/mois"
@@ -458,22 +459,16 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
           )}
 
           {activeTab === "ads" && (
-            <div className="space-y-6">
-              <AdIntelligenceHub
-                appName={app.name}
-                developerName={app.sellerName || app.artistName}
-                bundleId={app.bundleId}
-                countryCode={country}
-                detectedSocial={detectedSocial}
-                enabledPlatforms={AD_INTEL_PLATFORMS_PHASE1}
-              />
-              <SimilarShopsCarousel
-                apps={sidebarApps}
-                currentId={id}
-                country={country}
-                categoryLabel={`${app.primaryGenreName} · même classement`}
-              />
-            </div>
+            <Suspense
+              fallback={
+                <div className="space-y-4" aria-busy="true">
+                  <div className="tracker-shimmer h-40 w-full rounded-2xl" />
+                  <div className="tracker-shimmer h-56 w-full rounded-2xl opacity-80" />
+                </div>
+              }
+            >
+              <AppAdIntelligenceSection app={app} appId={id} country={country as CountryCode} sidebarApps={sidebarApps} />
+            </Suspense>
           )}
         </div>
 

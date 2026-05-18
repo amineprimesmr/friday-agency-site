@@ -1,13 +1,8 @@
-import { Inter } from "next/font/google";
+import { TrackerSaleNotificationsStack } from "@/components/tracker/tracker-sale-notifications-stack";
 
 import "@/styles/myfid-launch-steps.css";
 
-const interLaunch = Inter({
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const DEFAULT_CTA_HREF = "/trackapp";
+const DEFAULT_CTA_HREF = "/trackapp/inscription";
 
 /** Section « Lancez-vous rapidement » — même structure HTML / classes que la landing myfidpass. */
 export function MyfidLaunchStepsSection({
@@ -18,27 +13,17 @@ export function MyfidLaunchStepsSection({
   return (
     <section
       id="lancez-vous-rapidement"
-      className={`landing-launch-sf scroll-mt-[calc(5.75rem+env(safe-area-inset-top,0px)+1rem)] max-md:scroll-mt-[calc(6.375rem+env(safe-area-inset-top,0px)+1rem)] ${interLaunch.className}`}
+      className="landing-launch-sf scroll-mt-[calc(var(--tracker-header-offset)+1rem)]"
       aria-labelledby="landing-launch-heading"
     >
       <div className="landing-launch-sf-inner">
         <h2 id="landing-launch-heading" className="landing-launch-sf-heading">
           Lancez-vous rapidement
         </h2>
-        <div className="landing-launch-sf-grid">
-          <div className="landing-launch-sf-visual" aria-hidden="true">
-            <figure className="landing-launch-sf-fig landing-launch-sf-fig--primary">
-              <img
-                className="landing-launch-sf-img"
-                src="/assets/iphone-myfid-launch.png"
-                width={400}
-                height={530}
-                loading="lazy"
-                decoding="async"
-                alt=""
-              />
-            </figure>
-          </div>
+        <div className="landing-launch-sf-notifs">
+          <TrackerSaleNotificationsStack className="pb-6 pt-0" />
+        </div>
+        <div className="landing-launch-sf-grid landing-launch-sf-grid--solo">
           <div className="landing-launch-sf-steps-wrap">
             <ol className="landing-launch-sf-list">
               <li className="landing-launch-sf-row">
@@ -61,7 +46,7 @@ export function MyfidLaunchStepsSection({
               </li>
             </ol>
             <a className="landing-launch-sf-cta" href={ctaHref}>
-              Découvrir Trackapp
+              Ouvrir le workspace
             </a>
           </div>
         </div>

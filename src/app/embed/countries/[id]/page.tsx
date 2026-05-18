@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { EmbedCountriesShell } from "@/components/tracker/embed-countries-shell";
-import { fetchAppDetail, fetchCountryRankings, type CountryCode } from "@/lib/apple-charts";
+import { fetchAppDetail, fetchCountryRankings } from "@/lib/apple-charts";
+import { parseEmbedCountry } from "@/lib/tracker-app-embed-data";
 import { normalizeEmbedTheme, normalizeEmbedView } from "@/lib/embed-url";
 
 export const revalidate = 900;
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 
 interface PageProps {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ theme?: string; view?: string }>;
+  searchParams: Promise<{ theme?: string; view?: string; country?: string }>;
 }
 
 export default async function EmbedCountriesPage({ params, searchParams }: PageProps) {
@@ -22,9 +23,10 @@ export default async function EmbedCountriesPage({ params, searchParams }: PageP
 
   const theme = normalizeEmbedTheme(sp.theme ?? "system");
   const view = normalizeEmbedView(sp.view);
+  const country = parseEmbedCountry(sp.country);
 
   const [app, rankings] = await Promise.all([
-    fetchAppDetail(id, "us" as CountryCode),
+    fetchAppDetail(id, country),
     fetchCountryRankings(id),
   ]);
 
