@@ -245,7 +245,7 @@ export function TrackappPaymentPage() {
           {error ? <p className="saas-pay-feedback is-error">{error}</p> : null}
 
           <button type="button" className="saas-pay-continue" onClick={beginCheckout} disabled={busy}>
-            <span className="saas-pay-continue-label">{busy ? "Chargement du paiement..." : "Commencer pour 1€"}</span>
+            <span className="saas-pay-continue-label">{busy ? "Chargement du paiement..." : "Commencer maintenant"}</span>
           </button>
         </section>
       </main>

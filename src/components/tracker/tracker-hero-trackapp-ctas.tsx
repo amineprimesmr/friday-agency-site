@@ -9,7 +9,7 @@ export function TrackerHeroTrackappCtas() {
   return (
     <div className="mt-10 flex flex-col items-center px-2 sm:mt-11">
       <Link href="/trackapp/paiement" className="tracker-hero-liquidglass">
-        <span className="tracker-hero-liquidglass__label">Commencer pour 1&nbsp;€</span>
+        <span className="tracker-hero-liquidglass__label">Commencer maintenant</span>
       </Link>
     </div>
   );

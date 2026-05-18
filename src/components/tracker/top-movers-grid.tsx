@@ -103,7 +103,7 @@ export async function TopMoversGrid() {
                 href="/trackapp/paiement"
                 className="tracker-hero-liquidglass !mt-0"
               >
-                <span className="tracker-hero-liquidglass__label">Commencer pour 1&nbsp;€</span>
+                <span className="tracker-hero-liquidglass__label">Commencer maintenant</span>
               </Link>
             </div>
           </div>
