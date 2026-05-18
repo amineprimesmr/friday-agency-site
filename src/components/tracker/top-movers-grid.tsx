@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 
 import { ShowcaseHeroHeader } from "@/components/tracker/showcase-hero-header";
+import { TrackerTrackappPaymentCta } from "@/components/tracker/tracker-trackapp-payment-cta";
 import { TrackerNavLink } from "@/components/tracker/tracker-navigation";
 import { getTrackerCuratedPotentialAppsCached } from "@/lib/tracker-server-cache";
 import type { MultiCountryApp } from "@/lib/apple-charts";
@@ -99,12 +99,9 @@ export async function TopMoversGrid() {
             />
 
             <div className="absolute inset-0 z-[1] flex items-center justify-center px-4 py-6 sm:px-6">
-              <Link
-                href="/trackapp/paiement"
-                className="tracker-hero-liquidglass !mt-0"
-              >
+              <TrackerTrackappPaymentCta className="tracker-hero-liquidglass !mt-0">
                 <span className="tracker-hero-liquidglass__label">Commencer maintenant</span>
-              </Link>
+              </TrackerTrackappPaymentCta>
             </div>
           </div>
         ) : null}

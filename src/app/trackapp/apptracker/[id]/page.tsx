@@ -15,8 +15,10 @@ import {
   timeAgo,
   type CountryCode,
 } from "@/lib/apple-charts";
+import { getTrackappProfileFavorites } from "@/lib/trackapp-profile-favorites";
 import { extractSocialProfiles } from "@/lib/social-presence";
 import { buildTrackerMetaAdLibraryContext } from "@/lib/tracker-meta-ad-resolution";
+import { TrackappAppFavoriteButton } from "@/components/trackapp/trackapp-app-favorite-button";
 
 export const revalidate = 900;
 
@@ -67,6 +69,9 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
   const app = await fetchAppDetail(id, country);
   if (!app) notFound();
 
+  const { loggedIn, appIds } = await getTrackappProfileFavorites();
+  const appFav = appIds.includes(app.id);
+
   const countryData = COUNTRY_MAP[country as CountryCode];
   const dlEst = estimateMonthlyDownloads(50, country);
   const revEst = formatEstimatedMonthlyRevenuePrecise(50, app.price, app.categoryId, country, app.id);
@@ -87,7 +92,7 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
     <div className="relative z-[1] dashboard-main pb-16">
       <div className="mb-5">
         <Link href="/trackapp/apptracker" className="text-[0.88rem] font-semibold text-[var(--dash-muted-light)] no-underline hover:text-[var(--dash-text)]">
-          ← Retour à Apptracker
+          ← Retour aux apps du mois
         </Link>
       </div>
 
@@ -116,14 +121,19 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
                 </div>
               </div>
             </div>
-            <a
-              href={app.trackViewUrl || app.url}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-[#0f172a] px-5 text-[0.88rem] font-bold text-white no-underline transition hover:bg-[#111827]"
-            >
-              Ouvrir sur l&apos;App Store ↗
-            </a>
+            <div className="flex flex-wrap items-center gap-2 self-start sm:justify-end lg:items-start">
+              {loggedIn ? (
+                <TrackappAppFavoriteButton appId={app.id} initialFavorite={appFav} enabled />
+              ) : null}
+              <a
+                href={app.trackViewUrl || app.url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-[#0f172a] px-5 text-[0.88rem] font-bold text-white no-underline transition hover:bg-[#111827]"
+              >
+                Ouvrir sur l&apos;App Store ↗
+              </a>
+            </div>
           </div>
         </div>
       </section>

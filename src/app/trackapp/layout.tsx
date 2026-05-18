@@ -12,6 +12,8 @@ import "@/styles/fidelity-port/app-saas-shell.css";
 import "@/styles/trackapp-main-content.css";
 import "@/styles/trackapp-purple.css";
 import "@/styles/trackapp-saas-pro-payment-page.css";
+import "@/styles/trackapp-auth-modal.css";
+import "@/styles/trackapp-paiement-landing.css";
 
 export const metadata: Metadata = {
   title: "Trackapp — Du concept aux prompts Xcode",

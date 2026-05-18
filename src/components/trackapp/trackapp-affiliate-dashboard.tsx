@@ -18,6 +18,7 @@ type CommissionRow = {
 type AffiliateMe = {
   referralCode: string;
   referralLink: string;
+  friendDiscountPercent: number;
   commissionRate: number;
   minPayoutCents: number;
   balance: {
@@ -38,7 +39,7 @@ type AffiliateMe = {
 };
 
 function formatEur(cents: number): string {
-  return `${(cents / 100).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}€`;
+  return `${(cents / 100).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
 }
 
 function statusLabel(status: string): string {
@@ -68,7 +69,7 @@ export function TrackappAffiliateDashboard() {
     try {
       const res = await fetch("/api/trackapp/affiliate/me", { credentials: "include" });
       const json = (await res.json()) as AffiliateMe & { error?: string };
-      if (!res.ok) throw new Error(json.error ?? "Impossible de charger l’espace affilié.");
+      if (!res.ok) throw new Error(json.error ?? "Impossible de charger le dashboard affiliation.");
       setData(json);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur réseau.");
@@ -120,7 +121,7 @@ export function TrackappAffiliateDashboard() {
       });
       const json = (await res.json()) as { ok?: boolean; error?: string };
       if (!res.ok) throw new Error(json.error ?? "Virement refusé.");
-      setActionMsg("Virement initié vers ton compte bancaire Stripe.");
+      setActionMsg("Virement initié vers ton compte bancaire.");
       await load();
     } catch (e) {
       setActionMsg(e instanceof Error ? e.message : "Erreur virement.");
@@ -131,17 +132,17 @@ export function TrackappAffiliateDashboard() {
 
   if (loading) {
     return (
-      <div className="trackapp-affiliate-dash trackapp-affiliate-dash--loading">
-        Chargement de ton espace affilié…
+      <div className="ta-aff-dash ta-aff-dash--state" role="status">
+        Chargement du dashboard affiliation…
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="trackapp-affiliate-dash trackapp-affiliate-dash--error">
-        <p>{error ?? "Données indisponibles."}</p>
-        <button type="button" onClick={() => void load()}>
+      <div className="ta-aff-dash ta-aff-dash--state ta-aff-dash--error">
+        <p className="m-0">{error ?? "Données indisponibles."}</p>
+        <button type="button" className="ta-aff-dash__retry" onClick={() => void load()}>
           Réessayer
         </button>
       </div>
@@ -149,108 +150,134 @@ export function TrackappAffiliateDashboard() {
   }
 
   const ratePct = Math.round(data.commissionRate * 100);
+  const discountPct = data.friendDiscountPercent;
   const canPayout =
     data.connect.payoutsEnabled && data.balance.availableCents >= data.minPayoutCents;
 
   return (
-    <section className="trackapp-affiliate-dash" aria-labelledby="affiliate-dash-title">
-      <header className="trackapp-affiliate-dash__head">
-        <h2 id="affiliate-dash-title">Ton espace affilié</h2>
-        <p>
-          {ratePct}&nbsp;% de commission sur chaque paiement de tes filleuls (abonnement initial et
-          renouvellements).
+    <div className="ta-aff-dash">
+      <header className="ta-aff-dash__hero">
+        <p className="trackapp-workspace-hero-kicker">Affiliation</p>
+        <h1 className="ta-aff-dash__title">Dashboard affiliation</h1>
+        <p className="ta-aff-dash__lead">
+          Partage <strong>ton lien personnel</strong> : ton audience bénéficie de{" "}
+          <strong>−{discountPct}&nbsp;%</strong> sur l&apos;abonnement au moment du paiement (offre filleul), et tu
+          touches <strong>{ratePct}&nbsp;%</strong> de commission sur les paiements de tes filleuls une fois qu&apos;ils
+          sont abonnés.
         </p>
       </header>
 
-      <div className="trackapp-affiliate-dash__stats">
-        <article className="trackapp-affiliate-dash__stat">
-          <span className="trackapp-affiliate-dash__stat-label">Gains totaux</span>
+      <section className="ta-aff-dash__panel ta-aff-dash__panel--highlight" aria-labelledby="ta-aff-link-title">
+        <h2 id="ta-aff-link-title" className="ta-aff-dash__panel-title">
+          Lien à copier
+        </h2>
+        <p className="ta-aff-dash__panel-desc">
+          Envoie ce lien : les inscriptions sont rattachées à ton compte. Les personnes qui souscrivent l&apos;abonnement
+          après être passées par ton lien obtiennent <strong>−{discountPct}&nbsp;%</strong> sur le plan (réduction appliquée
+          au paiement Stripe lorsque la remise filleul est activée sur le projet).
+        </p>
+        <div className="ta-aff-dash__copy-row">
+          <code className="ta-aff-dash__url" title={data.referralLink}>
+            {data.referralLink}
+          </code>
+          <button type="button" className="ta-aff-dash__copy-btn" onClick={() => void copyLink()}>
+            {copied ? "Copié ✓" : "Copier"}
+          </button>
+        </div>
+        <p className="ta-aff-dash__code-line">
+          Code court : <strong>{data.referralCode}</strong> (déjà dans l&apos;URL <span className="text-[var(--dash-muted-light)]">?ref=…</span>)
+        </p>
+      </section>
+
+      <div className="ta-aff-dash__stats">
+        <article className="ta-aff-dash__stat">
+          <span className="ta-aff-dash__stat-label">Gains totaux</span>
           <strong>{formatEur(data.balance.totalEarnedCents)}</strong>
         </article>
-        <article className="trackapp-affiliate-dash__stat">
-          <span className="trackapp-affiliate-dash__stat-label">Disponible</span>
-          <strong className="is-highlight">{formatEur(data.balance.availableCents)}</strong>
+        <article className="ta-aff-dash__stat">
+          <span className="ta-aff-dash__stat-label">Disponible</span>
+          <strong className="text-emerald-700">{formatEur(data.balance.availableCents)}</strong>
         </article>
-        <article className="trackapp-affiliate-dash__stat">
-          <span className="trackapp-affiliate-dash__stat-label">En attente</span>
+        <article className="ta-aff-dash__stat">
+          <span className="ta-aff-dash__stat-label">En attente</span>
           <strong>{formatEur(data.balance.pendingCents)}</strong>
-          <span className="trackapp-affiliate-dash__stat-hint">14 jours de sécurisation</span>
+          <span className="ta-aff-dash__stat-hint">Sécurisation ~14 jours</span>
         </article>
-        <article className="trackapp-affiliate-dash__stat">
-          <span className="trackapp-affiliate-dash__stat-label">Filleuls</span>
+        <article className="ta-aff-dash__stat">
+          <span className="ta-aff-dash__stat-label">Filleuls</span>
           <strong>{data.referralsCount}</strong>
         </article>
       </div>
 
-      <div className="trackapp-affiliate-dash__link-box">
-        <p className="trackapp-affiliate-dash__link-label">Ton lien de parrainage</p>
-        <div className="trackapp-affiliate-dash__link-row">
-          <code>{data.referralLink}</code>
-          <button type="button" onClick={() => void copyLink()}>
-            {copied ? "Copié" : "Copier"}
-          </button>
-        </div>
-        <p className="trackapp-affiliate-dash__code">
-          Code&nbsp;: <strong>{data.referralCode}</strong>
+      <section className="ta-aff-dash__panel">
+        <h2 className="ta-aff-dash__panel-title">Versements</h2>
+        <p className="ta-aff-dash__panel-desc">
+          Connecte un compte Stripe pour recevoir tes commissions par virement. Seuil minimum :{" "}
+          {formatEur(data.minPayoutCents)}.
         </p>
-      </div>
-
-      <div className="trackapp-affiliate-dash__actions">
-        {!data.connect.payoutsEnabled ? (
-          <button
-            type="button"
-            className="trackapp-affiliate-dash__btn trackapp-affiliate-dash__btn--primary"
-            disabled={busy === "connect" || !data.connect.configured}
-            onClick={() => void startConnect()}
+        <div className="ta-aff-dash__actions">
+          {!data.connect.payoutsEnabled ? (
+            <button
+              type="button"
+              className="ta-aff-dash__btn ta-aff-dash__btn--primary"
+              disabled={busy === "connect" || !data.connect.configured}
+              onClick={() => void startConnect()}
+            >
+              {busy === "connect" ? "Redirection Stripe…" : "Configurer les virements (Stripe)"}
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="ta-aff-dash__btn ta-aff-dash__btn--primary"
+              disabled={!canPayout || busy === "payout"}
+              onClick={() => void requestPayout()}
+            >
+              {busy === "payout" ?
+                "Traitement…"
+              : `Demander un virement (min. ${formatEur(data.minPayoutCents)})`}
+            </button>
+          )}
+          <Link
+            href={`/trackapp/inscription?ref=${encodeURIComponent(data.referralCode)}`}
+            className="ta-aff-dash__btn ta-aff-dash__btn--ghost"
+            target="_blank"
+            rel="noreferrer"
           >
-            {busy === "connect" ? "Redirection Stripe…" : "Configurer mes virements (Stripe)"}
-          </button>
-        ) : (
-          <button
-            type="button"
-            className="trackapp-affiliate-dash__btn trackapp-affiliate-dash__btn--primary"
-            disabled={!canPayout || busy === "payout"}
-            onClick={() => void requestPayout()}
-          >
-            {busy === "payout" ?
-              "Virement en cours…"
-            : `Demander un virement (min. ${formatEur(data.minPayoutCents)})`}
-          </button>
-        )}
-        <Link href="/trackapp/inscription?mode=start" className="trackapp-affiliate-dash__btn trackapp-affiliate-dash__btn--ghost">
-          Page d’inscription filleul
-        </Link>
-      </div>
-
-      {actionMsg ? <p className="trackapp-affiliate-dash__msg">{actionMsg}</p> : null}
+            Prévisualiser la page d&apos;inscription filleul
+          </Link>
+        </div>
+        {actionMsg ? <p className="ta-aff-dash__msg">{actionMsg}</p> : null}
+      </section>
 
       {data.recentCommissions.length > 0 ? (
-        <div className="trackapp-affiliate-dash__table-wrap">
-          <h3>Dernières commissions</h3>
-          <table className="trackapp-affiliate-dash__table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Type</th>
-                <th>Brut</th>
-                <th>Commission</th>
-                <th>Statut</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.recentCommissions.map((row) => (
-                <tr key={row.id}>
-                  <td>{new Date(row.created_at).toLocaleDateString("fr-FR")}</td>
-                  <td>{row.event_type === "initial" ? "Premier paiement" : "Renouvellement"}</td>
-                  <td>{formatEur(row.gross_amount_cents)}</td>
-                  <td>{formatEur(row.commission_cents)}</td>
-                  <td>{statusLabel(row.status)}</td>
+        <section className="ta-aff-dash__table-block">
+          <h2 className="ta-aff-dash__panel-title">Dernières commissions</h2>
+          <div className="ta-aff-dash__table-wrap">
+            <table className="ta-aff-dash__table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Brut</th>
+                  <th>Commission</th>
+                  <th>Statut</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {data.recentCommissions.map((row) => (
+                  <tr key={row.id}>
+                    <td>{new Date(row.created_at).toLocaleDateString("fr-FR")}</td>
+                    <td>{row.event_type === "initial" ? "Premier paiement" : "Renouvellement"}</td>
+                    <td>{formatEur(row.gross_amount_cents)}</td>
+                    <td>{formatEur(row.commission_cents)}</td>
+                    <td>{statusLabel(row.status)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
       ) : null}
-    </section>
+    </div>
   );
 }

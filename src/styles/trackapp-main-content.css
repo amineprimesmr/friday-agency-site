@@ -1,5 +1,5 @@
 /**
- * Contenu playbook / dashboard à l’intérieur de .app-main (feuille claire Fidelity).
+ * Contenu dashboard à l’intérieur de .app-main (feuille claire Fidelity).
  * Reprend les blocs Trackapp avec variables adaptées au thème #app-app.
  */
 #app-app .app-main {
@@ -82,7 +82,7 @@
   margin: 0 0 1.75rem;
 }
 
-#app-app .app-main .trackapp-playbook-card {
+#app-app .app-main .trackapp-content-card {
   background: var(--dash-surface);
   border: 1px solid var(--dash-border);
   border-radius: var(--dash-radius-xl);
@@ -94,26 +94,26 @@
     box-shadow var(--dash-transition);
 }
 
-#app-app .app-main .trackapp-playbook-card:hover {
+#app-app .app-main .trackapp-content-card:hover {
   border-color: var(--dash-border-light);
   box-shadow: var(--dash-shadow-md);
 }
 
-#app-app .app-main .trackapp-playbook-card-header {
+#app-app .app-main .trackapp-content-card-header {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.6rem 0.8rem;
 }
 
-#app-app .app-main .trackapp-playbook-idx {
+#app-app .app-main .trackapp-content-idx {
   font-family: ui-monospace, monospace;
   font-size: 0.7rem;
   color: var(--dash-muted);
   font-weight: 600;
 }
 
-#app-app .app-main .trackapp-playbook-title {
+#app-app .app-main .trackapp-content-title {
   font-size: 1.02rem;
   font-weight: 700;
   color: var(--dash-text);
@@ -121,14 +121,14 @@
   margin: 0;
 }
 
-#app-app .app-main .trackapp-playbook-summary {
+#app-app .app-main .trackapp-content-summary {
   font-size: 0.875rem;
   color: var(--dash-muted-light);
   margin: 0.55rem 0 0;
   line-height: 1.55;
 }
 
-#app-app .app-main .trackapp-playbook-pre-wrap {
+#app-app .app-main .trackapp-content-pre-wrap {
   margin-top: 1rem;
   border-radius: var(--dash-radius-lg);
   border: 1px solid var(--dash-border);
@@ -136,14 +136,14 @@
   padding: 0.95rem 1.05rem;
 }
 
-#app-app .app-main .trackapp-playbook-pre-wrap--locked {
+#app-app .app-main .trackapp-content-pre-wrap--locked {
   filter: blur(5px);
   opacity: 0.92;
   user-select: none;
   pointer-events: none;
 }
 
-#app-app .app-main .trackapp-playbook-pre {
+#app-app .app-main .trackapp-content-pre {
   font-family: ui-monospace, "SF Mono", Menlo, Monaco, monospace;
   font-size: 0.76rem;
   line-height: 1.55;

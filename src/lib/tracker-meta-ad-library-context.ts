@@ -4,7 +4,7 @@ export type MetaAdPageResolutionEntry = {
   pageId: string;
   pageName?: string;
   sourceUrl: string;
-  source: "app_store" | "openai" | "openai_web";
+  source: "app_store" | "openai" | "openai_web" | "instagram_slug_infer" | "manual_local";
   confidence?: number;
   adsProbeCount?: number;
 };
@@ -20,7 +20,7 @@ export type BrandResolutionSource = {
 export type RejectedMetaPageCandidate = {
   url: string;
   reason: string;
-  source: "app_store" | "openai_web";
+  source: "app_store" | "openai_web" | "instagram_slug_infer";
 };
 
 /** Contexte sérialisable (Server → Client) pour Ad Library Meta. */

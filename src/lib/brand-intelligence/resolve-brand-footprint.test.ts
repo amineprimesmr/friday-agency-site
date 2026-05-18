@@ -10,6 +10,12 @@ describe("brand ads resolution primitives", () => {
     assert.equal(facebookGraphIdentifierFromUrl("https://www.facebook.com/calaiapp"), "calaiapp");
     assert.equal(facebookGraphIdentifierFromUrl("https://www.facebook.com/profile.php?id=123456789"), "123456789");
     assert.equal(facebookGraphIdentifierFromUrl("https://www.facebook.com/ads/library/?q=Cal%20AI"), null);
+    assert.equal(
+      facebookGraphIdentifierFromUrl(
+        "https://www.facebook.com/ads/library/?active_status=active&country=FR&search_type=page&view_all_page_id=9876543210987",
+      ),
+      "9876543210987",
+    );
   });
 
   it("detects social profiles used by the brand footprint UI", () => {

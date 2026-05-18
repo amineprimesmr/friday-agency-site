@@ -8,12 +8,11 @@ import "@/styles/trackapp-apptracker-liquid-search.css";
 import "@/styles/tracker-search-bar.css";
 
 type Props = Readonly<{
-  action: "/trackapp/accueil" | "/trackapp/apptracker";
   defaultQuery: string;
   country: CountryCode;
 }>;
 
-export function TrackappApptrackerLiquidSearchForm({ action, defaultQuery, country }: Props) {
+export function TrackappApptrackerLiquidSearchForm({ defaultQuery, country }: Props) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -33,11 +32,14 @@ export function TrackappApptrackerLiquidSearchForm({ action, defaultQuery, count
   return (
     <div className="trackapp-apptracker-liquid-search">
       <div className="trackapp-apptracker-liquid-search__stage">
-        <div className="tracker-switcher-host w-full min-w-0" data-search-surface="dark">
+        <div
+          className="tracker-switcher-host trackapp-accueil-search-host w-full min-w-0"
+          data-search-surface="light"
+        >
           <div className="tracker-search-desktop-host w-full">
             <div className="tracker-search-stack tracker-search-stack--desktop w-full">
               <form
-                action={action}
+                action="/trackapp/accueil"
                 method="get"
                 role="search"
                 className="tracker-search-pill trackapp-apptracker-liquid-search__form"

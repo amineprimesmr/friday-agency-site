@@ -15,7 +15,7 @@ import type {
   TrackerMetaAdLibraryContext,
 } from "@/lib/tracker-meta-ad-library-context";
 
-type CandidateSource = "app_store" | "openai_web";
+type CandidateSource = "app_store" | "openai_web" | "instagram_slug_infer";
 
 type FacebookCandidate = {
   url: string;
@@ -40,16 +40,49 @@ function manualMetaSearchUrl(keyword: string): string {
   return `https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&q=${q}&search_type=keyword_unordered&media_type=all`;
 }
 
-const cachedInferBrandFootprint = unstable_cache(
-  async (args: {
-    appName: string;
-    developerName: string;
-    genre: string;
-    descriptionSnippet: string;
-  }) => inferBrandFootprintWithOpenAI(args),
-  ["brand-footprint-openai-web-v1"],
-  { revalidate: 60 * 60 * 24 },
-);
+const META_SLUG_REJECTED = ["p", "reel", "reels", "stories", "explore", "accounts", "direct", "tv", "guides"];
+function instagramProfileToFacebookInferCandidate(profileUrl: string): FacebookCandidate | null {
+  let url: URL;
+  try {
+    url = /^https?:\/\//i.test(profileUrl.trim()) ? new URL(profileUrl) : new URL(`https://${profileUrl}`);
+  } catch {
+    return null;
+  }
+
+  const host = url.hostname.replace(/^www\./i, "").toLowerCase();
+  if (host !== "instagram.com") return null;
+  const segments = url.pathname.split("/").filter(Boolean);
+  const slug = segments[0]?.replace(/^@/, "").trim();
+  if (!slug || META_SLUG_REJECTED.includes(slug.toLowerCase())) return null;
+  if (!/^[a-zA-Z0-9._]{1,90}$/.test(slug)) return null;
+
+  return {
+    url: `https://www.facebook.com/${slug}`,
+    source: "instagram_slug_infer",
+    confidence: 0.55,
+  };
+}
+
+async function inferOpenAiBrandFootprintCached(args: {
+  appName: string;
+  developerName: string;
+  genre: string;
+  descriptionSnippet: string;
+}): Promise<OpenAiBrandFootprint | null> {
+  const run = unstable_cache(
+    async () => inferBrandFootprintWithOpenAI(args),
+    [
+      "openai-brand-footprint-v2",
+      args.appName.trim().toLowerCase().slice(0, 140),
+      args.developerName.trim().toLowerCase().slice(0, 140),
+      args.genre.trim().toLowerCase().slice(0, 56),
+      String(args.descriptionSnippet.length),
+      args.descriptionSnippet.slice(0, 900),
+    ],
+    { revalidate: 60 * 60 * 24 },
+  );
+  return run();
+}
 
 async function probeAdsCount(pageId: string, country: string): Promise<number | undefined> {
   const result = await fetchAdsArchive({
@@ -94,7 +127,12 @@ async function resolveFacebookCandidate(args: {
       pageId: node.id,
       pageName: node.name,
       sourceUrl: args.candidate.url,
-      source: args.candidate.source,
+      source:
+        args.candidate.source === "app_store"
+          ? "app_store"
+          : args.candidate.source === "instagram_slug_infer"
+            ? "instagram_slug_infer"
+            : "openai_web",
       confidence: args.candidate.confidence,
       adsProbeCount,
     },
@@ -129,7 +167,7 @@ export async function resolveBrandFootprint(args: {
   }));
 
   if (process.env.OPENAI_API_KEY?.trim()) {
-    footprint = await cachedInferBrandFootprint({
+    footprint = await inferOpenAiBrandFootprintCached({
       appName: args.appName,
       developerName: args.developerName,
       genre: args.genre,
@@ -156,12 +194,15 @@ export async function resolveBrandFootprint(args: {
   }
 
   const candidates = uniqByUrl([
-    ...args.socialFromStore
+    ...socialProfiles
       .filter((profile) => profile.id === "facebook")
       .map((profile): FacebookCandidate => ({ url: profile.url, source: "app_store", confidence: 0.82 })),
     ...(footprint?.facebook_url
       ? [{ url: footprint.facebook_url, source: "openai_web" as const, confidence: footprint.confidence }]
       : []),
+    ...socialProfiles
+      .map((profile) => (profile.id === "instagram" ? instagramProfileToFacebookInferCandidate(profile.url) : null))
+      .filter((c): c is FacebookCandidate => Boolean(c)),
   ]);
 
   const entries: MetaAdPageResolutionEntry[] = [];

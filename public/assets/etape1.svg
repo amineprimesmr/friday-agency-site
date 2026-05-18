@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
+  <rect width="1024" height="1024" fill="#0c0e12"/>
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#a855f7" stop-opacity="0.2"/>
+    </linearGradient>
+  </defs>
+  <rect x="112" y="180" width="800" height="664" rx="48" fill="#151922" stroke="url(#g1)" stroke-width="2"/>
+  <rect x="200" y="320" width="520" height="56" rx="16" fill="#1e293b"/>
+  <rect x="200" y="420" width="380" height="56" rx="16" fill="#252d3a"/>
+  <circle cx="760" cy="448" r="36" fill="#22d3ee" opacity="0.9"/>
+  <path d="M748 448l10 10 22-26" stroke="#0c0e12" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="512" y="720" text-anchor="middle" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="42" font-weight="600">Étape 1</text>
+</svg>

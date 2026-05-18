@@ -27,7 +27,7 @@ const SKIP_PATH_PREFIXES = new Set([
 
 /**
  * Extrait un identifiant utilisable dans `GET /{id-or-username}` (Graph).
- * Préfère l’ID numérique s’il est présent dans l’URL.
+ * Préfère l’ID numérique ; supporte aussi la Bibliothèque publicitaire (`view_all_page_id`).
  */
 export function facebookGraphIdentifierFromUrl(urlString: string): string | null {
   let u: URL;
@@ -42,7 +42,23 @@ export function facebookGraphIdentifierFromUrl(urlString: string): string | null
     return null;
   }
 
-  const idParam = u.searchParams.get("id");
+  const viewAll = u.searchParams.get("view_all_page_id")?.trim();
+  if (viewAll && /^\d+$/.test(viewAll)) return viewAll;
+
+  const searchPageRaw = u.searchParams.get("search_page_ids")?.trim();
+  if (searchPageRaw) {
+    try {
+      const arr = JSON.parse(searchPageRaw) as unknown;
+      if (Array.isArray(arr) && arr.length > 0) {
+        const first = String(arr[0]).trim();
+        if (/^\d+$/.test(first)) return first;
+      }
+    } catch {
+      /* ignore invalid JSON */
+    }
+  }
+
+  const idParam = u.searchParams.get("id")?.trim();
   if (idParam && /^\d+$/.test(idParam)) return idParam;
 
   const parts = u.pathname.split("/").filter(Boolean);

@@ -77,7 +77,7 @@ export async function POST(req: Request) {
 
   const metadataUser =
     typeof session.metadata?.supabase_user_id === "string" ? session.metadata.supabase_user_id : null;
-  const productOk = session.metadata?.product === "trackapp_full_playbook";
+  const productOk = session.metadata?.product === "trackapp_full_access";
   if (!productOk || metadataUser !== user.id) {
     return NextResponse.json({ detail: "Cette session Trackapp est invalide." }, { status: 403 });
   }

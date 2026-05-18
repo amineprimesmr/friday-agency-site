@@ -25,6 +25,10 @@ function mediaUrl(filename: string): string {
   return `/api/trackapp/ressources/file/${encodeURIComponent(filename)}`;
 }
 
+function previewVideoUrl(filename: string): string {
+  return `${mediaUrl(filename)}#t=0.1`;
+}
+
 function LazyResourceVideo({ filename, title }: Readonly<{ filename: string; title: string }>) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(false);
@@ -57,10 +61,10 @@ function LazyResourceVideo({ filename, title }: Readonly<{ filename: string; tit
         <video
           className="h-full w-full object-contain"
           controls
-          preload="none"
+          preload="metadata"
           playsInline
           muted
-          src={mediaUrl(filename)}
+          src={previewVideoUrl(filename)}
           aria-label={`Aperçu vidéo ${title}`}
         />
       ) : (
@@ -77,82 +81,116 @@ export function TrackappResourcesGallery({
   configured,
   favoriteIds = [],
   enableFavorites = false,
-  variant = "library",
+  initialFavoritesOnly = false,
 }: Readonly<{
   items: TrackappResourceRow[];
   configured: boolean;
   favoriteIds?: string[];
   enableFavorites?: boolean;
-  variant?: "library" | "favorites";
+  /** Ouvre directement la vue « favoris seulement » (page Favoris → Ressources). */
+  initialFavoritesOnly?: boolean;
 }>) {
-  const isFavorites = variant === "favorites";
   const [query, setQuery] = useState("");
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(initialFavoritesOnly);
   const deferred = useDeferredValue(query.trim().toLowerCase());
+  const favoriteSet = useMemo(() => new Set(favoriteIds), [favoriteIds]);
+  const visibleItems = useMemo(() => {
+    if (!showFavoritesOnly) return items;
+    return items.filter((row) => favoriteSet.has(row.id));
+  }, [favoriteSet, items, showFavoritesOnly]);
 
   const filtered = useMemo(() => {
-    if (!deferred) return items;
-    return items.filter((row) => {
+    if (!deferred) return visibleItems;
+    return visibleItems.filter((row) => {
       const hay = `${row.title} ${row.videoFile}`.toLowerCase();
       return hay.includes(deferred);
     });
-  }, [items, deferred]);
+  }, [deferred, visibleItems]);
 
   const zipCount = useMemo(() => items.filter((r) => r.zipFile).length, [items]);
 
   return (
-    <div className={cn(!isFavorites && "trackapp-resources-root relative overflow-hidden")}>
+    <div className="trackapp-resources-root relative overflow-hidden">
 
-      {!isFavorites ? (
-        <section className="dashboard-section relative">
+      <section className="dashboard-section relative">
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <p className="trackapp-workspace-hero-kicker">Bibliothèque</p>
+          <h1 className="trackapp-workspace-hero-title">Ressources vidéo</h1>
+          <p className="trackapp-workspace-hero-desc max-w-[62ch]">
+            Démos UI et packs sources associés. Ajoute tes vidéos préférées en favoris et filtre-les ici, sans changer de page.
+          </p>
+        </motion.div>
+
+        {!configured ? (
           <motion.div
-            initial={{ opacity: 0, y: 14 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+            className="trackapp-content-card mt-6 border-dashed border-[var(--dash-border-light)] bg-[var(--dash-surface-2)]"
           >
-            <p className="trackapp-workspace-hero-kicker">Bibliothèque</p>
-            <h1 className="trackapp-workspace-hero-title">Ressources vidéo</h1>
-            <p className="trackapp-workspace-hero-desc max-w-[62ch]">
-              Démos UI et packs sources associés. Lecture fluide dans le navigateur, téléchargement du ZIP en un clic.
+            <p className="trackapp-content-summary m-0 text-[var(--dash-text-secondary)]">
+              Aucun dossier média détecté. Place tes fichiers dans{" "}
+              <code className="rounded-md bg-white px-1.5 py-0.5 text-[0.8rem] text-[var(--dash-text)] shadow-sm ring-1 ring-[var(--dash-border)]">
+                ~/Desktop/Ressources
+              </code>{" "}
+              sur ce Mac, ou définis{" "}
+              <code className="rounded-md bg-white px-1.5 py-0.5 text-[0.8rem] text-[var(--dash-text)] shadow-sm ring-1 ring-[var(--dash-border)]">
+                TRACKAPP_RESOURCES_DIR
+              </code>{" "}
+              vers ton répertoire (sur serveur : copie dans{" "}
+              <code className="rounded-md bg-white px-1.5 py-0.5 text-[0.8rem] text-[var(--dash-text)] shadow-sm ring-1 ring-[var(--dash-border)]">
+                public/trackapp-ressources
+              </code>
+              ).
             </p>
           </motion.div>
+        ) : null}
 
-          {!configured ? (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="trackapp-playbook-card mt-6 border-dashed border-[var(--dash-border-light)] bg-[var(--dash-surface-2)]"
-            >
-              <p className="trackapp-playbook-summary m-0 text-[var(--dash-text-secondary)]">
-                Aucun dossier média détecté. Place tes fichiers dans{" "}
-                <code className="rounded-md bg-white px-1.5 py-0.5 text-[0.8rem] text-[var(--dash-text)] shadow-sm ring-1 ring-[var(--dash-border)]">
-                  ~/Desktop/Ressources
-                </code>{" "}
-                sur ce Mac, ou définis{" "}
-                <code className="rounded-md bg-white px-1.5 py-0.5 text-[0.8rem] text-[var(--dash-text)] shadow-sm ring-1 ring-[var(--dash-border)]">
-                  TRACKAPP_RESOURCES_DIR
-                </code>{" "}
-                vers ton répertoire (sur serveur : copie dans{" "}
-                <code className="rounded-md bg-white px-1.5 py-0.5 text-[0.8rem] text-[var(--dash-text)] shadow-sm ring-1 ring-[var(--dash-border)]">
-                  public/trackapp-ressources
-                </code>
-                ).
-              </p>
-            </motion.div>
-          ) : null}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.06, duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+          className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
+        >
+          <div className="flex flex-wrap gap-2">
+            <span className="dashboard-badge dashboard-badge-purple">{items.length} vidéos</span>
+            <span className="dashboard-badge dashboard-badge-success">{zipCount} archives ZIP</span>
+            {enableFavorites ? (
+              <span className="dashboard-badge dashboard-badge-warning">{favoriteIds.length} favoris</span>
+            ) : null}
+            {filtered.length !== visibleItems.length ? (
+              <span className="dashboard-badge dashboard-badge-warning">{filtered.length} affichées</span>
+            ) : null}
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.06, duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
-          >
-            <div className="flex flex-wrap gap-2">
-              <span className="dashboard-badge dashboard-badge-purple">{items.length} vidéos</span>
-              <span className="dashboard-badge dashboard-badge-success">{zipCount} archives ZIP</span>
-              {filtered.length !== items.length ? (
-                <span className="dashboard-badge dashboard-badge-warning">{filtered.length} affichées</span>
-              ) : null}
-            </div>
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+            {enableFavorites ? (
+              <div className="inline-flex rounded-full border border-[var(--dash-border)] bg-white p-1 shadow-[var(--dash-shadow)]">
+                <button
+                  type="button"
+                  onClick={() => setShowFavoritesOnly(false)}
+                  className={cn(
+                    "rounded-full px-3 py-1.5 text-[0.78rem] font-bold transition",
+                    !showFavoritesOnly ? "bg-slate-950 text-white" : "text-slate-500 hover:text-slate-900",
+                  )}
+                >
+                  Toutes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowFavoritesOnly(true)}
+                  className={cn(
+                    "rounded-full px-3 py-1.5 text-[0.78rem] font-bold transition",
+                    showFavoritesOnly ? "bg-slate-950 text-white" : "text-slate-500 hover:text-slate-900",
+                  )}
+                >
+                  Favoris
+                </button>
+              </div>
+            ) : null}
 
             <label className="relative flex w-full max-w-md items-center sm:w-auto">
               <span className="visually-hidden">Filtrer</span>
@@ -176,42 +214,9 @@ export function TrackappResourcesGallery({
                 className="w-full rounded-full border border-[var(--dash-border)] bg-white py-2.5 pr-4 pl-10 text-[0.9rem] text-[var(--dash-text)] shadow-[var(--dash-shadow)] outline-none transition-[box-shadow,border-color] duration-200 placeholder:text-[var(--dash-muted-light)] focus:border-[rgba(124,58,237,0.45)] focus:ring-[3px] focus:ring-[rgba(124,58,237,0.15)]"
               />
             </label>
-          </motion.div>
-        </section>
-      ) : (
-        <section className="relative mb-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-            <p className="text-[0.9rem] text-[var(--dash-muted-light,#64748b)]">
-              {items.length} design{items.length > 1 ? "s" : ""} en favoris
-              {filtered.length !== items.length
-                ? ` · ${filtered.length} correspondance${filtered.length > 1 ? "s" : ""}`
-                : ""}
-            </p>
-            <label className="relative flex w-full max-w-md items-center sm:w-auto">
-              <span className="visually-hidden">Filtrer</span>
-              <svg
-                className="pointer-events-none absolute left-3.5 h-4 w-4 text-[var(--dash-muted,#64748b)]"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                aria-hidden="true"
-              >
-                <circle cx="11" cy="11" r="7" />
-                <path d="M21 21l-4.3-4.3" strokeLinecap="round" />
-              </svg>
-              <input
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Filtrer par titre ou fichier…"
-                autoComplete="off"
-                className="w-full rounded-full border border-[var(--dash-border,#e2e8f0)] bg-white py-2.5 pr-4 pl-10 text-[0.9rem] text-[var(--dash-text,#1a202c)] shadow-[var(--dash-shadow)] outline-none transition-[box-shadow,border-color] duration-200 placeholder:text-[var(--dash-muted-light,#64748b)] focus:border-[rgba(15,23,42,0.22)] focus:ring-[3px] focus:ring-[rgba(15,23,42,0.08)]"
-              />
-            </label>
           </div>
-        </section>
-      )}
+        </motion.div>
+      </section>
 
       <motion.ul
         layout
@@ -261,7 +266,7 @@ export function TrackappResourcesGallery({
 
               <div className="flex flex-1 flex-col gap-3 p-4 sm:p-[1.15rem]">
                 <div className="min-w-0">
-                  <h2 className="trackapp-playbook-title text-[1.05rem] leading-snug">{row.title}</h2>
+                  <h2 className="trackapp-content-title text-[1.05rem] leading-snug">{row.title}</h2>
                   <p className="mt-1 truncate font-mono text-[0.72rem] text-[var(--dash-muted)]">{row.videoFile}</p>
                 </div>
 
@@ -290,23 +295,17 @@ export function TrackappResourcesGallery({
         ))}
       </motion.ul>
 
-      {!isFavorites && configured && filtered.length === 0 ? (
-        <p className="dashboard-hint mt-10 text-center text-[0.95rem]">Aucun résultat pour cette recherche.</p>
-      ) : null}
-
-      {isFavorites && filtered.length === 0 ? (
-        <p className="mt-10 text-center text-[0.95rem] text-[var(--dash-muted-light,#64748b)]">
-          Aucun résultat pour cette recherche.
+      {configured && filtered.length === 0 ? (
+        <p className="dashboard-hint mt-10 text-center text-[0.95rem]">
+          {showFavoritesOnly ? "Aucune vidéo en favori pour le moment." : "Aucun résultat pour cette recherche."}
         </p>
       ) : null}
 
-      {!isFavorites ? (
-        <p className="dashboard-hint mt-12 text-center text-[0.8rem]">
-          Les fichiers sont servis depuis ton dossier configuré ; en production, utilise{" "}
-          <code className="rounded bg-[var(--dash-surface-2)] px-1 py-0.5">TRACKAPP_RESOURCES_DIR</code> ou des fichiers dans{" "}
-          <code className="rounded bg-[var(--dash-surface-2)] px-1 py-0.5">public/trackapp-ressources</code>.
-        </p>
-      ) : null}
+      <p className="dashboard-hint mt-12 text-center text-[0.8rem]">
+        Les fichiers sont servis depuis ton dossier configuré ; en production, utilise{" "}
+        <code className="rounded bg-[var(--dash-surface-2)] px-1 py-0.5">TRACKAPP_RESOURCES_DIR</code> ou des fichiers dans{" "}
+        <code className="rounded bg-[var(--dash-surface-2)] px-1 py-0.5">public/trackapp-ressources</code>.
+      </p>
     </div>
   );
 }

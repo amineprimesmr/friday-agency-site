@@ -33,6 +33,7 @@ export async function AppAdIntelligenceSection({ app, appId, country, sidebarApp
         developerName={app.sellerName || app.artistName}
         bundleId={app.bundleId}
         countryCode={country}
+        trackerAppleAppId={appId}
         metaLibraryContext={metaLibraryContext}
         enabledPlatforms={AD_INTEL_PLATFORMS}
       />

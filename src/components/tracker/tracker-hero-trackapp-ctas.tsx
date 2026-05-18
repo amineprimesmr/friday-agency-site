@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { TrackerTrackappPaymentCta } from "@/components/tracker/tracker-trackapp-payment-cta";
 
 import "@/styles/tracker-hero-liquid-cta.css";
 
@@ -8,9 +8,9 @@ import "@/styles/tracker-hero-liquid-cta.css";
 export function TrackerHeroTrackappCtas() {
   return (
     <div className="mt-10 flex flex-col items-center px-2 sm:mt-11">
-      <Link href="/trackapp/paiement" className="tracker-hero-liquidglass">
+      <TrackerTrackappPaymentCta className="tracker-hero-liquidglass">
         <span className="tracker-hero-liquidglass__label">Commencer maintenant</span>
-      </Link>
+      </TrackerTrackappPaymentCta>
     </div>
   );
 }

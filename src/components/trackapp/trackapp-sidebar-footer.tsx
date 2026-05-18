@@ -33,7 +33,7 @@ export function TrackappSidebarFooter({ email, signOutHref, totalEarningsEur, on
   const wrapRef = useRef<HTMLDivElement>(null);
 
   const name = displayNameFromEmail(email);
-  const earningsLabel = formatEarningsEur(earnedCents);
+  const earningsLabel = formatEarningsEur(earnedCents / 100);
 
   useEffect(() => {
     if (!email) return;
@@ -71,7 +71,7 @@ export function TrackappSidebarFooter({ email, signOutHref, totalEarningsEur, on
       <Link
         href={AFFILIATION_HREF}
         className="trackapp-sidebar-earnings"
-        aria-label="Vos gains totaux — programme d'affiliation"
+        aria-label="Affiliation — gains totaux"
         onClick={() => onNavigate?.()}
       >
         <span className="trackapp-sidebar-earnings__glow" aria-hidden />
@@ -117,7 +117,7 @@ export function TrackappSidebarFooter({ email, signOutHref, totalEarningsEur, on
           {menuOpen ? (
             <div id={menuId} className="trackapp-sidebar-profile__dropdown" role="menu">
               <Link href="/trackapp/gagner-240" role="menuitem" onClick={() => setMenuOpen(false)}>
-                Programme affiliation
+                Affiliation
               </Link>
               <a href={signOutHref} role="menuitem" className="danger" onClick={() => setMenuOpen(false)}>
                 Déconnexion

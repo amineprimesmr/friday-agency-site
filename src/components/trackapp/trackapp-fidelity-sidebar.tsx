@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import type { ComponentType } from "react";
 import { useCallback, useLayoutEffect } from "react";
 
+import { TrackappSidebarFavoritesGroup } from "@/components/trackapp/trackapp-sidebar-favorites-group";
 import { TrackappSidebarFooter } from "@/components/trackapp/trackapp-sidebar-footer";
 import { cn } from "@/lib/utils";
 
@@ -10,22 +12,6 @@ const IconHome = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
     <polyline points="9 22 9 12 15 12 15 22" />
-  </svg>
-);
-
-const IconDashboard = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="7" height="7" rx="1" />
-    <rect x="14" y="3" width="7" height="7" rx="1" />
-    <rect x="3" y="14" width="7" height="7" rx="1" />
-    <rect x="14" y="14" width="7" height="7" rx="1" />
-  </svg>
-);
-
-const IconTracker = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 3v18h18" />
-    <path d="M18 17V9M13 17V5M8 17v-3" />
   </svg>
 );
 
@@ -48,6 +34,23 @@ const IconRessources = () => (
   </svg>
 );
 
+const IconAds = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 11h3l8-5v12l-8-5H3z" />
+    <path d="M6 13v5a2 2 0 0 0 2 2h1" />
+    <path d="M18 9a4 4 0 0 1 0 6" />
+    <path d="M21 7a7 7 0 0 1 0 10" />
+  </svg>
+);
+
+const IconOrganic = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M7 20c0-6 4-10 10-10h4v4c0 6-4 10-10 10H7z" />
+    <path d="M7 20c0-8-4-11-4-15 5 0 8 3 8 8" />
+    <path d="M9 18c2-4 5-6 9-6" />
+  </svg>
+);
+
 const IconSoftware = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="4" width="18" height="14" rx="2" />
@@ -66,25 +69,25 @@ const IconRocket = () => (
   </svg>
 );
 
-const IconHeart = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-  </svg>
-);
+type SidebarLink = {
+  href: string;
+  label: string;
+  section: string;
+  Icon: ComponentType;
+  soon?: boolean;
+};
 
-const LINKS = [
+const LINKS: readonly SidebarLink[] = [
   { href: "/trackapp/accueil", label: "Accueil", section: "accueil", Icon: IconHome },
-  { href: "/trackapp/apptracker", label: "Apptracker", section: "apptracker", Icon: IconSearchApp },
+  { href: "/trackapp/apptracker", label: "Apps du mois", section: "apptracker", Icon: IconSearchApp },
   { href: "/trackapp/creer-mon-app", label: "Créer mon app", section: "creer-mon-app", Icon: IconRocket },
-  { href: "/trackapp/espace", label: "Playbook", section: "espace", Icon: IconDashboard },
+  { href: "/trackapp/ads", label: "Ads", section: "ads", Icon: IconAds },
+  { href: "/trackapp/organique", label: "Organique", section: "organique", Icon: IconOrganic, soon: true },
   { href: "/trackapp/logiciels", label: "Logiciels", section: "logiciels", Icon: IconSoftware },
   { href: "/trackapp/ressources", label: "Ressources", section: "ressources", Icon: IconRessources },
-  { href: "/trackapp/favoris", label: "Mes favoris", section: "favoris", Icon: IconHeart },
-  { href: "/tracker", label: "Tracker", section: "tracker", Icon: IconTracker },
-] as const;
+];
 
 function activeForPath(pathname: string, section: string, href: string): boolean {
-  if (section === "tracker") return pathname === "/tracker" || pathname.startsWith("/tracker/");
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -133,30 +136,65 @@ export function TrackappFidelitySidebar({
         </Link>
       </div>
 
-      <nav className="app-sidebar-nav flex-1 overflow-y-auto px-2 py-3 pb-5" aria-label="Navigation principale">
+      <nav className="app-sidebar-nav flex-1 overflow-y-auto px-2 pb-5" aria-label="Navigation principale">
         {LINKS.map((link) => {
           const Icon = link.Icon;
-          const active = activeForPath(pathname, link.section, link.href);
+          const active = !link.soon && activeForPath(pathname, link.section, link.href);
+
+          const itemClassName = cn(
+            "app-sidebar-link flex items-center gap-2 rounded-[var(--app-radius-sm)] px-2 py-2",
+            "transition-colors duration-200",
+            link.soon
+              ? "cursor-default opacity-50 grayscale"
+              : [
+                  "text-[var(--app-sidebar-text-muted)] hover:bg-[var(--app-sidebar-hover)] hover:text-[var(--app-sidebar-text)]",
+                  active &&
+                    "app-sidebar-link-active bg-[var(--app-sidebar-active)] font-semibold text-[var(--app-sidebar-text)]",
+                ],
+          );
+
+          const itemBody = (
+            <>
+              <span className="app-sidebar-icon flex h-5 w-5 shrink-0 items-center justify-center [&>svg]:h-[1.1rem] [&>svg]:w-[1.1rem]">
+                <Icon />
+              </span>
+              <span className="app-sidebar-link-text truncate whitespace-nowrap">{link.label}</span>
+              {link.soon ? (
+                <span className="ml-auto rounded-full border border-slate-300 bg-slate-100 px-1.5 py-0.5 text-[0.55rem] font-black uppercase tracking-[0.12em] text-slate-500">
+                  Soon
+                </span>
+              ) : null}
+            </>
+          );
+
+          if (link.soon) {
+            return (
+              <span
+                key={link.href}
+                data-section={link.section}
+                aria-disabled="true"
+                title="Bientôt disponible"
+                className={itemClassName}
+              >
+                {itemBody}
+              </span>
+            );
+          }
+
           return (
             <Link
               key={link.href}
               href={link.href}
               data-section={link.section}
               onClick={() => onNavigate?.()}
-              className={cn(
-                "app-sidebar-link flex items-center gap-2 rounded-[var(--app-radius-sm)] px-2 py-2",
-                "text-[var(--app-sidebar-text-muted)] hover:bg-[var(--app-sidebar-hover)] hover:text-[var(--app-sidebar-text)]",
-                "transition-colors duration-200",
-                active && "app-sidebar-link-active bg-[var(--app-sidebar-active)] font-semibold text-[var(--app-sidebar-text)]",
-              )}
+              className={itemClassName}
             >
-              <span className="app-sidebar-icon flex h-5 w-5 shrink-0 items-center justify-center [&>svg]:h-[1.1rem] [&>svg]:w-[1.1rem]">
-                <Icon />
-              </span>
-              <span className="app-sidebar-link-text truncate whitespace-nowrap">{link.label}</span>
+              {itemBody}
             </Link>
           );
         })}
+
+        <TrackappSidebarFavoritesGroup pathname={pathname} onNavigate={onNavigate} />
       </nav>
 
       <TrackappSidebarFooter

@@ -124,7 +124,8 @@ html:has(body.trackapp-fidelity-body) {
 }
 
 .app-sidebar-brand {
-  padding: 0.18rem 0.5rem 0.5rem;
+  padding: 0 0.5rem 2rem;
+  padding-top: max(0px, env(safe-area-inset-top, 0px));
   border-bottom: 1px solid var(--app-sidebar-border);
 }
 
@@ -172,8 +173,13 @@ html:has(body.trackapp-fidelity-body) {
 }
 
 @media (min-width: 901px) {
-  .app-desktop-topbar__brand {
+  /* Marque dans la topbar (alignée avec recherche / affiliation) — pas de doublon sous la barre */
+  .app-sidebar-brand {
     display: none !important;
+  }
+
+  .app-sidebar-nav {
+    padding-top: 2.75rem;
   }
 }
 
@@ -847,8 +853,11 @@ html:has(body.trackapp-fidelity-body) {
 
 .app-sidebar-nav {
   flex: 1;
-  padding: 0.75rem 0.45rem 0.65rem;
+  padding: 2.1rem 0.45rem 0.65rem;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.42rem;
 }
 
 .app-sidebar-link {
@@ -861,7 +870,7 @@ html:has(body.trackapp-fidelity-body) {
   font-size: 0.75rem;
   font-weight: 500;
   border-radius: var(--app-radius-sm);
-  margin-bottom: 0.08rem;
+  margin-bottom: 0;
   transition: background 0.22s ease, color 0.22s ease, transform 0.2s var(--app-ease-spring), opacity 0.2s ease;
   position: relative;
 }
@@ -1075,7 +1084,7 @@ html:has(body.trackapp-fidelity-body) {
     display: flex;
     flex-wrap: wrap;
     padding: 0;
-    gap: 0.25rem;
+    gap: 0.4rem;
   }
   .app-sidebar-link {
     flex: 1;

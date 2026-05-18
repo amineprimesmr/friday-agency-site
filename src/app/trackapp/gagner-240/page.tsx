@@ -4,9 +4,9 @@ import { TrackappGagner240Page } from "@/components/trackapp/trackapp-gagner-240
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Gagner 240€ — Trackapp",
+  title: "Affiliation — Trackapp",
   description:
-    "Programme d'affiliation Trackapp : parrainez vos amis et touchez 50 % de commission sur chaque abonnement (initial et renouvellements).",
+    "Dashboard affiliation : lien à partager, −40 % pour tes filleuls sur l'abonnement, commissions et versements.",
 };
 
 export default async function TrackappGagner240Route() {

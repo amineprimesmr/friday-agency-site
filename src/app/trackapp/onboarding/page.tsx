@@ -1,6 +1,6 @@
 import { permanentRedirect } from "next/navigation";
 
-/** Ancienne étape onboarding — tout passe par l’espace playbook. */
+/** Ancienne étape onboarding — redirection vers l’accueil Trackapp. */
 export default async function OnboardingRemovedRedirect({
   searchParams,
 }: {
@@ -9,5 +9,5 @@ export default async function OnboardingRemovedRedirect({
   const sp = await searchParams;
   const app = typeof sp.app === "string" ? sp.app.trim() : "";
   const qs = app ? `?app=${encodeURIComponent(app)}` : "";
-  permanentRedirect(`/trackapp/espace${qs}`);
+  permanentRedirect(`/trackapp/accueil${qs}`);
 }

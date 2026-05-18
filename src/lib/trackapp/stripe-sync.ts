@@ -36,11 +36,17 @@ export async function persistTrackappPremium(opts: {
   if (!admin) return false;
 
   const unlockedAtIso = new Date().toISOString();
+  const subId =
+    opts.stripeSubscriptionId && opts.stripeSubscriptionId.trim().length ?
+      opts.stripeSubscriptionId.trim()
+    : null;
+
   await admin.from("trackapp_profiles").upsert({
     id: opts.userId,
     plan_unlocked_at: unlockedAtIso,
-    stripe_customer_id: opts.stripeCustomerId ?? null,
-    stripe_subscription_id: opts.stripeSubscriptionId ?? null,
+    stripe_customer_id:
+      opts.stripeCustomerId && opts.stripeCustomerId.trim().length ? opts.stripeCustomerId.trim() : null,
+    stripe_subscription_id: subId,
     updated_at: unlockedAtIso,
   });
 
@@ -56,7 +62,7 @@ export function billingIdsFromCheckoutSession(sess: Stripe.Checkout.Session): {
 
 export async function unlockTrackappFromCheckoutSession(sess: Stripe.Checkout.Session): Promise<boolean> {
   const userId =
-    sess.metadata?.product === "trackapp_full_playbook" && sess.metadata.supabase_user_id ?
+    sess.metadata?.product === "trackapp_full_access" && sess.metadata.supabase_user_id ?
       sess.metadata.supabase_user_id.trim()
     : "";
 

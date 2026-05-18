@@ -35,7 +35,7 @@ export function TrackappPromoModal({
         </h2>
         <p className="mt-4 text-[14px] leading-relaxed text-white/55">
           Un espace où tu enchaînes des étapes claires pour iOS, avec des prompts découpés. Une partie du plan reste
-          visible sans abonnement ; le playbook complet se débloque via Stripe.
+          visible sans abonnement ; l’accès complet se débloque via Stripe.
         </p>
         <ul className="mt-5 space-y-2 text-[13px] text-white/45">
           <li>● Onboarding ultra court (+ ton niveau en apps mobiles)</li>

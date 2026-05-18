@@ -386,7 +386,7 @@ const MODULES: JourneyModule[] = [
       "RevenueCat simplifie beaucoup la gestion des droits premium.",
     ],
     actions: [
-      "Choisir l'offre : mensuel, annuel, lifetime ou achat unique.",
+      "Choisir l'offre : mensuel (39 €) ou annuel (99 €).",
       "Creer les produits dans App Store Connect.",
       "Configurer RevenueCat.",
       "Construire le paywall.",

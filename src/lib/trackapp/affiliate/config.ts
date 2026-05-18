@@ -1,3 +1,6 @@
+/** Réduction affichée (et appliquée si STRIPE_COUPON_ID_REFERRAL_FRIEND est défini) pour les filleuls via lien d’affiliation. */
+export const AFFILIATE_FRIEND_DISCOUNT_PERCENT = 40;
+
 /** Taux de commission affilié (50 % du montant payé par le filleul). */
 export const AFFILIATE_COMMISSION_RATE = 0.5;
 

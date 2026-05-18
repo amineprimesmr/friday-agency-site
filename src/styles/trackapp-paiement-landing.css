@@ -1,0 +1,1035 @@
+/* Page offre / paiement Trackapp — sections marketing (mobile full page + desktop) */
+/* Aligné sur .saas-pay-checkout (trackapp-saas-pro-payment-page.css) pour un fond continu. */
+
+.tpl-paiement-page {
+  --tpl-flyer-canvas: #0e1113;
+  --tpl-flyer-glow-depth: rgb(36, 45, 59);
+  background:
+    radial-gradient(
+      ellipse 130% 95% at 50% 6%,
+      color-mix(in srgb, var(--tpl-flyer-glow-depth) 65%, transparent) 0%,
+      color-mix(in srgb, var(--tpl-flyer-glow-depth) 28%, transparent) 42%,
+      rgba(14, 17, 19, 0) 68%
+    ),
+    var(--tpl-flyer-canvas);
+  color: rgba(248, 250, 252, 0.96);
+  min-height: 100dvh;
+}
+
+/* Mobile : après clic « Commencer maintenant », entrée fluide depuis le bas (sessionStorage + layout) */
+@media (max-width: 1023.98px) {
+  .tpl-paiement-page.tpl-paiement-page--slide-enter {
+    animation: tpl-paiement-slide-enter 0.48s cubic-bezier(0.32, 0.72, 0, 1) both;
+    will-change: transform, opacity;
+  }
+}
+
+@keyframes tpl-paiement-slide-enter {
+  from {
+    transform: translate3d(0, min(18vh, 140px), 0);
+    opacity: 0.82;
+  }
+
+  to {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tpl-paiement-page.tpl-paiement-page--slide-enter {
+    animation: none;
+    transform: none;
+    opacity: 1;
+    will-change: auto;
+  }
+}
+
+.tpl-paiement-marketing {
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- Hero ciné --- */
+.tpl-hero {
+  position: relative;
+  min-height: 13.5rem;
+  padding: 1.25rem 1.25rem 4.25rem;
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .tpl-hero {
+    min-height: 15rem;
+    padding-bottom: 5rem;
+  }
+}
+
+.tpl-hero__bg {
+  position: absolute;
+  inset: 0;
+  /* Laisse le dégradé global .tpl-paiement-page visible (même base que le bon de commande). */
+  background: transparent;
+}
+
+.tpl-hero__inner {
+  position: relative;
+  z-index: 1;
+  max-width: 28rem;
+  margin: 0 auto;
+  text-align: center;
+  padding-top: max(0.5rem, env(safe-area-inset-top));
+}
+
+.tpl-hero__eyebrow {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.tpl-hero__discount {
+  margin: 0.6rem 0 0;
+  font-size: clamp(2.75rem, 13vw, 4.25rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  background: linear-gradient(180deg, #f8fafc 0%, #cbd5e1 48%, #64748b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+
+.tpl-hero__tagline {
+  margin: 0.55rem auto 0;
+  max-width: 22rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* --- Coque principale --- */
+.tpl-shell {
+  margin-top: -3rem;
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  border-radius: 1.75rem 1.75rem 0 0;
+  padding: 1.75rem 1rem 2rem;
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45);
+}
+
+@media (min-width: 640px) {
+  .tpl-shell {
+    max-width: 32rem;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: -3.25rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .tpl-shell {
+    max-width: 40rem;
+    padding-bottom: 2.5rem;
+  }
+}
+
+.tpl-pick__kicker {
+  margin: 0;
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+.tpl-pick__title {
+  margin: 0.5rem 0 0;
+  text-align: center;
+  font-size: clamp(1.45rem, 5vw, 1.85rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.tpl-pick__sub {
+  margin: 0.55rem 0 0;
+  text-align: center;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+/* Preuve sociale : pile d’avatars + étoiles + compteur membres (sans boîte de fond, format compact) */
+.tpl-member-proof {
+  --tpl-proof-star: #74f0a7;
+
+  margin: 0.75rem auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 0;
+  width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.tpl-member-proof__avatars {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding-left: 0.08rem;
+}
+
+.tpl-member-proof__avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1px solid #3f3f46;
+  margin-left: -7px;
+  object-fit: cover;
+  background: #1c1c1e;
+}
+
+.tpl-member-proof__avatar:first-child {
+  margin-left: 0;
+}
+
+.tpl-member-proof__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.tpl-member-proof__stars {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.05rem;
+  line-height: 1;
+}
+
+.tpl-member-proof__star {
+  font-size: 0.72rem;
+  color: var(--tpl-proof-star);
+  text-shadow: none;
+}
+
+.tpl-member-proof__count {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #ffffff;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  white-space: nowrap;
+}
+
+/* Interrupteur mensuel / annuel (même rendu que le bon de commande) */
+.tpl-shell-plan-switcher.saas-pay.saas-pay--plan-switcher-inline {
+  min-height: 0;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  color: inherit;
+  -webkit-font-smoothing: antialiased;
+}
+
+.tpl-shell-plan-switcher .tpl-shell-plan-switcher__billing {
+  margin: 1rem auto 1.25rem;
+}
+
+/* Spotlight card — même lumière bleue que .trackapp-sidebar-earnings (badge gains SaaS) */
+.tpl-spotlight {
+  --flyer-canvas: #0e1113;
+  --flyer-glow-depth: rgb(36, 45, 59);
+  --flyer-glow-vivid: rgb(72, 118, 198);
+  --flyer-glow-bright: rgb(120, 168, 255);
+
+  position: relative;
+  margin-top: 1.35rem;
+  padding: 0;
+  border-radius: 1.35rem;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid color-mix(in srgb, var(--flyer-glow-vivid) 55%, var(--flyer-glow-depth));
+  background:
+    radial-gradient(
+      ellipse 130% 95% at 50% 8%,
+      color-mix(in srgb, var(--flyer-glow-vivid) 52%, transparent) 0%,
+      color-mix(in srgb, var(--flyer-glow-depth) 38%, transparent) 38%,
+      rgba(14, 17, 19, 0) 70%
+    ),
+    radial-gradient(
+      ellipse 100% 75% at 50% 108%,
+      color-mix(in srgb, var(--flyer-glow-vivid) 28%, transparent) 0%,
+      transparent 58%
+    ),
+    var(--flyer-canvas);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--flyer-glow-bright) 22%, transparent),
+    0 0 36px color-mix(in srgb, var(--flyer-glow-vivid) 45%, transparent),
+    0 4px 24px rgba(0, 0, 0, 0.5);
+}
+
+.tpl-spotlight__glow-ring {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 102% 102% at 50% 50%,
+    var(--flyer-canvas) 0%,
+    #0a0d0f 36%,
+    color-mix(in srgb, var(--flyer-glow-vivid) 32%, transparent) 64%,
+    color-mix(in srgb, var(--flyer-glow-vivid) 58%, transparent) 84%,
+    color-mix(in srgb, var(--flyer-glow-bright) 72%, transparent) 93%,
+    color-mix(in srgb, var(--flyer-glow-vivid) 28%, transparent) 98%,
+    transparent 100%
+  );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--flyer-glow-bright) 48%, transparent),
+    inset 0 0 22px 4px color-mix(in srgb, var(--flyer-glow-vivid) 50%, transparent),
+    inset 0 0 48px 12px color-mix(in srgb, var(--flyer-glow-vivid) 28%, transparent),
+    inset 0 0 80px 24px color-mix(in srgb, var(--flyer-glow-depth) 14%, transparent);
+}
+
+.tpl-spotlight__vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 130% 90% at 50% 0%,
+      color-mix(in srgb, var(--flyer-glow-vivid) 55%, transparent) 0%,
+      transparent 48%
+    ),
+    radial-gradient(
+      ellipse 110% 85% at 0% 55%,
+      color-mix(in srgb, var(--flyer-glow-vivid) 38%, transparent) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse 110% 85% at 100% 55%,
+      color-mix(in srgb, var(--flyer-glow-vivid) 34%, transparent) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse 120% 75% at 50% 100%,
+      color-mix(in srgb, var(--flyer-glow-vivid) 30%, transparent) 0%,
+      transparent 50%
+    ),
+    radial-gradient(ellipse 70% 55% at 50% 50%, rgba(0, 0, 0, 0.5) 0%, transparent 72%);
+  opacity: 0.9;
+}
+
+.tpl-spotlight__content {
+  position: relative;
+  z-index: 2;
+  padding: 1.15rem 1.1rem 1.25rem;
+}
+
+.tpl-spotlight__head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.tpl-spotlight__name {
+  margin: 0;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(1.45rem, 5vw, 1.85rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  text-transform: uppercase;
+  -webkit-font-smoothing: antialiased;
+}
+
+.tpl-spotlight__chip {
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 0.2rem 0.45rem;
+  border-radius: 0.35rem;
+  background: rgba(56, 189, 248, 0.22);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #7dd3fc;
+}
+
+/* Carte annuelle : badge incliné type lien bleu → cyan (réf. produit) */
+.tpl-spotlight__chip--reduction {
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  vertical-align: middle;
+  box-shadow: none;
+}
+
+.tpl-spotlight__chip-reduction-wrap {
+  display: inline-block;
+  transform: skewX(-11deg);
+  border-radius: 0.5rem;
+  background: linear-gradient(90deg, #1d4ed8 0%, #0284c7 42%, #06b6d4 72%, #22d3ee 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 2px 14px rgba(6, 182, 212, 0.38);
+}
+
+.tpl-spotlight__chip-reduction-inner {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: nowrap;
+  gap: 0;
+  padding: 0.32rem 0.72rem 0.34rem 0.55rem;
+  transform: skewX(11deg);
+  color: #ffffff;
+  font-style: italic;
+  line-height: 1.05;
+  white-space: nowrap;
+  -webkit-font-smoothing: antialiased;
+}
+
+.tpl-spotlight__chip-reduction-lead {
+  font-size: 0.52rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.tpl-spotlight__chip-reduction-pct {
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.tpl-spotlight__desc {
+  position: relative;
+  margin: 0.4rem 0 0;
+  font-size: 0.84rem;
+  color: rgba(148, 163, 184, 0.95);
+  line-height: 1.4;
+}
+
+/* Bon de commande (timeline + champs + CTA) intégré sous le prix dans chaque carte */
+.tpl-spotlight__order {
+  margin-top: 0.95rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.tpl-spotlight .tpl-spotlight__order .saas-pay-wallet-hero {
+  margin: 0.4rem 0;
+}
+
+.tpl-spotlight .tpl-spotlight__order .saas-pay-method {
+  margin-top: 0.2rem;
+}
+
+.tpl-spotlight .tpl-spotlight__order .saas-pay-wallet-hero__glass {
+  min-height: 2.65rem;
+}
+
+/* Carrousel 2 cartes (Annuel / Mensuel) — pleine largeur dans la coque + coins droits */
+.tpl-spotlight-carousel {
+  position: relative;
+  margin-top: 1.35rem;
+  margin-left: -1rem;
+  margin-right: -1rem;
+  width: calc(100% + 2rem);
+  max-width: none;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+  .tpl-spotlight-carousel {
+    margin-left: -1.25rem;
+    margin-right: -1.25rem;
+    width: calc(100% + 2.5rem);
+  }
+}
+
+.tpl-spotlight-carousel .tpl-spotlight {
+  margin-top: 0;
+  border-radius: 1.15rem;
+}
+
+/* Carte mensuelle : teinte ardoise / violet discret, halo réduit */
+.tpl-spotlight-carousel .tpl-spotlight--monthly {
+  --flyer-canvas: #0c0c10;
+  --flyer-glow-depth: rgb(38, 36, 48);
+  --flyer-glow-vivid: rgb(86, 78, 118);
+  --flyer-glow-bright: rgb(132, 118, 175);
+
+  border-color: color-mix(in srgb, var(--flyer-glow-vivid) 38%, var(--flyer-glow-depth));
+  background:
+    radial-gradient(
+      ellipse 130% 95% at 50% 8%,
+      color-mix(in srgb, var(--flyer-glow-vivid) 22%, transparent) 0%,
+      color-mix(in srgb, var(--flyer-glow-depth) 40%, transparent) 42%,
+      rgba(12, 12, 16, 0) 72%
+    ),
+    radial-gradient(
+      ellipse 100% 75% at 50% 108%,
+      color-mix(in srgb, var(--flyer-glow-vivid) 12%, transparent) 0%,
+      transparent 58%
+    ),
+    var(--flyer-canvas);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--flyer-glow-bright) 10%, transparent),
+    0 0 14px color-mix(in srgb, var(--flyer-glow-vivid) 16%, transparent),
+    0 3px 18px rgba(0, 0, 0, 0.48);
+}
+
+.tpl-spotlight-carousel .tpl-spotlight--monthly .tpl-spotlight__glow-ring {
+  background: radial-gradient(
+    ellipse 102% 102% at 50% 50%,
+    var(--flyer-canvas) 0%,
+    #09090d 38%,
+    color-mix(in srgb, var(--flyer-glow-vivid) 16%, transparent) 62%,
+    color-mix(in srgb, var(--flyer-glow-vivid) 32%, transparent) 78%,
+    color-mix(in srgb, var(--flyer-glow-bright) 38%, transparent) 90%,
+    color-mix(in srgb, var(--flyer-glow-vivid) 14%, transparent) 98%,
+    transparent 100%
+  );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--flyer-glow-bright) 22%, transparent),
+    inset 0 0 10px 2px color-mix(in srgb, var(--flyer-glow-vivid) 18%, transparent),
+    inset 0 0 26px 7px color-mix(in srgb, var(--flyer-glow-vivid) 10%, transparent),
+    inset 0 0 52px 18px color-mix(in srgb, var(--flyer-glow-depth) 12%, transparent);
+}
+
+.tpl-spotlight-carousel .tpl-spotlight--monthly .tpl-spotlight__vignette {
+  opacity: 0.62;
+  background:
+    radial-gradient(
+      ellipse 130% 90% at 50% 0%,
+      color-mix(in srgb, var(--flyer-glow-vivid) 28%, transparent) 0%,
+      transparent 48%
+    ),
+    radial-gradient(
+      ellipse 110% 85% at 0% 55%,
+      color-mix(in srgb, var(--flyer-glow-vivid) 18%, transparent) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse 110% 85% at 100% 55%,
+      color-mix(in srgb, var(--flyer-glow-vivid) 16%, transparent) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse 120% 75% at 50% 100%,
+      color-mix(in srgb, var(--flyer-glow-vivid) 14%, transparent) 0%,
+      transparent 50%
+    ),
+    radial-gradient(ellipse 70% 55% at 50% 50%, rgba(0, 0, 0, 0.58) 0%, transparent 72%);
+}
+
+.tpl-spotlight-carousel .tpl-spotlight--monthly .tpl-spotlight__chip {
+  background: rgba(124, 116, 168, 0.2);
+  border-color: rgba(156, 148, 198, 0.38);
+  color: #c9c0ee;
+}
+
+.tpl-spotlight-carousel__viewport {
+  overflow: hidden;
+  width: 100%;
+  border-radius: 0;
+  /* Container query : centre la carte active (~85 cqi) avec bandes égales pour le peek */
+  container-type: inline-size;
+  container-name: tpl-spotlight;
+}
+
+.tpl-spotlight-carousel__track {
+  display: flex;
+  gap: 0.65rem;
+  width: max-content;
+  max-width: none;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  /* Centre la carte active : ~7,5 % de marge + peek symétrique ; 0 = mensuel, 1 = annuel */
+  transform: translateX(calc(7.5cqi - var(--carousel-index, 0) * (85cqi + 0.65rem)));
+  will-change: transform;
+}
+
+.tpl-spotlight-carousel__slide {
+  flex: 0 0 85cqi;
+  width: 85cqi;
+  min-width: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Navigateurs sans unités cqi : 2 cartes pleine largeur comme avant */
+@supports not (width: 1cqi) {
+  .tpl-spotlight-carousel__viewport {
+    container-type: normal;
+  }
+
+  .tpl-spotlight-carousel__track {
+    width: 200%;
+    gap: 0;
+    /* [Mensuel, Annuel] : pas de cqi, cartes pleine largeur */
+    transform: translateX(calc(var(--carousel-index, 0) * -50%));
+  }
+
+  .tpl-spotlight-carousel__slide {
+    flex: 0 0 50%;
+    width: 50%;
+  }
+}
+
+.tpl-spotlight-carousel__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem;
+  margin: 0;
+  border: none;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: rgba(226, 232, 240, 0.55);
+  cursor: pointer;
+  transform: translateY(-50%);
+  line-height: 0;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+.tpl-spotlight-carousel__arrow:hover {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.tpl-spotlight-carousel__arrow--left {
+  left: 0.2rem;
+}
+
+.tpl-spotlight-carousel__arrow--right {
+  right: 0.2rem;
+}
+
+.tpl-spotlight-carousel__arrow:focus-visible {
+  outline: 2px solid color-mix(in srgb, rgb(120, 168, 255) 55%, transparent);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+.tpl-price-row__lead {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.92);
+}
+
+.tpl-price-row__now--monthly {
+  margin-top: 0.35rem;
+}
+
+.tpl-credit-box {
+  position: relative;
+  margin-top: 1rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.85rem;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tpl-credit-box__title {
+  margin: 0 0 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(226, 232, 240, 0.95);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.tpl-credit-box__list {
+  margin: 0;
+  padding-left: 1rem;
+  font-size: 0.82rem;
+  color: rgba(203, 213, 225, 0.92);
+  line-height: 1.5;
+}
+
+.tpl-price-row {
+  position: relative;
+  margin-top: 1rem;
+}
+
+.tpl-price-row__strike {
+  margin: 0;
+  font-size: 0.8rem;
+  color: color-mix(in srgb, rgb(120, 168, 255) 72%, rgba(255, 255, 255, 0.2));
+  text-decoration: line-through;
+}
+
+.tpl-price-row__now {
+  margin: 0.2rem 0 0;
+  font-size: clamp(1.65rem, 6vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.tpl-price-row__note {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+.tpl-price-row__alt {
+  margin: 0.55rem 0 0;
+  font-size: 0.78rem;
+  color: rgba(148, 163, 184, 0.88);
+}
+
+.tpl-cta-pink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.1rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 0.9rem;
+  font-size: 0.92rem;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+  color: #fff;
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 48%, #be185d 100%);
+  box-shadow: 0 10px 32px rgba(236, 72, 153, 0.35);
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.tpl-cta-pink:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+/* Sections génériques */
+.tpl-section {
+  margin-top: 2.25rem;
+  padding-top: 0.25rem;
+}
+
+.tpl-section--tight {
+  margin-top: 1.75rem;
+}
+
+.tpl-section__kicker {
+  margin: 0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(100, 116, 139, 0.95);
+}
+
+.tpl-section__title {
+  margin: 0.4rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.tpl-checklist {
+  margin: 0.85rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tpl-checklist__item {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  padding: 0.45rem 0;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: rgba(226, 232, 240, 0.92);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tpl-checklist__item:last-child {
+  border-bottom: none;
+}
+
+.tpl-check {
+  flex-shrink: 0;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-top: 0.12rem;
+}
+
+.tpl-check--pink {
+  color: #f472b6;
+}
+
+.tpl-check--lime {
+  color: #bef264;
+}
+
+.tpl-detail-list {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tpl-detail-list__row {
+  display: grid;
+  grid-template-columns: 1.1rem 1fr auto;
+  gap: 0.45rem 0.55rem;
+  align-items: start;
+  padding: 0.55rem 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tpl-detail-list__text {
+  color: rgba(226, 232, 240, 0.9);
+}
+
+.tpl-pill {
+  justify-self: end;
+  padding: 0.18rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.tpl-pill--lime {
+  background: #d4ff3f;
+  color: #0c0c10;
+}
+
+.tpl-pill--pink {
+  background: linear-gradient(135deg, #ec4899, #db2777);
+  color: #fff;
+}
+
+.tpl-pill--muted {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(226, 232, 240, 0.88);
+}
+
+/* Community — titre + double bandeau témoignages (marquee) */
+.tpl-community--marquee {
+  position: relative;
+  margin-top: 2.5rem;
+  padding: 1.75rem 0 1rem;
+}
+
+.tpl-community__title {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(1.45rem, 5vw, 1.85rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.tpl-marquee-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.tpl-community__marquee-stack {
+  margin-top: 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.05rem;
+}
+
+.tpl-community__marquee-viewport {
+  overflow: hidden;
+  width: 100%;
+}
+
+.tpl-community__marquee-viewport--right {
+  transform: translateX(-1.25rem);
+}
+
+@media (max-width: 520px) {
+  .tpl-community__marquee-viewport--right {
+    transform: none;
+  }
+}
+
+.tpl-community__marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: tpl-marquee-scroll 55s linear infinite;
+}
+
+.tpl-community__marquee-track--left {
+  animation-duration: 52s;
+}
+
+.tpl-community__marquee-track--right {
+  animation-duration: 58s;
+  animation-direction: reverse;
+}
+
+.tpl-community__marquee-chunk {
+  display: flex;
+  align-items: stretch;
+  gap: 1.1rem;
+  padding-right: 1.1rem;
+}
+
+@keyframes tpl-marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tpl-community__marquee-track {
+    animation: none;
+    transform: translateX(0);
+  }
+}
+
+.tpl-marquee-card {
+  flex: 0 0 auto;
+  width: min(300px, 79vw);
+  max-width: 320px;
+  padding: 1.4rem 1.25rem;
+  border-radius: 1.15rem;
+  background: #1c1c1c;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-sizing: border-box;
+}
+
+.tpl-marquee-card__stars {
+  display: flex;
+  gap: 0.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.tpl-marquee-card__star {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.tpl-marquee-card__star--on {
+  color: #fff;
+}
+
+.tpl-marquee-card__title {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #fff;
+  line-height: 1.25;
+}
+
+.tpl-marquee-card__body {
+  margin: 0.4rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #a0a0a0;
+}
+
+.tpl-marquee-card__user {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.tpl-marquee-card__avatar {
+  display: inline-flex;
+  width: 1.85rem;
+  height: 1.85rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tpl-marquee-card__name {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+/* Intro formulaire (TrackappPaymentPage showHeroBlock false) */
+.tpl-paiement-form-intro {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 0.25rem;
+}
+
+.tpl-paiement-form-intro__title {
+  margin: 0.75rem 0 0;
+  font-size: clamp(1.15rem, 3.5vw, 1.35rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.tpl-paiement-form-intro__lead {
+  margin: 0.4rem 0 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+.saas-pay-checkout--landing-form .saas-pay-checkout-main {
+  padding-top: 0.5rem;
+}
+
+.saas-pay-checkout--landing-form .saas-pay-checkout-head {
+  margin-bottom: 0.85rem;
+}
+
+#paiement-checkout {
+  scroll-margin-top: 1rem;
+}
+
+/* Un seul dégradé : le parent .tpl-paiement-page porte le même fond que .saas-pay-checkout. */
+.tpl-paiement-page .saas-pay-checkout {
+  background: transparent;
+  min-height: 0;
+}

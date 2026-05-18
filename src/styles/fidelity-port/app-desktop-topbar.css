@@ -998,6 +998,11 @@
     box-shadow: none;
   }
 
+  .app-sidebar .app-sidebar-brand {
+    padding-top: 0;
+    padding-bottom: 0.4rem;
+  }
+
   .app-sidebar.is-mobile-open {
     transform: translateX(0);
     box-shadow: 0 14px 34px rgba(0, 0, 0, 0.38);
@@ -1007,8 +1012,8 @@
     display: flex !important;
     flex-direction: column !important;
     flex-wrap: nowrap !important;
-    gap: 0.18rem !important;
-    padding: 0.8rem 0.55rem 0.65rem !important;
+    gap: 0.45rem !important;
+    padding: 0.45rem 0.55rem 0.65rem !important;
   }
 
   .app-sidebar .app-sidebar-link {
@@ -1017,7 +1022,7 @@
     flex: 0 0 auto !important;
     justify-content: flex-start !important;
     gap: 0.55rem !important;
-    margin-bottom: 0.12rem !important;
+    margin-bottom: 0 !important;
     padding: 0.5rem 0.62rem !important;
     border-radius: 12px !important;
     font-size: 0.82rem !important;

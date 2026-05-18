@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 
-import { AFFILIATE_COMMISSION_RATE, AFFILIATE_MIN_PAYOUT_CENTS } from "@/lib/trackapp/affiliate/config";
+import {
+  AFFILIATE_COMMISSION_RATE,
+  AFFILIATE_FRIEND_DISCOUNT_PERCENT,
+  AFFILIATE_MIN_PAYOUT_CENTS,
+} from "@/lib/trackapp/affiliate/config";
 import { getAffiliateBalance } from "@/lib/trackapp/affiliate/commissions";
 import { ensureAffiliateProfile, referralLink } from "@/lib/trackapp/affiliate/referral";
 import { getConnectAccountStatus, stripeConnectConfigured } from "@/lib/trackapp/affiliate/stripe-connect";
@@ -64,6 +68,7 @@ export async function GET() {
   return NextResponse.json({
     referralCode: profile.referral_code,
     referralLink: referralLink(origin, profile.referral_code),
+    friendDiscountPercent: AFFILIATE_FRIEND_DISCOUNT_PERCENT,
     commissionRate: AFFILIATE_COMMISSION_RATE,
     minPayoutCents: AFFILIATE_MIN_PAYOUT_CENTS,
     balance,

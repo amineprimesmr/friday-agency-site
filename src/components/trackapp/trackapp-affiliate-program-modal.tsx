@@ -1,9 +1,7 @@
 "use client";
 
-import { TrendtrackAffiliateLanding } from "@/components/tracker/trendtrack-affiliate-landing";
+import Link from "next/link";
 import { useEffect, useId } from "react";
-
-import "@/styles/tracker-bracket-badge.css";
 
 export function TrackappAffiliateProgramModal({
   open,
@@ -43,25 +41,32 @@ export function TrackappAffiliateProgramModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={modalHeadingId}
-        className="relative flex max-h-[min(92dvh,920px)] w-full max-w-[1100px] flex-col overflow-hidden rounded-[clamp(14px,2.5vw,22px)] bg-black shadow-[0_24px_80px_rgba(0,0,0,0.55)] ring-1 ring-white/[0.12]"
+        className="relative w-full max-w-[440px] overflow-hidden rounded-[20px] bg-white p-6 shadow-[0_24px_80px_rgba(0,0,0,0.18)] ring-1 ring-slate-200"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 id={modalHeadingId} className="sr-only">
-          Programme d&apos;affiliation Trackapp
-        </h2>
-
         <button
           type="button"
-          className="absolute right-3 top-3 z-[2] flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/55 text-[13px] font-semibold text-white backdrop-blur-md transition hover:bg-black/70 md:right-4 md:top-4"
+          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50"
           onClick={onClose}
-          aria-label="Fermer la fenêtre affiliation"
+          aria-label="Fermer"
         >
           ✕
         </button>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-          <TrendtrackAffiliateLanding />
-        </div>
+        <h2 id={modalHeadingId} className="m-0 pr-8 text-lg font-extrabold tracking-tight text-slate-900">
+          Affiliation Trackapp
+        </h2>
+        <p className="mt-3 text-[0.92rem] leading-relaxed text-slate-600">
+          Ton lien offre <strong className="text-slate-900">−40&nbsp;%</strong> sur l&apos;abonnement aux personnes qui
+          passent par toi, et tu suis tes commissions dans le dashboard.
+        </p>
+        <Link
+          href="/trackapp/gagner-240"
+          className="mt-5 inline-flex w-full min-h-11 items-center justify-center rounded-full bg-[#0f172a] text-[0.88rem] font-bold text-white no-underline transition hover:bg-[#111827]"
+          onClick={onClose}
+        >
+          Ouvrir le dashboard affiliation
+        </Link>
       </div>
     </div>
   );

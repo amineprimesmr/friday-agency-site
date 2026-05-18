@@ -1,190 +1,271 @@
-.trackapp-affiliate-dash {
-  margin: 0 0 2rem;
-  padding: 1.25rem 1.35rem 1.5rem;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: linear-gradient(165deg, rgba(36, 45, 59, 0.35) 0%, rgba(14, 17, 19, 0.95) 55%);
-  color: #f5f7fb;
+/* Dashboard affiliation Trackapp (SaaS) — sobre, aligné workspace */
+
+.ta-aff-dash {
+  max-width: 920px;
+  margin: 0 auto;
+  padding-bottom: 2rem;
 }
 
-.trackapp-affiliate-dash--loading,
-.trackapp-affiliate-dash--error {
-  padding: 2rem;
+.ta-aff-dash--state {
+  min-height: 12rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
   text-align: center;
-  color: rgba(255, 255, 255, 0.65);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  color: var(--dash-muted-light);
 }
 
-.trackapp-affiliate-dash__head h2 {
-  margin: 0 0 0.35rem;
-  font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
+.ta-aff-dash--error {
+  color: var(--dash-text);
 }
 
-.trackapp-affiliate-dash__head p {
-  margin: 0 0 1.1rem;
+.ta-aff-dash__retry {
+  border-radius: 9999px;
+  border: 1px solid var(--dash-border);
+  background: white;
+  padding: 0.45rem 1rem;
   font-size: 0.85rem;
-  color: rgba(209, 217, 232, 0.82);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ta-aff-dash__hero {
+  margin-bottom: 1.75rem;
+}
+
+.ta-aff-dash__title {
+  margin: 0;
+  font-size: clamp(1.65rem, 3.5vw, 2.1rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--dash-text);
+}
+
+.ta-aff-dash__lead {
+  margin: 1rem 0 0;
+  max-width: 62ch;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--dash-muted-light);
+}
+
+.ta-aff-dash__lead strong {
+  color: var(--dash-text);
+  font-weight: 700;
+}
+
+.ta-aff-dash__panel {
+  margin-bottom: 1.25rem;
+  border-radius: 22px;
+  border: 1px solid var(--dash-border);
+  background: #fff;
+  padding: 1.25rem 1.35rem;
+  box-shadow: var(--dash-shadow);
+}
+
+.ta-aff-dash__panel--highlight {
+  border-color: rgba(94, 234, 212, 0.35);
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.07);
+  background: linear-gradient(145deg, rgba(240, 253, 250, 0.65) 0%, #fff 55%);
+}
+
+.ta-aff-dash__panel-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--dash-text);
+}
+
+.ta-aff-dash__panel-desc {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--dash-muted-light);
+}
+
+.ta-aff-dash__copy-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: stretch;
+}
+
+.ta-aff-dash__url {
+  flex: 1;
+  min-width: 0;
+  border-radius: 14px;
+  border: 1px solid var(--dash-border);
+  background: rgba(248, 250, 252, 0.95);
+  padding: 0.7rem 0.85rem;
+  font-size: 0.8rem;
   line-height: 1.45;
+  word-break: break-all;
+  color: var(--dash-text);
 }
 
-.trackapp-affiliate-dash__stats {
+.ta-aff-dash__copy-btn {
+  flex-shrink: 0;
+  border-radius: 14px;
+  border: none;
+  background: #0f172a;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.82rem;
+  padding: 0.65rem 1.1rem;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+
+.ta-aff-dash__copy-btn:hover {
+  background: #111827;
+}
+
+.ta-aff-dash__code-line {
+  margin: 0.85rem 0 0;
+  font-size: 0.82rem;
+  color: var(--dash-muted-light);
+}
+
+.ta-aff-dash__stats {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.65rem;
-  margin-bottom: 1.1rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
 }
 
-@media (min-width: 640px) {
-  .trackapp-affiliate-dash__stats {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+@media (min-width: 720px) {
+  .ta-aff-dash__stats {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
-.trackapp-affiliate-dash__stat {
-  padding: 0.75rem 0.85rem;
-  border-radius: 14px;
-  background: rgba(0, 0, 0, 0.28);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+.ta-aff-dash__stat {
+  border-radius: 18px;
+  border: 1px solid var(--dash-border);
+  background: #fff;
+  padding: 1rem 1rem 0.9rem;
+  box-shadow: var(--dash-shadow);
 }
 
-.trackapp-affiliate-dash__stat-label {
+.ta-aff-dash__stat-label {
   display: block;
   font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: 0.25rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--dash-muted-light);
 }
 
-.trackapp-affiliate-dash__stat strong {
-  font-size: 1.05rem;
-  font-weight: 700;
-}
-
-.trackapp-affiliate-dash__stat strong.is-highlight {
-  color: #a8c4ff;
-}
-
-.trackapp-affiliate-dash__stat-hint {
+.ta-aff-dash__stat strong {
   display: block;
-  margin-top: 0.2rem;
-  font-size: 0.62rem;
-  color: rgba(255, 255, 255, 0.38);
+  margin-top: 0.45rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--dash-text);
 }
 
-.trackapp-affiliate-dash__link-box {
-  margin-bottom: 1rem;
-  padding: 0.85rem 1rem;
-  border-radius: 14px;
-  background: rgba(0, 0, 0, 0.22);
-  border: 1px solid rgba(120, 168, 255, 0.2);
-}
-
-.trackapp-affiliate-dash__link-label {
-  margin: 0 0 0.45rem;
+.ta-aff-dash__stat-hint {
+  display: block;
+  margin-top: 0.35rem;
   font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--dash-muted-light);
 }
 
-.trackapp-affiliate-dash__link-row {
+.ta-aff-dash__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
 }
 
-.trackapp-affiliate-dash__link-row code {
-  flex: 1;
-  min-width: 0;
-  font-size: 0.72rem;
-  word-break: break-all;
-  color: #d1d9e8;
-}
-
-.trackapp-affiliate-dash__link-row button {
-  flex-shrink: 0;
-  padding: 0.4rem 0.75rem;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.trackapp-affiliate-dash__code {
-  margin: 0.5rem 0 0;
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.trackapp-affiliate-dash__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.55rem;
-}
-
-.trackapp-affiliate-dash__btn {
+.ta-aff-dash__btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.55rem 1rem;
-  border-radius: 10px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  min-height: 2.65rem;
+  padding: 0 1.15rem;
+  border-radius: 9999px;
+  font-size: 0.84rem;
+  font-weight: 800;
   text-decoration: none;
-  cursor: pointer;
-  border: none;
-  transition: opacity 0.15s ease;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    opacity 0.18s ease;
 }
 
-.trackapp-affiliate-dash__btn:disabled {
-  opacity: 0.45;
+.ta-aff-dash__btn:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-.trackapp-affiliate-dash__btn--primary {
-  background: linear-gradient(135deg, #5b8def 0%, #3d6fd4 100%);
+.ta-aff-dash__btn--primary {
+  border: none;
+  background: #0f172a;
   color: #fff;
 }
 
-.trackapp-affiliate-dash__btn--ghost {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: transparent;
-  color: rgba(255, 255, 255, 0.88);
+.ta-aff-dash__btn--primary:hover:not(:disabled) {
+  background: #111827;
 }
 
-.trackapp-affiliate-dash__msg {
-  margin: 0.75rem 0 0;
-  font-size: 0.8rem;
-  color: #a8c4ff;
+.ta-aff-dash__btn--ghost {
+  border: 1px solid var(--dash-border);
+  background: #fff;
+  color: var(--dash-text);
 }
 
-.trackapp-affiliate-dash__table-wrap {
-  margin-top: 1.25rem;
+.ta-aff-dash__btn--ghost:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
 }
 
-.trackapp-affiliate-dash__table-wrap h3 {
-  margin: 0 0 0.5rem;
+.ta-aff-dash__msg {
+  margin: 0.85rem 0 0;
   font-size: 0.88rem;
   font-weight: 600;
+  color: #047857;
 }
 
-.trackapp-affiliate-dash__table {
+.ta-aff-dash__table-block {
+  margin-top: 0.5rem;
+}
+
+.ta-aff-dash__table-wrap {
+  margin-top: 0.65rem;
+  overflow-x: auto;
+  border-radius: 16px;
+  border: 1px solid var(--dash-border);
+  background: #fff;
+}
+
+.ta-aff-dash__table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.72rem;
+  font-size: 0.82rem;
 }
 
-.trackapp-affiliate-dash__table th,
-.trackapp-affiliate-dash__table td {
-  padding: 0.45rem 0.35rem;
+.ta-aff-dash__table th,
+.ta-aff-dash__table td {
+  padding: 0.65rem 0.75rem;
   text-align: left;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid #f1f5f9;
 }
 
-.trackapp-affiliate-dash__table th {
-  color: rgba(255, 255, 255, 0.45);
-  font-weight: 500;
+.ta-aff-dash__table th {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--dash-muted-light);
+  background: #fafafa;
+}
+
+.ta-aff-dash__table tr:last-child td {
+  border-bottom: none;
 }

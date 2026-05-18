@@ -8,11 +8,13 @@ import {
   type CountryCode,
   type SearchResult,
 } from "@/lib/apple-charts";
+import { cn } from "@/lib/utils";
 
 export function TrackappApptrackerAppResultCard({
   app,
   country,
-}: Readonly<{ app: SearchResult; country: CountryCode }>) {
+  className,
+}: Readonly<{ app: SearchResult; country: CountryCode; className?: string }>) {
   const dlEst = estimateMonthlyDownloads(app.rank || 50, country);
   const revEst = formatEstimatedMonthlyRevenuePrecise(
     app.rank || 50,
@@ -25,7 +27,10 @@ export function TrackappApptrackerAppResultCard({
   return (
     <Link
       href={`/trackapp/apptracker/${app.id}?country=${country}`}
-      className="group flex gap-4 rounded-[22px] border border-[var(--dash-border)] bg-white p-4 text-[var(--dash-text)] no-underline shadow-[var(--dash-shadow)] transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[var(--dash-shadow-lg)]"
+      className={cn(
+        "group flex gap-4 rounded-[22px] border border-[var(--dash-border)] bg-white p-4 text-[var(--dash-text)] no-underline shadow-[var(--dash-shadow)] transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[var(--dash-shadow-lg)]",
+        className,
+      )}
     >
       <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-200">
         {app.artworkUrl ? (

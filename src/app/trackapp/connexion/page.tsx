@@ -1,4 +1,4 @@
-import { ConnexionForm } from "@/components/trackapp/connexion-form";
+import { TaConnexionFlow } from "@/components/trackapp/auth/trackapp-connexion-flow";
 import { TrackappDevSaasBypassButton } from "@/components/trackapp/trackapp-dev-saas-bypass";
 
 function safeNext(raw: string | string[] | undefined): string {
@@ -22,24 +22,11 @@ export default async function ConnexionPage({
   const nextHref = safeNext(qs.next);
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-14 lg:py-22">
-      <div className="grid gap-14 lg:grid-cols-[1fr,min(460px)] lg:gap-24">
-        <div className="space-y-5">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-violet-300/85">Connexion Trackapp</p>
-          <h1 className="text-balance text-4xl font-semibold tracking-tight text-white lg:text-[2.75rem]">
-            Ton espace playbook iOS avec prompts prêts à coller.
-          </h1>
-          <p className="max-w-lg text-[15px] leading-relaxed text-white/52">
-            Même ambiance sombre inspirée Trendtrack mais en violet fluo. Après paiement Stripe, tous les prompts se débloquent.
-          </p>
-        </div>
-        <div className="rounded-[1.85rem] border border-white/[0.08] bg-white/[0.03] p-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] lg:p-10">
-          <ConnexionForm nextHref={nextHref} />
-        </div>
-      </div>
-      <div className="mt-16 flex justify-center lg:mt-20">
+    <div className="ta-font min-h-dvh bg-neutral-950 antialiased">
+      <TaConnexionFlow nextHref={nextHref} />
+      <footer className="ta-auth-page-footer flex justify-center">
         <TrackappDevSaasBypassButton />
-      </div>
-    </main>
+      </footer>
+    </div>
   );
 }

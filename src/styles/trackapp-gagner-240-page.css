@@ -14,7 +14,3 @@ body.trackapp-fidelity-body #app-app .app-main:has(.trackapp-gagner-240-page) > 
   width: 100%;
   min-height: min(100%, calc(100dvh - var(--app-topbar-height, 56px) - 1rem));
 }
-
-.trackapp-gagner-240-page .tt-affiliate {
-  min-height: inherit;
-}

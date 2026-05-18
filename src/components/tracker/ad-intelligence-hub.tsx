@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { estimateMonthlyDownloads, type AppEntry, type CountryCode } from "@/lib/apple-charts";
 import Image from "next/image";
 import type { TrackerMetaAdLibraryContext } from "@/lib/tracker-meta-ad-library-context";
@@ -13,12 +14,18 @@ import { MetaLatestAdsCarousel } from "@/components/tracker/meta-latest-ads-caro
 import type { AdIntelPlatform } from "@/components/tracker/app-ads";
 import { AppAds } from "@/components/tracker/app-ads";
 import { useMetaAdLibrary } from "@/components/tracker/use-meta-ad-library";
+import { mergeManualMetaPageIds } from "@/lib/tracker-merge-manual-meta";
+import {
+  loadStoredManualMetaPageIds,
+  TrackerManualMetaPagesPanel,
+} from "@/components/tracker/tracker-manual-meta-pages";
 
 export function AdIntelligenceHub({
   appName,
   developerName,
   bundleId,
   countryCode,
+  trackerAppleAppId,
   metaLibraryContext,
   enabledPlatforms,
 }: {
@@ -26,15 +33,32 @@ export function AdIntelligenceHub({
   developerName: string;
   bundleId: string;
   countryCode: string;
+  /** ID App Store (chiffres) — clé localStorage pour pages Meta manuelles. */
+  trackerAppleAppId: string;
   metaLibraryContext: TrackerMetaAdLibraryContext;
   enabledPlatforms: AdIntelPlatform[];
 }) {
   const metaOk = useMetaLibraryConfigured();
   const metaCc = (countryCode || "FR").trim() || "FR";
-  const hasResolvedMetaPage = metaLibraryContext.searchPageIds.length > 0;
+
+  const [manualPageIds, setManualPageIds] = useState<string[]>([]);
+  useEffect(() => {
+    setManualPageIds(loadStoredManualMetaPageIds(trackerAppleAppId));
+  }, [trackerAppleAppId]);
+
+  const onManualPageIdsChange = useCallback((ids: string[]) => {
+    setManualPageIds(ids);
+  }, []);
+
+  const effectiveContext = useMemo(
+    () => mergeManualMetaPageIds(metaLibraryContext, manualPageIds),
+    [metaLibraryContext, manualPageIds],
+  );
+
+  const hasResolvedMetaPage = effectiveContext.searchPageIds.length > 0;
   const metaLib = useMetaAdLibrary({
-    searchTerms: metaLibraryContext.keywordFallback,
-    searchPageIds: metaLibraryContext.searchPageIds,
+    searchTerms: effectiveContext.keywordFallback,
+    searchPageIds: effectiveContext.searchPageIds,
     countryCode: metaCc,
     pageSize: 12,
     enabled: hasResolvedMetaPage,
@@ -54,20 +78,27 @@ export function AdIntelligenceHub({
       </div>
 
       <SocialPresenceStrip
-        profiles={metaLibraryContext.socialProfiles}
+        profiles={effectiveContext.socialProfiles}
         appName={appName}
-        enrichedByAi={metaLibraryContext.openAiEnriched}
-        officialWebsite={metaLibraryContext.officialWebsite}
-        confidence={metaLibraryContext.confidence}
-        sources={metaLibraryContext.sources}
+        enrichedByAi={effectiveContext.openAiEnriched}
+        officialWebsite={effectiveContext.officialWebsite}
+        confidence={effectiveContext.confidence}
+        sources={effectiveContext.sources}
       />
 
       <PixelIntegrationsPanel metaLibraryConfigured={metaOk} />
 
+      <TrackerManualMetaPagesPanel
+        trackerAppleAppId={trackerAppleAppId}
+        manualPageIds={manualPageIds}
+        onManualPageIdsChange={onManualPageIdsChange}
+        configured={metaOk}
+      />
+
       <MetaLatestAdsCarousel
         appName={appName}
         countryCode={countryCode}
-        metaLibraryContext={metaLibraryContext}
+        metaLibraryContext={effectiveContext}
         library={metaLib}
       />
 
@@ -81,7 +112,7 @@ export function AdIntelligenceHub({
             bundleId={bundleId}
             countryCode={countryCode}
             enabledPlatforms={enabledPlatforms}
-            metaLibraryContext={metaLibraryContext}
+            metaLibraryContext={effectiveContext}
             metaAdLibrary={metaLib}
           />
         </div>

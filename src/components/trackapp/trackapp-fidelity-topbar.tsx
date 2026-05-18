@@ -87,8 +87,8 @@ export function TrackappFidelityTopbar({
           <div className="trackapp-topbar-affiliate-glass-host trackapp-topbar-affiliate-glass-host--right">
             <Link href="/trackapp/gagner-240" className="trackapp-topbar-affiliate-glass">
               <span className="trackapp-topbar-affiliate-glass__label">
-                <span>Parraine un ami</span>
-                <span>et gagne 240&nbsp;€</span>
+                <span>Affiliation</span>
+                <span>−40&nbsp;% pour tes filleuls</span>
               </span>
             </Link>
           </div>
