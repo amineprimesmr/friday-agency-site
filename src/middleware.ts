@@ -36,6 +36,7 @@ const PREMIUM_EXEMPT_PREFIXES = [
 const PROTECT_PREFIXES = [
   "/trackapp/accueil",
   "/trackapp/apptracker",
+  "/trackapp/notre-selection",
   "/trackapp/creer-mon-app",
   "/trackapp/organique",
   "/trackapp/logiciels",
@@ -67,8 +68,19 @@ export async function middleware(request: NextRequest) {
   const isResourcesApi = pathname.startsWith("/api/trackapp/ressources");
   const isFavoritesApi = pathname.startsWith("/api/trackapp/favorites");
   const isAffiliateApi = pathname.startsWith("/api/trackapp/affiliate");
+  const isMediaProxyApi = pathname.startsWith("/api/trackapp/media-proxy");
+  const isInstagramOrganicApi = pathname.startsWith("/api/trackapp/instagram-organic");
+  const isTikTokOrganicApi = pathname.startsWith("/api/trackapp/tiktok-organic");
 
-  if (!pathname.startsWith("/trackapp") && !isResourcesApi && !isFavoritesApi && !isAffiliateApi) {
+  if (
+    !pathname.startsWith("/trackapp") &&
+    !isResourcesApi &&
+    !isFavoritesApi &&
+    !isAffiliateApi &&
+    !isMediaProxyApi &&
+    !isInstagramOrganicApi &&
+    !isTikTokOrganicApi
+  ) {
     return response;
   }
 
@@ -79,7 +91,10 @@ export async function middleware(request: NextRequest) {
     PROTECT_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))
     || isResourcesApi
     || isFavoritesApi
-    || isAffiliateApi;
+    || isAffiliateApi
+    || isMediaProxyApi
+    || isInstagramOrganicApi
+    || isTikTokOrganicApi;
 
   /** En local tu peux ouvrir l’UI SaaS sans session ; la page serve les données maquette. */
   const skipTrackappAuth = process.env.NODE_ENV !== "production";
@@ -175,5 +190,11 @@ export const config = {
     "/api/trackapp/favorites/:path*",
     "/api/trackapp/affiliate",
     "/api/trackapp/affiliate/:path*",
+    "/api/trackapp/media-proxy",
+    "/api/trackapp/media-proxy/:path*",
+    "/api/trackapp/instagram-organic",
+    "/api/trackapp/instagram-organic/:path*",
+    "/api/trackapp/tiktok-organic",
+    "/api/trackapp/tiktok-organic/:path*",
   ],
 };

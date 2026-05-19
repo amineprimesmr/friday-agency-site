@@ -7,13 +7,14 @@ import {
   type TrackappMonthlyPickResolved,
 } from "@/lib/trackapp-apptracker-monthly-picks";
 import type { CountryCode } from "@/lib/apple-charts";
-import { COUNTRY_MAP } from "@/lib/apple-charts";
 
 type Props = Readonly<{
   country: CountryCode;
   picks: readonly TrackappMonthlyPickResolved[];
   favoritesEnabled?: boolean;
   favoriteAppIds?: string[];
+  /** Intégré dans le hub Apptracker (sans hero dupliqué ni CTA accueil). */
+  embedded?: boolean;
 }>;
 
 export function TrackappApptrackerMonthlySection({
@@ -21,51 +22,41 @@ export function TrackappApptrackerMonthlySection({
   picks,
   favoritesEnabled = false,
   favoriteAppIds = [],
+  embedded = false,
 }: Props) {
-  const countryData = COUNTRY_MAP[country];
   const favSet = new Set(favoriteAppIds);
 
   return (
     <>
-      <section className="dashboard-section">
-        <p className="trackapp-workspace-hero-kicker">Apptracker · Sélection</p>
-        <h1 className="trackapp-workspace-hero-title">Les apps du mois à copier de A à Z</h1>
-        <p className="trackapp-workspace-hero-desc max-w-[70ch]">
-          Chaque fiche ouvre une analyse complète : métriques, screenshots, store copy. Tu veux chercher n&apos;importe
-          quelle app ? Utilise la recherche sur l&apos;
-          <Link href="/trackapp/accueil" className="font-semibold text-[var(--dash-text)] underline-offset-2 hover:underline">
-            accueil
-          </Link>
-          .
-        </p>
+      <section className={embedded ? "mt-10" : "dashboard-section"}>
+        {embedded ? (
+          <h2 className="m-0 text-[1.35rem] font-bold tracking-tight text-[var(--dash-text)]">Apps du mois</h2>
+        ) : (
+          <>
+            <p className="trackapp-workspace-hero-kicker">Apptracker · Trackapp</p>
+            <h1 className="trackapp-workspace-hero-title">Notre sélection</h1>
+            <p className="trackapp-workspace-hero-desc max-w-[70ch]">
+              Les apps du mois à copier de A à Z — chaque fiche ouvre une analyse complète : métriques, screenshots,
+              présence officielle.
+            </p>
+          </>
+        )}
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[0.78rem] font-bold text-slate-600 shadow-[var(--dash-shadow)]">
             {TRACKAPP_APPTRACKER_PICKS_MONTH_LABEL}
           </span>
-          {countryData ? (
-            <span className="text-[0.88rem] font-semibold text-[var(--dash-muted-light)]">
-              Boutique {countryData.flag} {countryData.name}
-            </span>
-          ) : null}
         </div>
       </section>
 
       {picks.length === 0 ? (
         <section className="rounded-[26px] border border-dashed border-amber-300 bg-amber-50/80 p-8 text-center shadow-[var(--dash-shadow)]">
           <p className="text-[0.95rem] font-semibold text-amber-950">
-            Impossible de charger la sélection pour cette boutique. Réessaie plus tard ou passe par la recherche sur
-            l&apos;accueil.
+            Impossible de charger la sélection pour cette boutique. Réessaie plus tard ou utilise la recherche ci-dessus.
           </p>
-          <Link
-            href="/trackapp/accueil"
-            className="mt-4 inline-flex rounded-full bg-slate-900 px-4 py-2 text-[0.84rem] font-bold text-white no-underline hover:bg-slate-800"
-          >
-            Aller à l&apos;accueil
-          </Link>
         </section>
       ) : (
         <section className="grid gap-6 lg:grid-cols-2">
-          {picks.map(({ app, blurb }) => (
+          {picks.map(({ app, blurb, metrics }) => (
             <article
               key={app.id}
               className="overflow-hidden rounded-[22px] border border-[var(--dash-border)] bg-white shadow-[var(--dash-shadow)] transition hover:border-slate-300 hover:shadow-[var(--dash-shadow-lg)]"
@@ -79,6 +70,7 @@ export function TrackappApptrackerMonthlySection({
                   <TrackappApptrackerAppResultCard
                     app={app}
                     country={country}
+                    metrics={metrics}
                     className="rounded-none border-0 pr-11 shadow-none hover:translate-y-0 hover:border-transparent hover:shadow-none md:pr-14"
                   />
                 </TrackappAppFavoriteRow>
@@ -86,6 +78,7 @@ export function TrackappApptrackerMonthlySection({
                 <TrackappApptrackerAppResultCard
                   app={app}
                   country={country}
+                  metrics={metrics}
                   className="rounded-none border-0 shadow-none hover:translate-y-0 hover:border-transparent hover:shadow-none"
                 />
               )}
@@ -100,17 +93,17 @@ export function TrackappApptrackerMonthlySection({
         </section>
       )}
 
-      <section className="mt-10 rounded-[24px] border border-slate-200 bg-slate-50 px-6 py-6 text-center shadow-inner">
-        <p className="m-0 text-[0.92rem] font-semibold text-slate-700">
-          Recherche libre App Store (même barre que l&apos;accueil)
-        </p>
-        <Link
-          href="/trackapp/accueil"
-          className="mt-3 inline-flex rounded-full border border-slate-300 bg-white px-4 py-2 text-[0.84rem] font-bold text-slate-900 no-underline shadow-sm transition hover:border-slate-400 hover:bg-slate-50"
-        >
-          Ouvrir l&apos;accueil
-        </Link>
-      </section>
+      {!embedded ? (
+        <section className="mt-10 rounded-[24px] border border-slate-200 bg-slate-50 px-6 py-6 text-center shadow-inner">
+          <p className="m-0 text-[0.92rem] font-semibold text-slate-700">Tu cherches une autre app ?</p>
+          <Link
+            href="/trackapp/accueil"
+            className="mt-3 inline-flex rounded-full border border-slate-300 bg-white px-4 py-2 text-[0.84rem] font-bold text-slate-900 no-underline shadow-sm transition hover:border-slate-400 hover:bg-slate-50"
+          >
+            Ouvrir la recherche Apptracker
+          </Link>
+        </section>
+      ) : null}
     </>
   );
 }

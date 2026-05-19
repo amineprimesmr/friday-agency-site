@@ -1,34 +1,30 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import {
-  estimateMonthlyDownloads,
-  formatEstimatedMonthlyRevenuePrecise,
-  formatRatingCount,
-  type CountryCode,
-  type SearchResult,
-} from "@/lib/apple-charts";
+import { formatRatingCount, type CountryCode, type SearchResult } from "@/lib/apple-charts";
+import type { TrackappAppDisplayMetrics } from "@/lib/trackapp-app-display-metrics";
+import { trackappApptrackerAppHref } from "@/lib/trackapp-apptracker-paths";
 import { cn } from "@/lib/utils";
 
 export function TrackappApptrackerAppResultCard({
   app,
   country,
+  metrics,
   className,
-}: Readonly<{ app: SearchResult; country: CountryCode; className?: string }>) {
-  const dlEst = estimateMonthlyDownloads(app.rank || 50, country);
-  const revEst = formatEstimatedMonthlyRevenuePrecise(
-    app.rank || 50,
-    app.price,
-    app.categoryId,
-    country,
-    app.id,
-  );
+}: Readonly<{
+  app: SearchResult;
+  country: CountryCode;
+  metrics: TrackappAppDisplayMetrics;
+  className?: string;
+}>) {
+  const dlEst = metrics.downloadsDisplay;
+  const revEst = metrics.revenueDisplay;
 
   return (
     <Link
-      href={`/trackapp/apptracker/${app.id}?country=${country}`}
+      href={trackappApptrackerAppHref(app.id, country)}
       className={cn(
-        "group flex gap-4 rounded-[22px] border border-[var(--dash-border)] bg-white p-4 text-[var(--dash-text)] no-underline shadow-[var(--dash-shadow)] transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[var(--dash-shadow-lg)]",
+        "group flex w-full min-w-0 gap-4 rounded-[22px] border border-[var(--dash-border)] bg-white p-4 text-[var(--dash-text)] no-underline shadow-[var(--dash-shadow)] transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[var(--dash-shadow-lg)]",
         className,
       )}
     >

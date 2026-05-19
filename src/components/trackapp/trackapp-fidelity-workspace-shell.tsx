@@ -1,18 +1,15 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 
 import { TrackerLiquidGlassFilterSvg } from "@/components/tracker/tracker-liquid-glass-filter-svg";
 import { TrackappBodyClass } from "@/components/trackapp/trackapp-body-class";
+import { TrackappBreadcrumbProvider } from "@/components/trackapp/trackapp-breadcrumb-context";
 import { TrackappFidelitySidebar } from "@/components/trackapp/trackapp-fidelity-sidebar";
 import { TrackappFidelityTopbar } from "@/components/trackapp/trackapp-fidelity-topbar";
 
-const TrackappTopbarSearchModal = dynamic(
-  () => import("@/components/trackapp/trackapp-topbar-search-modal").then((mod) => mod.TrackappTopbarSearchModal),
-  { ssr: false },
-);
+import "@/styles/trackapp-lab-nav.css";
 
 export function TrackappFidelityWorkspaceShell({
   children,
@@ -27,7 +24,6 @@ export function TrackappFidelityWorkspaceShell({
 }>) {
   const pathname = usePathname() ?? "";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
 
   useLayoutEffect(() => {
     const el = document.getElementById("app-app");
@@ -48,38 +44,12 @@ export function TrackappFidelityWorkspaceShell({
     closeMobile();
   }, [pathname, closeMobile]);
 
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "k") return;
-      const el = document.activeElement;
-      if (
-        el instanceof HTMLInputElement
-        || el instanceof HTMLTextAreaElement
-        || el instanceof HTMLSelectElement
-        || (el instanceof HTMLElement && el.isContentEditable)
-      ) {
-        return;
-      }
-      e.preventDefault();
-      setSearchOpen(true);
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-
   return (
-    <>
+    <TrackappBreadcrumbProvider>
       <TrackappBodyClass active />
       <div id="app-app" className="app-unified-shell" data-mobile-section="dashboard" data-sidebar-expanded="false">
         <TrackerLiquidGlassFilterSvg />
-        <TrackappFidelityTopbar
-          email={email}
-          loggedIn={loggedIn}
-          signOutHref={signOutHref}
-          onMenuClick={toggleMobile}
-          mobileMenuOpen={mobileMenuOpen}
-          onSearchOpen={() => setSearchOpen(true)}
-        />
+        <TrackappFidelityTopbar onMenuClick={toggleMobile} mobileMenuOpen={mobileMenuOpen} />
 
         <button
           type="button"
@@ -89,8 +59,6 @@ export function TrackappFidelityWorkspaceShell({
           aria-hidden={!mobileMenuOpen}
           onClick={closeMobile}
         />
-
-        <TrackappTopbarSearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
 
         <TrackappFidelitySidebar
           pathname={pathname}
@@ -104,6 +72,6 @@ export function TrackappFidelityWorkspaceShell({
           <div className="app-content">{children}</div>
         </main>
       </div>
-    </>
+    </TrackappBreadcrumbProvider>
   );
 }

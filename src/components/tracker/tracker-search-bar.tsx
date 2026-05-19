@@ -18,6 +18,7 @@ import {
 
 import "@/styles/tracker-search-bar.css";
 
+import { abortInFlightRequest, isAbortError } from "@/lib/abort-signal";
 import { COUNTRY_MAP, TRACKER_DEFAULT_COUNTRY } from "@/lib/apple-charts";
 
 export type TrackerSearchSurface = "dark" | "light";
@@ -192,13 +193,13 @@ export function TrackerSearchBar({
           setSearchHits(Array.isArray(data.apps) ? data.apps : []);
         }
       } catch (e) {
-        if ((e as Error).name === "AbortError") return;
-        if (!ac.signal.aborted) setSearchHits([]);
+        if (isAbortError(e) || ac.signal.aborted) return;
+        setSearchHits([]);
       } finally {
         if (!ac.signal.aborted) setSearchLoading(false);
       }
-    })();
-    return () => ac.abort();
+    })().catch(() => undefined);
+    return () => abortInFlightRequest(ac);
   }, [debouncedQ]);
 
   useEffect(() => {

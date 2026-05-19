@@ -2,10 +2,18 @@ import { unstable_cache } from "next/cache";
 
 import type { AppDetail } from "@/lib/apple-charts";
 import {
+  OFFICIAL_BRAND_OSINT_SYSTEM_PROMPT,
+  OFFICIAL_BRAND_OSINT_USER_SUFFIX,
+} from "@/lib/official-brand-osint-prompt";
+import {
   facebookGraphIdentifierFromUrl,
   resolveFacebookPageNode,
 } from "@/lib/meta-page-resolve";
 import { detectProfileFromUrl, type DetectedSocialProfile } from "@/lib/social-presence";
+import { buildHeuristicSocialCandidates } from "@/lib/official-brand-social-candidates";
+import { affirmOfficialSocialProfile, isSocialBioAffirmConfigured } from "@/lib/official-brand-social-affirm";
+import { VERIFIED_OFFICIAL_SOCIAL_OVERRIDES } from "@/lib/official-brand-social-overrides";
+import { urlHasWebEvidence, verifyOutboundUrl } from "@/lib/official-brand-url-verify";
 
 export type OfficialLinkKey =
   | "site"
@@ -24,7 +32,7 @@ export type OfficialLinkValidation = {
   url: string | null;
   validated: boolean;
   reason: string;
-  source: "app_store" | "official_site" | "openai_web" | "meta_graph" | "not_found";
+  source: "app_store" | "official_site" | "openai_web" | "meta_graph" | "profile_verify" | "not_found";
 };
 
 export type OfficialBrandLinksReport = Record<OfficialLinkKey, OfficialLinkValidation> & {
@@ -61,6 +69,72 @@ const NETWORK_ORDER: Array<Exclude<OfficialLinkKey, "site" | "appStore" | "googl
 
 function emptyLink(label: string, reason = "pas de lien officiel validé"): OfficialLinkValidation {
   return { label, url: null, validated: false, reason, source: "not_found" };
+}
+
+const SOCIAL_KEYS: Array<
+  Exclude<OfficialLinkKey, "site" | "appStore" | "googlePlay" | "metaAdsLibrary">
+> = ["instagram", "tiktok", "x", "youtube", "facebook", "linkedin"];
+
+async function tryAcceptLink(
+  report: OfficialBrandLinksReport,
+  key: OfficialLinkKey,
+  url: string,
+  source: OfficialLinkValidation["source"],
+  reasonPrefix: string,
+  options?: { skipHttpVerify?: boolean },
+): Promise<boolean> {
+  const classified = classifyOutputKey(url);
+  if (classified !== key) return false;
+
+  if (key === "metaAdsLibrary") {
+    const pageId = metaPageIdFromAdLibraryUrl(url);
+    if (!pageId) return false;
+    const verify = await verifyOutboundUrl(url, "metaAdsLibrary");
+    if (!verify.ok) return false;
+    report.metaPageId = pageId;
+    report[key] = {
+      label: report[key].label,
+      url: metaAdsLibraryUrl(pageId),
+      validated: true,
+      reason: `${reasonPrefix} — ${verify.reason}`,
+      source,
+    };
+    return true;
+  }
+
+  if (!options?.skipHttpVerify) {
+    const verifyPlatform: Parameters<typeof verifyOutboundUrl>[1] =
+      key === "site"
+        ? "site"
+        : SOCIAL_KEYS.includes(key as (typeof SOCIAL_KEYS)[number])
+          ? (key as (typeof SOCIAL_KEYS)[number])
+          : undefined;
+    const verify = await verifyOutboundUrl(url, verifyPlatform);
+    if (!verify.ok) {
+      report[key] = emptyLink(report[key].label, `pas de lien officiel validé (${verify.reason})`);
+      return false;
+    }
+
+    if (key === "facebook" && process.env.META_AD_LIBRARY_ACCESS_TOKEN?.trim()) {
+      const meta = await resolveOfficialMetaPage(url);
+      if (!meta?.pageId) {
+        report[key] = emptyLink(
+          report[key].label,
+          "pas de lien officiel validé (page Facebook introuvable via Graph API)",
+        );
+        return false;
+      }
+    }
+  }
+
+  report[key] = {
+    label: report[key].label,
+    url,
+    validated: true,
+    reason: reasonPrefix,
+    source,
+  };
+  return true;
 }
 
 function makeReportBase(): OfficialBrandLinksReport {
@@ -309,15 +383,7 @@ async function inferOfficialLinksWithOpenAI(args: {
       input: [
         {
           role: "system",
-          content:
-            "Tu es un vérificateur strict de liens officiels d'apps mobiles. " +
-            "Trouve d'abord le site officiel de l'app. Le site officiel est la source principale pour valider les réseaux. " +
-            "Inspecte ensuite header, footer, About, Contact, Press, Careers et les résultats web publics utiles. " +
-            "Valide chaque réseau uniquement si branding, nom/logo, bio, contenu, site officiel/app et cohérence produit correspondent. " +
-            "Ne renvoie jamais de compte fan, affilié, UGC, page parasite, post, vidéo, reel, story ou recherche keyword. " +
-            "Si un lien n'est pas officiellement validé, renvoie null et explique brièvement pourquoi dans validation_notes. " +
-            "Pour Meta Ads Library, renvoie uniquement un Page ID Facebook officiel validé et une URL avec view_all_page_id. " +
-            "N'utilise jamais q=nomdelapp ni search_type=keyword_unordered.",
+          content: OFFICIAL_BRAND_OSINT_SYSTEM_PROMPT,
         },
         {
           role: "user",
@@ -330,10 +396,7 @@ async function inferOfficialLinksWithOpenAI(args: {
             `Category: ${args.app.primaryGenreName}`,
             `Site hint from App Store: ${args.officialSiteHint || args.app.sellerUrl || args.app.supportUrl || "none"}`,
             "",
-            "Retourne uniquement les liens officiels validés pour: site, Instagram, TikTok, X/Twitter, YouTube, Facebook, LinkedIn, App Store, Google Play, Meta Ads Library.",
-            "Méthode obligatoire: recherche web, site officiel source principale, validation de branding/bio/contenu/lien officiel. Si doute: null.",
-            "Pour App Store et Google Play: vérifie nom, développeur/éditeur, logo/screenshots cohérents et site développeur cohérent.",
-            "Pour Meta Ads Library: trouve la page Facebook officielle, récupère uniquement view_all_page_id, jamais une recherche keyword.",
+            OFFICIAL_BRAND_OSINT_USER_SUFFIX,
             "",
             "Description App Store:",
             (args.app.description ?? "").slice(0, 1400),
@@ -445,6 +508,199 @@ function extractLiteralUrls(html: string): string[] {
     out.push(href);
   }
   return out;
+}
+
+/** Liens sameAs (schema.org) — souvent les seuls réseaux sur sites marketing sans footer social. */
+function extractJsonLdSameAs(html: string): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  const re = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  let m: RegExpExecArray | null;
+
+  const pushUrl = (raw: unknown) => {
+    const url = pickUrl(typeof raw === "string" ? raw : null);
+    if (!url || seen.has(url)) return;
+    seen.add(url);
+    out.push(url);
+  };
+
+  while ((m = re.exec(html)) !== null) {
+    const block = m[1]?.trim();
+    if (!block) continue;
+    try {
+      const parsed = JSON.parse(block) as unknown;
+      const nodes = Array.isArray(parsed) ? parsed : [parsed];
+      for (const node of nodes) {
+        if (!node || typeof node !== "object") continue;
+        const record = node as Record<string, unknown>;
+        const sameAs = record.sameAs;
+        if (typeof sameAs === "string") pushUrl(sameAs);
+        else if (Array.isArray(sameAs)) {
+          for (const entry of sameAs) pushUrl(entry);
+        }
+        if (record["@graph"] && Array.isArray(record["@graph"])) {
+          for (const child of record["@graph"]) {
+            if (!child || typeof child !== "object") continue;
+            const childSame = (child as Record<string, unknown>).sameAs;
+            if (typeof childSame === "string") pushUrl(childSame);
+            else if (Array.isArray(childSame)) {
+              for (const entry of childSame) pushUrl(entry);
+            }
+          }
+        }
+      }
+    } catch {
+      // JSON-LD invalide — ignorer
+    }
+  }
+  return out;
+}
+
+/** Évite les faux positifs TikTok/Instagram dans le JS minifié (widgets, analytics). */
+function collectSiteOutboundLinks(html: string, baseUrl: string): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  const push = (raw: string) => {
+    const parsed = parseUrl(raw, baseUrl);
+    if (!parsed || !isHttpUrl(parsed)) return;
+    const href = cleanUrl(parsed);
+    if (seen.has(href)) return;
+    seen.add(href);
+    out.push(href);
+  };
+
+  for (const href of extractAnchorHrefs(html, baseUrl)) push(href);
+  for (const href of extractJsonLdSameAs(html)) push(href);
+  for (const href of extractLiteralUrls(html)) {
+    const key = classifyOutputKey(href);
+    if (key && SOCIAL_KEYS.includes(key as (typeof SOCIAL_KEYS)[number])) continue;
+    push(href);
+  }
+  return out;
+}
+
+async function tryApplyVerifiedSocialOverrides(
+  report: OfficialBrandLinksReport,
+  app: AppDetail,
+  seenAccepted: Set<OfficialLinkKey>,
+): Promise<void> {
+  const row = VERIFIED_OFFICIAL_SOCIAL_OVERRIDES[String(app.id)];
+  if (!row) return;
+
+  const officialSiteUrl = report.site.validated ? report.site.url : null;
+
+  for (const platform of ["instagram", "tiktok"] as const) {
+    const url = row[platform];
+    if (!url || report[platform].validated) continue;
+
+    if (
+      await tryAcceptLink(
+        report,
+        platform,
+        url,
+        "profile_verify",
+        "compte vérifié manuellement (liste blanche Trackapp)",
+      )
+    ) {
+      seenAccepted.add(platform);
+    }
+  }
+}
+
+async function tryDiscoverSocialFromHeuristics(
+  report: OfficialBrandLinksReport,
+  app: AppDetail,
+  seenAccepted: Set<OfficialLinkKey>,
+): Promise<void> {
+  if (!isSocialBioAffirmConfigured()) return;
+
+  const officialSiteUrl = report.site.validated ? report.site.url : null;
+  const candidates = buildHeuristicSocialCandidates(app);
+
+  for (const platform of ["instagram", "tiktok"] as const) {
+    if (report[platform].validated) continue;
+
+    for (const candidate of candidates.filter((c) => c.platform === platform)) {
+      const affirm = await affirmOfficialSocialProfile(platform, candidate.url, app, officialSiteUrl, {
+        strictBrandSlug: true,
+      });
+      if (!affirm.ok) continue;
+
+      if (
+        await tryAcceptLink(
+          report,
+          platform,
+          candidate.url,
+          "profile_verify",
+          `handle dérivé du site / nom d'app — ${affirm.reason}`,
+        )
+      ) {
+        seenAccepted.add(platform);
+        break;
+      }
+    }
+  }
+}
+
+async function tryDiscoverSocialFromWebSearch(
+  report: OfficialBrandLinksReport,
+  app: AppDetail,
+  ai: OpenAiOfficialLinks | null,
+  seenAccepted: Set<OfficialLinkKey>,
+): Promise<void> {
+  if (!ai) return;
+
+  const officialSiteUrl = report.site.validated ? report.site.url : null;
+  const aiSources = ai.sources ?? [];
+
+  const candidates: Array<{
+    key: (typeof SOCIAL_KEYS)[number];
+    url: string;
+    note: string;
+  }> = [
+    { key: "instagram", url: ai.instagram_url ?? "", note: ai.validation_notes.instagram },
+    { key: "tiktok", url: ai.tiktok_url ?? "", note: ai.validation_notes.tiktok },
+    { key: "x", url: ai.x_url ?? "", note: ai.validation_notes.x },
+    { key: "youtube", url: ai.youtube_url ?? "", note: ai.validation_notes.youtube },
+    { key: "facebook", url: ai.facebook_url ?? "", note: ai.validation_notes.facebook },
+    { key: "linkedin", url: ai.linkedin_url ?? "", note: ai.validation_notes.linkedin },
+  ].filter((row): row is { key: (typeof SOCIAL_KEYS)[number]; url: string; note: string } =>
+    Boolean(row.url && !seenAccepted.has(row.key as OfficialLinkKey)),
+  );
+
+  for (const candidate of candidates) {
+    if (!urlHasWebEvidence(candidate.url, aiSources)) continue;
+
+    if (candidate.key === "instagram" || candidate.key === "tiktok") {
+      if (!isSocialBioAffirmConfigured()) continue;
+      const affirm = await affirmOfficialSocialProfile(candidate.key, candidate.url, app, officialSiteUrl);
+      if (!affirm.ok) continue;
+      if (
+        await tryAcceptLink(
+          report,
+          candidate.key,
+          candidate.url,
+          "openai_web",
+          `${candidate.note || "recherche web"} — ${affirm.reason}`,
+        )
+      ) {
+        seenAccepted.add(candidate.key);
+      }
+      continue;
+    }
+
+    if (
+      await tryAcceptLink(
+        report,
+        candidate.key,
+        candidate.url,
+        "openai_web",
+        candidate.note || "lien confirmé par recherche web + vérification HTTP",
+      )
+    ) {
+      seenAccepted.add(candidate.key);
+    }
+  }
 }
 
 function classifyOutputKey(urlString: string): OfficialLinkKey | null {
@@ -607,11 +863,20 @@ async function resolveOfficialBrandLinks(app: AppDetail): Promise<OfficialBrandL
 
   if (!officialSite) return report;
 
+  const siteUrl = cleanUrl(officialSite);
+  const siteVerify = await verifyOutboundUrl(siteUrl, "site");
+  if (!siteVerify.ok) {
+    report.site = emptyLink("Site", `pas de lien officiel validé (${siteVerify.reason})`);
+    return report;
+  }
+
   report.site = {
     label: "Site",
-    url: cleanUrl(officialSite),
+    url: siteUrl,
     validated: true,
-    reason: localOfficialSite ? "site officiel issu de la fiche App Store" : ai?.validation_notes.site || "site officiel validé par OpenAI web search",
+    reason: localOfficialSite
+      ? `site officiel issu de la fiche App Store — ${siteVerify.reason}`
+      : `${ai?.validation_notes.site || "site officiel validé par recherche web"} — ${siteVerify.reason}`,
     source: localOfficialSite ? "app_store" : "openai_web",
   };
   report.officialSiteOrigin = officialSite.origin;
@@ -622,7 +887,7 @@ async function resolveOfficialBrandLinks(app: AppDetail): Promise<OfficialBrandL
   const firstHtml = await fetchHtml(cleanUrl(officialSite));
   if (firstHtml) {
     scanned.add(cleanUrl(officialSite));
-    const firstLinks = [...extractAnchorHrefs(firstHtml, cleanUrl(officialSite)), ...extractLiteralUrls(firstHtml)];
+    const firstLinks = collectSiteOutboundLinks(firstHtml, cleanUrl(officialSite));
     allOutboundLinks.push(...firstLinks);
 
     for (const scanUrl of internalScanLinks(officialSite, firstLinks)) {
@@ -630,29 +895,63 @@ async function resolveOfficialBrandLinks(app: AppDetail): Promise<OfficialBrandL
       const html = await fetchHtml(scanUrl);
       if (!html) continue;
       scanned.add(scanUrl);
-      allOutboundLinks.push(...extractAnchorHrefs(html, scanUrl), ...extractLiteralUrls(html));
+      allOutboundLinks.push(...collectSiteOutboundLinks(html, scanUrl));
     }
   }
 
   report.scannedUrls = [...scanned];
   const seenAccepted = new Set<OfficialLinkKey>();
+  const manualSocial = VERIFIED_OFFICIAL_SOCIAL_OVERRIDES[String(app.id)];
 
   for (const raw of allOutboundLinks) {
     const key = classifyOutputKey(raw);
     if (!key || seenAccepted.has(key)) continue;
 
-    if (key === "appStore" && !appStoreUrlIsCurrentApp(app, raw)) continue;
-    if (key === "googlePlay" && !googlePlayUrlMatchesApp(app, raw)) continue;
+    if (key === "appStore") {
+      if (!appStoreUrlIsCurrentApp(app, raw)) continue;
+      if (await tryAcceptLink(report, "appStore", raw, "official_site", "lien App Store sur le site officiel")) {
+        seenAccepted.add(key);
+      }
+      continue;
+    }
 
-    const label = report[key].label;
-    report[key] = {
-      label,
-      url: raw,
-      validated: true,
-      reason: "lien sortant trouve sur le site officiel",
-      source: "official_site",
-    };
-    seenAccepted.add(key);
+    if (key === "googlePlay") {
+      if (!googlePlayUrlMatchesApp(app, raw)) continue;
+      if (await tryAcceptLink(report, "googlePlay", raw, "official_site", "lien Google Play sur le site officiel")) {
+        seenAccepted.add(key);
+      }
+      continue;
+    }
+
+    if (!SOCIAL_KEYS.includes(key as (typeof SOCIAL_KEYS)[number])) continue;
+
+    if (key === "instagram" || key === "tiktok") {
+      if (manualSocial?.[key]) continue;
+      if (
+        await tryAcceptLink(
+          report,
+          key,
+          raw,
+          "official_site",
+          "lien social trouvé sur le site officiel (footer / page)",
+        )
+      ) {
+        seenAccepted.add(key);
+      }
+      continue;
+    }
+
+    if (
+      await tryAcceptLink(
+        report,
+        key,
+        raw,
+        "official_site",
+        "lien sortant trouvé sur le site officiel (niveau 1 — source de vérité)",
+      )
+    ) {
+      seenAccepted.add(key);
+    }
   }
 
   if (!report.appStore.validated && app.trackViewUrl) {
@@ -665,38 +964,37 @@ async function resolveOfficialBrandLinks(app: AppDetail): Promise<OfficialBrandL
     };
   }
 
-  const openAiCandidates: Array<{
+  const openAiStoreCandidates: Array<{
     key: OfficialLinkKey;
     url: string | null;
     note: string;
   }> = ai
     ? [
-        { key: "instagram", url: ai.instagram_url, note: ai.validation_notes.instagram },
-        { key: "tiktok", url: ai.tiktok_url, note: ai.validation_notes.tiktok },
-        { key: "x", url: ai.x_url, note: ai.validation_notes.x },
-        { key: "youtube", url: ai.youtube_url, note: ai.validation_notes.youtube },
-        { key: "facebook", url: ai.facebook_url, note: ai.validation_notes.facebook },
-        { key: "linkedin", url: ai.linkedin_url, note: ai.validation_notes.linkedin },
         { key: "appStore", url: ai.app_store_url, note: ai.validation_notes.app_store },
         { key: "googlePlay", url: ai.google_play_url, note: ai.validation_notes.google_play },
       ]
     : [];
 
-  for (const candidate of openAiCandidates) {
+  const aiSources = ai?.sources ?? [];
+
+  for (const candidate of openAiStoreCandidates) {
     if (!candidate.url || report[candidate.key].validated) continue;
-    const classified = classifyOutputKey(candidate.url);
-    if (classified !== candidate.key) continue;
     if (candidate.key === "appStore" && !appStoreUrlIsCurrentApp(app, candidate.url)) continue;
     if (candidate.key === "googlePlay" && !googlePlayUrlMatchesApp(app, candidate.url)) continue;
+    if (!urlHasWebEvidence(candidate.url, aiSources)) continue;
 
-    report[candidate.key] = {
-      label: report[candidate.key].label,
-      url: candidate.url,
-      validated: true,
-      reason: candidate.note || "lien officiel validé par OpenAI web search",
-      source: "openai_web",
-    };
+    await tryAcceptLink(
+      report,
+      candidate.key,
+      candidate.url,
+      "openai_web",
+      candidate.note || "lien confirmé par recherche web + vérification HTTP",
+    );
   }
+
+  await tryApplyVerifiedSocialOverrides(report, app, seenAccepted);
+  await tryDiscoverSocialFromHeuristics(report, app, seenAccepted);
+  await tryDiscoverSocialFromWebSearch(report, app, ai, seenAccepted);
 
   const profiles: DetectedSocialProfile[] = [];
   for (const key of NETWORK_ORDER) {
@@ -707,31 +1005,25 @@ async function resolveOfficialBrandLinks(app: AppDetail): Promise<OfficialBrandL
   }
   report.socialProfiles = profiles;
 
-  const openAiMetaPageId = ai?.meta_page_id ?? metaPageIdFromAdLibraryUrl(ai?.meta_ads_library_url ?? null);
-  if (openAiMetaPageId) {
-    report.metaPageId = openAiMetaPageId;
-    report.metaPageName = null;
-    report.metaAdsLibrary = {
-      label: "Meta Ads Library",
-      url: metaAdsLibraryUrl(openAiMetaPageId),
-      validated: true,
-      reason: ai?.validation_notes?.meta_ads_library || "Page ID officiel validé par OpenAI web search",
-      source: "openai_web",
-    };
-  }
-
-  if (!report.metaPageId && report.facebook.validated && report.facebook.url) {
+  if (report.facebook.validated && report.facebook.url) {
     const meta = await resolveOfficialMetaPage(report.facebook.url);
     if (meta?.pageId) {
       report.metaPageId = meta.pageId;
       report.metaPageName = meta.pageName ?? null;
-      report.metaAdsLibrary = {
-        label: "Meta Ads Library",
-        url: metaAdsLibraryUrl(meta.pageId),
-        validated: true,
-        reason: "Page ID officiel validee par Graph (search_type=page, view_all_page_id)",
-        source: "meta_graph",
-      };
+      const adsUrl = metaAdsLibraryUrl(meta.pageId);
+      await tryAcceptLink(
+        report,
+        "metaAdsLibrary",
+        adsUrl,
+        "meta_graph",
+        "Page ID officielle via Graph API (search_type=page, view_all_page_id)",
+        { skipHttpVerify: true },
+      );
+    } else {
+      report.metaAdsLibrary = emptyLink(
+        "Meta Ads Library",
+        "pas de lien officiel validé (Page ID Facebook introuvable via Graph)",
+      );
     }
   }
 
@@ -755,8 +1047,9 @@ export async function resolveOfficialBrandLinksCached(app: AppDetail): Promise<O
   const run = unstable_cache(
     async () => resolveOfficialBrandLinks(app),
     [
-      "official-brand-links-v7",
+      "official-brand-links-v14-site-social",
       isOfficialLinksOpenAiConfigured() ? "openai-on" : "openai-off",
+      isSocialBioAffirmConfigured() ? "apify-affirm-on" : "apify-affirm-off",
       app.id,
       app.name.trim().toLowerCase(),
       app.sellerName.trim().toLowerCase(),

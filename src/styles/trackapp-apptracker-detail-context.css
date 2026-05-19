@@ -1,0 +1,30 @@
+.trackapp-apptracker-detail-context {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--dash-muted-light, #64748b);
+}
+
+.trackapp-apptracker-detail-context__hub {
+  flex-shrink: 0;
+  color: #4338ca;
+  text-decoration: none;
+}
+
+.trackapp-apptracker-detail-context__hub:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.trackapp-apptracker-detail-context__sep {
+  flex-shrink: 0;
+  opacity: 0.55;
+}
+
+.trackapp-apptracker-detail-context__current {
+  min-width: 0;
+  color: var(--dash-text, #0f172a);
+}

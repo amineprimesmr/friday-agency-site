@@ -400,15 +400,28 @@ export async function fetchAppDetail(
   country: CountryCode = TRACKER_DEFAULT_COUNTRY,
 ): Promise<AppDetail | null> {
   try {
-    const res = await fetchTimed(`${ITUNES_BASE}/lookup?id=${id}&country=${country}`, {
-      next: { revalidate: 3600 },
-    });
+    const { fetchAppStoreWebScreenshots } = await import("@/lib/apple-app-store-web-screenshots");
+
+    const [res, webScreenshots] = await Promise.all([
+      fetchTimed(`${ITUNES_BASE}/lookup?id=${id}&country=${country}`, {
+        next: { revalidate: 3600 },
+      }),
+      fetchAppStoreWebScreenshots(id, country),
+    ]);
     if (!res.ok) return null;
     const data = (await res.json()) as {
       results?: Record<string, unknown>[];
     };
     const app = data?.results?.[0];
     if (!app) return null;
+
+    const itunesScreenshots = (app.screenshotUrls as string[]) ?? [];
+    const itunesIpadScreenshots = (app.ipadScreenshotUrls as string[]) ?? [];
+    const screenshotUrls =
+      webScreenshots.iphone.length > 0 ? webScreenshots.iphone : itunesScreenshots;
+    const ipadScreenshotUrls =
+      webScreenshots.ipad.length > 0 ? webScreenshots.ipad : itunesIpadScreenshots;
+
     return {
       id: String(app.trackId ?? ""),
       name: String(app.trackName ?? ""),
@@ -427,8 +440,8 @@ export async function fetchAppDetail(
       userRatingCount: Number(app.userRatingCount ?? 0),
       averageUserRatingForCurrentVersion: Number(app.averageUserRatingForCurrentVersion ?? 0),
       userRatingCountForCurrentVersion: Number(app.userRatingCountForCurrentVersion ?? 0),
-      screenshotUrls: (app.screenshotUrls as string[]) ?? [],
-      ipadScreenshotUrls: (app.ipadScreenshotUrls as string[]) ?? [],
+      screenshotUrls,
+      ipadScreenshotUrls,
       minimumOsVersion: String(app.minimumOsVersion ?? ""),
       fileSizeBytes: String(app.fileSizeBytes ?? ""),
       version: String(app.version ?? ""),

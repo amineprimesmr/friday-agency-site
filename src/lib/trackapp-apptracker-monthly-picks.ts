@@ -1,7 +1,18 @@
 import { unstable_cache } from "next/cache";
 
-import { fetchAppDetail, type CountryCode, type SearchResult } from "@/lib/apple-charts";
+import {
+  fetchAppDetail,
+  fetchEnrichedTopFree,
+  fetchIosAggregateAppMetrics,
+  type CountryCode,
+  type SearchResult,
+} from "@/lib/apple-charts";
 import { appDetailToSearchResultForFavorites } from "@/lib/trackapp-app-favorites-map";
+import {
+  metricsFromAppDetail,
+  TRACKAPP_DETAIL_FALLBACK_ESTIMATE_RANK,
+  type TrackappAppDisplayMetrics,
+} from "@/lib/trackapp-app-display-metrics";
 
 /** Libellé affiché en tête de page — à mettre à jour chaque mois. */
 export const TRACKAPP_APPTRACKER_PICKS_MONTH_LABEL = "Mai 2026";
@@ -17,56 +28,75 @@ export type TrackappMonthlyPickDefinition = Readonly<{
  */
 export const TRACKAPP_APPTRACKER_MONTHLY_PICKS: readonly TrackappMonthlyPickDefinition[] = [
   {
-    id: "835599320",
+    id: "6739003582",
     blurb:
-      "Feed infini, création UGC, boucle de rétention : l’exemple le plus complet pour une app consumer ultra addictive à étudier du bouton install au FYP.",
+      "Hooks viraux, génération IA et paywall rapide : référence pour une app créateur orientée TikTok/Reels avec forte intention d’achat.",
   },
   {
-    id: "570060128",
+    id: "6478868302",
     blurb:
-      "Streaks, récompenses, monétisation par paliers : blueprint idéal pour gamifier l’habitude sans sacrifier la clarté du parcours.",
+      "Texte → vidéo, templates et crédits : modèle clair pour monétiser une app IA visuelle sans onboarding lourd.",
   },
   {
-    id: "6448311069",
+    id: "6746838126",
     blurb:
-      "Chat comme surface principale, onboarding minimal, abonnement : à copier pour une app IA / assistant avec un modèle SaaS mobile crédible.",
+      "Avant/après, scan facial et promesse esthétique : blueprint utilitaire bien-être avec preuve visuelle et abonnement premium.",
   },
   {
-    id: "1482384689",
+    id: "6498938838",
     blurb:
-      "Scan → verdict → partage : démonstration parfaite d’une app utilitaire quotidienne avec confiance, simplicité et forte viralité organique.",
+      "Suivi sommeil, routines santé et rétention quotidienne : à étudier pour les dashboards, notifications et habitude long terme.",
   },
   {
-    id: "426826309",
+    id: "1551099110",
     blurb:
-      "Réseau social + activité physique + freemium : à disséquer pour la communauté, les classements et la conversion vers l’abonnement.",
+      "Programmes guidés, exercices courts et niche wellness : exemple solide d’app niche avec contenu récurrent et upsell abonnement.",
   },
   {
-    id: "1232780281",
+    id: "6478942469",
     blurb:
-      "Workspace flexible, templates, partage : structure de référence pour une app productivité avec adoption large et usage B2C / pro.",
+      "Challenge 66 jours, streaks et reset de vie : structure idéale pour gamifier les habitudes avec un arc temporel fort.",
   },
 ];
 
 export type TrackappMonthlyPickResolved = Readonly<{
   app: SearchResult;
   blurb: string;
+  metrics: TrackappAppDisplayMetrics;
 }>;
 
 export const getTrackappApptrackerMonthlyPicks = unstable_cache(
   async (country: CountryCode) => {
-    const rows = await Promise.all(
-      TRACKAPP_APPTRACKER_MONTHLY_PICKS.map(async (def, i) => {
-        const detail = await fetchAppDetail(def.id, country);
-        if (!detail) return null;
-        return {
-          app: appDetailToSearchResultForFavorites(detail, i + 1),
-          blurb: def.blurb,
-        } satisfies TrackappMonthlyPickResolved;
-      }),
+    const enrichedNationalTop = await fetchEnrichedTopFree(country, 100);
+
+    const details = await Promise.all(
+      TRACKAPP_APPTRACKER_MONTHLY_PICKS.map((def) => fetchAppDetail(def.id, country)),
     );
+
+    /** Sensor Tower rate-limit (429) si trop d’appels parallèles — séquentiel comme sur la fiche. */
+    const aggregateMetricsList: Awaited<ReturnType<typeof fetchIosAggregateAppMetrics>>[] = [];
+    for (const def of TRACKAPP_APPTRACKER_MONTHLY_PICKS) {
+      aggregateMetricsList.push(await fetchIosAggregateAppMetrics(def.id));
+    }
+
+    const rows = TRACKAPP_APPTRACKER_MONTHLY_PICKS.map((def, i) => {
+      const detail = details[i];
+      if (!detail) return null;
+      const metrics = metricsFromAppDetail(
+        detail,
+        country,
+        aggregateMetricsList[i] ?? null,
+        enrichedNationalTop,
+        TRACKAPP_DETAIL_FALLBACK_ESTIMATE_RANK,
+      );
+      return {
+        app: appDetailToSearchResultForFavorites(detail, i + 1),
+        blurb: def.blurb,
+        metrics,
+      } satisfies TrackappMonthlyPickResolved;
+    });
     return rows.filter((x): x is TrackappMonthlyPickResolved => x != null);
   },
-  ["trackapp-apptracker-monthly-picks-v1"],
+  ["trackapp-apptracker-monthly-picks-v4"],
   { revalidate: 3600 },
 );

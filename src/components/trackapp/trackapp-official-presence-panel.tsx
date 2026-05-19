@@ -1,7 +1,12 @@
 "use client";
 
+import { TrackappAppFavoriteButton } from "@/components/trackapp/trackapp-app-favorite-button";
+import { TrackappInstagramOrganicGallery } from "@/components/trackapp/trackapp-instagram-organic-gallery";
+import { TrackappMetaAdsGallery } from "@/components/trackapp/trackapp-meta-ads-gallery";
+import { TrackappTikTokOrganicGallery } from "@/components/trackapp/trackapp-tiktok-organic-gallery";
 import type { OfficialBrandLinksReport, OfficialLinkKey } from "@/lib/official-brand-links";
 import type { BrandResolutionSource } from "@/lib/official-brand-presence-context";
+import type { MetaAdsLibraryFetchResult } from "@/lib/meta-ads-library";
 import type { DetectedSocialProfile } from "@/lib/social-presence";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +40,8 @@ function sourceLabel(source: string): string {
       return "OpenAI";
     case "meta_graph":
       return "Meta Graph";
+    case "profile_verify":
+      return "Bio vérifiée";
     default:
       return "—";
   }
@@ -97,159 +104,154 @@ function hostname(url: string): string {
   }
 }
 
+function isValidatedOfficialLink(row: OfficialBrandLinksReport[OfficialLinkKey]): row is OfficialBrandLinksReport[OfficialLinkKey] & {
+  validated: true;
+  url: string;
+} {
+  return Boolean(row.validated && row.url);
+}
+
 function LinkCard({
   linkKey,
   row,
   profile,
 }: {
   linkKey: OfficialLinkKey;
-  row: OfficialBrandLinksReport[OfficialLinkKey];
+  row: OfficialBrandLinksReport[OfficialLinkKey] & { validated: true; url: string };
   profile?: DetectedSocialProfile;
 }) {
   const meta = KEY_META[linkKey];
-  const validated = row.validated && row.url;
-
-  if (validated && row.url) {
-    return (
-      <a
-        href={row.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        title={row.reason}
-        className={cn(
-          "group flex flex-col gap-3 rounded-[20px] border p-4 no-underline transition",
-          "border-[var(--dash-border)] bg-white shadow-[var(--dash-shadow)]",
-          "hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[var(--dash-shadow-lg)]",
-        )}
-      >
-        <span className="flex items-center justify-between gap-2">
-          <span
-            className={cn(
-              "inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[0.72rem] font-bold ring-1",
-              meta.accent,
-            )}
-          >
-            {meta.social ? <SocialGlyph id={meta.social} /> : null}
-            {meta.short}
-          </span>
-          <span className="text-[0.72rem] font-bold uppercase tracking-wide text-emerald-600">Validé</span>
-        </span>
-        <span className="truncate text-[0.88rem] font-semibold text-[var(--dash-text)] group-hover:text-slate-950">
-          {profile?.hint || hostname(row.url)}
-        </span>
-        <span className="truncate text-[0.75rem] text-[var(--dash-muted-light)]">{hostname(row.url)}</span>
-        <span className="text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-slate-400">
-          {sourceLabel(row.source)} ↗
-        </span>
-      </a>
-    );
-  }
 
   return (
-    <div
-      className="flex flex-col gap-2 rounded-[20px] border border-dashed border-slate-200 bg-slate-50/80 p-4"
+    <a
+      href={row.url}
+      target="_blank"
+      rel="noopener noreferrer"
       title={row.reason}
+      className={cn(
+        "group flex flex-col gap-3 rounded-[20px] border p-4 no-underline transition",
+        "border-[var(--dash-border)] bg-white shadow-[var(--dash-shadow)]",
+        "hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[var(--dash-shadow-lg)]",
+      )}
     >
-      <span className="flex items-center justify-between gap-2">
-        <span className="text-[0.72rem] font-bold uppercase tracking-wide text-slate-400">{meta.short}</span>
-        <span className="text-[0.68rem] font-semibold text-slate-400">Non validé</span>
+      <span
+        className={cn(
+          "inline-flex w-fit items-center gap-2 rounded-full px-2.5 py-1 text-[0.72rem] font-bold ring-1",
+          meta.accent,
+        )}
+      >
+        {meta.social ? <SocialGlyph id={meta.social} /> : null}
+        {meta.short}
       </span>
-      <span className="text-[0.8rem] leading-snug text-slate-500">pas de lien officiel validé</span>
-    </div>
+      <span className="truncate text-[0.88rem] font-semibold text-[var(--dash-text)] group-hover:text-slate-950">
+        {profile?.hint || hostname(row.url)}
+      </span>
+      <span className="truncate text-[0.75rem] text-[var(--dash-muted-light)]">{hostname(row.url)}</span>
+      <span className="text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-slate-400">
+        {sourceLabel(row.source)} ↗
+      </span>
+    </a>
   );
 }
 
 export function TrackappOfficialPresencePanel({
+  appId,
   appName,
+  initialFavorite,
+  favoritesEnabled,
   officialLinks,
   profiles,
-  confidence,
-  openAiEnriched,
-  openAiConfigured,
   sources,
+  metaAds,
+  metaPageName,
+  instagramProfileUrl,
+  tiktokProfileUrl,
 }: {
+  appId: string;
   appName: string;
+  initialFavorite: boolean;
+  favoritesEnabled: boolean;
   officialLinks: OfficialBrandLinksReport;
   profiles: DetectedSocialProfile[];
-  confidence: number;
-  openAiEnriched: boolean;
-  openAiConfigured: boolean;
   sources: BrandResolutionSource[];
+  metaAds: MetaAdsLibraryFetchResult | null;
+  metaPageName?: string | null;
+  instagramProfileUrl: string | null;
+  tiktokProfileUrl: string | null;
 }) {
-  const allKeys: OfficialLinkKey[] = [...SOCIAL_KEYS, ...STORE_KEYS];
-  const validatedCount = allKeys.filter((k) => officialLinks[k].validated).length;
   const profileByKey = new Map<DetectedSocialProfile["id"], DetectedSocialProfile>();
   for (const p of profiles) profileByKey.set(p.id, p);
+
+  const socialKeys = SOCIAL_KEYS.filter((key) => isValidatedOfficialLink(officialLinks[key]));
+  const storeKeys = STORE_KEYS.filter((key) => isValidatedOfficialLink(officialLinks[key]));
 
   return (
     <div className="overflow-hidden rounded-[28px] border border-[var(--dash-border)] bg-white shadow-[var(--dash-shadow-lg)]">
       <div className="border-b border-[var(--dash-border)] bg-gradient-to-br from-slate-50 to-white px-5 py-5 sm:px-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
             <p className="m-0 text-[0.72rem] font-bold uppercase tracking-[0.18em] text-slate-400">Présence officielle</p>
             <h3 className="mt-1 text-[1.35rem] font-black tracking-tight text-[var(--dash-text)]">{appName}</h3>
-            <p className="mt-1 max-w-[50ch] text-[0.88rem] leading-relaxed text-[var(--dash-muted-light)]">
-              Liens validés site-first · jamais de recherche mot-clé Meta
-            </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-[#0f172a] px-3 py-1.5 text-[0.78rem] font-bold text-white tabular-nums">
-              {validatedCount}/{allKeys.length} validés
-            </span>
-            {confidence > 0 ? (
-              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[0.78rem] font-bold text-emerald-800">
-                Confiance {Math.round(confidence * 100)}%
-              </span>
-            ) : null}
-            {openAiEnriched ? (
-              <span className="rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-[0.78rem] font-bold text-violet-800">
-                OpenAI web
-              </span>
-            ) : openAiConfigured ? (
-              <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[0.78rem] font-semibold text-slate-600">
-                OpenAI actif
-              </span>
-            ) : (
-              <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-[0.78rem] font-bold text-amber-900">
-                OpenAI requis
-              </span>
-            )}
-          </div>
+          {favoritesEnabled ? (
+            <TrackappAppFavoriteButton
+              appId={appId}
+              initialFavorite={initialFavorite}
+              enabled
+              className="border-slate-200 bg-white text-slate-500 shadow-sm hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
+            />
+          ) : null}
         </div>
       </div>
 
-      {!openAiConfigured && validatedCount <= 2 ? (
-        <div className="mx-5 mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[0.88rem] leading-relaxed text-amber-950 sm:mx-6">
-          <strong className="font-bold">Validation web inactive.</strong> Les sites en JavaScript (Duolingo, etc.) nécessitent{" "}
-          <code className="rounded bg-amber-100/90 px-1 text-[0.8rem]">OPENAI_API_KEY</code> sur le serveur.
-        </div>
-      ) : null}
-
-      {openAiConfigured && !openAiEnriched && validatedCount <= 2 ? (
-        <div className="mx-5 mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-[0.88rem] text-slate-700 sm:mx-6">
-          Résolution en cours ou cache vide — recharge dans quelques minutes si tu viens d&apos;activer OpenAI.
-        </div>
-      ) : null}
-
       <div className="p-5 sm:p-6">
-        <p className="mb-3 text-[0.72rem] font-bold uppercase tracking-[0.14em] text-slate-400">Réseaux sociaux</p>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {SOCIAL_KEYS.map((key) => (
-            <LinkCard
-              key={key}
-              linkKey={key}
-              row={officialLinks[key]}
-              profile={KEY_META[key].social ? profileByKey.get(KEY_META[key].social!) : undefined}
-            />
-          ))}
-        </div>
+        {socialKeys.length > 0 ? (
+          <>
+            <p className="mb-3 text-[0.72rem] font-bold uppercase tracking-[0.14em] text-slate-400">Réseaux sociaux</p>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {socialKeys.map((key) => (
+                <LinkCard
+                  key={key}
+                  linkKey={key}
+                  row={officialLinks[key] as OfficialBrandLinksReport[OfficialLinkKey] & {
+                    validated: true;
+                    url: string;
+                  }}
+                  profile={KEY_META[key].social ? profileByKey.get(KEY_META[key].social!) : undefined}
+                />
+              ))}
+            </div>
+          </>
+        ) : null}
 
-        <p className="mb-3 mt-8 text-[0.72rem] font-bold uppercase tracking-[0.14em] text-slate-400">Site & stores</p>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {STORE_KEYS.map((key) => (
-            <LinkCard key={key} linkKey={key} row={officialLinks[key]} />
-          ))}
-        </div>
+        {storeKeys.length > 0 ? (
+          <>
+            <p
+              className={cn(
+                "mb-3 text-[0.72rem] font-bold uppercase tracking-[0.14em] text-slate-400",
+                socialKeys.length > 0 && "mt-8",
+              )}
+            >
+              Site & stores
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {storeKeys.map((key) => (
+                <LinkCard
+                  key={key}
+                  linkKey={key}
+                  row={officialLinks[key] as OfficialBrandLinksReport[OfficialLinkKey] & {
+                    validated: true;
+                    url: string;
+                  }}
+                />
+              ))}
+            </div>
+          </>
+        ) : null}
+
+        {metaAds ? <TrackappMetaAdsGallery result={metaAds} pageName={metaPageName} /> : null}
+        <TrackappInstagramOrganicGallery profileUrl={instagramProfileUrl} />
+        <TrackappTikTokOrganicGallery profileUrl={tiktokProfileUrl} />
 
         {sources.filter((s) => s.url).length > 0 ? (
           <details className="mt-6 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">

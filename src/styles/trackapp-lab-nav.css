@@ -1,0 +1,235 @@
+/* Navigation workspace — style 81lab (sidebar + topbar fil d’Ariane) */
+
+body.trackapp-fidelity-body #app-app {
+  --app-sidebar-width: 232px;
+}
+
+@media (min-width: 901px) {
+  body.trackapp-fidelity-body #app-app {
+    --app-topbar-height: 52px;
+  }
+
+  body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar {
+    top: 0 !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    z-index: 400 !important;
+    background: #000 !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar .app-sidebar-brand {
+    display: flex !important;
+    align-items: center;
+    padding: 1.35rem 1.1rem 1.15rem !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar .app-sidebar-nav {
+    padding: 0.65rem 0.65rem 1rem !important;
+  }
+
+  body.trackapp-fidelity-body #app-app .app-desktop-topbar.trackapp-lab-topbar {
+    left: var(--app-sidebar-width);
+    right: 0;
+    width: auto;
+    display: flex !important;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0 1.15rem 0 0.85rem;
+    background: #0f1114;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  body.trackapp-fidelity-body #app-app .trackapp-lab-topbar .app-desktop-topbar__menu-btn {
+    display: inline-flex !important;
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.85);
+    flex-shrink: 0;
+  }
+
+  body.trackapp-fidelity-body #app-app .trackapp-lab-topbar .app-desktop-topbar__menu-btn span {
+    display: none;
+  }
+
+  body.trackapp-fidelity-body #app-app .app-main {
+    margin-left: var(--app-sidebar-width) !important;
+    margin-top: var(--app-topbar-height) !important;
+  }
+}
+
+/* —— Sidebar brand —— */
+.trackapp-lab-sidebar__logo {
+  gap: 0.55rem;
+}
+
+.trackapp-lab-sidebar__logo-text {
+  font-size: 1.35rem;
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: -0.04em;
+  color: #fff;
+}
+
+/* —— Nav groups —— */
+.trackapp-lab-nav__group {
+  margin-bottom: 0.15rem;
+}
+
+.trackapp-lab-nav__group-btn {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.55rem 0.5rem;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+  text-align: left;
+}
+
+.trackapp-lab-nav__group-btn:hover {
+  color: #fff;
+}
+
+.trackapp-lab-nav__group-label {
+  text-transform: none;
+}
+
+.trackapp-lab-nav__group-toggle {
+  font-size: 1.05rem;
+  font-weight: 400;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.45);
+  user-select: none;
+}
+
+.trackapp-lab-nav__children {
+  position: relative;
+  margin: 0.1rem 0 0.35rem 0.35rem;
+  padding-left: 0.85rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.trackapp-lab-nav__item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.48rem 0.45rem;
+  margin: 0.05rem 0;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 0.84rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.trackapp-lab-nav__item:hover {
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.trackapp-lab-nav__item--active {
+  color: #fff !important;
+  font-weight: 600;
+  background: transparent;
+}
+
+.trackapp-lab-nav__item--soon {
+  opacity: 0.38;
+  cursor: default;
+}
+
+.trackapp-lab-nav__item-icon {
+  display: flex;
+  width: 1.25rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+}
+
+.trackapp-lab-nav__item--active .trackapp-lab-nav__item-icon {
+  opacity: 1;
+}
+
+.trackapp-lab-nav__item-label {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* —— Topbar breadcrumb —— */
+.trackapp-lab-topbar__panel-btn {
+  margin-right: 0.15rem;
+}
+
+.trackapp-lab-topbar__crumbs {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.trackapp-lab-topbar__crumb--section {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.trackapp-lab-topbar__crumb-sep {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.trackapp-lab-topbar__crumb--hub {
+  color: rgba(255, 255, 255, 0.72);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.trackapp-lab-topbar__crumb--hub:hover {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.trackapp-lab-topbar__crumb--current {
+  color: #fff;
+  font-weight: 600;
+  min-width: 0;
+}
+
+.trackapp-lab-topbar__actions {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Masquer recherche / marque topbar legacy */
+body.trackapp-fidelity-body #app-app .trackapp-lab-topbar .app-desktop-topbar__brand,
+body.trackapp-fidelity-body #app-app .trackapp-lab-topbar .app-desktop-topbar__search-center {
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar .app-sidebar-brand {
+    display: none !important;
+  }
+
+  body.trackapp-fidelity-body #app-app .trackapp-lab-topbar__crumbs {
+    font-size: 0.8rem;
+  }
+}

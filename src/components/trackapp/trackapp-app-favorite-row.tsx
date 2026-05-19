@@ -16,10 +16,10 @@ export function TrackappAppFavoriteRow({
   children: ReactNode;
 }>) {
   return (
-    <div className="relative">
-      {children}
+    <div className="flex w-full min-w-0 items-stretch gap-2">
+      <div className="min-w-0 flex-1">{children}</div>
       {favoritesEnabled ? (
-        <div className="pointer-events-auto absolute right-2 top-2 z-[2] md:right-3 md:top-3">
+        <div className="flex shrink-0 items-start pt-3 pr-0.5">
           <TrackappAppFavoriteButton appId={appId} initialFavorite={initialFavorite} enabled={favoritesEnabled} />
         </div>
       ) : null}

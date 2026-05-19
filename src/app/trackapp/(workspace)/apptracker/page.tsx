@@ -1,36 +1,16 @@
-import type { Metadata } from "next";
+import { permanentRedirect } from "next/navigation";
 
-import { TrackappApptrackerMonthlySection } from "@/components/trackapp/trackapp-apptracker-monthly-section";
-import { getTrackappApptrackerMonthlyPicks } from "@/lib/trackapp-apptracker-monthly-picks";
 import { normalizeTrackerCountryParam } from "@/lib/apple-charts";
-import { getTrackappProfileFavorites } from "@/lib/trackapp-profile-favorites";
+import { trackappAccueilHref } from "@/lib/trackapp-apptracker-paths";
 
-export const metadata: Metadata = {
-  title: "Apps du mois — Apptracker",
-  description:
-    "Sélection Trackapp des meilleures apps à analyser et à copier de A à Z : fiches complètes et métriques.",
-};
-
-export const revalidate = 3600;
-
-export default async function TrackappApptrackerPage({
+/** `/trackapp/apptracker` sans id → recherche sur Accueil. */
+export default async function TrackappApptrackerIndexRedirectPage({
   searchParams,
 }: Readonly<{
-  searchParams: Promise<{ country?: string }>;
+  searchParams: Promise<{ q?: string; country?: string }>;
 }>) {
   const sp = await searchParams;
+  const q = typeof sp.q === "string" ? sp.q.trim() : "";
   const country = normalizeTrackerCountryParam(sp.country);
-  const picks = await getTrackappApptrackerMonthlyPicks(country);
-  const { loggedIn, appIds } = await getTrackappProfileFavorites();
-
-  return (
-    <div className="relative z-[1] dashboard-main pb-16">
-      <TrackappApptrackerMonthlySection
-        country={country}
-        picks={picks}
-        favoritesEnabled={loggedIn}
-        favoriteAppIds={appIds}
-      />
-    </div>
-  );
+  permanentRedirect(trackappAccueilHref({ country, q: q || undefined }));
 }

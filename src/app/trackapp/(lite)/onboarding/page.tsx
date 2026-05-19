@@ -1,6 +1,6 @@
 import { permanentRedirect } from "next/navigation";
 
-/** Ancienne étape onboarding — redirection vers l’accueil Trackapp. */
+/** Ancienne étape onboarding — redirection vers Apptracker. */
 export default async function OnboardingRemovedRedirect({
   searchParams,
 }: {

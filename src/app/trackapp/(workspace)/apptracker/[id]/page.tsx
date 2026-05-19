@@ -1,23 +1,26 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import {
-  COUNTRY_MAP,
   daysSince,
-  estimateMonthlyDownloads,
   formatBytes,
-  formatEstimatedMonthlyRevenuePrecise,
   formatRatingCount,
   normalizeTrackerCountryParam,
   timeAgo,
   type CountryCode,
 } from "@/lib/apple-charts";
+import { metricsFromEmbedContext } from "@/lib/trackapp-app-display-metrics";
 import { getTrackappProfileFavorites } from "@/lib/trackapp-profile-favorites";
-import { fetchAppDetailCached } from "@/lib/tracker-server-cache";
+import {
+  fetchAppDetailCached,
+  loadAppStoreWebScreenshotsCached,
+  loadTrackerAppEmbedContextCached,
+} from "@/lib/tracker-server-cache";
+import { TrackappApptrackerDetailContext } from "@/components/trackapp/trackapp-apptracker-detail-context";
 import { TrackappAppFavoriteButton } from "@/components/trackapp/trackapp-app-favorite-button";
+import { TrackappAppStoreScreenshots } from "@/components/trackapp/trackapp-app-store-screenshots";
 import { TrackappOfficialPresenceLoading } from "@/components/trackapp/trackapp-official-presence-loading";
 import { TrackappOfficialPresenceSection } from "@/components/trackapp/trackapp-official-presence-section";
 
@@ -69,27 +72,34 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
   const { id } = await params;
   const sp = await searchParams;
   const country = normalizeTrackerCountryParam(sp.country);
-  const appPromise = fetchAppDetailCached(id, country as CountryCode);
-  const favoritesPromise = getTrackappProfileFavorites();
-  const app = await appPromise;
-  if (!app) notFound();
+  const countryCode = country as CountryCode;
+  const [context, favorites, webScreenshots] = await Promise.all([
+    loadTrackerAppEmbedContextCached(id, countryCode),
+    getTrackappProfileFavorites(),
+    loadAppStoreWebScreenshotsCached(id, countryCode),
+  ]);
+  if (!context) notFound();
 
-  const countryData = COUNTRY_MAP[country as CountryCode];
-  const dlEst = estimateMonthlyDownloads(50, country);
-  const revEst = formatEstimatedMonthlyRevenuePrecise(50, app.price, app.categoryId, country, app.id);
+  const { app, aggregateMetrics: agg, overallRank, genreSliceRank } = context;
+  const listMetrics = metricsFromEmbedContext(
+    app,
+    country,
+    agg,
+    overallRank,
+    genreSliceRank,
+  );
+  const downloadsValue = listMetrics.downloadsDisplay;
+  const revenueValue = listMetrics.revenueDisplay;
+  const metricSource = listMetrics.metricSource;
   const appAge = app.releaseDate ? daysSince(app.releaseDate) : Number.NaN;
-  const screenshots = [...(app.screenshotUrls ?? []), ...(app.ipadScreenshotUrls ?? [])].slice(0, 6);
-  const { loggedIn, appIds } = await favoritesPromise;
+  const screenshotUrls =
+    webScreenshots.iphone.length > 0 ? webScreenshots.iphone : (app.screenshotUrls ?? []);
+  const { loggedIn, appIds } = favorites;
   const appFav = appIds.includes(app.id);
 
   return (
     <div className="relative z-[1] dashboard-main pb-16">
-      <div className="mb-5">
-        <Link href="/trackapp/apptracker" className="text-[0.88rem] font-semibold text-[var(--dash-muted-light)] no-underline hover:text-[var(--dash-text)]">
-          ← Retour aux apps du mois
-        </Link>
-      </div>
-
+      <TrackappApptrackerDetailContext appName={app.name} />
       <section className="overflow-hidden rounded-[30px] border border-[var(--dash-border)] bg-white shadow-[var(--dash-shadow-lg)]">
         <div className="relative p-6 sm:p-8">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-slate-100 to-transparent" aria-hidden />
@@ -101,7 +111,7 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
                 ) : null}
               </div>
               <div className="min-w-0">
-                <p className="trackapp-workspace-hero-kicker mb-2">{countryData?.flag} {countryData?.name} · Apptracker</p>
+                <p className="trackapp-workspace-hero-kicker mb-2">Apptracker</p>
                 <h1 className="m-0 text-[clamp(2rem,5vw,3.4rem)] font-black leading-[0.98] tracking-[-0.06em] text-[var(--dash-text)]">
                   {app.name}
                 </h1>
@@ -134,13 +144,18 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
 
       <section className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard label="Note" value={app.averageUserRating > 0 ? app.averageUserRating.toFixed(1) : "—"} sub={app.userRatingCount > 0 ? `${formatRatingCount(app.userRatingCount)} avis` : "Avis indisponibles"} />
-        <MetricCard label="Téléchargements" value={dlEst} sub="estimation mensuelle" />
-        <MetricCard label="Revenus" value={revEst} sub="estimation mensuelle" />
+        <MetricCard label="Téléchargements" value={downloadsValue} sub={metricSource} />
+        <MetricCard label="Revenus" value={revenueValue} sub={metricSource} />
         <MetricCard label="Ancienneté" value={Number.isFinite(appAge) ? timeAgo(app.releaseDate) : "—"} sub={app.version ? `Version ${app.version}` : undefined} />
       </section>
 
       <Suspense fallback={<TrackappOfficialPresenceLoading />}>
-        <TrackappOfficialPresenceSection app={app} country={country as CountryCode} />
+        <TrackappOfficialPresenceSection
+          app={app}
+          country={country as CountryCode}
+          initialFavorite={appFav}
+          favoritesEnabled={loggedIn}
+        />
       </Suspense>
 
       <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.75fr)]">
@@ -171,18 +186,7 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
         </article>
       </section>
 
-      {screenshots.length > 0 ? (
-        <section className="mt-5 rounded-[24px] border border-[var(--dash-border)] bg-white p-5 shadow-[var(--dash-shadow)]">
-          <h2 className="m-0 text-[1.25rem] font-bold tracking-tight text-[var(--dash-text)]">Screenshots App Store</h2>
-          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {screenshots.map((src) => (
-              <div key={src} className="relative aspect-[9/19.5] overflow-hidden rounded-[22px] bg-slate-100 ring-1 ring-slate-200">
-                <Image src={src} alt="" fill className="object-cover" sizes="(min-width: 1024px) 280px, 45vw" />
-              </div>
-            ))}
-          </div>
-        </section>
-      ) : null}
+      <TrackappAppStoreScreenshots urls={screenshotUrls} title="Screenshots App Store" />
     </div>
   );
 }

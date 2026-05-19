@@ -1,39 +1,39 @@
-import Link from "next/link";
-
 import { TrackappOfficialPresencePanel } from "@/components/trackapp/trackapp-official-presence-panel";
 import { buildOfficialBrandPresenceContext } from "@/lib/official-brand-presence";
-import { isOfficialLinksOpenAiConfigured } from "@/lib/official-brand-links";
+import { fetchMetaAdsForPageCached } from "@/lib/meta-ads-library";
 import type { AppDetail } from "@/lib/apple-charts";
 import type { CountryCode } from "@/lib/apple-charts";
 
 export async function TrackappOfficialPresenceSection({
   app,
   country,
+  initialFavorite,
+  favoritesEnabled,
 }: {
   app: AppDetail;
   country: CountryCode;
+  initialFavorite: boolean;
+  favoritesEnabled: boolean;
 }) {
   const presence = await buildOfficialBrandPresenceContext(app);
-  const openAiConfigured = isOfficialLinksOpenAiConfigured();
+  const instagramUrl = presence.officialLinks.instagram.validated ? presence.officialLinks.instagram.url : null;
+  const tiktokUrl = presence.officialLinks.tiktok.validated ? presence.officialLinks.tiktok.url : null;
+  const metaAds = presence.metaPageId ? await fetchMetaAdsForPageCached(presence.metaPageId, country) : null;
 
   return (
     <section className="mt-5">
-      <div className="mb-4 flex justify-end">
-        <Link
-          href={`/tracker/apps/${app.id}?country=${country}&tab=official`}
-          className="inline-flex min-h-10 items-center justify-center rounded-full border border-slate-200 bg-white px-4 text-[0.85rem] font-bold text-slate-700 no-underline shadow-sm transition hover:border-slate-300"
-        >
-          Vue Tracker complète →
-        </Link>
-      </div>
       <TrackappOfficialPresencePanel
+        appId={app.id}
         appName={app.name}
+        initialFavorite={initialFavorite}
+        favoritesEnabled={favoritesEnabled}
         officialLinks={presence.officialLinks}
         profiles={presence.socialProfiles}
-        confidence={presence.confidence}
-        openAiEnriched={presence.openAiEnriched}
-        openAiConfigured={openAiConfigured}
         sources={presence.sources}
+        metaAds={metaAds}
+        metaPageName={presence.metaPageName}
+        instagramProfileUrl={instagramUrl}
+        tiktokProfileUrl={tiktokUrl}
       />
     </section>
   );

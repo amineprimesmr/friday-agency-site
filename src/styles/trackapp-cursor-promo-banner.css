@@ -108,7 +108,8 @@
 body.trackapp-fidelity-body #app-app .app-main:has(.trackapp-accueil-page) {
   padding: 0 !important;
   padding-bottom: calc(2.5rem + env(safe-area-inset-bottom, 0px)) !important;
-  overflow: hidden;
+  overflow-x: clip;
+  overflow-y: auto;
   /* Retire le liseré blanc inset du desktop (visible dans les coins arrondis) */
   box-shadow: 0 -14px 44px rgba(0, 0, 0, 0.16) !important;
 }

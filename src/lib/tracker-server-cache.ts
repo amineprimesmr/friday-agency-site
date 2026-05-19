@@ -10,6 +10,7 @@ import {
   type CountryCode,
   type MultiCountryApp,
 } from "@/lib/apple-charts";
+import { fetchAppStoreWebScreenshots } from "@/lib/apple-app-store-web-screenshots";
 import { loadTrackerAppEmbedContext } from "@/lib/tracker-app-embed-data";
 import { getTrackerCuratedPotentialApps } from "@/lib/tracker-curated-potential-apps";
 
@@ -46,7 +47,16 @@ export async function getTrackerCuratedPotentialAppsCached() {
 export function loadTrackerAppEmbedContextCached(appId: string, country: CountryCode) {
   return unstable_cache(
     () => loadTrackerAppEmbedContext(appId, country),
-    ["tracker-app-embed-v1", appId, country],
+    ["tracker-app-embed-v2", appId, country],
+    { revalidate: REVALIDATE_TRACKER },
+  )();
+}
+
+/** Screenshots fiche apps.apple.com (souvent plus récents que l’API iTunes). */
+export function loadAppStoreWebScreenshotsCached(appId: string, country: CountryCode) {
+  return unstable_cache(
+    () => fetchAppStoreWebScreenshots(appId, country),
+    ["app-store-web-screenshots-v2", appId, country],
     { revalidate: REVALIDATE_TRACKER },
   )();
 }

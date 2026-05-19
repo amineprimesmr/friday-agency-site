@@ -4,11 +4,18 @@ import { TrackappAppFavoriteRow } from "@/components/trackapp/trackapp-app-favor
 import { TrackappApptrackerAppResultCard } from "@/components/trackapp/trackapp-apptracker-app-result-card";
 import { fetchAppDetail, normalizeTrackerCountryParam } from "@/lib/apple-charts";
 import { appDetailToSearchResultForFavorites } from "@/lib/trackapp-app-favorites-map";
+import { resolveTrackappAppsDisplayMetricsBatch } from "@/lib/trackapp-app-display-metrics";
 import { getTrackappProfileFavorites } from "@/lib/trackapp-profile-favorites";
 
 export const metadata: Metadata = {
   title: "Favoris — Apps",
   description: "Apps que tu as enregistrées en favori.",
+};
+
+const EMPTY_METRICS = {
+  downloadsDisplay: "—",
+  revenueDisplay: "—",
+  metricSource: "donnée indisponible" as const,
 };
 
 export default async function TrackappFavoriteAppsPage({
@@ -28,6 +35,10 @@ export default async function TrackappFavoriteAppsPage({
     }),
   );
   const picks = rows.filter((x): x is NonNullable<typeof x> => x != null);
+  const metricsMap = await resolveTrackappAppsDisplayMetricsBatch(
+    picks.map((p) => p.id),
+    country,
+  );
 
   return (
     <div className="relative z-[1] dashboard-main pb-16">
@@ -49,7 +60,7 @@ export default async function TrackappFavoriteAppsPage({
         </p>
       ) : (
         <div className="grid gap-3">
-          {picks.map(({ app }) => (
+          {picks.map(({ app, id }) => (
             <TrackappAppFavoriteRow
               key={app.id}
               appId={app.id}
@@ -59,6 +70,7 @@ export default async function TrackappFavoriteAppsPage({
               <TrackappApptrackerAppResultCard
                 app={app}
                 country={country}
+                metrics={metricsMap.get(id) ?? EMPTY_METRICS}
                 className={loggedIn ? "pr-12 md:pr-14" : undefined}
               />
             </TrackappAppFavoriteRow>

@@ -1,20 +1,40 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useId, useRef } from "react";
+
+import {
+  TRACKAPP_SEARCH_MIN_QUERY_LEN,
+  useTrackappLiveAppSearch,
+} from "@/hooks/use-trackapp-live-app-search";
+import { normalizeTrackerCountryParam } from "@/lib/apple-charts";
+import { trackappApptrackerAppHref } from "@/lib/trackapp-apptracker-paths";
+import { TRACKAPP_APPTRACKER_SEARCH_EXAMPLES } from "@/lib/trackapp-apptracker-search";
 
 export function TrackappTopbarSearchModal({ open, onClose }: Readonly<{ open: boolean; onClose: () => void }>) {
-  const router = useRouter();
+  const searchParams = useSearchParams();
+  const country = normalizeTrackerCountryParam(searchParams.get("country") ?? undefined);
+
   const id = useId();
   const titleId = `app-topbar-search-title-${id}`;
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const [q, setQ] = useState("");
+
+  const { query, setQuery, debouncedQ, results, loading, showResults, showHint, reset } =
+    useTrackappLiveAppSearch({
+      country,
+      enabled: open,
+    });
 
   useEffect(() => {
-    if (!open) return undefined;
+    if (!open) {
+      reset();
+      return undefined;
+    }
     const t = window.setTimeout(() => inputRef.current?.focus(), 30);
     return () => window.clearTimeout(t);
-  }, [open]);
+  }, [open, reset]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -25,16 +45,13 @@ export function TrackappTopbarSearchModal({ open, onClose }: Readonly<{ open: bo
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  const submit = useCallback(() => {
-    const term = q.trim();
+  const onPick = useCallback(() => {
     onClose();
-    setQ("");
-    if (term.length > 0) {
-      router.push(`/trackapp/accueil?q=${encodeURIComponent(term)}`);
-    } else {
-      router.push("/trackapp/accueil");
-    }
-  }, [q, onClose, router]);
+    reset();
+  }, [onClose, reset]);
+
+  const showEmpty = !showResults && !showHint && !loading;
+  const showNoResults = showResults && !loading && results.length === 0;
 
   return (
     <div
@@ -72,36 +89,103 @@ export function TrackappTopbarSearchModal({ open, onClose }: Readonly<{ open: bo
             className="app-topbar-search-input"
             placeholder="Rechercher une app…"
             autoComplete="off"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                submit();
-              }
-            }}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             aria-autocomplete="list"
+            aria-controls="app-topbar-search-results"
+            aria-busy={loading}
           />
+          {loading ? (
+            <span className="app-topbar-search-spinner" role="status" aria-label="Recherche en cours" />
+          ) : null}
           <button type="button" className="app-topbar-search-filter" aria-label="Filtres" title="Bientôt" disabled>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M4 6h16M7 12h10M10 18h4" />
             </svg>
           </button>
         </div>
-        <div className="app-topbar-search-chips" id="app-topbar-search-chips" role="tablist" aria-label="Raccourcis" />
-        <div className="app-topbar-search-body">
-          <ul className="app-topbar-search-results hidden" id="app-topbar-search-results" role="listbox" />
-          <div className="app-topbar-search-empty" id="app-topbar-search-empty">
-            <div className="app-topbar-search-empty-ico" aria-hidden="true">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
-                <circle cx="11" cy="11" r="7" />
-                <path d="M21 21l-4.3-4.3" />
-              </svg>
-            </div>
-            <p className="app-topbar-search-empty-text" id="app-topbar-search-empty-text">
-              Entre un nom d&apos;app puis Entrée — les résultats s&apos;affichent sur l&apos;accueil.
-            </p>
+
+        {showEmpty ? (
+          <div className="app-topbar-search-chips" id="app-topbar-search-chips" role="tablist" aria-label="Exemples">
+            {TRACKAPP_APPTRACKER_SEARCH_EXAMPLES.map((term) => (
+              <button key={term} type="button" className="app-topbar-search-chip" onClick={() => setQuery(term)}>
+                {term}
+              </button>
+            ))}
           </div>
+        ) : null}
+
+        <div className="app-topbar-search-body">
+          {showHint ? (
+            <p className="app-topbar-search-hint">
+              Tape au moins {TRACKAPP_SEARCH_MIN_QUERY_LEN} caractères pour lancer la recherche.
+            </p>
+          ) : null}
+
+          {showResults && loading && results.length === 0 ? (
+            <ul className="app-topbar-search-results" id="app-topbar-search-results" role="listbox" aria-label="Résultats">
+              {Array.from({ length: 5 }, (_, i) => (
+                <li key={i} className="app-topbar-search-result-skeleton" aria-hidden="true" />
+              ))}
+            </ul>
+          ) : null}
+
+          {showResults && results.length > 0 ? (
+            <>
+              <p className="app-topbar-search-results-meta">
+                {loading ? "Recherche…" : `${results.length} résultat${results.length === 1 ? "" : "s"}`}
+              </p>
+              <ul className="app-topbar-search-results" id="app-topbar-search-results" role="listbox" aria-label="Résultats">
+                {results.map((app) => (
+                  <li key={app.id} role="option">
+                    <Link
+                      href={trackappApptrackerAppHref(app.id, country)}
+                      className="app-topbar-search-result"
+                      onClick={onPick}
+                    >
+                      <span className="app-topbar-search-result-art">
+                        {app.artworkUrl ? (
+                          <Image src={app.artworkUrl} alt="" width={40} height={40} className="object-cover" />
+                        ) : (
+                          <span className="app-topbar-search-result-art-fallback">{app.name.charAt(0)}</span>
+                        )}
+                      </span>
+                      <span className="app-topbar-search-result-copy">
+                        <span className="app-topbar-search-result-label">{app.name}</span>
+                        <span className="app-topbar-search-result-sub">{app.artistName}</span>
+                      </span>
+                      <span className="app-topbar-search-result-meta">
+                        {app.category || "App"}
+                        {app.averageUserRating > 0 ? ` · ★ ${app.averageUserRating.toFixed(1)}` : ""}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : null}
+
+          {showNoResults ? (
+            <div className="app-topbar-search-empty" id="app-topbar-search-empty">
+              <p className="app-topbar-search-empty-text">
+                Aucun résultat pour &ldquo;{debouncedQ}&rdquo;. Essaie un autre nom.
+              </p>
+            </div>
+          ) : null}
+
+          {showEmpty ? (
+            <div className="app-topbar-search-empty" id="app-topbar-search-empty">
+              <div className="app-topbar-search-empty-ico" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="M21 21l-4.3-4.3" />
+                </svg>
+              </div>
+              <p className="app-topbar-search-empty-text" id="app-topbar-search-empty-text">
+                Les résultats s&apos;affichent ici au fil de la saisie — sur Apptracker.
+              </p>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

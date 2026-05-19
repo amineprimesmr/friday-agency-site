@@ -59,6 +59,27 @@
   outline-offset: 2px;
 }
 
+.trackapp-accueil-live-search__results {
+  position: relative;
+  z-index: 2;
+  isolation: isolate;
+}
+
+.trackapp-accueil-live-search__spinner {
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 2px solid rgba(10, 10, 10, 0.12);
+  border-top-color: rgba(10, 10, 10, 0.55);
+  border-radius: 50%;
+  animation: trackapp-accueil-search-spin 0.65s linear infinite;
+}
+
+@keyframes trackapp-accueil-search-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (max-width: 640px) {
   .trackapp-apptracker-liquid-search__form {
     flex-wrap: wrap;
