@@ -3,8 +3,8 @@ const KEY = "trackapp-paiement-billing";
 export type TrackappPaiementBillingPlan = "monthly" | "yearly";
 
 export function getTrackappPaiementPlan(): TrackappPaiementBillingPlan {
-  if (typeof window === "undefined") return "monthly";
-  return sessionStorage.getItem(KEY) === "yearly" ? "yearly" : "monthly";
+  if (typeof window === "undefined") return "yearly";
+  return sessionStorage.getItem(KEY) === "monthly" ? "monthly" : "yearly";
 }
 
 export function setTrackappPaiementPlan(plan: TrackappPaiementBillingPlan): void {

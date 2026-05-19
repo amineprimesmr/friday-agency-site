@@ -6,7 +6,7 @@ import { getTrackappPaiementPlan, setTrackappPaiementPlan } from "@/lib/trackapp
 import { TrackappPlanBillingSwitcher } from "@/components/trackapp/trackapp-plan-billing-switcher";
 
 export function TrackappPaiementMarketingPlanSwitcher() {
-  const [yearly, setYearly] = useState(false);
+  const [yearly, setYearly] = useState(true);
 
   const syncFromStore = useCallback(() => {
     setYearly(getTrackappPaiementPlan() === "yearly");

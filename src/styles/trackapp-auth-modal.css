@@ -21,7 +21,26 @@
 
 .ta-auth-root--embedded .ta-auth-modal {
   width: 100%;
-  max-height: min(88dvh, 680px);
+  max-width: none;
+  max-height: min(92dvh, 760px);
+}
+
+@media (min-width: 900px) {
+  .ta-auth-root--embedded .ta-auth-modal {
+    max-height: min(94dvh, 780px);
+    min-height: min(640px, 88dvh);
+  }
+}
+
+@media (min-width: 1280px) {
+  .ta-auth-root--embedded .ta-auth-modal {
+    min-height: min(680px, 90dvh);
+  }
+
+  .ta-auth-root--embedded .ta-auth-pane {
+    padding: clamp(2rem, 3.5vw, 3.25rem);
+    padding-top: clamp(2.85rem, 4vw, 3.65rem);
+  }
 }
 
 .ta-auth-root {
@@ -43,8 +62,8 @@
 
 .ta-auth-modal {
   position: relative;
-  width: min(100%, 56rem);
-  max-height: min(92dvh, 680px);
+  width: min(100%, 68rem);
+  max-height: min(92dvh, 760px);
   display: flex;
   flex-direction: column;
   background: var(--ta-panel-dark);
@@ -59,7 +78,12 @@
 @media (min-width: 900px) {
   .ta-auth-modal {
     flex-direction: row;
-    max-height: min(94dvh, 640px);
+    width: min(100%, 72rem);
+    max-height: min(94dvh, 780px);
+  }
+
+  .ta-auth-root--embedded .ta-auth-modal {
+    min-height: min(640px, 88dvh);
   }
 }
 
@@ -132,13 +156,10 @@
   margin-bottom: 1.25rem;
 }
 
-.ta-auth-mark__inner {
+.ta-auth-mark__img {
   width: 52px;
   height: 52px;
   border-radius: 12px;
-  background: var(--ta-lime);
-  display: grid;
-  place-items: center;
   box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
 }
 
@@ -378,7 +399,7 @@
   display: none;
   position: relative;
   flex: 1 1 50%;
-  min-height: min(560px, 85dvh);
+  min-height: min(640px, 88dvh);
   background: #0a0a0b;
 }
 
@@ -520,7 +541,7 @@
 
 /* Dev bypass sous le modal */
 .ta-auth-page-footer {
-  width: min(56rem, 100%);
+  width: min(72rem, 100%);
   margin: 0 auto;
   padding: 0 1rem 2.5rem;
 }

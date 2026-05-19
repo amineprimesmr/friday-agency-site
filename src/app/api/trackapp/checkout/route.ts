@@ -12,32 +12,17 @@ export async function POST(req: Request) {
   const stripe = getStripe();
 
   type BillingPlan = "monthly" | "yearly";
-  let plan: BillingPlan = "monthly";
-  let billingFirstName = "";
-  let billingLastName = "";
-  let billingEmailFromClient = "";
+  let plan: BillingPlan = "yearly";
   try {
     const ct = req.headers.get("content-type") ?? "";
     if (ct.includes("application/json")) {
-      const body = (await req.json()) as {
-        plan?: unknown;
-        billingFirstName?: unknown;
-        billingLastName?: unknown;
-        billingEmail?: unknown;
-      };
-      if (body?.plan === "yearly") plan = "yearly";
-      if (typeof body?.billingFirstName === "string") {
-        billingFirstName = body.billingFirstName.trim().slice(0, 80);
-      }
-      if (typeof body?.billingLastName === "string") {
-        billingLastName = body.billingLastName.trim().slice(0, 80);
-      }
-      if (typeof body?.billingEmail === "string") {
-        billingEmailFromClient = body.billingEmail.trim().slice(0, 320);
+      const body = (await req.json()) as { plan?: unknown };
+      if (body?.plan === "monthly" || body?.plan === "yearly") {
+        plan = body.plan;
       }
     }
   } catch {
-    plan = "monthly";
+    plan = "yearly";
   }
 
   const priceMonthly =
@@ -93,17 +78,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Connexion Trackapp requise." }, { status: 401 });
   }
 
-  if (!billingFirstName || !billingLastName) {
-    return NextResponse.json({ error: "Prénom et nom sont requis pour continuer." }, { status: 400 });
-  }
-  const clientEmail = billingEmailFromClient.toLowerCase();
-  const accountEmail = user.email.trim().toLowerCase();
-  if (!clientEmail || clientEmail !== accountEmail) {
-    return NextResponse.json(
-      { error: "Utilise l’adresse e-mail de ton compte Trackapp (celle avec laquelle tu es connecté)." },
-      { status: 400 },
-    );
-  }
+  const userMeta = user.user_metadata ?? {};
+  const billingFirstName =
+    typeof userMeta.first_name === "string" ? userMeta.first_name.trim().slice(0, 80)
+    : typeof userMeta.given_name === "string" ? userMeta.given_name.trim().slice(0, 80)
+    : "";
+  const billingLastName =
+    typeof userMeta.last_name === "string" ? userMeta.last_name.trim().slice(0, 80)
+    : typeof userMeta.family_name === "string" ? userMeta.family_name.trim().slice(0, 80)
+    : "";
 
   const origin =
     originRaw ?
@@ -116,9 +99,9 @@ export async function POST(req: Request) {
     supabase_user_id: user.id,
     product: "trackapp_full_access",
     trackapp_plan: plan === "yearly" ? "subscription_yearly" : "subscription_monthly",
-    billing_first_name: billingFirstName,
-    billing_last_name: billingLastName,
   };
+  if (billingFirstName) metadata.billing_first_name = billingFirstName;
+  if (billingLastName) metadata.billing_last_name = billingLastName;
 
   const refCode = cookieStore.get(AFFILIATE_REF_COOKIE)?.value?.trim();
   const admin = createAdminClient();

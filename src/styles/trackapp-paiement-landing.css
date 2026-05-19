@@ -36,10 +36,10 @@
   appearance: none;
   -webkit-appearance: none;
   cursor: pointer;
-  background: rgba(15, 23, 42, 0.38);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   transition:
     color 0.15s ease,
     border-color 0.15s ease,
@@ -47,9 +47,9 @@
 }
 
 .tpl-paiement-back-discrete:hover {
-  color: rgba(248, 250, 252, 0.9);
-  border-color: rgba(148, 163, 184, 0.28);
-  background: rgba(15, 23, 42, 0.52);
+  color: rgba(248, 250, 252, 0.88);
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .tpl-paiement-back-discrete svg {
@@ -126,6 +126,17 @@
   text-shadow: none;
 }
 
+.tpl-hero--monthly .tpl-hero__inner {
+  padding-top: max(1.35rem, env(safe-area-inset-top));
+}
+
+.tpl-hero__discount--monthly {
+  margin: 0;
+  font-size: clamp(1.85rem, 9vw, 2.85rem);
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+}
+
 .tpl-hero__tagline {
   margin: 0.55rem auto 0;
   max-width: 22rem;
@@ -143,7 +154,7 @@
   z-index: 2;
   isolation: isolate;
   border-radius: 2.3rem 2.3rem 0 0;
-  padding: 1.75rem 1rem 2rem;
+  padding: 1.75rem 1rem 2.25rem;
   background: transparent;
 }
 
@@ -218,75 +229,18 @@
   color: rgba(148, 163, 184, 0.95);
 }
 
-/* Preuve sociale : pile d’avatars + étoiles + compteur membres (sans boîte de fond, format compact) */
-.tpl-member-proof {
-  --tpl-proof-star: #74f0a7;
-
-  margin: 0.75rem auto 0;
+.tpl-pick__badge-wrap {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 0.65rem;
-  padding: 0;
-  width: fit-content;
-  max-width: 100%;
-  box-sizing: border-box;
+  margin: 0.75rem auto 1rem;
+  width: 100%;
 }
 
-.tpl-member-proof__avatars {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-  padding-left: 0.08rem;
-}
-
-.tpl-member-proof__avatar {
-  width: 24px;
-  height: 24px;
-  border-radius: 999px;
-  border: 1px solid #3f3f46;
-  margin-left: -7px;
-  object-fit: cover;
-  background: #1c1c1e;
-}
-
-.tpl-member-proof__avatar:first-child {
-  margin-left: 0;
-}
-
-.tpl-member-proof__meta {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.1rem;
-  min-width: 0;
-}
-
-.tpl-member-proof__stars {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.05rem;
-  line-height: 1;
-}
-
-.tpl-member-proof__star {
-  font-size: 0.72rem;
-  color: var(--tpl-proof-star);
-  text-shadow: none;
-}
-
-.tpl-member-proof__count {
+.tpl-pick__badge-wrap .tracker-hero-social-proof {
   margin: 0;
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: #ffffff;
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  white-space: nowrap;
 }
 
-/* Interrupteur mensuel / annuel (même rendu que le bon de commande) */
+/* Spotlight card — même lumière bleue que .trackapp-sidebar-earnings (badge gains SaaS) */
 .tpl-shell-plan-switcher.saas-pay.saas-pay--plan-switcher-inline {
   min-height: 0;
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
@@ -695,10 +649,39 @@
 .tpl-credit-box {
   position: relative;
   margin-top: 1rem;
-  padding: 0.75rem 0.85rem;
+  padding: 0.85rem 0.95rem;
   border-radius: 0.85rem;
   background: rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tpl-credit-box__price {
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.tpl-credit-box__price-value {
+  margin: 0;
+  font-size: clamp(1.85rem, 7.5vw, 2.35rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #fff;
+  line-height: 1.05;
+}
+
+.tpl-credit-box__price-period {
+  font-size: 0.68em;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  opacity: 0.92;
+}
+
+.tpl-credit-box__price-note {
+  margin: 0.3rem 0 0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(148, 163, 184, 0.95);
 }
 
 .tpl-credit-box__title {
@@ -713,10 +696,30 @@
 
 .tpl-credit-box__list {
   margin: 0;
-  padding-left: 1rem;
-  font-size: 0.82rem;
+  padding: 0;
+  list-style: none;
+  font-size: 0.76rem;
   color: rgba(203, 213, 225, 0.92);
-  line-height: 1.5;
+  line-height: 1.45;
+}
+
+.tpl-credit-box__list-item {
+  display: flex;
+  gap: 0.45rem;
+  align-items: flex-start;
+  padding: 0.32rem 0;
+}
+
+.tpl-credit-box__list-item:last-child {
+  padding-bottom: 0;
+}
+
+.tpl-credit-box__check {
+  flex-shrink: 0;
+  color: rgba(167, 243, 208, 0.95);
+  font-size: 0.72rem;
+  font-weight: 800;
+  margin-top: 0.15rem;
 }
 
 .tpl-price-row {
@@ -827,15 +830,22 @@
   margin-top: 0.12rem;
 }
 
-/* Community — titre + double bandeau témoignages (marquee) */
+/* Community — titre + double bandeau témoignages pleine largeur (marquee) */
 .tpl-community--marquee {
+  --tpl-marquee-star: #74f0a7;
+
   position: relative;
-  margin-top: 2.5rem;
-  padding: 1.75rem 0 1rem;
+  width: 100%;
+  max-width: none;
+  margin: 2.75rem 0 0;
+  padding: 0 0 2.25rem;
+  overflow: hidden;
 }
 
 .tpl-community__title {
-  margin: 0;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  max-width: 40rem;
   text-align: center;
   font-size: clamp(1.45rem, 5vw, 1.85rem);
   font-weight: 800;
@@ -857,10 +867,10 @@
 }
 
 .tpl-community__marquee-stack {
-  margin-top: 1.35rem;
+  margin-top: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.05rem;
+  gap: 0.85rem;
 }
 
 .tpl-community__marquee-viewport {
@@ -869,12 +879,12 @@
 }
 
 .tpl-community__marquee-viewport--right {
-  transform: translateX(-1.25rem);
+  padding-left: 2.75rem;
 }
 
-@media (max-width: 520px) {
+@media (min-width: 768px) {
   .tpl-community__marquee-viewport--right {
-    transform: none;
+    padding-left: 4.5rem;
   }
 }
 
@@ -882,23 +892,23 @@
   display: flex;
   width: max-content;
   will-change: transform;
-  animation: tpl-marquee-scroll 55s linear infinite;
+  animation: tpl-marquee-scroll 46s linear infinite;
 }
 
 .tpl-community__marquee-track--left {
-  animation-duration: 52s;
+  animation-duration: 44s;
 }
 
 .tpl-community__marquee-track--right {
-  animation-duration: 58s;
+  animation-duration: 50s;
   animation-direction: reverse;
 }
 
 .tpl-community__marquee-chunk {
   display: flex;
   align-items: stretch;
-  gap: 1.1rem;
-  padding-right: 1.1rem;
+  gap: 0.85rem;
+  padding-right: 0.85rem;
 }
 
 @keyframes tpl-marquee-scroll {
@@ -919,33 +929,46 @@
 
 .tpl-marquee-card {
   flex: 0 0 auto;
-  width: min(300px, 79vw);
-  max-width: 320px;
-  padding: 1.4rem 1.25rem;
-  border-radius: 1.15rem;
-  background: #1c1c1c;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  width: min(19.5rem, 78vw);
+  max-width: 21rem;
+  padding: 0.55rem;
+  border-radius: 1.1rem;
+  background: #141414;
+  border: 1px solid rgba(255, 255, 255, 0.07);
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.tpl-marquee-card__panel {
+  flex: 1;
+  min-height: 8.75rem;
+  padding: 0.95rem 1rem 1rem;
+  border-radius: 0.8rem;
+  background: #242424;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .tpl-marquee-card__stars {
   display: flex;
-  gap: 0.1rem;
-  margin-bottom: 0.5rem;
+  gap: 0.12rem;
+  margin-bottom: 0.55rem;
 }
 
 .tpl-marquee-card__star {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.25);
+  font-size: 0.72rem;
+  color: rgba(116, 240, 167, 0.22);
 }
 
 .tpl-marquee-card__star--on {
-  color: #fff;
+  color: var(--tpl-marquee-star);
+  text-shadow: 0 0 10px rgba(116, 240, 167, 0.35);
 }
 
 .tpl-marquee-card__title {
   margin: 0;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   font-weight: 800;
   letter-spacing: -0.02em;
   color: #fff;
@@ -953,37 +976,41 @@
 }
 
 .tpl-marquee-card__body {
-  margin: 0.4rem 0 0;
+  margin: 0.45rem 0 0;
   font-size: 0.78rem;
-  line-height: 1.5;
-  color: #a0a0a0;
+  line-height: 1.48;
+  color: rgba(163, 163, 163, 0.95);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
 }
 
 .tpl-marquee-card__user {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
+  gap: 0.55rem;
+  padding: 0 0.35rem 0.15rem;
 }
 
 .tpl-marquee-card__avatar {
   display: inline-flex;
-  width: 1.85rem;
-  height: 1.85rem;
+  width: 1.75rem;
+  height: 1.75rem;
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  font-size: 0.58rem;
+  font-size: 0.56rem;
   font-weight: 800;
-  background: rgba(0, 0, 0, 0.45);
+  background: #0a0a0a;
   color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .tpl-marquee-card__name {
   font-size: 0.76rem;
   font-weight: 600;
-  color: #f8fafc;
+  color: #f5f5f5;
 }
 
 /* Intro formulaire (TrackappPaymentPage showHeroBlock false) */

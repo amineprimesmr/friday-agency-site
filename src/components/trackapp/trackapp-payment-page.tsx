@@ -5,13 +5,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { TrackappPlanBillingSwitcher } from "@/components/trackapp/trackapp-plan-billing-switcher";
 import { TrackappPaiementOrderForm } from "@/components/trackapp/trackapp-paiement-order-form";
+import { TrackerHeroSocialProofBadge } from "@/components/tracker/tracker-hero-social-proof-badge";
 import { getTrackappPaiementPlan, setTrackappPaiementPlan } from "@/lib/trackapp-paiement-plan-storage";
-
-const AVA = [
-  "https://i.pravatar.cc/96?img=12",
-  "https://i.pravatar.cc/96?img=33",
-  "https://i.pravatar.cc/96?img=47",
-];
 
 function CheckoutBackIcon() {
   return (
@@ -33,7 +28,7 @@ export function TrackappPaymentPage({
 }> = {}) {
   const switcherRef = useRef<HTMLFieldSetElement | null>(null);
   /** true = abonnement annuel (99 € / an) */
-  const [yearly, setYearly] = useState(false);
+  const [yearly, setYearly] = useState(true);
 
   const syncYearlyFromStore = useCallback(() => {
     setYearly(getTrackappPaiementPlan() === "yearly");
@@ -75,23 +70,8 @@ export function TrackappPaymentPage({
                 <strong>39&nbsp;€</strong> / mois ou <strong>99&nbsp;€</strong> / an — même produit, tu choisis ta
                 cadence.
               </p>
-              <div className="saas-pay-checkout-trust-badge" role="status">
-                <div className="saas-pay-checkout-trust-badge__stack" aria-hidden="true">
-                  {AVA.map((src, idx) => (
-                    <img
-                      key={src}
-                      src={src}
-                      alt=""
-                      width={32}
-                      height={32}
-                      loading="lazy"
-                      decoding="async"
-                      className="saas-pay-checkout-trust-badge__avatar"
-                      style={{ zIndex: AVA.length - idx }}
-                    />
-                  ))}
-                </div>
-                <p className="saas-pay-checkout-trust-badge__label">Adopté par +125 créateurs</p>
+              <div className="tpl-pick__badge-wrap">
+                <TrackerHeroSocialProofBadge />
               </div>
             </>
           ) : (

@@ -82,58 +82,6 @@
   letter-spacing: 0.01em;
 }
 
-.saas-pay-checkout-trust-badge {
-  width: fit-content;
-  max-width: 100%;
-  box-sizing: border-box;
-  margin-top: 0.55rem;
-  align-self: center;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.32rem 0.72rem 0.32rem 0.42rem;
-  border-radius: 999px;
-  background: linear-gradient(180deg, #3a452e 0%, #2a331f 48%, #252e1c 100%);
-  border: 1px solid rgba(20, 26, 14, 0.85);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
-    0 8px 28px rgba(0, 0, 0, 0.35);
-}
-
-.saas-pay-checkout-trust-badge__stack {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-  padding-left: 0.08rem;
-}
-
-.saas-pay-checkout-trust-badge__avatar {
-  width: 1.85rem;
-  height: 1.85rem;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 1.5px solid #161c12;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
-  margin-left: -0.52rem;
-}
-
-.saas-pay-checkout-trust-badge__avatar:first-child {
-  margin-left: 0;
-}
-
-.saas-pay-checkout-trust-badge__label {
-  margin: 0;
-  flex: 0 1 auto;
-  font-size: clamp(0.72rem, 2.85vw, 0.88rem);
-  font-weight: 500;
-  letter-spacing: -0.015em;
-  line-height: 1.2;
-  white-space: nowrap;
-  color: #dff962;
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
-}
-
 .saas-pay-checkout-back {
   align-self: flex-start;
   display: inline-flex;

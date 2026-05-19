@@ -4,10 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
-import { TrackappPaymentPage } from "@/components/trackapp/trackapp-payment-page";
-import { cn } from "@/lib/utils";
-
-import "@/styles/trackapp-saas-pro-payment-page.css";
+import { TrackappPaymentFlow } from "@/components/trackapp/trackapp-payment-flow";
 
 /** Modale bureau uniquement — le mobile va sur `/trackapp/paiement` (page pleine). */
 export function TrackappPaymentOverlay({
@@ -47,7 +44,7 @@ export function TrackappPaymentOverlay({
       {open ? (
         <motion.div
           key="trackapp-payment-overlay"
-          className="fixed inset-0 z-[600]"
+          className="fixed inset-0 z-[960]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -56,32 +53,27 @@ export function TrackappPaymentOverlay({
           <button
             type="button"
             aria-label="Fermer la fenêtre de paiement"
-            className="absolute inset-0 bg-black/70 backdrop-blur-[1px]"
+            className="absolute inset-0 bg-black/55 backdrop-blur-md md:bg-black/60 md:backdrop-blur-lg lg:backdrop-blur-xl"
             onClick={onClose}
           />
 
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-4 md:p-6">
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="trackapp-payment-dialog-title"
+            className="pointer-events-none absolute inset-0 flex items-center justify-center p-4 md:p-8 lg:p-10"
+            initial={reduce ? false : { opacity: 0, scale: 0.96, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={reduce ? undefined : { opacity: 0, scale: 0.98, y: 10 }}
+            transition={reduce ? { duration: 0.12 } : { type: "spring", damping: 28, stiffness: 340 }}
+          >
             <motion.div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="trackapp-payment-dialog-title"
-              className={cn(
-                "pointer-events-auto flex max-h-[min(92dvh,920px)] w-[min(520px,calc(100vw-2rem))] max-w-full flex-col overflow-hidden rounded-2xl shadow-2xl",
-              )}
-              initial={reduce ? false : { opacity: 0, scale: 0.9, y: 22 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={
-                reduce
-                  ? { duration: 0.12 }
-                  : { type: "spring", damping: 28, stiffness: 340 }
-              }
+              className="pointer-events-auto w-[min(68rem,calc(100vw-1.25rem))] max-w-full lg:w-[min(72rem,calc(100vw-2rem))]"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-gutter:stable]">
-                <TrackappPaymentPage embedded onRequestClose={onClose} />
-              </div>
+              <TrackappPaymentFlow onClose={onClose} />
             </motion.div>
-          </div>
+          </motion.div>
         </motion.div>
       ) : null}
     </AnimatePresence>,
