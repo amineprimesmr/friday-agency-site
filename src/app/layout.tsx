@@ -17,13 +17,13 @@ function metadataBaseSafe(): URL {
 export const metadata: Metadata = {
   metadataBase: metadataBaseSafe(),
   title: {
-    default: "Friday — App Store Tracker",
-    template: "%s · Friday",
+    default: "Trackapp — App Store Tracker",
+    template: "%s · Trackapp",
   },
   description:
     "Suivez les classements App Store en temps réel : Top Charts, nouveautés, mouvements de rangs par pays et catégorie.",
   openGraph: {
-    title: "Friday — App Store Tracker",
+    title: "Trackapp — App Store Tracker",
     description:
       "Classements iOS en temps réel, top charts, nouveautés et explorer d'apps.",
     type: "website",

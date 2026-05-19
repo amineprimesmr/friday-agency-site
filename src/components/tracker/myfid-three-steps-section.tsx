@@ -30,7 +30,7 @@ const FINTAP_STEPS = [
   },
 ] as const;
 
-const ETAPE_ASSETS = ["/assets/etape1.png", "/assets/etape2.png", "/assets/etape3.png"] as const;
+const ETAPE_ASSETS = ["/assets/etape1.jpg", "/assets/etape2.jpg", "/assets/etape3.jpg"] as const;
 
 const ETAPE_ALTS = [
   "Étape 1 : connectez votre commerce",

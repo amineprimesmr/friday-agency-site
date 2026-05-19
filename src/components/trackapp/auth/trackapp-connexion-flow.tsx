@@ -19,7 +19,13 @@ import { createClient } from "@/lib/supabase/client";
 
 function ConnexionExperienceInner({
   nextHrefSafe,
-}: Readonly<{ nextHrefSafe: string }>) {
+  embedded = false,
+  onClose,
+}: Readonly<{
+  nextHrefSafe: string;
+  embedded?: boolean;
+  onClose?: () => void;
+}>) {
   const sb = createClient();
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -74,15 +80,22 @@ function ConnexionExperienceInner({
       setError(authErr.message ?? "Erreur de connexion.");
       return;
     }
+    onClose?.();
     router.refresh();
     router.push(nextHrefSafe);
   }
 
   if (!sb) {
     return (
-      <div className="ta-auth-root">
-        <div className="rounded-3xl border border-white/14 bg-neutral-950/90 p-12 text-[14px] text-white/55">
-          Définissez <code>NEXT_PUBLIC_SUPABASE_URL</code> et <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>.
+      <div className={embedded ? "ta-auth-root ta-auth-root--embedded" : "ta-auth-root"}>
+        <div className="ta-auth-modal relative p-8 sm:p-10">
+          <p className="m-0 text-[14px] leading-relaxed text-white/60">
+            Variables Supabase introuvables côté navigateur. Vérifie{" "}
+            <code className="text-white/85">NEXT_PUBLIC_SUPABASE_URL</code> et{" "}
+            <code className="text-white/85">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> dans{" "}
+            <code className="text-white/85">.env.local</code>, puis redémarre{" "}
+            <code className="text-white/85">npm run dev</code>.
+          </p>
         </div>
       </div>
     );
@@ -90,15 +103,24 @@ function ConnexionExperienceInner({
 
   const closeHref = "/tracker";
   const disabled = busy || !email || !password;
+  const rootClass = embedded ? "ta-auth-root ta-auth-root--embedded ta-font" : "ta-auth-root ta-font";
 
   return (
-    <div className="ta-auth-root ta-font">
+    <div className={rootClass}>
       <div className="ta-auth-modal relative">
-        <Link href={closeHref} className="ta-auth-close" prefetch={false} aria-label="Fermer">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
-            <path strokeWidth="2" strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
-          </svg>
-        </Link>
+        {embedded && onClose ? (
+          <button type="button" className="ta-auth-close" onClick={onClose} aria-label="Fermer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+              <path strokeWidth="2" strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        ) : (
+          <Link href={closeHref} className="ta-auth-close" prefetch={false} aria-label="Fermer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+              <path strokeWidth="2" strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </Link>
+        )}
 
         <div className="ta-auth-pane ta-auth-pane--with-back">
           <Link href="/trackapp/inscription" prefetch={false} className="ta-auth-back" aria-label="Retour">
@@ -108,7 +130,9 @@ function ConnexionExperienceInner({
           </Link>
 
           <TrackappLimeLogo />
-          <h1 className="ta-auth-headline">Connexion Trackapp</h1>
+          <h1 id="ta-auth-headline" className="ta-auth-headline">
+            Connexion Trackapp
+          </h1>
           <p className="ta-auth-lead">Connecte-toi pour retrouver tes outils et ton espace.</p>
 
           <div className="ta-auth-oauth-stack">
@@ -185,10 +209,18 @@ function ConnexionExperienceInner({
   );
 }
 
-export function TaConnexionFlow({ nextHref }: Readonly<{ nextHref: string }>) {
+export function TaConnexionFlow({
+  nextHref,
+  embedded = false,
+  onClose,
+}: Readonly<{
+  nextHref: string;
+  embedded?: boolean;
+  onClose?: () => void;
+}>) {
   return (
     <Suspense fallback={<TaAuthSuspended />}>
-      <ConnexionExperienceInner nextHrefSafe={nextHref} />
+      <ConnexionExperienceInner nextHrefSafe={nextHref} embedded={embedded} onClose={onClose} />
     </Suspense>
   );
 }

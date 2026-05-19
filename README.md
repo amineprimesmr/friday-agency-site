@@ -1,6 +1,6 @@
-# Trackapp — vitrine + App Tracker + SaaS
+# Trackapp — App Store Tracker + SaaS
 
-Monorepo [Next.js](https://nextjs.org) 15 (App Router, React 19, Tailwind CSS v4) : réécriture de la racine vers la **vitrine statique** (`public/legacy-agency/`), **App Store Tracker** (`/tracker`), routes API (Stripe, auth JWT), et assets statiques (`public/`).
+Monorepo [Next.js](https://nextjs.org) 15 (App Router, React 19, Tailwind CSS v4) pour **Trackapp** : App Store Tracker public (`/tracker`), espace SaaS (`/trackapp/*`), routes API (Stripe, Supabase, Meta/TikTok) et assets statiques (`public/`).
 
 ## Prérequis
 
@@ -14,7 +14,7 @@ npm install
 npm run dev
 ```
 
-- [http://localhost:3000](http://localhost:3000) — en dev, page Next minimaliste avec liens vitrine / tracker (en prod, `/` est réécrit vers la vitrine HTML).
+- [http://localhost:3000](http://localhost:3000) — en dev comme en prod, `/` redirige vers `/tracker`.
 - Variables Stripe / JWT : voir `.env.example`.
 
 ## Scripts
@@ -34,17 +34,16 @@ npm run dev
 |--------|---------|
 | `src/app/` | App Router : layouts, pages dynamiques, `globals.css` |
 | `src/styles/` | Feuilles CSS additionnelles importées par `globals.css` |
-| `src/components/` | UI réutilisable (`site-*`, `tracker/*`) |
+| `src/components/` | UI réutilisable (`tracker/*`, `trackapp/*`) |
 | `src/lib/` | Logique métier (Apple charts, Stripe, session, etc.) |
-| `public/legacy-agency/` | Vitrine HTML/CSS/JS servie à `/` (rewrite Next) |
-| `public/assets/` | Images servies sous `/assets/*` (logo, fonds vitrine, Instagram) |
+| `public/assets/` | Images et vidéos servies sous `/assets/*` |
 | `public/` | Pages statiques (`instagram.html`, scripts associés, widget tracker) |
 
 Ne pas recréer de dossiers dupliqués à la racine (`assets/`, `legacy/`) : tout ce qui est servi au navigateur vit sous **`public/`**.
 
 ## Déploiement (Vercel)
 
-Configurer les variables de `.env.example` dans le projet Vercel. `NEXT_PUBLIC_APP_URL` doit être l’URL publique (redirections Stripe, métadonnées).
+Configurer les variables de `.env.example` dans le projet Vercel. `NEXT_PUBLIC_APP_URL` doit rester l’URL canonique publique : `https://trackapp.fr`.
 
 ### Git branchée sur le bon repo
 

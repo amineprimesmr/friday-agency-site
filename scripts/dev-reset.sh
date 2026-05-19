@@ -11,7 +11,7 @@ PORTS=(3000 3001 3002 3003 3010 3011 3020 3030 3031 3080)
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  FRIDAY — reset dev (stop + clean + npm install)"
+echo "  TRACKAPP — reset dev (stop + clean + npm install)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 echo ""

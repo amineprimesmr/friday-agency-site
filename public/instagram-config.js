@@ -8,7 +8,7 @@
  * Instagram ne fournit pas la liste complète des posts sans API Meta (compte pro + token).
  * Tu peux coller ici autant d’URLs que tu veux : elles s’affichent en grille sur la page.
  */
-window.FRIDAY_INSTAGRAM = {
+window.TRACKAPP_INSTAGRAM = {
   profileUrl: "https://www.instagram.com/",
   /** @type {string[]} */
   postUrls: [],
@@ -21,10 +21,10 @@ window.FRIDAY_INSTAGRAM = {
    */
   nativePosts: [
     {
-      image: "/assets/insta/fond1.jpg",
-      ctaLabel: "@FRID4Y.AGENCY",
-      ctaHref: "https://www.instagram.com/frid4y.agency/",
-      exportFileName: "frid4y-agency-post",
+      image: "/assets/banner.jpg",
+      ctaLabel: "trackapp.fr",
+      ctaHref: "https://trackapp.fr/",
+      exportFileName: "trackapp-post",
       /** Flou initial du fond (0–24 px). Réglable ensuite avec le curseur sous la carte. */
       backgroundBlurPx: 0,
     },

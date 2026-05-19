@@ -1,9 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { useLayoutEffect, useRef } from "react";
-
-import { TRACKAPP_PAIEMENT_SLIDE_UP_KEY } from "@/lib/trackapp-paiement-navigation";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect } from "react";
 
 function BackChevron() {
   return (
@@ -19,43 +17,26 @@ function BackChevron() {
   );
 }
 
-/** Mobile : entrée type feuille depuis le bas (clic « Commencer maintenant » → sessionStorage). */
+const PAYMENT_BACK_TARGET = "/tracker";
+
+/** Page paiement : retour déterministe vers la landing publique, sans dépendre de l'historique. */
 export function TrackappPaiementPageShell({ children }: Readonly<{ children: React.ReactNode }>) {
-  const rootRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
-  useLayoutEffect(() => {
-    const el = rootRef.current;
-    if (!el) return;
-    try {
-      if (window.matchMedia("(min-width: 1024px)").matches) {
-        sessionStorage.removeItem(TRACKAPP_PAIEMENT_SLIDE_UP_KEY);
-        return;
-      }
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        sessionStorage.removeItem(TRACKAPP_PAIEMENT_SLIDE_UP_KEY);
-        return;
-      }
-      if (sessionStorage.getItem(TRACKAPP_PAIEMENT_SLIDE_UP_KEY) !== "1") return;
-      sessionStorage.removeItem(TRACKAPP_PAIEMENT_SLIDE_UP_KEY);
-    } catch {
-      return;
-    }
+  useEffect(() => {
+    router.prefetch(PAYMENT_BACK_TARGET);
+  }, [router]);
 
-    el.classList.add("tpl-paiement-page--slide-enter");
-
-    const clear = () => {
-      el.classList.remove("tpl-paiement-page--slide-enter");
-      el.removeEventListener("animationend", clear);
-    };
-    el.addEventListener("animationend", clear, { once: true });
-  }, []);
+  const goLanding = useCallback(() => {
+    router.replace(PAYMENT_BACK_TARGET);
+  }, [router]);
 
   return (
-    <div ref={rootRef} className="tpl-paiement-page">
-      <Link href="/trackapp/accueil" className="tpl-paiement-back-discrete" prefetch={false} aria-label="Retour à l'accueil Trackapp">
+    <div className="tpl-paiement-page">
+      <button type="button" className="tpl-paiement-back-discrete" onClick={goLanding} aria-label="Retour à la landing Trackapp">
         <BackChevron />
         <span>Retour</span>
-      </Link>
+      </button>
       {children}
     </div>
   );

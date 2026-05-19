@@ -12,6 +12,18 @@
   --ta-primary-btn: #2f343c;
 }
 
+.ta-auth-root--embedded {
+  min-height: 0;
+  background: transparent;
+  padding: 0;
+  width: 100%;
+}
+
+.ta-auth-root--embedded .ta-auth-modal {
+  width: 100%;
+  max-height: min(88dvh, 680px);
+}
+
 .ta-auth-root {
   min-height: 100dvh;
   background: var(--ta-bg-overlay);

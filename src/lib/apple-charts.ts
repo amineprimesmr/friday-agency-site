@@ -447,17 +447,6 @@ export async function fetchAppDetail(
   }
 }
 
-export async function fetchRecentlyRanked(
-  country: CountryCode = TRACKER_DEFAULT_COUNTRY,
-  limit = 10,
-): Promise<AppEntry[]> {
-  const apps = await fetchTopCharts(country, "top-free", 100);
-  return [...apps]
-    .filter((a) => a.releaseDate)
-    .sort((a, b) => new Date(b.releaseDate).getTime() - new Date(a.releaseDate).getTime())
-    .slice(0, limit);
-}
-
 export async function fetchCountryRankings(appId: string): Promise<CountryRanking[]> {
   const canonicalId = String(appId);
   const results = await Promise.all(

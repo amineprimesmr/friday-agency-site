@@ -47,6 +47,12 @@ export async function middleware(request: NextRequest) {
     return withReferralCookie(request, NextResponse.redirect(url));
   }
 
+  if (pathname === "/tracker/new-releases" || pathname.startsWith("/tracker/new-releases/")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/tracker";
+    return withReferralCookie(request, NextResponse.redirect(url));
+  }
+
   const isResourcesApi = pathname.startsWith("/api/trackapp/ressources");
   const isFavoritesApi = pathname.startsWith("/api/trackapp/favorites");
   const isAffiliateApi = pathname.startsWith("/api/trackapp/affiliate");

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://frid4y.agency/sitemap.xml
+Sitemap: https://trackapp.fr/sitemap.xml

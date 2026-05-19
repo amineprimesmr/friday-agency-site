@@ -128,7 +128,7 @@ export function TrackappPaiementMarketing() {
           <h2 className="tpl-pick__title" id="tpl-pick-title">
             Choisissez votre plan
           </h2>
-          <p className="tpl-pick__sub">Plus de clarté sur les niches, les rangs et le lancement de ton app.</p>
+          <p className="tpl-pick__sub">Trouvez les apps qui scalent en ce moment.</p>
 
           <div className="tpl-member-proof" role="status" aria-label="+2 560 membres, 5 étoiles sur 5">
             <div className="tpl-member-proof__avatars" aria-hidden="true">

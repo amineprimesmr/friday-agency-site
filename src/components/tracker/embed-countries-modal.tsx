@@ -32,7 +32,7 @@ export function EmbedCountriesModalTrigger({ appId, appName }: Props) {
   const iframeSrc = useMemo(() => buildEmbedCountriesIframeSrc(appId, { theme, view }), [appId, theme, view]);
 
   const snippet = useMemo(() => {
-    const escTitle = `${appName} — Friday · classements pays`
+    const escTitle = `${appName} — Trackapp · classements pays`
       .replace(/&/g, "&amp;")
       .replace(/"/g, "&quot;")
       .replace(/</g, "&lt;");
@@ -173,7 +173,7 @@ export function EmbedCountriesModalTrigger({ appId, appName }: Props) {
               {copied ? "Copié dans le presse-papiers" : "Copier le code iframe"}
             </button>
             <p className="mt-3 text-center text-[11px] text-white/32" aria-live="polite">
-              L’iframe ouvre uniquement une page Friday dédiée, sans votre header tracker.
+              L’iframe ouvre uniquement une page Trackapp dédiée, sans votre header tracker.
             </p>
           </div>
         </div>

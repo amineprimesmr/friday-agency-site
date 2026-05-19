@@ -8,7 +8,12 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
+import {
+  TRACKER_CONNEXION_HREF,
+  TRACKER_WORKSPACE_HREF,
+  trackerAuthNavActive,
+} from "@/lib/tracker-auth-nav";
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import "@/styles/tracker-header.css";
 
@@ -17,35 +22,44 @@ const TrackerSearchBar = dynamic(
   { ssr: false },
 );
 
+const TrackappAuthOverlay = dynamic(
+  () => import("@/components/trackapp/trackapp-auth-overlay").then((mod) => mod.TrackappAuthOverlay),
+  { ssr: false },
+);
+
 /** Sections à fond clair derrière lesquelles le menu passe en encre noire */
 const LIGHT_SURFACE_SELECTORS = ["#comment-ca-marche", ".tt-affiliate-shell"] as const;
 
-const NAV = [
+const BASE_NAV = [
   { href: "/tracker", label: "Accueil" },
   { href: "/tracker/top-charts", label: "Classements" },
-  { href: "/tracker/new-releases", label: "Nouveautés" },
   { href: "/tracker/affiliation", label: "Affiliation" },
 ] as const;
 
 function navActive(pathname: string, href: string) {
+  if (href.startsWith("/trackapp/")) return trackerAuthNavActive(pathname, href);
   if (href === "/tracker") return pathname === "/tracker";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 export function TrackerHeader({
+  loggedIn = false,
   searchSurface,
 }: {
+  loggedIn?: boolean;
   searchSurface?: TrackerSearchSurface;
 }) {
   const pathname = usePathname();
   const router = useRouter();
   const reduceMotion = useReducedMotion();
+  const [authOpen, setAuthOpen] = useState(false);
 
   useEffect(() => {
-    for (const item of NAV) {
+    for (const item of BASE_NAV) {
       void router.prefetch(item.href);
     }
-  }, [router]);
+    if (loggedIn) void router.prefetch(TRACKER_WORKSPACE_HREF);
+  }, [router, loggedIn]);
   const mobileId = useId();
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -122,9 +136,18 @@ export function TrackerHeader({
 
   const closeMobile = () => setMobileOpen(false);
 
+  const openAuthModal = () => {
+    setAuthOpen(true);
+    closeMobile();
+  };
+
   const mobilePanelTransition = reduceMotion
     ? { duration: 0 }
-    : { duration: 0.32, ease: [0.22, 1, 0.36, 1] as const };
+    : { duration: 0.46, ease: [0.16, 1, 0.3, 1] as const };
+
+  const mobileBackdropTransition = reduceMotion
+    ? { duration: 0 }
+    : { duration: 0.34, ease: [0.22, 1, 0.36, 1] as const };
 
   return (
     <>
@@ -169,7 +192,7 @@ export function TrackerHeader({
             aria-label="Navigation tracker"
           >
             <div className="pointer-events-auto flex items-center gap-0.5">
-              {NAV.map(({ href, label }) => (
+              {BASE_NAV.map(({ href, label }) => (
                 <TrackerNavLink
                   key={href}
                   href={href}
@@ -181,6 +204,25 @@ export function TrackerHeader({
                   {label}
                 </TrackerNavLink>
               ))}
+              {loggedIn ? (
+                <TrackerNavLink
+                  href={TRACKER_WORKSPACE_HREF}
+                  className={cn(
+                    "tracker-header-nav-link",
+                    navActive(pathname, TRACKER_WORKSPACE_HREF) && "tracker-header-nav-link--active",
+                  )}
+                >
+                  Mon espace
+                </TrackerNavLink>
+              ) : (
+                <button
+                  type="button"
+                  className="tracker-header-nav-link"
+                  onClick={openAuthModal}
+                >
+                  Connexion
+                </button>
+              )}
             </div>
           </nav>
 
@@ -245,65 +287,161 @@ export function TrackerHeader({
 
         <AnimatePresence>
           {mobileOpen ? (
-            <motion.div
-              key="mobile-nav"
-              id={mobileId}
-              initial={reduceMotion ? false : { height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={reduceMotion ? undefined : { height: 0, opacity: 0 }}
-              transition={mobilePanelTransition}
-              className="tracker-header-mobile-panel relative z-[2] overflow-hidden lg:hidden"
-            >
-              <nav
-                className="flex flex-col gap-1 px-4 pb-4 pt-1"
-                aria-label="Navigation tracker (mobile)"
+            <>
+              <motion.button
+                key="mobile-nav-backdrop"
+                type="button"
+                aria-label="Fermer le menu"
+                className="tracker-header-mobile-scrim lg:hidden"
+                initial={reduceMotion ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={reduceMotion ? undefined : { opacity: 0 }}
+                transition={mobileBackdropTransition}
+                onClick={closeMobile}
+              />
+              <motion.div
+                key="mobile-nav"
+                id={mobileId}
+                initial={reduceMotion ? false : { opacity: 0, y: -28, scaleY: 0.94 }}
+                animate={{ opacity: 1, y: 0, scaleY: 1 }}
+                exit={reduceMotion ? undefined : { opacity: 0, y: -18, scaleY: 0.97 }}
+                transition={mobilePanelTransition}
+                className="tracker-header-mobile-panel lg:hidden"
+                style={{ transformOrigin: "top center" }}
               >
-                {NAV.map(({ href, label }) => (
+                <div className="tracker-header-mobile-panel-head">
+                  <p>MENU</p>
+                  <button type="button" className="tracker-header-mobile-close" onClick={closeMobile}>
+                    <span className="sr-only">Fermer le menu</span>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+                      <path
+                        d="M6 6l12 12M18 6L6 18"
+                        stroke="currentColor"
+                        strokeWidth="2.25"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
+
+                <nav className="tracker-header-mobile-nav" aria-label="Navigation tracker (mobile)">
+                  {BASE_NAV.map(({ href, label }) => (
+                    <TrackerNavLink
+                      key={href}
+                      href={href}
+                      className={cn(
+                        "tracker-header-mobile-link",
+                        navActive(pathname, href) && "tracker-header-mobile-link--active",
+                      )}
+                      onClick={closeMobile}
+                    >
+                      <span>{label}</span>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+                        <path
+                          d="M7 17L17 7M9 7h8v8"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </TrackerNavLink>
+                  ))}
+                  {loggedIn ? (
+                    <TrackerNavLink
+                      href={TRACKER_WORKSPACE_HREF}
+                      className={cn(
+                        "tracker-header-mobile-link",
+                        navActive(pathname, TRACKER_WORKSPACE_HREF) && "tracker-header-mobile-link--active",
+                      )}
+                      onClick={closeMobile}
+                    >
+                      <span>Mon espace</span>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+                        <path
+                          d="M7 17L17 7M9 7h8v8"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </TrackerNavLink>
+                  ) : (
+                    <button
+                      type="button"
+                      className="tracker-header-mobile-link w-full text-left"
+                      onClick={openAuthModal}
+                    >
+                      <span>Connexion</span>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+                        <path
+                          d="M7 17L17 7M9 7h8v8"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                  )}
                   <TrackerNavLink
-                    key={href}
-                    href={href}
+                    href="/tracker/widget"
                     className={cn(
-                      "tracker-header-nav-link justify-start py-2.5 text-[0.9rem]",
-                      navActive(pathname, href) && "tracker-header-nav-link--active",
+                      "tracker-header-mobile-link",
+                      (pathname === "/tracker/widget" || pathname.startsWith("/tracker/widget/")) &&
+                        "tracker-header-mobile-link--active",
                     )}
                     onClick={closeMobile}
                   >
-                    {label}
+                    <span>Extension iOS</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+                      <path
+                        d="M7 17L17 7M9 7h8v8"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
                   </TrackerNavLink>
-                ))}
-                <TrackerNavLink
-                  href="/tracker/widget"
-                  className={cn(
-                    "tracker-header-btn tracker-header-btn--ios-extension mt-2 inline-flex w-full items-center justify-center gap-2 py-2.5 text-[0.9rem]",
-                    (pathname === "/tracker/widget" || pathname.startsWith("/tracker/widget/")) &&
-                      "tracker-header-btn--ios-extension-active",
+                </nav>
+
+                <div className="tracker-header-mobile-actions">
+                  {loggedIn ? null : (
+                    <button
+                      type="button"
+                      className="tracker-header-mobile-login"
+                      onClick={openAuthModal}
+                    >
+                      Connexion
+                    </button>
                   )}
-                  onClick={closeMobile}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-                    <rect x="4" y="4" width="16" height="16" rx="4" stroke="currentColor" strokeWidth="2" />
-                    <path
-                      d="M9 12h6M12 9v6"
-                      stroke="currentColor"
-                      strokeWidth="1.75"
-                      strokeLinecap="round"
-                      opacity="0.85"
-                    />
-                  </svg>
-                  Extension iOS
-                </TrackerNavLink>
-                <TrackerNavLink
-                  href="/trackapp/connexion"
-                  className="tracker-header-btn tracker-header-btn--outline mt-2 justify-center py-2.5"
-                  onClick={closeMobile}
-                >
-                  Connexion
-                </TrackerNavLink>
-              </nav>
-            </motion.div>
+                  <TrackerNavLink
+                    href={loggedIn ? TRACKER_WORKSPACE_HREF : "/trackapp/inscription?mode=start"}
+                    className="tracker-header-mobile-cta"
+                    onClick={closeMobile}
+                  >
+                    <span>{loggedIn ? "Mon espace" : "Commencer"}</span>
+                    <span className="tracker-header-mobile-cta-icon" aria-hidden>
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                        <path
+                          d="M9 6l6 6-6 6"
+                          stroke="currentColor"
+                          strokeWidth="2.4"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
+                  </TrackerNavLink>
+                </div>
+              </motion.div>
+            </>
           ) : null}
         </AnimatePresence>
       </header>
+      {!loggedIn ? <TrackappAuthOverlay open={authOpen} onClose={() => setAuthOpen(false)} /> : null}
     </>
   );
 }

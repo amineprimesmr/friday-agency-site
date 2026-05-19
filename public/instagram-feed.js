@@ -27,7 +27,7 @@ async function exportNativePostAsPng(targetEl, button) {
     const name =
       typeof targetEl.dataset?.exportName === "string" && targetEl.dataset.exportName.trim()
         ? `${targetEl.dataset.exportName.trim().replace(/[^\w.-]+/g, "_")}.png`
-        : `frid4y-post-${Date.now()}.png`;
+        : `trackapp-post-${Date.now()}.png`;
 
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -69,11 +69,11 @@ function createNativePostCard(post, nativeIndex = 0) {
   const ctaHref =
     typeof post.ctaHref === "string" && post.ctaHref.trim()
       ? post.ctaHref.trim()
-      : "https://www.instagram.com/frid4y.agency/";
+      : "https://trackapp.fr/";
   const ctaLabel =
     typeof post.ctaLabel === "string" && post.ctaLabel.trim()
       ? post.ctaLabel.trim()
-      : "@FRID4Y.AGENCY";
+      : "trackapp.fr";
 
   const article = document.createElement("article");
   article.className = "instagram-native-post";
@@ -120,7 +120,7 @@ function createNativePostCard(post, nativeIndex = 0) {
   cta.href = ctaHref;
   cta.target = "_blank";
   cta.rel = "noopener noreferrer";
-  cta.setAttribute("aria-label", `${ctaLabel} — ouvrir Instagram`);
+  cta.setAttribute("aria-label", `${ctaLabel} — ouvrir Trackapp`);
 
   const label = document.createElement("span");
   label.className = "instagram-native-cta__label";
@@ -139,12 +139,12 @@ function createNativePostCard(post, nativeIndex = 0) {
   wrap.dataset.exportName =
     typeof post.exportFileName === "string" && post.exportFileName.trim()
       ? post.exportFileName.trim()
-      : "frid4y-agency-post";
+      : "trackapp-post";
   wrap.appendChild(article);
 
   applyBackgroundBlur(blurInitial);
 
-  const blurId = `friday-bg-blur-${Math.random().toString(36).slice(2, 11)}`;
+  const blurId = `trackapp-bg-blur-${Math.random().toString(36).slice(2, 11)}`;
   const controls = document.createElement("div");
   controls.className = "instagram-native-blur-controls";
 
@@ -208,7 +208,7 @@ function createNativePostCard(post, nativeIndex = 0) {
 }
 
 function render() {
-  const cfg = window.FRIDAY_INSTAGRAM;
+  const cfg = window.TRACKAPP_INSTAGRAM;
   const grid = document.getElementById("instagram-grid");
   const empty = document.getElementById("instagram-empty");
   const profileLink = document.getElementById("instagram-profile-link");

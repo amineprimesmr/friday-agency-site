@@ -1,7 +1,5 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import type { Transition as MotionTransition } from "framer-motion";
 import { useEffect, useState } from "react";
 
 const COUNTRIES = [
@@ -31,8 +29,6 @@ export function TrackappPaiementOrderForm({
   onCountryChange: (code: string) => void;
   className?: string;
 }>) {
-  const reduceMotion = useReducedMotion();
-
   /** 1 = identité, 2 = bloc paiement (aperçu carte + Stripe) */
   const [step, setStep] = useState<1 | 2>(1);
   const [firstName, setFirstName] = useState("");
@@ -48,20 +44,6 @@ export function TrackappPaiementOrderForm({
   }, [plan]);
 
   const continueLabel = busy ? "Ouverture du paiement..." : "Rejoindre";
-  /** Courbe identique mais `as const` pour le tuple Bézier attendu par framer-motion. */
-  const transition: MotionTransition =
-    reduceMotion ?
-      { duration: 0 }
-    : {
-        duration: 0.32,
-        ease: [0.25, 0.46, 0.45, 0.94] as const,
-      };
-
-  const stepVariants = {
-    initial: reduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 },
-    animate: reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 },
-    exit: reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 },
-  };
 
   const validateIdentity = () => {
     const fn = normalizeSpace(firstName);
@@ -116,18 +98,8 @@ export function TrackappPaiementOrderForm({
 
   return (
     <div className={`saas-pay-order-inset tpl-paiement-order-steps${className ? ` ${className}` : ""}`}>
-      <AnimatePresence mode="wait" initial={false}>
-        {step === 1 ?
-          <motion.section
-            key="identity"
-            className="saas-pay-identity-step"
-            aria-label="Étape 1 — Coordonnées"
-            variants={stepVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            transition={transition}
-          >
+      {step === 1 ?
+          <section className="saas-pay-identity-step" aria-label="Étape 1 — Coordonnées">
             <p className="saas-pay-wallet-divider">Tes informations</p>
 
             <label htmlFor={`tpl-pay-fn-${plan}`}>Prénom</label>
@@ -178,15 +150,8 @@ export function TrackappPaiementOrderForm({
             <button type="button" className="saas-pay-continue" onClick={goToPaymentStep}>
               <span className="saas-pay-continue-label">Continuer</span>
             </button>
-          </motion.section>
-        : <motion.div
-            key="payment"
-            variants={stepVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            transition={transition}
-          >
+          </section>
+        : <div>
             <section className="saas-pay-wallet-hero" aria-label="Paiement express">
               <div className="saas-pay-wallet-hero__glass saas-pay-wallet-hero__glass--loading">
                 <div className="saas-pay-wallet-mount saas-pay-wallet-mount--hero">Paiement sécurisé Trackapp</div>
@@ -248,9 +213,8 @@ export function TrackappPaiementOrderForm({
                 <span className="saas-pay-continue-label">{continueLabel}</span>
               </button>
             </section>
-          </motion.div>
+          </div>
         }
-      </AnimatePresence>
     </div>
   );
 }

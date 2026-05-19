@@ -1,8 +1,10 @@
 /** Réduction affichée (et appliquée si STRIPE_COUPON_ID_REFERRAL_FRIEND est défini) pour les filleuls via lien d’affiliation. */
 export const AFFILIATE_FRIEND_DISCOUNT_PERCENT = 40;
 
-/** Taux de commission affilié (50 % du montant payé par le filleul). */
-export const AFFILIATE_COMMISSION_RATE = 0.5;
+/** Commission fixe par filleul actif et par mois de MRR (20 €). */
+export const AFFILIATE_COMMISSION_MRR_CENTS = 2000;
+
+export const AFFILIATE_COMMISSION_MRR_EUR = AFFILIATE_COMMISSION_MRR_CENTS / 100;
 
 /** Délai avant qu'une commission devienne disponible au retrait (chargebacks). */
 export const AFFILIATE_HOLDING_DAYS = 14;

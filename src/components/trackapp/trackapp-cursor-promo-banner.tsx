@@ -17,7 +17,7 @@ export function TrackappCursorPromoBanner() {
       <div className="trackapp-cursor-promo__glow" aria-hidden />
       <span className="trackapp-cursor-promo__pill">
         <Image
-          src="/assets/cursoricon.png"
+          src="/assets/cursoricon.jpg"
           alt=""
           width={26}
           height={26}

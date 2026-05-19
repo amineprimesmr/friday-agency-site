@@ -61,8 +61,3 @@ h6 {
     scroll-behavior: auto;
   }
 }
-
-/** Routes : /avatar, /studio — corps de texte aligné sur Geist (titres : balises h* ou styles locaux) */
-.studio-system-ui {
-  font-family: var(--font-geist-sans), var(--font-system-ui);
-}

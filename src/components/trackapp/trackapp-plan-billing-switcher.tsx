@@ -53,7 +53,7 @@ export function TrackappPlanBillingSwitcher({
           />
           <span className="switcher__text">Annuel</span>
           <span className="saas-pay-billing-pct-badge" aria-hidden="true">
-            −89&nbsp;%
+            −79&nbsp;%
           </span>
         </label>
         <svg className="switcher__filter" aria-hidden="true">

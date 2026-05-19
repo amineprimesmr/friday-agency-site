@@ -1,19 +1,7 @@
-import { readFile } from "fs/promises";
-import path from "path";
-import { NextResponse } from "next/server";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-static";
 
 export async function GET() {
-  const filePath = path.join(process.cwd(), "public", "trackapp-app-stats-signed.shortcut");
-  const file = await readFile(filePath);
-
-  return new NextResponse(file, {
-    headers: {
-      // MIME type reconnu par iOS pour ouvrir automatiquement dans l'app Raccourcis
-      "Content-Type": "application/x-shortcuts",
-      "Content-Disposition": 'attachment; filename="App-Stats-Trackapp.shortcut"',
-      "Content-Length": String(file.length),
-    },
-  });
+  redirect("https://www.icloud.com/shortcuts/15ffc694f45844dfabcf7e48198545d7");
 }

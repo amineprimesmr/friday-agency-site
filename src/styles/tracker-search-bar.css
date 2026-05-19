@@ -87,7 +87,7 @@
   max-height: min(70vh, 520px);
 }
 
-/* Pilule liquid glass — aligné fooontic / kube.io (feDisplacementMap via url(#tracker-liquid-glass-fr)) */
+/* Pilule liquid glass (feDisplacementMap via url(#tracker-liquid-glass-fr)) */
 button.tracker-search-pill.tracker-search-pill--trigger {
   width: 100%;
   margin: 0;

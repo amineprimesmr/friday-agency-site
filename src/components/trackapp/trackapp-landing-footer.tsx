@@ -9,11 +9,11 @@ export function TrackappLandingFooter() {
         <Link href="/tracker" className="underline-offset-4 hover:text-violet-200 hover:underline">
           App Store Tracker
         </Link>
-        <Link href="/trackapp/legal/cgu" className="underline-offset-4 hover:text-violet-200 hover:underline">
+        <Link href="/trackapp/legal/terms" className="underline-offset-4 hover:text-violet-200 hover:underline">
           CGU
         </Link>
         <Link
-          href="/trackapp/legal/confidentialite"
+          href="/trackapp/legal/privacy"
           className="underline-offset-4 hover:text-violet-200 hover:underline"
         >
           Confidentialité

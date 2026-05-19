@@ -5,7 +5,7 @@ import { TrendtrackAffiliateLanding } from "@/components/tracker/trendtrack-affi
 export const metadata: Metadata = {
   title: "Affiliation",
   description:
-    "Programme d’affiliation Trackapp : 30 % sur chaque abonnement généré, lien et code promo, simulateur de revenus et FAQ.",
+    "Programme d’affiliation Trackapp : 20 € de MRR par parrainage actif, lien et code promo, simulateur de revenus et FAQ.",
 };
 
 export default function TrackerAffiliationPage() {

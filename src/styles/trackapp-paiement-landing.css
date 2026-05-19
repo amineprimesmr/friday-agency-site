@@ -33,6 +33,9 @@
   letter-spacing: 0.02em;
   color: rgba(248, 250, 252, 0.52);
   text-decoration: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
   background: rgba(15, 23, 42, 0.38);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -57,35 +60,6 @@
 @media (prefers-reduced-motion: reduce) {
   .tpl-paiement-back-discrete {
     transition: none;
-  }
-}
-
-/* Mobile : après clic « Commencer maintenant », entrée fluide depuis le bas (sessionStorage + layout) */
-@media (max-width: 1023.98px) {
-  .tpl-paiement-page.tpl-paiement-page--slide-enter {
-    animation: tpl-paiement-slide-enter 0.48s cubic-bezier(0.32, 0.72, 0, 1) both;
-    will-change: transform, opacity;
-  }
-}
-
-@keyframes tpl-paiement-slide-enter {
-  from {
-    transform: translate3d(0, min(18vh, 140px), 0);
-    opacity: 0.82;
-  }
-
-  to {
-    transform: translate3d(0, 0, 0);
-    opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tpl-paiement-page.tpl-paiement-page--slide-enter {
-    animation: none;
-    transform: none;
-    opacity: 1;
-    will-change: auto;
   }
 }
 
@@ -115,9 +89,9 @@
   inset: 0;
   background-image:
     linear-gradient(180deg, rgba(2, 6, 23, 0.55) 0%, rgba(2, 6, 23, 0.35) 45%, rgba(2, 6, 23, 0.9) 100%),
-    url("/assets/banner.png");
+    url("/assets/banner.jpg");
   background-size: cover;
-  background-position: center;
+  background-position: center 72%;
   background-repeat: no-repeat;
 }
 
@@ -164,15 +138,29 @@
 
 /* --- Coque principale : doit recouper le hero (coins arrondis) avec un fond opaque par-dessus la photo --- */
 .tpl-shell {
-  margin-top: -3rem;
+  margin-top: -2.45rem;
   position: relative;
   z-index: 2;
   isolation: isolate;
-  border-radius: 1.75rem 1.75rem 0 0;
+  border-radius: 2.3rem 2.3rem 0 0;
   padding: 1.75rem 1rem 2rem;
-  /* Même toile que la page : la couleur du bloc masque bien l’image sous l’arc supérieur */
+  background: transparent;
+}
+
+.tpl-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0.65rem 0 0;
+  z-index: 0;
+  border-radius: 2.3rem 2.3rem 0 0;
   background-color: var(--tpl-flyer-canvas, #0e1113);
   box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+.tpl-shell > * {
+  position: relative;
+  z-index: 1;
 }
 
 @media (min-width: 640px) {
@@ -180,7 +168,7 @@
     max-width: 32rem;
     margin-left: auto;
     margin-right: auto;
-    margin-top: -3.25rem;
+    margin-top: -2.65rem;
     padding-left: 1.25rem;
     padding-right: 1.25rem;
   }
@@ -202,10 +190,20 @@
   color: rgba(148, 163, 184, 0.95);
 }
 
+.tpl-pick {
+  padding-top: 0.85rem;
+}
+
+@media (min-width: 640px) {
+  .tpl-pick {
+    padding-top: 1.2rem;
+  }
+}
+
 .tpl-pick__title {
   margin: 0.5rem 0 0;
   text-align: center;
-  font-size: clamp(1.45rem, 5vw, 1.85rem);
+  font-size: clamp(1.72rem, 6vw, 2.2rem);
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.15;

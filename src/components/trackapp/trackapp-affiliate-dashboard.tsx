@@ -19,7 +19,7 @@ type AffiliateMe = {
   referralCode: string;
   referralLink: string;
   friendDiscountPercent: number;
-  commissionRate: number;
+  commissionMrrCents: number;
   minPayoutCents: number;
   balance: {
     pendingCents: number;
@@ -149,7 +149,7 @@ export function TrackappAffiliateDashboard() {
     );
   }
 
-  const ratePct = Math.round(data.commissionRate * 100);
+  const commissionMrrEur = data.commissionMrrCents / 100;
   const discountPct = data.friendDiscountPercent;
   const canPayout =
     data.connect.payoutsEnabled && data.balance.availableCents >= data.minPayoutCents;
@@ -162,8 +162,8 @@ export function TrackappAffiliateDashboard() {
         <p className="ta-aff-dash__lead">
           Partage <strong>ton lien personnel</strong> : ton audience bénéficie de{" "}
           <strong>−{discountPct}&nbsp;%</strong> sur l&apos;abonnement au moment du paiement (offre filleul), et tu
-          touches <strong>{ratePct}&nbsp;%</strong> de commission sur les paiements de tes filleuls une fois qu&apos;ils
-          sont abonnés.
+          touches <strong>{commissionMrrEur.toLocaleString("fr-FR")}&nbsp;€ de MRR</strong> par filleul actif, chaque
+          mois tant qu&apos;il reste abonné.
         </p>
       </header>
 

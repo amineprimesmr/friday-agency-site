@@ -1,6 +1,6 @@
 /** Thème clair/sombre réutilisable (page Instagram seule). */
 (function () {
-  const key = "friday-theme-instagram";
+  const key = "trackapp-theme-instagram";
 
   function apply(stored) {
     document.body.classList.remove("theme-deep", "theme-soft");

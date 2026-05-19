@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { AFFILIATE_COMMISSION_RATE } from "@/lib/trackapp/affiliate/config";
+import { AFFILIATE_COMMISSION_MRR_CENTS } from "@/lib/trackapp/affiliate/config";
 
 export type AffiliateProfileRow = {
   id: string;
@@ -103,8 +103,14 @@ export async function getReferrerForUser(
   return referrer ?? null;
 }
 
-export function commissionCentsFromGross(grossCents: number): number {
-  return Math.floor(grossCents * AFFILIATE_COMMISSION_RATE);
+/** Commission fixe par événement MRR (checkout initial ou renouvellement mensuel). */
+export function commissionCentsFromGross(_grossCents: number): number {
+  return AFFILIATE_COMMISSION_MRR_CENTS;
+}
+
+export function affiliateCommissionRateForGross(grossCents: number): number {
+  if (grossCents <= 0) return 0;
+  return Math.min(1, AFFILIATE_COMMISSION_MRR_CENTS / grossCents);
 }
 
 export function referralLink(origin: string, code: string): string {

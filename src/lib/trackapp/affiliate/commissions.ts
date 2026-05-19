@@ -1,11 +1,12 @@
 import type Stripe from "stripe";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { AFFILIATE_HOLDING_DAYS } from "@/lib/trackapp/affiliate/config";
 import {
-  AFFILIATE_COMMISSION_RATE,
-  AFFILIATE_HOLDING_DAYS,
-} from "@/lib/trackapp/affiliate/config";
-import { commissionCentsFromGross, getReferrerForUser } from "@/lib/trackapp/affiliate/referral";
+  affiliateCommissionRateForGross,
+  commissionCentsFromGross,
+  getReferrerForUser,
+} from "@/lib/trackapp/affiliate/referral";
 
 function holdingAvailableAt(): string {
   const d = new Date();
@@ -47,7 +48,7 @@ export async function recordCommission(opts: {
     referred_user_id: opts.referredUserId,
     gross_amount_cents: opts.grossAmountCents,
     commission_cents: commissionCents,
-    commission_rate: AFFILIATE_COMMISSION_RATE,
+    commission_rate: affiliateCommissionRateForGross(opts.grossAmountCents),
     currency: opts.currency.toLowerCase(),
     stripe_event_id: opts.stripeEventId,
     stripe_checkout_session_id: opts.stripeCheckoutSessionId ?? null,

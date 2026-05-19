@@ -1,18 +1,32 @@
-/* Page affiliation — inspiration Trendtrack / trendtrack.io/fr/affiliate */
+/* Page affiliation — fond aligné sur .tpl-paiement-page / .saas-pay-checkout */
 
 .tt-affiliate {
-  --tt-green: #4ade80;
-  --tt-green-deep: #22c55e;
-  --tt-black: #000000;
+  --tt-flyer-canvas: #0e1113;
+  --tt-flyer-glow-depth: rgb(36, 45, 59);
   --tt-white: #ffffff;
   --tt-grey-400: #a1a1aa;
   --tt-grey-500: #71717a;
   --tt-card-dark: #141414;
   --tt-card-dark-2: #18181b;
+  --c-glass: #bbbbbc;
+  --c-light: #fff;
+  --c-dark: #000;
+  --glass-reflex-dark: 2;
+  --glass-reflex-light: 0.32;
+  --saturation: 155%;
+  --blur: 22px;
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  color: var(--tt-white);
-  background: var(--tt-black);
+  color: rgba(248, 250, 252, 0.96);
+  min-height: 100%;
+  background:
+    radial-gradient(
+      ellipse 130% 95% at 50% 6%,
+      color-mix(in srgb, var(--tt-flyer-glow-depth) 65%, transparent) 0%,
+      color-mix(in srgb, var(--tt-flyer-glow-depth) 28%, transparent) 42%,
+      rgba(14, 17, 19, 0) 68%
+    ),
+    var(--tt-flyer-canvas);
 }
 
 .tt-affiliate-hero {
@@ -20,19 +34,6 @@
   padding: clamp(2.5rem, 8vw, 5rem) 1.25rem clamp(3rem, 10vw, 6.5rem);
   text-align: center;
   overflow: hidden;
-}
-
-.tt-affiliate-hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse 70% 55% at 50% 88%,
-    rgba(74, 222, 128, 0.22) 0%,
-    rgba(34, 197, 94, 0.08) 38%,
-    transparent 68%
-  );
-  pointer-events: none;
 }
 
 .tt-affiliate-hero-inner {
@@ -64,34 +65,50 @@
   color: rgba(255, 255, 255, 0.58);
 }
 
-.tt-affiliate-cta {
+a.tt-affiliate-cta {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.4rem;
   margin-top: 2rem;
   padding: 0.85rem 1.65rem;
+  min-height: 3rem;
   border-radius: 999px;
   border: none;
   font-size: 0.9375rem;
   font-weight: 600;
   letter-spacing: 0.01em;
-  color: #0a0a0a;
-  background: linear-gradient(180deg, #4ade80 0%, #22c55e 100%);
+  color: rgba(255, 255, 255, 0.96);
   text-decoration: none;
   cursor: pointer;
+  transform: translateZ(0);
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  background-color: color-mix(in srgb, var(--c-glass) 12%, transparent);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--saturation)) url(#tracker-liquid-glass-fr);
+  backdrop-filter: blur(var(--blur)) saturate(var(--saturation)) url(#tracker-liquid-glass-fr);
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.12) inset,
-    0 12px 40px rgba(34, 197, 94, 0.45),
-    0 4px 14px rgba(0, 0, 0, 0.35);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+    inset 0 0 0 1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 10%), transparent),
+    inset 1.8px 3px 0 -2px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 90%), transparent),
+    inset -2px -2px 0 -2px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 80%), transparent),
+    inset -3px -8px 1px -6px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 60%), transparent),
+    inset -0.3px -1px 4px 0 color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 12%), transparent),
+    inset 2px -6.5px 1px -4px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
+    0 6px 20px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 22%), transparent);
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
 }
 
-.tt-affiliate-cta:hover {
+a.tt-affiliate-cta:hover {
   transform: translateY(-1px);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.16) inset,
-    0 16px 48px rgba(34, 197, 94, 0.5),
-    0 6px 18px rgba(0, 0, 0, 0.4);
+  background-color: color-mix(in srgb, var(--c-glass) 18%, transparent);
+}
+
+a.tt-affiliate-cta:focus-visible {
+  outline: 2px solid rgba(200, 255, 61, 0.65);
+  outline-offset: 3px;
 }
 
 .tt-affiliate-sim-wrap {
@@ -114,7 +131,6 @@
   transform: translateZ(0);
   border: none;
   padding: 1.25rem 1.35rem 1.4rem;
-  /* Voile sombre sous le verre : réduit les traînées vertes quand la carte de déplacement déforme le halo hero. */
   background:
     linear-gradient(165deg, rgba(8, 8, 10, 0.72) 0%, rgba(6, 6, 8, 0.55) 100%),
     color-mix(in srgb, var(--c-glass) 12%, transparent);
@@ -210,9 +226,8 @@
   top: 0;
   bottom: 0;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--tt-green-deep), var(--tt-green));
+  background: linear-gradient(90deg, rgba(100, 116, 139, 0.75) 0%, rgba(226, 232, 240, 0.92) 100%);
   pointer-events: none;
-  box-shadow: 0 0 14px rgba(74, 222, 128, 0.25);
 }
 
 .tt-affiliate-liquid-slider-input {
@@ -327,8 +342,28 @@
   border-radius: 999px;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #052e16;
-  background: var(--tt-green);
+  color: rgba(255, 255, 255, 0.94);
+  transform: translateZ(0);
+  background-color: color-mix(in srgb, var(--c-glass) 14%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(var(--saturation)) url(#tracker-liquid-glass-fr);
+  backdrop-filter: blur(14px) saturate(var(--saturation)) url(#tracker-liquid-glass-fr);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 10%), transparent),
+    inset 1.2px 2px 0 -2px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 85%), transparent),
+    inset -1.5px -4px 1px -4px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 55%), transparent),
+    0 4px 14px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 18%), transparent);
+}
+
+/* Accents démo dans les cartes étapes (section claire) */
+.tt-affiliate-demo-chip {
+  color: #18181b;
+  background: rgba(228, 228, 231, 0.95);
+  border: 1px solid #d4d4d8;
+}
+
+.tt-affiliate-demo-block {
+  background: linear-gradient(145deg, #e4e4e7 0%, #d4d4d8 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 /* Coque blanche arrondie (sections claires) */
@@ -554,7 +589,7 @@
 .tt-affiliate-footer-cta {
   padding: clamp(3.5rem, 10vw, 6rem) 1.5rem clamp(4rem, 12vw, 7rem);
   text-align: center;
-  background: var(--tt-black);
+  background: transparent;
 }
 
 .tt-affiliate-footer-title {

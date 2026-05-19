@@ -47,6 +47,7 @@ function PhoneSlide({ ariaLabel, item, reduceMotion }: PhoneSlideProps) {
   const src = item?.src ?? null;
   const title = item?.displayName ?? null;
   const artworkUrl = item?.artworkUrl ?? null;
+  const posterSrc = item?.posterSrc ?? null;
 
   const moneyLine = item?.monthlyRevenueLabel ?? null;
 
@@ -80,25 +81,39 @@ function PhoneSlide({ ariaLabel, item, reduceMotion }: PhoneSlideProps) {
             {src ? (
               <>
                 {!mediaActive ? (
-                  <div className="absolute inset-0 h-full w-full bg-neutral-950" aria-label={ariaLabel} />
+                  posterSrc ? (
+                    <Image
+                      src={posterSrc}
+                      alt=""
+                      fill
+                      sizes="248px"
+                      className="object-cover"
+                      aria-label={ariaLabel}
+                      priority={false}
+                    />
+                  ) : (
+                    <div className="absolute inset-0 h-full w-full bg-neutral-950" aria-label={ariaLabel} />
+                  )
                 ) : reduceMotion ? (
                   <video
                     className="absolute inset-0 h-full w-full object-cover"
                     src={src}
+                    poster={posterSrc ?? undefined}
                     muted
                     playsInline
-                    preload="none"
+                    preload="metadata"
                     aria-label={ariaLabel}
                   />
                 ) : (
                   <video
                     className="absolute inset-0 h-full w-full object-cover"
                     src={src}
+                    poster={posterSrc ?? undefined}
                     autoPlay
                     muted
                     loop
                     playsInline
-                    preload="none"
+                    preload="auto"
                     aria-label={ariaLabel}
                   />
                 )}

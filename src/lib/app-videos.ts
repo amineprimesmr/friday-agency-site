@@ -13,6 +13,8 @@
 export type AppShowcaseVideoItem = {
   /** URL publique `/assets/appvideo/...` — sert aussi de clé stable pour la dérivation du CA affiché. */
   src: string;
+  /** Image légère affichée immédiatement pendant que la vidéo se met en cache. */
+  posterSrc: string;
   displayName: string;
   artworkUrl: string;
   /** ID App Store — CA affiché via Sensor Tower (`fetchIosAggregateAppMetrics`), comme les fiches app. */
@@ -23,7 +25,7 @@ export type AppShowcaseVideoItem = {
 
 const APP_SHOWCASE_VIDEO_ROWS = [
   {
-    file: "kalam.mov",
+    file: "kalam.mp4",
     displayName: "Kalam",
     appStoreId: "6745237476",
     artworkUrl:
@@ -31,7 +33,7 @@ const APP_SHOWCASE_VIDEO_ROWS = [
     approxMonthlyRevenueEUR: 49_000,
   },
   {
-    file: "kotcha.mov",
+    file: "kotcha.mp4",
     displayName: "Kotcha",
     appStoreId: "6746164787",
     artworkUrl:
@@ -39,7 +41,7 @@ const APP_SHOWCASE_VIDEO_ROWS = [
     approxMonthlyRevenueEUR: 32_000,
   },
   {
-    file: "locket.mov",
+    file: "locket.mp4",
     displayName: "Locket",
     appStoreId: "1600525061",
     artworkUrl:
@@ -47,7 +49,7 @@ const APP_SHOWCASE_VIDEO_ROWS = [
     approxMonthlyRevenueEUR: 95_000,
   },
   {
-    file: "napper.mov",
+    file: "napper.mp4",
     displayName: "Napper",
     appStoreId: "1491340863",
     artworkUrl:
@@ -55,7 +57,7 @@ const APP_SHOWCASE_VIDEO_ROWS = [
     approxMonthlyRevenueEUR: 27_000,
   },
   {
-    file: "speak.mov",
+    file: "speak.mp4",
     displayName: "Speak",
     appStoreId: "1286609883",
     artworkUrl:
@@ -63,7 +65,7 @@ const APP_SHOWCASE_VIDEO_ROWS = [
     approxMonthlyRevenueEUR: 57_000,
   },
   {
-    file: "watchlab.mov",
+    file: "watchlab.mp4",
     displayName: "Watchlab",
     appStoreId: "6446290569",
     artworkUrl:
@@ -84,6 +86,7 @@ export function listAppShowcaseVideoItems(): AppShowcaseVideoItem[] {
     .sort((a, b) => a.file.localeCompare(b.file, undefined, { numeric: true, sensitivity: "base" }))
     .map((row) => ({
       src: `/assets/appvideo/${encodeURIComponent(row.file)}`,
+      posterSrc: `/assets/appvideo/${encodeURIComponent(row.file.replace(/\.mp4$/i, ".jpg"))}`,
       displayName: row.displayName,
       appStoreId: row.appStoreId,
       artworkUrl: row.artworkUrl,

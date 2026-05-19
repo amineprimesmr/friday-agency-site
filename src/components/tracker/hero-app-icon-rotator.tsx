@@ -38,7 +38,7 @@ export function HeroAppIconRotator({
   return (
     <span
       className={cn(
-        "relative ml-1 mr-[0.65rem] inline-flex align-middle sm:mr-3 md:mr-3.5 [--hero-icon:2.85rem] sm:[--hero-icon:3.35rem] md:[--hero-icon:3.75rem]",
+        "relative ml-1 mr-[0.55rem] inline-flex align-middle sm:mr-2.5 md:mr-3 [--hero-icon:2.35rem] sm:[--hero-icon:2.65rem] md:[--hero-icon:2.9rem]",
         className,
       )}
       style={{ perspective: "960px" }}

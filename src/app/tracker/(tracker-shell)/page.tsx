@@ -23,7 +23,7 @@ const SHOWCASE_ENRICH_BUDGET_MS = 8000;
 const HERO_APPS_BUDGET_MS = 15_000;
 
 export const metadata: Metadata = {
-  title: "App Store Tracker — Copiez une app et monétisez-la",
+  title: "App Store Tracker — Trouvez les apps qui scalent maintenant",
 };
 
 export const revalidate = 900;
@@ -83,12 +83,12 @@ export default async function TrackerDashboard() {
             aria-hidden
           />
           <div className="relative mx-auto max-w-4xl px-4 pt-[calc(var(--tracker-header-offset)+2.5rem)] text-center sm:pt-[calc(var(--tracker-header-offset)+3.5rem)]">
-            <h1 className="bg-gradient-to-br from-white via-zinc-100 to-zinc-500 bg-clip-text pb-1.5 text-[clamp(2.5rem,9.5vw,6rem)] font-semibold leading-[1.04] tracking-[-0.035em] text-transparent sm:text-[clamp(2.65rem,10vw,6.25rem)]">
-              Copiez une app{" "}
+            <h1 className="bg-gradient-to-br from-white via-zinc-100 to-zinc-500 bg-clip-text pb-1.5 text-[clamp(2rem,7.2vw,4.35rem)] font-semibold leading-[1.06] tracking-[-0.035em] text-transparent sm:text-[clamp(2.2rem,7.8vw,4.85rem)]">
+              Trouvez les apps{" "}
               <HeroAppIconRotator
                 apps={heroApps.map((a) => ({ id: a.id, name: a.name, artworkUrl: a.artworkUrl }))}
               />{" "}
-              et monétisez-la
+              qui scalent maintenant
             </h1>
             <div className="mt-8 sm:mt-10">
               <TrackerSaleNotificationsStack />

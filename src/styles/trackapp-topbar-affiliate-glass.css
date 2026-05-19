@@ -132,18 +132,19 @@ button.trackapp-topbar-affiliate-glass:focus-visible {
 
 @media (max-width: 900px) {
   .trackapp-topbar-affiliate-glass-host--right {
-    width: clamp(9.5rem, 34vw, 12.5rem);
+    width: min(calc(100vw - 5.9rem), 20.5rem);
   }
 
   .trackapp-topbar-affiliate-glass-host--right a.trackapp-topbar-affiliate-glass,
 .trackapp-topbar-affiliate-glass-host--right button.trackapp-topbar-affiliate-glass {
     min-height: 2.15rem;
-    padding: 0.24rem 0.58rem;
-    font-size: clamp(0.68rem, 2.3vw, 0.78rem);
+    padding: 0.24rem 0.95rem;
+    font-size: clamp(0.76rem, 3.15vw, 0.92rem);
   }
 
   .trackapp-topbar-affiliate-glass-host--right .trackapp-topbar-affiliate-glass__label {
-    flex-direction: column;
-    gap: 0.04rem;
+    flex-direction: row;
+    gap: 0.35rem;
+    white-space: nowrap;
   }
 }

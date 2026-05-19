@@ -163,16 +163,14 @@ export function TrackerSaleNotificationsStack({ className }: { className?: strin
                 }}
               >
                 <div className="tracker-sale-notif">
-                  <div className="tracker-sale-notif-icon-wrap">
-                    <div className="tracker-sale-notif-icon-surface tracker-sale-notif-icon-surface--brand">
-                      <Image
-                        src={TRACKER_SALE_NOTIF_ICON_SRC}
-                        alt=""
-                        fill
-                        className="tracker-sale-notif-icon-img object-contain select-none pointer-events-none"
-                        sizes="48px"
-                      />
-                    </div>
+                  <div className="tracker-sale-notif-icon-wrap tracker-sale-notif-icon-wrap--brand">
+                    <Image
+                      src={TRACKER_SALE_NOTIF_ICON_SRC}
+                      alt=""
+                      fill
+                      className="tracker-sale-notif-icon-img object-contain select-none pointer-events-none"
+                      sizes="44px"
+                    />
                   </div>
                   <div className="tracker-sale-notif-body">
                     <div className="tracker-sale-notif-head">{sale.brand}</div>

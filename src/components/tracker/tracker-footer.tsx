@@ -1,17 +1,13 @@
 import Link from "next/link";
 
-export function TrackerFooter() {
+import { trackerAuthNavItem } from "@/lib/tracker-auth-nav";
+
+export function TrackerFooter({ loggedIn = false }: { loggedIn?: boolean }) {
+  const authNav = trackerAuthNavItem(loggedIn);
+
   return (
     <footer className="border-t border-white/[0.08] bg-black py-12 text-sm text-white/60">
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 sm:flex-row sm:items-start sm:justify-between sm:px-6">
-        <div className="max-w-sm space-y-3">
-          <p className="text-base font-semibold text-white">Trackapp — App Store Tracker</p>
-          <p className="leading-relaxed">
-            Classements iOS en temps réel : Top Charts, nouveautés, mouvements de rangs par pays et
-            catégorie, creatives et publicités Meta &amp; TikTok.
-          </p>
-        </div>
-
         <div className="flex flex-wrap gap-8">
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40">Navigation</p>
@@ -27,8 +23,13 @@ export function TrackerFooter() {
                 </Link>
               </li>
               <li>
-                <Link className="hover:text-white" href="/tracker/new-releases">
-                  Nouveautés
+                <Link className="hover:text-white" href="/tracker/affiliation">
+                  Affiliation
+                </Link>
+              </li>
+              <li>
+                <Link className="hover:text-white" href={authNav.href}>
+                  {authNav.label}
                 </Link>
               </li>
               <li>

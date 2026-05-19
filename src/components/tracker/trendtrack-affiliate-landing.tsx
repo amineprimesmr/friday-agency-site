@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
+import { AFFILIATE_COMMISSION_MRR_EUR } from "@/lib/trackapp/affiliate/config";
+
 import "@/styles/trendtrack-affiliate.css";
 
 const FAQ_ITEMS: { q: string; a: string }[] = [
@@ -40,9 +42,6 @@ function ChevronDown() {
   );
 }
 
-/** Commission mensuelle estimée par filleul actif (50 % d’un abonnement ~49 €). */
-const COMMISSION_PER_REFERRAL_EUR = 24.5;
-
 type Props = Readonly<{
   embedded?: boolean;
 }>;
@@ -52,7 +51,7 @@ export function TrendtrackAffiliateLanding({ embedded = false }: Props) {
   const [faqOpen, setFaqOpen] = useState<number | null>(null);
 
   const payout = useMemo(
-    () => Math.round(affiliates * COMMISSION_PER_REFERRAL_EUR),
+    () => Math.round(affiliates * AFFILIATE_COMMISSION_MRR_EUR),
     [affiliates],
   );
   const pct = affiliates / 500;
@@ -71,13 +70,13 @@ export function TrendtrackAffiliateLanding({ embedded = false }: Props) {
             </span>
           </p>
           <h1 id="tt-affiliate-hero-title" className="tt-affiliate-title">
-            Gagnez 50&nbsp;% sur chaque
+            {AFFILIATE_COMMISSION_MRR_EUR}&nbsp;€ de MRR
             <br />
-            abonnement généré
+            par parrainage actif
           </h1>
           <p className="tt-affiliate-lead">
-            Un lien de parrainage unique. Commissions sur le premier paiement et chaque renouvellement.
-            Virements sécurisés via Stripe.
+            Un lien de parrainage unique. {AFFILIATE_COMMISSION_MRR_EUR}&nbsp;€ de commission récurrente par filleul
+            abonné, chaque mois, tant qu&apos;il reste client. Virements sécurisés via Stripe.
           </p>
           {embedded ?
             null
@@ -132,7 +131,7 @@ export function TrendtrackAffiliateLanding({ embedded = false }: Props) {
           </div>
           <div className="tt-affiliate-sim-foot">
             <div>
-              <span className="tt-affiliate-sim-payout-label">Payout</span>
+              <span className="tt-affiliate-sim-payout-label">Revenu MRR estimé</span>
               <span className="tt-affiliate-sim-payout-value">
                 {payout.toLocaleString("fr-FR")}€ /mois
               </span>
@@ -154,8 +153,8 @@ export function TrendtrackAffiliateLanding({ embedded = false }: Props) {
         </p>
         <h2 className="tt-affiliate-section-title">Devenez affilié en 3 étapes</h2>
         <p className="tt-affiliate-section-lead">
-          Configuré en moins de 2 minutes. Partagez votre lien. Gagnez 30% sur chaque abonnement généré, chaque mois,
-          pour toujours.
+          Configuré en moins de 2 minutes. Partagez votre lien. Gagnez {AFFILIATE_COMMISSION_MRR_EUR}&nbsp;€ de MRR par
+          filleul actif, chaque mois, tant qu&apos;il reste abonné.
         </p>
 
         <div className="tt-affiliate-steps">
@@ -166,7 +165,7 @@ export function TrendtrackAffiliateLanding({ embedded = false }: Props) {
             <div className="tt-affiliate-step-visual">
               <div className="flex flex-wrap items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2.5 shadow-sm">
                 <span className="truncate text-[13px] text-zinc-600">https://trackapp.app/</span>
-                <span className="shrink-0 rounded-full bg-[#4ade80] px-2.5 py-1 text-[11px] font-semibold text-zinc-900">
+                <span className="tt-affiliate-demo-chip shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold">
                   via?=toi
                 </span>
               </div>
@@ -195,7 +194,7 @@ export function TrendtrackAffiliateLanding({ embedded = false }: Props) {
             </div>
             <div className="tt-affiliate-step-visual flex flex-col items-center justify-center gap-3">
               <div className="flex items-center justify-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-[#4ade80] shadow-md" aria-hidden />
+                <div className="tt-affiliate-demo-block h-10 w-10 rounded-lg" aria-hidden />
                 <div className="hidden h-px w-8 bg-zinc-300 sm:block" />
                 <div className="flex gap-2">
                   <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500 text-[10px] font-bold text-white">
@@ -241,10 +240,10 @@ export function TrendtrackAffiliateLanding({ embedded = false }: Props) {
                 <p className="text-sm font-bold text-zinc-900">56&nbsp;$</p>
               </div>
               <div className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-center shadow-sm">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Available</p>
-                <p className="text-sm font-bold text-zinc-900">1&nbsp;674&nbsp;$</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">MRR / filleul</p>
+                <p className="text-sm font-bold text-zinc-900">{AFFILIATE_COMMISSION_MRR_EUR}&nbsp;€</p>
               </div>
-              <span className="rounded-full bg-[#4ade80] px-3 py-1.5 text-xs font-bold text-zinc-900">Payout</span>
+              <span className="tt-affiliate-demo-chip rounded-full px-3 py-1.5 text-xs font-bold">Payout</span>
             </div>
             <div className="tt-affiliate-step-body">
               <div className="tt-affiliate-step-icon" aria-hidden>
@@ -255,7 +254,7 @@ export function TrendtrackAffiliateLanding({ embedded = false }: Props) {
               </div>
               <h3 className="tt-affiliate-step-title">Gagnez chaque mois</h3>
               <p className="tt-affiliate-step-desc">
-                Recevez 30% de chaque abonnement généré, tant que votre filleul reste actif.
+                Recevez {AFFILIATE_COMMISSION_MRR_EUR}&nbsp;€ de commission MRR par mois et par filleul actif.
               </p>
             </div>
           </article>

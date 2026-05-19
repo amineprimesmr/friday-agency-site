@@ -888,6 +888,9 @@
 
   .app-desktop-topbar__menu-btn {
     display: inline-flex;
+    border-color: transparent;
+    background: transparent;
+    border-radius: 0;
   }
 
   .app-desktop-topbar__brand {
@@ -904,9 +907,7 @@
   }
 
   .app-desktop-topbar__search-center {
-    flex: 1 1 auto;
-    min-width: 0;
-    padding: 0;
+    display: none;
   }
 
   .app-desktop-topbar__tracker-search-wrap {

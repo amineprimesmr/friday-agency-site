@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import {
-  AFFILIATE_COMMISSION_RATE,
+  AFFILIATE_COMMISSION_MRR_CENTS,
   AFFILIATE_FRIEND_DISCOUNT_PERCENT,
   AFFILIATE_MIN_PAYOUT_CENTS,
 } from "@/lib/trackapp/affiliate/config";
@@ -69,7 +69,7 @@ export async function GET() {
     referralCode: profile.referral_code,
     referralLink: referralLink(origin, profile.referral_code),
     friendDiscountPercent: AFFILIATE_FRIEND_DISCOUNT_PERCENT,
-    commissionRate: AFFILIATE_COMMISSION_RATE,
+    commissionMrrCents: AFFILIATE_COMMISSION_MRR_CENTS,
     minPayoutCents: AFFILIATE_MIN_PAYOUT_CENTS,
     balance,
     referralsCount: referralsCount ?? 0,

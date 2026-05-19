@@ -1,23 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://frid4y.agency/</loc>
+    <loc>https://trackapp.fr/tracker</loc>
     <changefreq>weekly</changefreq>
     <priority>1</priority>
   </url>
   <url>
-    <loc>https://frid4y.agency/#realisations</loc>
+    <loc>https://trackapp.fr/tracker/top-charts</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.95</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://frid4y.agency/#contact</loc>
+    <loc>https://trackapp.fr/tracker/search</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://frid4y.agency/instagram.html</loc>
-    <changefreq>weekly</changefreq>
+    <loc>https://trackapp.fr/trackapp/paiement</loc>
+    <changefreq>monthly</changefreq>
     <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://trackapp.fr/instagram.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.4</priority>
   </url>
 </urlset>
