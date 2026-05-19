@@ -37,7 +37,7 @@ export function TrackappNav({
                 Connexion
               </Link>
               <Link
-                href="/trackapp/inscription"
+                href="/trackapp/paiement"
                 className="rounded-full border border-violet-500/35 bg-violet-500/[0.12] px-4 py-2 text-violet-100 hover:bg-violet-500/[0.2]"
               >
                 Inscription

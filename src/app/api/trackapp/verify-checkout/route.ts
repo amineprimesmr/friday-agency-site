@@ -1,16 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import type Stripe from "stripe";
 
 import { processCheckoutSessionCommission } from "@/lib/trackapp/affiliate/commissions";
-import {
-  billingIdsFromCheckoutSession,
-  persistTrackappPremium,
-} from "@/lib/trackapp/stripe-sync";
+import { linkCheckoutSessionToUser } from "@/lib/trackapp/stripe-sync";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe";
 
+/** Rétrocompatibilité : lie une session au compte connecté. */
 export async function POST(req: Request) {
   let body: unknown;
   try {
@@ -58,11 +55,11 @@ export async function POST(req: Request) {
     data: { user },
     error,
   } = await sb.auth.getUser();
-  if (error || !user?.id) {
+  if (error || !user?.id || !user.email) {
     return NextResponse.json({ detail: "Session Trackapp nécessaire." }, { status: 401 });
   }
 
-  let session: Stripe.Checkout.Session | null = null;
+  let session;
   try {
     session = await stripe.checkout.sessions.retrieve(sessionId, {
       expand: ["subscription", "customer"],
@@ -71,40 +68,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ detail: "Session Stripe invalide ou expirée." }, { status: 404 });
   }
 
-  if (!session) {
-    return NextResponse.json({ detail: "Session introuvable." }, { status: 404 });
-  }
-
-  const metadataUser =
-    typeof session.metadata?.supabase_user_id === "string" ? session.metadata.supabase_user_id : null;
-  const productOk = session.metadata?.product === "trackapp_full_access";
-  if (!productOk || metadataUser !== user.id) {
-    return NextResponse.json({ detail: "Cette session Trackapp est invalide." }, { status: 403 });
-  }
-
-  const paid =
-    session.payment_status === "paid"
-    || session.payment_status === "no_payment_required"
-    || session.status === "complete";
-
-  if (!paid) {
-    return NextResponse.json({ detail: "Paiement non finalisé côté Stripe." }, { status: 402 });
-  }
-
-  const billing = billingIdsFromCheckoutSession(session);
-  const persisted = await persistTrackappPremium({
+  const link = await linkCheckoutSessionToUser({
+    session,
     userId: user.id,
-    stripeCustomerId: billing.customerId,
-    stripeSubscriptionId: billing.subscriptionId,
+    userEmail: user.email,
   });
 
-  if (!persisted) {
-    return NextResponse.json(
-      {
-        detail: "SUPABASE_SERVICE_ROLE_KEY absent : impossible de consigner la souscription Trackapp.",
-      },
-      { status: 503 },
-    );
+  if (!link.ok) {
+    return NextResponse.json({ detail: link.error }, { status: 403 });
   }
 
   const admin = createAdminClient();

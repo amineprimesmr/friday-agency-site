@@ -48,10 +48,6 @@ export function TrackappPaiementOrderForm({
         }),
       });
       const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
-      if (res.status === 401) {
-        window.location.href = "/trackapp/inscription?mode=start&redirect=/trackapp/paiement";
-        return;
-      }
       if (!res.ok || !data.url) {
         throw new Error(data.error || "Impossible de préparer le paiement.");
       }

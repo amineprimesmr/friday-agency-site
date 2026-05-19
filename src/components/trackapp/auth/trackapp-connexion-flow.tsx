@@ -7,7 +7,6 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import {
   PROMO_SLIDES,
   PromoPanel,
-  SvgApple,
   SvgGoogle,
   SvgCloudSmall,
   TaAuthLegalFooter,
@@ -47,23 +46,20 @@ function ConnexionExperienceInner({
     return `${origin}/trackapp/auth/callback?next=${nextEnc}`;
   }, [nextHrefSafe]);
 
-  const oauth = useCallback(
-    async (provider: "google" | "apple") => {
-      if (!sb) return;
-      setBusy(true);
-      setError(null);
-      const { error: oErr } = await sb.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: callbackUrl,
-          queryParams: provider === "google" ? { prompt: "select_account" } : {},
-        },
-      });
-      setBusy(false);
-      if (oErr) setError(oErr.message ?? `Connexion ${provider} indisponible (Supabase).`);
-    },
-    [sb, callbackUrl],
-  );
+  const oauth = useCallback(async () => {
+    if (!sb) return;
+    setBusy(true);
+    setError(null);
+    const { error: oErr } = await sb.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: callbackUrl,
+        queryParams: { prompt: "select_account" },
+      },
+    });
+    setBusy(false);
+    if (oErr) setError(oErr.message ?? "Connexion Google indisponible (Supabase).");
+  }, [sb, callbackUrl]);
 
   async function onSubmit(ev: React.FormEvent) {
     ev.preventDefault();
@@ -121,27 +117,17 @@ function ConnexionExperienceInner({
           </Link>
         )}
 
-        <div className="ta-auth-pane ta-auth-pane--with-back">
-          <Link href="/trackapp/inscription" prefetch={false} className="ta-auth-back" aria-label="Retour">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
-              <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="m15 6-9 9 9 9" />
-            </svg>
-          </Link>
-
+        <div className="ta-auth-pane">
           <TrackappLimeLogo />
           <h1 id="ta-auth-headline" className="ta-auth-headline">
             Connexion Trackapp
           </h1>
-          <p className="ta-auth-lead">Connecte-toi pour retrouver tes outils et ton espace.</p>
+          <p className="ta-auth-lead">Connecte-toi pour retrouver ton espace et tes outils.</p>
 
           <div className="ta-auth-oauth-stack">
-            <button type="button" className="ta-auth-oauth-row" disabled={busy} onClick={() => oauth("google")}>
+            <button type="button" className="ta-auth-oauth-row" disabled={busy} onClick={oauth}>
               <SvgGoogle />
               Continuer avec Google
-            </button>
-            <button type="button" className="ta-auth-oauth-row" disabled={busy} onClick={() => oauth("apple")}>
-              <SvgApple />
-              Continuer avec Apple
             </button>
           </div>
 
@@ -154,7 +140,7 @@ function ConnexionExperienceInner({
               className="ta-auth-input"
               name="email"
               type="email"
-              placeholder="Email"
+              placeholder="E-mail"
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -181,9 +167,9 @@ function ConnexionExperienceInner({
               Mot de passe oublié ?
             </Link>
             <span>
-              Pas de compte ?{" "}
-              <Link prefetch={false} href="/trackapp/inscription">
-                S&apos;inscrire
+              Pas encore abonné ?{" "}
+              <Link prefetch={false} href="/trackapp/paiement">
+                Choisir un plan
               </Link>
             </span>
           </div>
@@ -191,7 +177,8 @@ function ConnexionExperienceInner({
           <div className="ta-auth-sso-note mt-12 border-t border-white/[0.06] pt-6">
             <SvgCloudSmall />
             <span>
-              SSO équipes&nbsp;: <Link href="/trackapp/paiement">voir les offres</Link>.
+              Premier achat ?{" "}
+              <Link href="/trackapp/paiement">Commencer par le paiement</Link>, puis crée ton compte.
             </span>
           </div>
 

@@ -286,7 +286,7 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:justify-end">
             <Link
-              href={`/trackapp/inscription?mode=copy&app=${encodeURIComponent(id)}`}
+              href={`/trackapp/paiement?app=${encodeURIComponent(id)}`}
               prefetch={false}
               className="rounded-full bg-violet-600/90 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-white shadow-[0_8px_30px_-6px_rgba(124,58,237,.45)] hover:bg-violet-500"
             >

@@ -238,12 +238,12 @@ export function TrackappAffiliateDashboard() {
             </button>
           )}
           <Link
-            href={`/trackapp/inscription?ref=${encodeURIComponent(data.referralCode)}`}
+            href={`/trackapp/paiement?ref=${encodeURIComponent(data.referralCode)}`}
             className="ta-aff-dash__btn ta-aff-dash__btn--ghost"
             target="_blank"
             rel="noreferrer"
           >
-            Prévisualiser la page d&apos;inscription filleul
+            Prévisualiser la page paiement filleul
           </Link>
         </div>
         {actionMsg ? <p className="ta-aff-dash__msg">{actionMsg}</p> : null}

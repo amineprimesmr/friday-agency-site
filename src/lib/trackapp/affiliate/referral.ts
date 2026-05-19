@@ -115,5 +115,5 @@ export function affiliateCommissionRateForGross(grossCents: number): number {
 
 export function referralLink(origin: string, code: string): string {
   const base = origin.replace(/\/$/, "");
-  return `${base}/trackapp/inscription?ref=${encodeURIComponent(code)}`;
+  return `${base}/trackapp/paiement?ref=${encodeURIComponent(code)}`;
 }

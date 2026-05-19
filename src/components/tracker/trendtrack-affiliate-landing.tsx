@@ -80,7 +80,7 @@ export function TrendtrackAffiliateLanding({ embedded = false }: Props) {
           </p>
           {embedded ?
             null
-          : <Link href="/trackapp/inscription?mode=start" className="tt-affiliate-cta">
+          : <Link href="/trackapp/paiement" className="tt-affiliate-cta">
               Devenir affilié
               <span aria-hidden>→</span>
             </Link>}

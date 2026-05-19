@@ -1,5 +1,11 @@
 import type Stripe from "stripe";
 
+import {
+  checkoutSessionCustomerEmail,
+  emailsMatch,
+  isTrackappCheckoutProduct,
+  isTrackappCheckoutSessionPaid,
+} from "@/lib/trackapp/checkout-session";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 function customerId(sess: Stripe.Checkout.Session): string {
@@ -60,18 +66,59 @@ export function billingIdsFromCheckoutSession(sess: Stripe.Checkout.Session): {
   return { customerId: customerId(sess), subscriptionId: subscriptionId(sess) };
 }
 
+export async function linkCheckoutSessionToUser(opts: {
+  session: Stripe.Checkout.Session;
+  userId: string;
+  userEmail: string;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const { session, userId, userEmail } = opts;
+
+  if (!isTrackappCheckoutProduct(session)) {
+    return { ok: false, error: "Session Trackapp invalide." };
+  }
+
+  if (!isTrackappCheckoutSessionPaid(session)) {
+    return { ok: false, error: "Paiement non finalisé." };
+  }
+
+  const metadataUser =
+    typeof session.metadata?.supabase_user_id === "string" ? session.metadata.supabase_user_id.trim() : "";
+  if (metadataUser && metadataUser !== userId) {
+    return { ok: false, error: "Cette session est déjà liée à un autre compte." };
+  }
+
+  const stripeEmail = checkoutSessionCustomerEmail(session);
+  if (stripeEmail && !emailsMatch(stripeEmail, userEmail)) {
+    return {
+      ok: false,
+      error: `Utilise la même adresse e-mail que lors du paiement (${stripeEmail}).`,
+    };
+  }
+
+  const billing = billingIdsFromCheckoutSession(session);
+  const persisted = await persistTrackappPremium({
+    userId,
+    stripeCustomerId: billing.customerId,
+    stripeSubscriptionId: billing.subscriptionId,
+  });
+
+  if (!persisted) {
+    return { ok: false, error: "Impossible d'activer l'abonnement (service role Supabase)." };
+  }
+
+  return { ok: true };
+}
+
 export async function unlockTrackappFromCheckoutSession(sess: Stripe.Checkout.Session): Promise<boolean> {
   const userId =
     sess.metadata?.product === "trackapp_full_access" && sess.metadata.supabase_user_id ?
       sess.metadata.supabase_user_id.trim()
     : "";
 
-  const paid =
-    sess.payment_status === "paid"
-    || sess.payment_status === "no_payment_required"
-    || sess.status === "complete";
+  if (!userId) return false;
 
-  if (!userId || !paid) return false;
+  const paid = isTrackappCheckoutSessionPaid(sess);
+  if (!paid) return false;
 
   const billing = billingIdsFromCheckoutSession(sess);
   return persistTrackappPremium({

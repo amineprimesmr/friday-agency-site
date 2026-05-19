@@ -21,6 +21,18 @@ function withReferralCookie(request: NextRequest, response: NextResponse): NextR
   return response;
 }
 
+const PREMIUM_EXEMPT_PREFIXES = [
+  "/trackapp/paiement",
+  "/trackapp/activation",
+  "/trackapp/connexion",
+  "/trackapp/inscription",
+  "/trackapp/mot-de-passe-oublie",
+  "/trackapp/onboarding",
+  "/trackapp/legal",
+  "/trackapp/auth",
+  "/trackapp/deconnexion",
+];
+
 const PROTECT_PREFIXES = [
   "/trackapp/accueil",
   "/trackapp/apptracker",
@@ -121,6 +133,33 @@ export async function middleware(request: NextRequest) {
       redirectResponse.cookies.set(cookie);
     });
     return redirectResponse;
+  }
+
+  const isPremiumExempt = PREMIUM_EXEMPT_PREFIXES.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
+
+  if (needsAuth && user && !skipTrackappAuth && !isPremiumExempt) {
+    const { data: profile } = await supabase
+      .from("trackapp_profiles")
+      .select("plan_unlocked_at")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (!profile?.plan_unlocked_at) {
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json({ error: "Abonnement Trackapp requis." }, { status: 402 });
+      }
+
+      const payUrl = request.nextUrl.clone();
+      payUrl.pathname = "/trackapp/paiement";
+      payUrl.search = "";
+      const redirectResponse = NextResponse.redirect(payUrl);
+      response.cookies.getAll().forEach((cookie) => {
+        redirectResponse.cookies.set(cookie);
+      });
+      return redirectResponse;
+    }
   }
 
   return response;

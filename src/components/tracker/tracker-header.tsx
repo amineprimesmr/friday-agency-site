@@ -415,7 +415,7 @@ export function TrackerHeader({
                     </button>
                   )}
                   <TrackerNavLink
-                    href={loggedIn ? TRACKER_WORKSPACE_HREF : "/trackapp/inscription?mode=start"}
+                    href={loggedIn ? TRACKER_WORKSPACE_HREF : "/trackapp/paiement"}
                     className="tracker-header-mobile-cta"
                     onClick={closeMobile}
                   >

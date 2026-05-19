@@ -22,7 +22,6 @@ export async function GET(request: NextRequest) {
       nextPath = "/trackapp/accueil";
     }
   }
-
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 

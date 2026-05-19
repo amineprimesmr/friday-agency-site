@@ -30,7 +30,7 @@ export function TrackappDevPremiumBypassButton() {
       };
 
       if (res.status === 401) {
-        window.location.href = "/trackapp/inscription?mode=start&redirect=/trackapp/paiement";
+        window.location.href = "/trackapp/connexion?next=/trackapp/paiement";
         return;
       }
 
