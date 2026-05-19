@@ -154,7 +154,7 @@ export function TrackappPaiementPlanSpotlightCards({
     <PageSpotlightCarousel
       className={className}
       checkoutReveal={checkoutReveal}
-      checkoutRevealedProp={checkoutRevealedProp}
+      checkoutRevealed={checkoutRevealedProp}
       onCheckoutRevealedChange={onCheckoutRevealedChange}
     />
   );
@@ -163,7 +163,7 @@ export function TrackappPaiementPlanSpotlightCards({
 function PageSpotlightCarousel({
   className,
   checkoutReveal,
-  checkoutRevealedProp,
+  checkoutRevealed: checkoutRevealedProp,
   onCheckoutRevealedChange,
 }: Readonly<{
   className?: string;
