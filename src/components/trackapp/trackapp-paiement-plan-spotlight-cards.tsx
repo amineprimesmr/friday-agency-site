@@ -147,11 +147,30 @@ export function TrackappPaiementPlanSpotlightCards({
   onCheckoutRevealedChange?: (revealed: boolean) => void;
 }>) {
   if (mode === "modal") {
-    return (
-      <ModalSpotlightGrid className={className} />
-    );
+    return <ModalSpotlightGrid className={className} />;
   }
 
+  return (
+    <PageSpotlightCarousel
+      className={className}
+      checkoutReveal={checkoutReveal}
+      checkoutRevealedProp={checkoutRevealedProp}
+      onCheckoutRevealedChange={onCheckoutRevealedChange}
+    />
+  );
+}
+
+function PageSpotlightCarousel({
+  className,
+  checkoutReveal,
+  checkoutRevealedProp,
+  onCheckoutRevealedChange,
+}: Readonly<{
+  className?: string;
+  checkoutReveal: boolean;
+  checkoutRevealed?: boolean;
+  onCheckoutRevealedChange?: (revealed: boolean) => void;
+}>) {
   /** 0 = annuel, 1 = mensuel */
   const [index, setIndex] = useState(0);
   const [internalCheckoutRevealed, setInternalCheckoutRevealed] = useState(false);

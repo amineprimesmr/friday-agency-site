@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 
 import { AFFILIATE_REF_COOKIE } from "@/lib/trackapp/affiliate/config";
-import { attachReferrerIfEligible, resolveReferrerByCode } from "@/lib/trackapp/affiliate/referral";
+import { resolveReferrerByCode } from "@/lib/trackapp/affiliate/referral";
 import { resolveTrackappOrigin } from "@/lib/trackapp/checkout-session";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe";
