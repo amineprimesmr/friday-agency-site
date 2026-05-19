@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 
+import { TrackappLogoMark } from "@/components/trackapp/trackapp-logo-mark";
+
 export const PROMO_SLIDES = [
   {
     badge: "Avec mise à jour",
@@ -119,18 +121,7 @@ export function SvgAudio() {
 export function TrackappLimeLogo() {
   return (
     <div className="ta-auth-mark" aria-hidden="true">
-      <div className="ta-auth-mark__inner">
-        <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden>
-          <title>Trackapp</title>
-          <path
-            d="M10 26c9-12 17-21 17-26M6 26C16 13 26 10 31 26"
-            stroke="#0f0f0f"
-            strokeWidth="4.2"
-            strokeLinecap="round"
-          />
-          <circle cx="7" cy="7" r="2.35" fill="#0f0f0f" />
-        </svg>
-      </div>
+      <TrackappLogoMark size="lg" className="ta-auth-mark__img" decorative />
     </div>
   );
 }

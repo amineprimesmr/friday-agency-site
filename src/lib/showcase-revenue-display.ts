@@ -16,3 +16,16 @@ export function deriveShowcaseMonthlyRevenueEUR(approxEUR: number, canonicalKey:
   }
   return derivePreciseRevenueDisplayUsd(approxEUR, `showcase-eur:${canonicalKey}`);
 }
+
+/** Libellé CA mensuel showcase — toujours en EUR, jamais en $US. */
+export function formatShowcaseEurMonthlyLabel(eur: number): string {
+  const n = Math.max(0, Math.round(eur));
+  if (n <= 0) return "—";
+  const amount = new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
+  }).format(n);
+  return `${amount} / mois`;
+}

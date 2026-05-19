@@ -55,82 +55,9 @@
   border-radius: 14px;
 }
 
-/* Modale PC — étape 1 : prix + bullets + Rejoindre ; étape 2 : champs carte */
-.tpl-spotlight-carousel--payment-modal .tpl-spotlight__checkout-intro {
-  margin-top: 0.95rem;
-}
-
-.tpl-spotlight-carousel--payment-modal .tpl-spotlight__join {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  margin-top: 0.95rem;
-  min-height: 3.25rem;
-  padding: 0.65rem 1.25rem;
-  border: none;
-  border-radius: 999px;
-  background: #fff;
-  color: #0a0a0a;
-  font-family: inherit;
-  font-size: clamp(1rem, 2.2vw, 1.12rem);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-  cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14);
-  transition:
-    background-color 0.15s ease,
-    transform 0.15s ease;
-}
-
-.tpl-spotlight-carousel--payment-modal .tpl-spotlight__join:hover {
-  background: #f4f4f5;
-}
-
-.tpl-spotlight-carousel--payment-modal .tpl-spotlight__join:focus-visible {
-  outline: 2px solid rgb(255 255 255 / 0.45);
-  outline-offset: 2px;
-}
-
-.tpl-spotlight-carousel--payment-modal .tpl-spotlight__order--revealed {
-  margin-top: 0.95rem;
-  padding-top: 0;
-  border-top: none;
-  animation: ta-pay-checkout-reveal 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.tpl-spotlight-carousel--payment-modal .tpl-spotlight__order--revealed .saas-pay-wallet-divider {
-  margin-top: 0;
-}
-
-@keyframes ta-pay-checkout-reveal {
-  from {
-    opacity: 0;
-    transform: translateY(0.35rem);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .ta-auth-pane--payment .tpl-spotlight-carousel--payment-modal.tpl-spotlight-carousel--checkout-open {
   margin-left: 0;
   margin-right: 0;
-  width: 100%;
-}
-
-.tpl-spotlight-carousel--payment-modal.tpl-spotlight-carousel--checkout-open .tpl-spotlight-carousel__track {
-  width: 100%;
-  max-width: 100%;
-  gap: 0;
-  transform: none !important;
-}
-
-.tpl-spotlight-carousel--payment-modal.tpl-spotlight-carousel--checkout-open .tpl-spotlight-carousel__slide {
-  flex: 0 0 100%;
   width: 100%;
 }
 

@@ -223,13 +223,13 @@ function FinTapStepsScrollDesktop({ measureRef }: { measureRef: MutableRefObject
             <div className="fintap-steps-scroll__left">
               <ScrollReveal variant="slide-left">
                 <h2 id="fintap-steps-heading" className="fintap-steps-scroll__h2">
-                  Lancez-vous en 3 étapes simples.
+                  Ce que vous allez obtenir
                 </h2>
               </ScrollReveal>
               <ScrollReveal variant="slide-left" delay={0.1}>
                 <p className="fintap-steps-scroll__intro">
-                  Du commerce à la carte Wallet : tout est pensé pour vous faire gagner du temps et garder vos clients
-                  engagés.
+                  Trackapp vous offre un plan étape par étape et les outils pour créer votre app iOS et la
+                  monétiser.
                 </p>
               </ScrollReveal>
             </div>
@@ -276,12 +276,12 @@ function FinTapStepsScrollMobile() {
     <div className="fintap-steps-scroll__mobile">
       <ScrollReveal>
         <h2 id="fintap-steps-heading" className="fintap-steps-scroll__h2">
-          Lancez-vous en 3 étapes simples.
+          Ce que vous allez obtenir
         </h2>
       </ScrollReveal>
       <ScrollReveal delay={0.1}>
         <p className="fintap-steps-scroll__intro">
-          Du commerce à la carte Wallet : tout est pensé pour vous faire gagner du temps et garder vos clients engagés.
+          Trackapp vous offre un plan étape par étape et les outils pour créer votre app iOS et la monétiser.
         </p>
       </ScrollReveal>
       <ol className="fintap-steps-mobile__list">

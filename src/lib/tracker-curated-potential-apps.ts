@@ -19,20 +19,20 @@ const ROWS = [
     categoryId: "6008",
   },
   {
-    id: "6456176249",
-    label: "Bevel",
+    id: "6746838126",
+    label: "Depuff AI",
     artworkUrl:
-      "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/b0/bc/ec/b0bcec19-83e6-61ac-9ac4-2df647217478/AppIconFlatAuto-0-0-1x_U007ephone-0-0-0-1-0-0-P3-85-220.png/512x512bb.jpg",
-    estimateRank: 74,
-    categoryId: "6008",
+      "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/5e/30/57/5e3057ba-bb10-472d-26eb-ebbd8b212a5f/AppIcon-0-0-1x_U007ephone-0-1-85-220.png/512x512bb.jpg",
+    estimateRank: 118,
+    categoryId: "6013",
   },
   {
-    id: "6648771147",
-    label: "FocusFlight",
+    id: "6478942469",
+    label: "Life Reset",
     artworkUrl:
-      "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/a0/8b/c1/a08bc118-a1b5-934a-f4fb-08bcbb5c8040/AppIcon-0-1x_U007epad-0-1-0-sRGB-85-220-0.png/512x512bb.jpg",
-    estimateRank: 46,
-    categoryId: "6007",
+      "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/71/88/49/71884915-a0f9-d209-419d-ba500bad3699/AppIcon-0-0-1x_U007ephone-0-1-0-85-220.png/512x512bb.jpg",
+    estimateRank: 124,
+    categoryId: "6012",
   },
   {
     id: "6478868302",
@@ -51,12 +51,12 @@ const ROWS = [
     categoryId: "6013",
   },
   {
-    id: "6746838126",
-    label: "Depuff AI",
+    id: "6456176249",
+    label: "Bevel",
     artworkUrl:
-      "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/5e/30/57/5e3057ba-bb10-472d-26eb-ebbd8b212a5f/AppIcon-0-0-1x_U007ephone-0-1-85-220.png/512x512bb.jpg",
-    estimateRank: 118,
-    categoryId: "6013",
+      "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/b0/bc/ec/b0bcec19-83e6-61ac-9ac4-2df647217478/AppIconFlatAuto-0-0-1x_U007ephone-0-0-0-1-0-0-P3-85-220.png/512x512bb.jpg",
+    estimateRank: 74,
+    categoryId: "6008",
   },
   {
     id: "1551099110",
@@ -105,14 +105,6 @@ const ROWS = [
       "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/c7/8c/d6/c78cd678-d058-0ca6-3908-44baeae83287/AppIcon-0-0-1x_U007ephone-0-1-0-85-220.png/512x512bb.jpg",
     estimateRank: 72,
     categoryId: "6013",
-  },
-  {
-    id: "6478942469",
-    label: "Life Reset",
-    artworkUrl:
-      "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/71/88/49/71884915-a0f9-d209-419d-ba500bad3699/AppIcon-0-0-1x_U007ephone-0-1-0-85-220.png/512x512bb.jpg",
-    estimateRank: 124,
-    categoryId: "6012",
   },
   {
     id: "1510911574",

@@ -2,13 +2,15 @@
 
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
+import { useCallback, useEffect, useRef, useState } from "react";
 
+import { TRACKAPP_ICON_SRC } from "@/lib/trackapp-brand";
 import { cn } from "@/lib/utils";
 
 import "@/styles/tracker-sale-notifications.css";
 
-/** Logo notification (PNG fond transparent) — `public/assets/RClogo.png`. */
-export const TRACKER_SALE_NOTIF_ICON_SRC = "/assets/RClogo.png";
+/** Logo notification — icône officielle Trackapp. */
+export const TRACKER_SALE_NOTIF_ICON_SRC = TRACKAPP_ICON_SRC;
 
 type SaleDemo = {
   id: string;
@@ -17,170 +19,170 @@ type SaleDemo = {
   accent: "" | "notif-accent-a" | "notif-accent-b";
 };
 
-const DEMO_SALES: SaleDemo[] = [
+const DEMO_SALES: Omit<SaleDemo, "id">[] = [
   {
-    id: "s1",
     brand: "Nouvelle vente 🎉",
     line: "Abonnement mensuel : +7,99 € MRR",
     accent: "",
   },
   {
-    id: "s2",
     brand: "Nouvelle vente ✨",
     line: "Vente à l’unité : 12,99 € encaissée",
     accent: "notif-accent-a",
   },
   {
-    id: "s3",
     brand: "Nouvelle vente 🎉",
     line: "Renouvellement : 29,99 € / mois confirmé",
     accent: "notif-accent-b",
   },
   {
-    id: "s4",
     brand: "Nouvelle vente ✨",
     line: "Offre annuelle : +49,99 € (Facture 12 mois)",
     accent: "notif-accent-a",
   },
   {
-    id: "s5",
     brand: "Nouvelle vente 🎉",
     line: "Achat in-app : module Pro · 9,99 €",
     accent: "",
   },
   {
-    id: "s6",
     brand: "Nouvelle vente ✨",
     line: "Essai → abonnement : 4,99 € / mois activé",
     accent: "notif-accent-b",
   },
   {
-    id: "s7",
     brand: "Nouvelle vente 🎉",
     line: "Panier complété : 24,90 € · paiement réussi",
     accent: "notif-accent-a",
   },
 ];
 
-function overlapMarginRem(depth: number): string {
-  if (depth <= 0) return "0";
-  const base = -1.78 - depth * 0.46;
-  return `${base.toFixed(2)}rem`;
-}
+const VISIBLE_COUNT = 4;
+const NEW_SALE_INTERVAL_MS = 3800;
 
-/** Les coques restent pleinement opaques : la pile ne doit pas disparaître en transparence. */
-function shellOpacity(): number {
-  return 1;
-}
+/** Décalage vertical par profondeur (pile iOS). */
+const DEPTH_Y_PX = [0, 28, 54, 78] as const;
+
+const SPRING = { type: "spring" as const, stiffness: 380, damping: 32, mass: 0.82 };
 
 function shellScale(depth: number): number {
-  return Number((1 - depth * 0.036).toFixed(4));
+  return Number((1 - depth * 0.032).toFixed(4));
+}
+
+function timeLabel(depth: number): string {
+  if (depth === 0) return "maintenant";
+  if (depth === 1) return "1 min";
+  return `${depth} min`;
+}
+
+function seedInitialStack(): SaleDemo[] {
+  return DEMO_SALES.slice(0, VISIBLE_COUNT)
+    .map((sale, i) => ({ ...sale, id: `seed-${i}` }))
+    .reverse();
+}
+
+function SaleNotificationCard({
+  sale,
+  depth,
+  rm,
+  isNew,
+}: Readonly<{
+  sale: SaleDemo;
+  depth: number;
+  rm: boolean;
+  isNew: boolean;
+}>) {
+  const y = DEPTH_Y_PX[depth] ?? DEPTH_Y_PX[DEPTH_Y_PX.length - 1];
+  const scale = shellScale(depth);
+
+  return (
+    <motion.div
+      data-depth={String(depth)}
+      className={cn("tracker-sale-notif-shell", sale.accent)}
+      style={{
+        position: "absolute",
+        insetInline: 0,
+        top: 0,
+        zIndex: 40 - depth,
+        pointerEvents: "none",
+      }}
+      initial={
+        isNew && !rm
+          ? { opacity: 0, y: y - 32, scale: scale * 0.96 }
+          : { opacity: 1, y, scale }
+      }
+      animate={{ opacity: 1, y, scale }}
+      transition={rm ? { duration: 0.1 } : SPRING}
+    >
+      <div className="tracker-sale-notif">
+        <div className="tracker-sale-notif-icon-wrap" aria-hidden>
+          <Image
+            src={TRACKER_SALE_NOTIF_ICON_SRC}
+            alt=""
+            fill
+            className="tracker-sale-notif-icon-img"
+            sizes="44px"
+            priority={depth === 0}
+          />
+        </div>
+        <div className="tracker-sale-notif-body">
+          <div className="tracker-sale-notif-head-row">
+            <div className="tracker-sale-notif-head">{sale.brand}</div>
+            <span className="tracker-sale-notif-time">{timeLabel(depth)}</span>
+          </div>
+          <p className="tracker-sale-notif-sub">{sale.line}</p>
+        </div>
+      </div>
+    </motion.div>
+  );
 }
 
 export function TrackerSaleNotificationsStack({ className }: { className?: string }) {
   const rm = useReducedMotion();
+  const [stack, setStack] = useState<SaleDemo[]>(seedInitialStack);
+  const [enteringId, setEnteringId] = useState<string | null>(null);
+  const saleIndexRef = useRef(VISIBLE_COUNT);
 
-  const stack = [...DEMO_SALES].reverse();
+  const pushSale = useCallback(() => {
+    const i = saleIndexRef.current;
+    const template = DEMO_SALES[i % DEMO_SALES.length];
+    const entry: SaleDemo = {
+      ...template,
+      id: `live-${i}`,
+    };
+
+    saleIndexRef.current = i + 1;
+    setEnteringId(entry.id);
+    setStack((current) => [entry, ...current.slice(0, VISIBLE_COUNT - 1)]);
+  }, []);
+
+  useEffect(() => {
+    if (!enteringId) return;
+    const timer = window.setTimeout(() => setEnteringId(null), 700);
+    return () => window.clearTimeout(timer);
+  }, [enteringId]);
+
+  useEffect(() => {
+    if (rm) return;
+    const interval = window.setInterval(pushSale, NEW_SALE_INTERVAL_MS);
+    return () => window.clearInterval(interval);
+  }, [rm, pushSale]);
 
   return (
     <figure className={cn("tracker-sale-notifs mx-auto pb-10 pt-1", className)}>
       <figcaption className="sr-only">
-        Exemple décoratif : plusieurs notifications de ventes empilées avec effet verre.
+        Notifications de ventes en direct : de nouvelles alertes s’ajoutent en continu.
       </figcaption>
       <div className="tracker-sale-notifs-stack">
-        {stack.map((sale, idx) => {
-          const depth = idx;
-          const scale = shellScale(depth);
-          const faded = shellOpacity();
-
-          const restingBlur = "blur(0px)";
-          const enterBlur = "blur(0px)";
-
-          return (
-            <motion.div
-              key={sale.id}
-              data-depth={String(depth)}
-              className={`tracker-sale-notif-shell ${sale.accent}`}
-              style={{
-                marginTop: depth === 0 ? undefined : overlapMarginRem(depth),
-                zIndex: 30 - depth,
-              }}
-              initial={
-                rm
-                  ? false
-                  : {
-                      opacity: 0,
-                      y: 28 + idx * 8,
-                      rotateX: -3 + idx * 1.05,
-                      filter: enterBlur,
-                    }
-              }
-              animate={
-                rm
-                  ? { opacity: faded, y: 0, rotateX: 0, filter: "blur(0px)" }
-                  : {
-                      opacity: faded,
-                      y: 0,
-                      rotateX: 0,
-                      filter: restingBlur,
-                    }
-              }
-              transition={
-                rm
-                  ? { duration: 0.14 }
-                  : {
-                      delay: idx * 0.058,
-                      type: "spring",
-                      stiffness: 360 + depth * 10,
-                      damping: 31,
-                      mass: 0.68,
-                    }
-              }
-            >
-              {!rm && depth === 0 ? (
-                <motion.div
-                  aria-hidden
-                  className="absolute inset-x-6 -bottom-2 z-0 h-4 rounded-[50%]"
-                  style={{
-                    background: "rgba(0,0,0,0.22)",
-                    filter: "blur(12px)",
-                  }}
-                  initial={{ scale: 0.85, opacity: 0 }}
-                  animate={{ scale: [0.9, 1, 1], opacity: [0.12, 0.52, 0.4] }}
-                  transition={{
-                    delay: 0.5,
-                    duration: 0.65,
-                    ease: [0.22, 1, 0.36, 1],
-                  }}
-                />
-              ) : null}
-
-              <div
-                className="tracker-sale-notif-visual"
-                style={{
-                  transform: `scale(${String(scale)})`,
-                  transformOrigin: "50% 0%",
-                }}
-              >
-                <div className="tracker-sale-notif">
-                  <div className="tracker-sale-notif-icon-wrap tracker-sale-notif-icon-wrap--brand">
-                    <Image
-                      src={TRACKER_SALE_NOTIF_ICON_SRC}
-                      alt=""
-                      fill
-                      className="tracker-sale-notif-icon-img object-contain select-none pointer-events-none"
-                      sizes="44px"
-                    />
-                  </div>
-                  <div className="tracker-sale-notif-body">
-                    <div className="tracker-sale-notif-head">{sale.brand}</div>
-                    <p className="tracker-sale-notif-sub">{sale.line}</p>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          );
-        })}
+        {stack.map((sale, depth) => (
+          <SaleNotificationCard
+            key={sale.id}
+            sale={sale}
+            depth={depth}
+            rm={Boolean(rm)}
+            isNew={sale.id === enteringId}
+          />
+        ))}
       </div>
     </figure>
   );

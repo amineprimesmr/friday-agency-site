@@ -64,7 +64,7 @@ function normalizeSearchPageIds(raw: string[] | undefined): string[] {
  * Appelle `GET /ads_archive` (serveur uniquement — token en env).
  *
  * - Mode **page** : `searchPageIds` (IDs Page Facebook numériques) → filtre Ad Library à la page / marque uniquement.
- * - Mode **mot-clé** : `searchTerms` + `KEYWORD_UNORDERED` (réservé aux recherches manuelles / legacy).
+ * - Mode **mot-clé** : legacy interne uniquement. L'UI Trackapp envoie `page_only=1`.
  *
  * @see https://developers.facebook.com/docs/graph-api/reference/ads_archive/
  */
@@ -141,14 +141,22 @@ export async function fetchAdsArchive(params: {
 }
 
 /**
- * URL web officielle Ad Library : filtre par **page** (`view_all_page_id`) si on a un ID Page Meta,
- * sinon ouvre une recherche **manuelle** par mot-clé (ne doit pas alimenter l'UI page-only).
+ * URL web officielle Ad Library : filtre par **page** (`view_all_page_id`) si on a un ID Page Meta.
  */
 export function metaAdLibraryWebUrl(params: { searchPageIds: string[]; keywordFallback: string }): string {
   const rawId = params.searchPageIds.find((id) => /^\d+$/.test(id));
   if (rawId) {
-    return `https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&view_all_page_id=${encodeURIComponent(rawId)}&media_type=all`;
+    const url = new URL("https://www.facebook.com/ads/library/");
+    url.searchParams.set("active_status", "active");
+    url.searchParams.set("ad_type", "all");
+    url.searchParams.set("country", "ALL");
+    url.searchParams.set("is_targeted_country", "false");
+    url.searchParams.set("media_type", "all");
+    url.searchParams.set("search_type", "page");
+    url.searchParams.set("sort_data[direction]", "desc");
+    url.searchParams.set("sort_data[mode]", "total_impressions");
+    url.searchParams.set("view_all_page_id", rawId);
+    return url.toString();
   }
-  const q = encodeURIComponent(params.keywordFallback.trim().slice(0, 100) || " ");
-  return `https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&q=${q}&search_type=keyword_unordered&media_type=all`;
+  return "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&media_type=all";
 }

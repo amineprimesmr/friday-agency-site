@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+
 import { TrackappLandingFooter } from "@/components/trackapp/trackapp-landing-footer";
 import { TrackappPaiementMarketingHero } from "@/components/trackapp/trackapp-paiement-marketing-hero";
 import { TrackappPaiementMarketingPlanSwitcher } from "@/components/trackapp/trackapp-paiement-marketing-plan-switcher";
@@ -10,6 +14,8 @@ import { TrackerHeroSocialProofBadge } from "@/components/tracker/tracker-hero-s
 
 /** Page longue mobile (et desktop) : sections commerciales avant le bloc paiement Stripe. */
 export function TrackappPaiementMarketing() {
+  const [checkoutRevealed, setCheckoutRevealed] = useState(false);
+
   return (
     <div className="tpl-paiement-marketing">
       <TrackappPaiementMarketingHero />
@@ -26,9 +32,14 @@ export function TrackappPaiementMarketing() {
             <TrackerHeroSocialProofBadge />
           </div>
 
-          <TrackappPaiementMarketingPlanSwitcher />
-
-          <TrackappPaiementPlanSpotlightCards />
+          <div className={`tpl-pick__spotlight-stack${checkoutRevealed ? " tpl-pick__spotlight-stack--checkout-open" : ""}`}>
+            {!checkoutRevealed ? <TrackappPaiementMarketingPlanSwitcher /> : null}
+            <TrackappPaiementPlanSpotlightCards
+              checkoutReveal
+              checkoutRevealed={checkoutRevealed}
+              onCheckoutRevealedChange={setCheckoutRevealed}
+            />
+          </div>
         </section>
       </div>
 

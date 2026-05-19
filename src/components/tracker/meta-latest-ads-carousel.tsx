@@ -134,30 +134,25 @@ export function MetaLatestAdsCarousel({
             ) : null}
           </p>
         </div>
-        <a
-          href={metaLibraryWebUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="shrink-0 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-2 text-xs font-semibold text-neutral-800 transition hover:bg-white"
-        >
-          Bibliothèque Meta ↗
-        </a>
+        {hasResolvedMetaPage ? (
+          <a
+            href={metaLibraryWebUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-2 text-xs font-semibold text-neutral-800 transition hover:bg-white"
+          >
+            Bibliothèque Meta ↗
+          </a>
+        ) : null}
       </div>
 
       {!hasResolvedMetaPage ? (
         <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-950">
           <p className="font-semibold">Dernières ads indisponibles</p>
           <p className="mt-1 text-[12px] text-amber-900/85">
-            Aucune Page Meta fiable n’a été résolue. On n’affiche pas de résultats mot-clé pour éviter les faux positifs.
+            Meta Ads Library : pas de page officielle validée. On n’affiche pas de résultats par mot-clé pour éviter les
+            faux positifs.
           </p>
-          <a
-            href={metaLibraryContext.manualSearchUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 inline-flex rounded-lg border border-amber-200 bg-white/70 px-3 py-2 text-xs font-semibold text-amber-950 hover:bg-white"
-          >
-            Recherche manuelle Meta ↗
-          </a>
         </div>
       ) : null}
 

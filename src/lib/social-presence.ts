@@ -154,7 +154,7 @@ function classify(url: URL): DetectedSocialProfile | null {
   return null;
 }
 
-/** Profil détecté à partir d’une URL complète (utile pour fusionner des liens OpenAI). */
+/** Profil détecté à partir d’une URL complète. */
 export function detectProfileFromUrl(urlString: string): DetectedSocialProfile | null {
   const url = tryParseUrl(urlString);
   if (!url) return null;

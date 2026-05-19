@@ -38,7 +38,7 @@ export async function getTrackerHeroApps(): Promise<MultiCountryApp[]> {
 }
 
 export async function getTrackerCuratedPotentialAppsCached() {
-  return unstable_cache(getTrackerCuratedPotentialApps, ["tracker-curated-potential-v1"], {
+  return unstable_cache(getTrackerCuratedPotentialApps, ["tracker-curated-potential-v3"], {
     revalidate: REVALIDATE_TRACKER,
   })();
 }

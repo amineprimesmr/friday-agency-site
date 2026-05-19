@@ -1,5 +1,6 @@
 "use client";
 
+import { TrackappLogoMark } from "@/components/trackapp/trackapp-logo-mark";
 import Link from "next/link";
 
 import "@/styles/trackapp-topbar-affiliate-glass.css";
@@ -36,9 +37,7 @@ export function TrackappFidelityTopbar({
 
         <Link href="/trackapp/accueil" className="app-desktop-topbar__brand" aria-label="Trackapp — Accueil">
           <span className="app-desktop-topbar__brand-mark" aria-hidden="true">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/10 text-[11px] font-extrabold text-white">
-              TA
-            </span>
+            <TrackappLogoMark size="sm" className="app-desktop-topbar__brand-img" decorative />
           </span>
           <span className="app-desktop-topbar__brand-text">Trackapp</span>
         </Link>

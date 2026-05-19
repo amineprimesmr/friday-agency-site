@@ -17,7 +17,14 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ["framer-motion"],
   },
   images: {
-    remotePatterns: APPLE_MZSTATIC_PATTERNS,
+    remotePatterns: [
+      ...APPLE_MZSTATIC_PATTERNS,
+      {
+        protocol: "https",
+        hostname: "api.dicebear.com",
+        pathname: "/**",
+      },
+    ],
   },
   /** Autoriser l’embedding cross-origin des snippets /embed/* dans des iframes (CSP niveau cadre uniquement). */
   async headers() {

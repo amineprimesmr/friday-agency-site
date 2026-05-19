@@ -48,7 +48,7 @@ export function HeroAppIconRotator({
         className="relative inline-flex h-[var(--hero-icon)] w-[var(--hero-icon)] items-center justify-center"
         style={{ transformStyle: "preserve-3d" }}
       >
-        <span className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl bg-neutral-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_14px_44px_rgba(0,0,0,0.55)] ring-1 ring-white/18">
+        <span className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-[22%] bg-neutral-950 shadow-[0_4px_18px_rgba(0,0,0,0.45),0_0_0_1px_rgba(255,255,255,0.14)]">
           <AnimatePresence mode="wait" initial={false}>
             <motion.span
               key={`${current.id}-${index}`}
@@ -98,10 +98,10 @@ export function HeroAppIconRotator({
             </motion.span>
           </AnimatePresence>
 
-          {/* Reflet vitré */}
+          {/* Reflet vitré léger */}
           <span
             aria-hidden
-            className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/25 via-transparent to-transparent opacity-35"
+            className="pointer-events-none absolute inset-0 rounded-[22%] bg-gradient-to-br from-white/12 via-transparent to-transparent opacity-30"
           />
         </span>
       </span>

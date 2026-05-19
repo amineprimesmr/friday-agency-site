@@ -131,12 +131,21 @@
 }
 
 .tracker-header-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   font-weight: 700;
   font-size: 1.05rem;
   letter-spacing: -0.03em;
   color: #fafafa;
   text-decoration: none;
   white-space: nowrap;
+}
+
+.tracker-header-brand__icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
 }
 
 .tracker-header-brand:hover {

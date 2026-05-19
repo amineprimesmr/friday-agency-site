@@ -6,8 +6,7 @@
  * Ajouter une entrée quand tu ajoutes un fichier ; ou pointe vers des URLs externes.
  *
  * --- CA mensuel ---
- * Avec `appStoreId`, le CA affiché sur la home vient de Sensor Tower comme sur `/tracker/apps/[id]`
- * (`listAppShowcaseVideoItemsEnriched`). Sinon repli sur `approxMonthlyRevenueEUR` + `deriveShowcaseMonthlyRevenueEUR`.
+ * Avec `approxMonthlyRevenueEUR`, le CA affiché sur la home est dérivé en EUR (`listAppShowcaseVideoItemsEnriched`).
  */
 
 export type AppShowcaseVideoItem = {
@@ -97,4 +96,30 @@ export function listAppShowcaseVideoItems(): AppShowcaseVideoItem[] {
 /** @deprecated Préférer `listAppShowcaseVideoItems` pour les métadonnées. */
 export function listAppShowcaseVideos(): string[] {
   return listAppShowcaseVideoItems().map((v) => v.src);
+}
+
+/** Duolingo — en plus des apps du carrousel vidéo dans le rotator du titre hero. */
+const HERO_ROTATOR_DUOLINGO = {
+  id: "570060128",
+  name: "Duolingo",
+  artworkUrl:
+    "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/96/eb/4c/96eb4cdd-d8ee-da26-c916-ad2a11696b11/AppIcon-0-0-1x_U007epad-0-1-85-220.png/512x512bb.jpg",
+} as const;
+
+export type HeroRotatorAppRef = {
+  id: string;
+  name: string;
+  artworkUrl: string;
+};
+
+/** Icônes du titre hero : apps du carrousel vidéo + Duolingo. */
+export function listHeroRotatorApps(): HeroRotatorAppRef[] {
+  const fromCarousel = listAppShowcaseVideoItems().map((item) => ({
+    id: item.appStoreId,
+    name: item.displayName,
+    artworkUrl: item.artworkUrl,
+  }));
+  const seen = new Set(fromCarousel.map((a) => a.id));
+  if (seen.has(HERO_ROTATOR_DUOLINGO.id)) return fromCarousel;
+  return [...fromCarousel, HERO_ROTATOR_DUOLINGO];
 }

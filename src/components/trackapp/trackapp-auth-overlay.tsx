@@ -49,7 +49,7 @@ export function TrackappAuthOverlay({
       {open ? (
         <motion.div
           key="trackapp-auth-overlay"
-          className="fixed inset-0 z-[600]"
+          className="fixed inset-0 z-[960]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -58,7 +58,7 @@ export function TrackappAuthOverlay({
           <button
             type="button"
             aria-label="Fermer la fenêtre de connexion"
-            className="absolute inset-0 bg-black/70 backdrop-blur-[2px]"
+            className="absolute inset-0 bg-black/55 backdrop-blur-md md:bg-black/60 md:backdrop-blur-lg lg:backdrop-blur-xl"
             onClick={onClose}
           />
 
@@ -66,14 +66,14 @@ export function TrackappAuthOverlay({
             role="dialog"
             aria-modal="true"
             aria-labelledby="ta-auth-headline"
-            className="pointer-events-none absolute inset-0 flex items-center justify-center p-4 md:p-6"
+            className="pointer-events-none absolute inset-0 flex items-center justify-center p-4 md:p-8 lg:p-10"
             initial={reduce ? false : { opacity: 0, scale: 0.96, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={reduce ? undefined : { opacity: 0, scale: 0.98, y: 10 }}
             transition={reduce ? { duration: 0.12 } : { type: "spring", damping: 28, stiffness: 340 }}
           >
             <motion.div
-              className="pointer-events-auto w-[min(56rem,calc(100vw-2rem))] max-w-full"
+              className="pointer-events-auto w-[min(68rem,calc(100vw-1.25rem))] max-w-full lg:w-[min(72rem,calc(100vw-2rem))]"
               onClick={(e) => e.stopPropagation()}
             >
               <TaConnexionFlow embedded nextHref={nextHref} onClose={onClose} />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { officialLinkFallbackText, type OfficialBrandLinksReport, type OfficialLinkKey } from "@/lib/official-brand-links";
 import type { DetectedSocialProfile } from "@/lib/social-presence";
 import type { BrandResolutionSource } from "@/lib/tracker-meta-ad-library-context";
 
@@ -111,27 +112,41 @@ function networkIcon(id: DetectedSocialProfile["id"]) {
 export function SocialPresenceStrip({
   profiles,
   appName,
-  enrichedByAi,
+  openAiEnriched,
   officialWebsite,
   confidence,
   sources,
+  officialLinks,
 }: {
   profiles: DetectedSocialProfile[];
   appName: string;
-  /** Vrai si des liens ont été proposés par le modèle (à valider manuellement). */
-  enrichedByAi?: boolean;
+  openAiEnriched?: boolean;
   officialWebsite?: string | null;
   confidence?: number;
   sources?: BrandResolutionSource[];
+  officialLinks?: OfficialBrandLinksReport;
 }) {
   const visibleSources = (sources ?? []).filter((source) => source.url).slice(0, 5);
+  const requiredRows: OfficialLinkKey[] = [
+    "site",
+    "instagram",
+    "tiktok",
+    "x",
+    "youtube",
+    "facebook",
+    "linkedin",
+    "appStore",
+    "googlePlay",
+    "metaAdsLibrary",
+  ];
+
   return (
     <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
         <div>
           <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-400">Réseaux détectés</h3>
           <p className="mt-1 text-sm text-neutral-600">
-            Fiche App Store{enrichedByAi ? " · complété par IA web" : ""} · {appName}
+            Validation stricte depuis le site officiel{openAiEnriched ? " + OpenAI web search" : ""} · {appName}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -159,6 +174,40 @@ export function SocialPresenceStrip({
             ↗
           </span>
         </a>
+      ) : null}
+
+      {officialLinks ? (
+        <div className="mb-4 overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50">
+          <div className="border-b border-neutral-200 px-3 py-2">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-neutral-400">Liens officiels validés</p>
+          </div>
+          <dl className="divide-y divide-neutral-200">
+            {requiredRows.map((key) => {
+              const row = officialLinks[key];
+              const value = officialLinkFallbackText(row);
+              return (
+                <div key={key} className="grid gap-1 px-3 py-2.5 sm:grid-cols-[138px_1fr] sm:items-center">
+                  <dt className="text-[12px] font-bold text-neutral-700">{row.label} :</dt>
+                  <dd className="min-w-0 text-[12px] text-neutral-500">
+                    {row.validated && row.url ? (
+                      <a
+                        href={row.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="break-all font-semibold text-neutral-900 underline-offset-2 hover:underline"
+                        title={row.reason}
+                      >
+                        {value}
+                      </a>
+                    ) : (
+                      <span title={row.reason}>{value}</span>
+                    )}
+                  </dd>
+                </div>
+              );
+            })}
+          </dl>
+        </div>
       ) : null}
 
       {profiles.length === 0 ? (

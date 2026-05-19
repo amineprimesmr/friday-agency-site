@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { getTrackerHeroApps } from "@/lib/tracker-server-cache";
 import { TopMoversGrid } from "@/components/tracker/top-movers-grid";
 import { BuildNextShowcase } from "@/components/tracker/build-next-showcase";
 import { MyfidLaunchStepsSection } from "@/components/tracker/myfid-launch-steps-section";
 import { MyfidThreeStepsSection } from "@/components/tracker/myfid-three-steps-section";
 import { HeroAppIconRotator } from "@/components/tracker/hero-app-icon-rotator";
+import { TrackerHeroSocialProofBadge } from "@/components/tracker/tracker-hero-social-proof-badge";
 import { TrackerHeroTrackappCtas } from "@/components/tracker/tracker-hero-trackapp-ctas";
 import { TrackerSaleNotificationsStack } from "@/components/tracker/tracker-sale-notifications-stack";
+import { listHeroRotatorApps } from "@/lib/app-videos";
 import {
   listAppShowcaseVideoItemsEnriched,
   listAppShowcaseVideoItemsFallbackEnriched,
@@ -19,8 +20,7 @@ const TRACKER_ANCHOR_SCROLL =
 /** Au-delà de ce délai, on affiche les CA dérivés localement pour ne pas laisser `/tracker` en chargement infini. */
 const SHOWCASE_ENRICH_BUDGET_MS = 8000;
 
-/** Filet de sécurité si `unstable_cache` / réseau reste bloqué au-delà du timeout fetch RSS (12s). */
-const HERO_APPS_BUDGET_MS = 15_000;
+const heroRotatorApps = listHeroRotatorApps();
 
 export const metadata: Metadata = {
   title: "App Store Tracker — Trouvez les apps qui scalent maintenant",
@@ -42,15 +42,6 @@ function TopMoversGridSkeleton() {
 }
 
 export default async function TrackerDashboard() {
-  const heroAppsPromise = Promise.race([
-    getTrackerHeroApps().catch((err) => {
-      console.error("[tracker] getTrackerHeroApps:", err);
-      return [] as Awaited<ReturnType<typeof getTrackerHeroApps>>;
-    }),
-    new Promise<Awaited<ReturnType<typeof getTrackerHeroApps>>>((resolve) =>
-      setTimeout(() => resolve([]), HERO_APPS_BUDGET_MS),
-    ),
-  ]);
   const appShowcaseVideosPromise = Promise.race([
     listAppShowcaseVideoItemsEnriched().catch((err) => {
       console.error("[tracker] listAppShowcaseVideoItemsEnriched:", err);
@@ -63,7 +54,7 @@ export default async function TrackerDashboard() {
       ),
     ),
   ]);
-  const [heroApps, appShowcaseVideos] = await Promise.all([heroAppsPromise, appShowcaseVideosPromise]);
+  const appShowcaseVideos = await appShowcaseVideosPromise;
 
   return (
     <>
@@ -83,11 +74,10 @@ export default async function TrackerDashboard() {
             aria-hidden
           />
           <div className="relative mx-auto max-w-4xl px-4 pt-[calc(var(--tracker-header-offset)+2.5rem)] text-center sm:pt-[calc(var(--tracker-header-offset)+3.5rem)]">
+            <TrackerHeroSocialProofBadge />
             <h1 className="bg-gradient-to-br from-white via-zinc-100 to-zinc-500 bg-clip-text pb-1.5 text-[clamp(2rem,7.2vw,4.35rem)] font-semibold leading-[1.06] tracking-[-0.035em] text-transparent sm:text-[clamp(2.2rem,7.8vw,4.85rem)]">
               Trouvez les apps{" "}
-              <HeroAppIconRotator
-                apps={heroApps.map((a) => ({ id: a.id, name: a.name, artworkUrl: a.artworkUrl }))}
-              />{" "}
+              <HeroAppIconRotator apps={heroRotatorApps} />{" "}
               qui scalent maintenant
             </h1>
             <div className="mt-8 sm:mt-10">

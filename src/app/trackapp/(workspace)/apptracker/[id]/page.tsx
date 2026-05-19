@@ -15,7 +15,6 @@ import {
   type CountryCode,
 } from "@/lib/apple-charts";
 import { getTrackappProfileFavorites } from "@/lib/trackapp-profile-favorites";
-import { extractSocialProfiles } from "@/lib/social-presence";
 import { buildTrackerMetaAdLibraryContext } from "@/lib/tracker-meta-ad-resolution";
 import { fetchAppDetailCached } from "@/lib/tracker-server-cache";
 import { TrackappAppFavoriteButton } from "@/components/trackapp/trackapp-app-favorite-button";
@@ -76,15 +75,9 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
   const revEst = formatEstimatedMonthlyRevenuePrecise(50, app.price, app.categoryId, country, app.id);
   const appAge = app.releaseDate ? daysSince(app.releaseDate) : Number.NaN;
   const screenshots = [...(app.screenshotUrls ?? []), ...(app.ipadScreenshotUrls ?? [])].slice(0, 6);
-  const socialFromStore = extractSocialProfiles(app.description, app.releaseNotes ?? "");
   const [metaLibraryContext, { loggedIn, appIds }] = await Promise.all([
     buildTrackerMetaAdLibraryContext({
-      appName: app.name,
-      developerName: app.sellerName || app.artistName,
-      genre: app.primaryGenreName,
-      description: app.description ?? "",
-      releaseNotes: app.releaseNotes ?? "",
-      socialFromStore,
+      app,
       country,
     }),
     favoritesPromise,
@@ -204,17 +197,9 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
           ) : (
             <>
               <p className="mt-3 text-[0.92rem] leading-relaxed text-[var(--dash-muted-light)]">
-                Aucune Page Meta fiable n&apos;a encore été résolue. Les ads par mot-clé sont bloquées pour éviter les
-                faux positifs.
+                Meta Ads Library : pas de page officielle validée. Les ads par mot-clé sont bloquées pour éviter les faux
+                positifs.
               </p>
-              <a
-                href={metaLibraryContext.manualSearchUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full border border-slate-200 bg-slate-50 px-5 text-[0.88rem] font-bold text-slate-800 no-underline transition hover:bg-white"
-              >
-                Recherche manuelle Meta ↗
-              </a>
             </>
           )}
         </article>

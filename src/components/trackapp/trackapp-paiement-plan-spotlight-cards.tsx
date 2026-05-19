@@ -170,6 +170,7 @@ export function TrackappPaiementPlanSpotlightCards({
       className={[
         "tpl-spotlight-carousel",
         className,
+        checkoutReveal ? "tpl-spotlight-carousel--checkout-reveal" : "",
         checkoutReveal && checkoutRevealed ? "tpl-spotlight-carousel--checkout-open" : "",
       ]
         .filter(Boolean)

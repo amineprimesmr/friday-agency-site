@@ -2,55 +2,42 @@ import { unstable_cache } from "next/cache";
 
 import type { AppShowcaseVideoItem } from "@/lib/app-videos";
 import { listAppShowcaseVideoItems } from "@/lib/app-videos";
-import { fetchIosAggregateAppMetrics } from "@/lib/apple-charts";
 import {
   deriveShowcaseMonthlyRevenueEUR,
+  formatShowcaseEurMonthlyLabel,
   showcaseMonthlyRevenueCanonicalKey,
 } from "@/lib/showcase-revenue-display";
 
 export type AppShowcaseVideoItemEnriched = AppShowcaseVideoItem & {
-  /** Même source que les fiches app (`fetchIosAggregateAppMetrics` → `revenueString`) quand dispo. */
+  /** CA mensuel affiché en EUR (ex. « 100 342 € / mois »). */
   monthlyRevenueLabel: string;
 };
 
-function fallbackEurLabel(item: AppShowcaseVideoItem): string {
-  const n = deriveShowcaseMonthlyRevenueEUR(
+function buildMonthlyRevenueLabel(item: AppShowcaseVideoItem): string {
+  const eur = deriveShowcaseMonthlyRevenueEUR(
     item.approxMonthlyRevenueEUR,
     showcaseMonthlyRevenueCanonicalKey(item.displayName, item.src),
   );
-  return new Intl.NumberFormat("fr-FR", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(n);
+  return formatShowcaseEurMonthlyLabel(eur);
 }
 
-/** Sans appels réseau — utilisé si l’enrichissement ST dépasse le budget ou échoue (évite un SSR bloqué). */
+/** Sans appels réseau — utilisé si l’enrichissement dépasse le budget ou échoue. */
 export function listAppShowcaseVideoItemsFallbackEnriched(): AppShowcaseVideoItemEnriched[] {
   return listAppShowcaseVideoItems().map((item) => ({
     ...item,
-    monthlyRevenueLabel: fallbackEurLabel(item),
+    monthlyRevenueLabel: buildMonthlyRevenueLabel(item),
   }));
 }
 
-/** Enrichit les vidéos showcase avec le CA Sensor Tower (comme `/tracker/apps/[id]`). */
 async function listAppShowcaseVideoItemsEnrichedCore(): Promise<AppShowcaseVideoItemEnriched[]> {
-  const base = listAppShowcaseVideoItems();
-  const rows = await Promise.all(
-    base.map(async (item) => {
-      const agg = await fetchIosAggregateAppMetrics(item.appStoreId);
-      const label =
-        agg && agg.revenue > 0 && agg.revenueString !== "—"
-          ? `${agg.revenueString} / mois`
-          : fallbackEurLabel(item);
-      return { ...item, monthlyRevenueLabel: label };
-    }),
-  );
-  return rows;
+  return listAppShowcaseVideoItems().map((item) => ({
+    ...item,
+    monthlyRevenueLabel: buildMonthlyRevenueLabel(item),
+  }));
 }
 
 export const listAppShowcaseVideoItemsEnriched = unstable_cache(
   listAppShowcaseVideoItemsEnrichedCore,
-  ["app-showcase-videos-enriched-v1"],
+  ["app-showcase-videos-enriched-v2-eur"],
   { revalidate: 3600 },
 );

@@ -6,7 +6,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { ShowcaseHeroHeader } from "@/components/tracker/showcase-hero-header";
 import type { AppShowcaseVideoItemEnriched } from "@/lib/showcase-app-videos-enrich";
-import { formatShowcaseLastUpdatedLine } from "@/lib/tracker-showcase-last-updated";
 import { cn } from "@/lib/utils";
 
 import "@/styles/build-next-showcase.css";
@@ -25,21 +24,6 @@ type PhoneSlideProps = {
 const PHONE_FRAME =
   "relative mx-auto aspect-[9/19.5] w-[min(78vw,15.5rem)] max-w-[15.5rem] shrink-0 " +
   "shadow-[0_20px_48px_rgba(0,0,0,.5)] ring-1 ring-white/[0.04] sm:w-[15.25rem]";
-
-function VideoFootLastUpdated() {
-  const [line, setLine] = useState("");
-
-  useEffect(() => {
-    setLine(formatShowcaseLastUpdatedLine());
-  }, []);
-
-  return (
-    <p className="build-next-video-foot__updated">
-      <span className="build-next-video-foot__status-dot" aria-hidden />
-      <span>Dernière mise à jour&nbsp;: {line || "\u00a0"}</span>
-    </p>
-  );
-}
 
 function PhoneSlide({ ariaLabel, item, reduceMotion }: PhoneSlideProps) {
   const frameRef = useRef<HTMLDivElement>(null);
@@ -136,7 +120,6 @@ function PhoneSlide({ ariaLabel, item, reduceMotion }: PhoneSlideProps) {
                       <div>
                         <p className="build-next-video-foot__money">{moneyLine}</p>
                       </div>
-                      <VideoFootLastUpdated />
                     </div>
                   </div>
                 ) : null}

@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import "@/styles/tracker-hero-liquid-cta.css";
 
 const POTENTIAL_GRID_COLS = 3;
-const POTENTIAL_VISIBLE_ROWS = 2;
+const POTENTIAL_VISIBLE_ROWS = 1;
 const POTENTIAL_UNLOCKED_COUNT = POTENTIAL_GRID_COLS * POTENTIAL_VISIBLE_ROWS;
 
 const tileClass =
@@ -100,7 +100,7 @@ export async function TopMoversGrid() {
 
             <div className="absolute inset-0 z-[1] flex items-center justify-center px-4 py-6 sm:px-6">
               <TrackerTrackappPaymentCta className="tracker-hero-liquidglass !mt-0">
-                <span className="tracker-hero-liquidglass__label">Commencer maintenant</span>
+                <span className="tracker-hero-liquidglass__label">Débloquer les apps</span>
               </TrackerTrackappPaymentCta>
             </div>
           </div>

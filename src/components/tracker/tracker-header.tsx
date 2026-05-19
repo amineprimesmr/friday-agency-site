@@ -1,5 +1,6 @@
 "use client";
 
+import { TrackappLogoMark } from "@/components/trackapp/trackapp-logo-mark";
 import type { TrackerSearchSurface } from "@/components/tracker/tracker-search-bar";
 import { TrackerLiquidGlassFilterSvg } from "@/components/tracker/tracker-liquid-glass-filter-svg";
 import { TrackerNavLink } from "@/components/tracker/tracker-navigation";
@@ -172,17 +173,13 @@ export function TrackerHeader({
           >
             <Link
               href="/tracker"
-              className="tracker-header-brand tracker-header-mobile-brand-left lg:hidden"
+              className={cn(
+                "tracker-header-brand tracker-header-mobile-brand-left shrink-0",
+                searchOpen && "max-lg:hidden",
+              )}
               onClick={closeMobile}
             >
-              Trackapp
-            </Link>
-
-            <Link
-              href="/tracker"
-              className="tracker-header-brand hidden shrink-0 lg:inline-flex"
-              onClick={closeMobile}
-            >
+              <TrackappLogoMark size="xs" className="tracker-header-brand__icon" decorative />
               Trackapp
             </Link>
           </div>

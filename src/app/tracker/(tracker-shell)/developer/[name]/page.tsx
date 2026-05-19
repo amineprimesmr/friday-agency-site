@@ -60,8 +60,8 @@ export default async function DeveloperPage({ params, searchParams }: PageProps)
     displayApps.filter((a) => a.averageUserRating > 0).reduce((s, a) => s + a.averageUserRating, 0) /
     (displayApps.filter((a) => a.averageUserRating > 0).length || 1);
 
-  // Meta Ad Library URL for this developer
-  const metaLibraryUrl = `https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&q=${encodeURIComponent(developerName)}&search_type=keyword_unordered`;
+  // L'app detail resout Meta par Page ID officiel. Pas de lien keyword ici pour eviter les faux positifs.
+  const metaLibraryUrl = "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&media_type=all";
   const tiktokUrl = `https://ads.tiktok.com/business/creativecenter/inspiration/topads/pc/en?search=${encodeURIComponent(developerName)}`;
   const googleUrl = `https://adstransparency.google.com/?region=anywhere&query=${encodeURIComponent(developerName)}`;
 
@@ -125,7 +125,7 @@ export default async function DeveloperPage({ params, searchParams }: PageProps)
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-white group-hover:text-white">Meta Ad Library</p>
-              <p className="text-[11px] text-white/40">Toutes les pubs Facebook & Instagram actives</p>
+              <p className="text-[11px] text-white/40">Ouvre la librairie, sans recherche mot-clé automatique</p>
             </div>
             <span className="text-white/30 group-hover:text-white/60">↗</span>
           </a>

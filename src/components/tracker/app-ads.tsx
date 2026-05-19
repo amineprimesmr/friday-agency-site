@@ -74,8 +74,8 @@ function MetaAdsPanel({
           </div>
           {metaLibraryContext.mode === "unresolved" ? (
             <p className="mt-2 text-[11px] leading-relaxed text-amber-200/80">
-              Aucune Page Facebook fiable n’a été validée. Les résultats par mot-clé sont volontairement bloqués pour
-              éviter de mélanger les pubs d’autres marques.
+              Meta Ads Library : pas de page officielle validée. Les résultats par mot-clé sont bloqués pour éviter les
+              faux positifs.
             </p>
           ) : null}
           <p className="mt-0.5 text-[11px] text-white/30">
@@ -96,8 +96,8 @@ function MetaAdsPanel({
         <div className="rounded-xl border border-amber-400/25 bg-amber-400/10 px-4 py-4 text-[13px] text-amber-100/90">
           <p className="font-semibold">Page Meta officielle non trouvée</p>
           <p className="mt-1 text-[12px] leading-relaxed text-amber-100/75">
-            La recherche automatique a détecté les réseaux disponibles, mais aucune Page Facebook/Meta fiable n’a pu être
-            convertie en ID publicitaire. La librairie reste donc en pause au lieu d’afficher des résultats par mot-clé.
+            Aucun Page ID officiel n’a été validé depuis le site officiel de l’app. La librairie reste donc en pause au
+            lieu d’afficher des résultats par mot-clé.
           </p>
           {metaLibraryContext.rejectedCandidates.length > 0 ? (
             <ul className="mt-3 space-y-1 text-[11px] text-amber-100/65">
@@ -108,14 +108,9 @@ function MetaAdsPanel({
               ))}
             </ul>
           ) : null}
-          <a
-            href={metaLibraryContext.manualSearchUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 inline-flex rounded-lg border border-amber-100/25 bg-amber-100/10 px-3 py-2 text-xs font-semibold text-amber-50 hover:bg-amber-100/15"
-          >
-            Recherche manuelle Meta ↗
-          </a>
+          <p className="mt-3 text-[11px] font-semibold text-amber-50">
+            Meta Ads Library : pas de page officielle validée.
+          </p>
         </div>
       ) : null}
 
@@ -182,7 +177,7 @@ function MetaAdsPanel({
             <div className="rounded-xl border border-white/[0.06] bg-black/40 px-4 py-10 text-center">
               <p className="text-sm text-white/55">Résolution Meta requise avant de charger les créatives.</p>
               <p className="mt-2 text-[12px] text-white/35">
-                Les résultats mot-clé sont désactivés pour garantir une librairie ads uniquement liée à la marque.
+                Les résultats par mot-clé sont désactivés pour garantir une librairie ads uniquement liée à la marque.
               </p>
             </div>
           ) : ads.length === 0 ? (

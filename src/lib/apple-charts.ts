@@ -118,6 +118,8 @@ export interface AppDetail extends AppEntry {
   primaryGenreName: string;
   primaryGenreId: string;
   trackViewUrl: string;
+  sellerUrl: string;
+  supportUrl: string;
   sellerName: string;
   bundleId: string;
   languageCodesISO2A: string[];
@@ -436,6 +438,8 @@ export async function fetchAppDetail(
       primaryGenreName: String(app.primaryGenreName ?? ""),
       primaryGenreId: String(app.primaryGenreId ?? ""),
       trackViewUrl: String(app.trackViewUrl ?? ""),
+      sellerUrl: String(app.sellerUrl ?? ""),
+      supportUrl: String(app.supportUrl ?? ""),
       sellerName: String(app.sellerName ?? ""),
       bundleId: String(app.bundleId ?? ""),
       languageCodesISO2A: (app.languageCodesISO2A as string[]) ?? [],

@@ -1,120 +1,61 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useMemo } from "react";
 import { estimateMonthlyDownloads, type AppEntry, type CountryCode } from "@/lib/apple-charts";
 import Image from "next/image";
 import type { TrackerMetaAdLibraryContext } from "@/lib/tracker-meta-ad-library-context";
 import { TrackerNavLink } from "@/components/tracker/tracker-navigation";
-import {
-  PixelIntegrationsPanel,
-  SocialPresenceStrip,
-  useMetaLibraryConfigured,
-} from "@/components/tracker/pixel-integrations-panel";
-import { MetaLatestAdsCarousel } from "@/components/tracker/meta-latest-ads-carousel";
-import type { AdIntelPlatform } from "@/components/tracker/app-ads";
-import { AppAds } from "@/components/tracker/app-ads";
-import { useMetaAdLibrary } from "@/components/tracker/use-meta-ad-library";
-import { mergeManualMetaPageIds } from "@/lib/tracker-merge-manual-meta";
-import {
-  loadStoredManualMetaPageIds,
-  TrackerManualMetaPagesPanel,
-} from "@/components/tracker/tracker-manual-meta-pages";
+import { SocialPresenceStrip } from "@/components/tracker/pixel-integrations-panel";
 
 export function AdIntelligenceHub({
   appName,
-  developerName,
-  bundleId,
-  countryCode,
-  trackerAppleAppId,
   metaLibraryContext,
-  enabledPlatforms,
 }: {
   appName: string;
-  developerName: string;
-  bundleId: string;
-  countryCode: string;
-  /** ID App Store (chiffres) — clé localStorage pour pages Meta manuelles. */
-  trackerAppleAppId: string;
   metaLibraryContext: TrackerMetaAdLibraryContext;
-  enabledPlatforms: AdIntelPlatform[];
 }) {
-  const metaOk = useMetaLibraryConfigured();
-  const metaCc = (countryCode || "FR").trim() || "FR";
-
-  const [manualPageIds, setManualPageIds] = useState<string[]>([]);
-  useEffect(() => {
-    setManualPageIds(loadStoredManualMetaPageIds(trackerAppleAppId));
-  }, [trackerAppleAppId]);
-
-  const onManualPageIdsChange = useCallback((ids: string[]) => {
-    setManualPageIds(ids);
-  }, []);
-
-  const effectiveContext = useMemo(
-    () => mergeManualMetaPageIds(metaLibraryContext, manualPageIds),
-    [metaLibraryContext, manualPageIds],
-  );
-
-  const hasResolvedMetaPage = effectiveContext.searchPageIds.length > 0;
-  const metaLib = useMetaAdLibrary({
-    searchTerms: effectiveContext.keywordFallback,
-    searchPageIds: effectiveContext.searchPageIds,
-    countryCode: metaCc,
-    pageSize: 12,
-    enabled: hasResolvedMetaPage,
-  });
+  const effectiveContext = useMemo(() => metaLibraryContext, [metaLibraryContext]);
 
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-transparent p-5 sm:p-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/35">Style TrendTrack</p>
-        <h2 className="mt-1 text-lg font-semibold text-white">Intelligence marque & pubs</h2>
+        <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/35">Marketing tracker</p>
+        <h2 className="mt-1 text-lg font-semibold text-white">Liens officiels & organique</h2>
         <p className="mt-1 max-w-2xl text-sm text-white/45">
-          Réseaux officiels (App Store + recherche web IA), puis Ad Library Meta en mode strict : les créas sont chargées
-          uniquement quand une <strong className="font-semibold text-white/70">Page Facebook</strong> officielle est
-          résolue et filtrée avec <code className="rounded bg-white/[0.06] px-1 text-[10px]">search_page_ids</code>.
-          Aucun résultat mot-clé n’est mélangé à la marque.
+          Meta Ads Library est désactivé pour le moment. On garde la partie fiable : site officiel, réseaux validés et
+          base pour tracker les vidéos organiques récentes qui performent.
         </p>
       </div>
 
       <SocialPresenceStrip
         profiles={effectiveContext.socialProfiles}
         appName={appName}
-        enrichedByAi={effectiveContext.openAiEnriched}
+        openAiEnriched={effectiveContext.openAiEnriched}
         officialWebsite={effectiveContext.officialWebsite}
         confidence={effectiveContext.confidence}
         sources={effectiveContext.sources}
+        officialLinks={effectiveContext.officialLinks}
       />
 
-      <PixelIntegrationsPanel metaLibraryConfigured={metaOk} />
-
-      <TrackerManualMetaPagesPanel
-        trackerAppleAppId={trackerAppleAppId}
-        manualPageIds={manualPageIds}
-        onManualPageIdsChange={onManualPageIdsChange}
-        configured={metaOk}
-      />
-
-      <MetaLatestAdsCarousel
-        appName={appName}
-        countryCode={countryCode}
-        metaLibraryContext={effectiveContext}
-        library={metaLib}
-      />
-
-      <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5">
-        <h3 className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/40">Vue détaillée API</h3>
-        <p className="mt-1 text-xs text-white/35">Grille classique, pagination et onglets selon ta configuration.</p>
-        <div className="mt-5">
-          <AppAds
-            appName={appName}
-            developerName={developerName}
-            bundleId={bundleId}
-            countryCode={countryCode}
-            enabledPlatforms={enabledPlatforms}
-            metaLibraryContext={effectiveContext}
-            metaAdLibrary={metaLib}
-          />
+      <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5 sm:p-6">
+        <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/40">Organic video tracker</p>
+        <h3 className="mt-1 text-base font-semibold text-white">Prochaine brique recommandée</h3>
+        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/45">
+          Oui, on peut créer un système qui part des comptes officiels validés, puis récupère les vidéos récentes et les
+          classe par vues, likes, commentaires, partages et vitesse de croissance. Le plus fiable sera TikTok, YouTube
+          Shorts et Instagram Reels quand les APIs/exports disponibles le permettent.
+        </p>
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          {[
+            { title: "TikTok organique", text: "Dernières vidéos du compte officiel, vues, likes, commentaires, partages, lien direct." },
+            { title: "YouTube Shorts", text: "Shorts récents, vues publiques, engagement, date de publication et top hooks." },
+            { title: "Instagram Reels", text: "Lien des reels détectés, validation du compte officiel, scoring manuel/API selon accès." },
+          ].map((item) => (
+            <div key={item.title} className="rounded-xl border border-white/[0.07] bg-black/30 p-4">
+              <p className="text-sm font-semibold text-white/85">{item.title}</p>
+              <p className="mt-1 text-xs leading-relaxed text-white/40">{item.text}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>

@@ -10,7 +10,6 @@ import {
   SvgCloudSmall,
   SvgGoogle,
   SvgMail,
-  SvgMicrosoft,
   SvgApple,
   TaAuthLegalFooter,
   TaAuthSuspended,
@@ -63,7 +62,7 @@ function InscriptionExperienceInner({
   const disabled = busy || email.length < 3 || password.length < 8;
 
   const oauth = useCallback(
-    async (provider: "google" | "apple" | "azure") => {
+    async (provider: "google" | "apple") => {
       if (!sb) return;
       setBusy(true);
       setError(null);
@@ -171,10 +170,6 @@ function InscriptionExperienceInner({
                 <button type="button" className="ta-auth-oauth-row" disabled={busy} onClick={() => oauth("apple")}>
                   <SvgApple />
                   Continuer avec Apple
-                </button>
-                <button type="button" className="ta-auth-oauth-row" disabled={busy} onClick={() => oauth("azure")}>
-                  <SvgMicrosoft />
-                  Continuer avec Microsoft
                 </button>
               </div>
 

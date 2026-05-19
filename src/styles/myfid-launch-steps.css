@@ -1,10 +1,131 @@
 /* Extraite du bundle myfidpass main-Dmf0zYFy.css — bloc .landing-launch-sf */
 .landing-launch-sf{--ls-bg: #030808;--ls-num: #00ff92;--ls-accent-b: #008060;--ls-text: #ffffff;--ls-muted: rgba(255, 255, 255, .68);--ls-rule: rgba(255, 255, 255, .2);margin:0 calc(-50vw + 50%) 0;padding:clamp(3.65rem,8.5vw,6rem) max(1.25rem,calc(50vw - 672px)) clamp(2.5rem,5vw,4rem);width:100vw;max-width:100vw;box-sizing:border-box;border-radius:40px 40px 0 0;background:radial-gradient(120% 95% at 18% 10%,#21222a8c,#21222a00 56%),radial-gradient(95% 80% at 86% 68%,#21222a6b,#21222a00 62%),linear-gradient(128deg,#030808,#0b1014 38%,#171d24 64%,#21222a);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif;font-feature-settings:"cv02","cv03","cv04","salt" 1;-webkit-font-smoothing:antialiased;position:relative;overflow:clip}.landing-launch-sf:after{content:"";position:absolute;left:0;right:0;bottom:0;height:clamp(96px,16vw,170px);pointer-events:none;background:linear-gradient(180deg,#03080800,#000)}.landing-launch-sf-inner{max-width:1344px;margin:0 auto;padding-top:clamp(.4rem,1.5vw,1.1rem)}.landing-launch-sf-heading{margin:0 auto clamp(2.5rem,5vw,3.75rem);padding:0 clamp(1.25rem,4vw,2.5rem);width:100%;max-width:min(100%,38rem);box-sizing:border-box;text-align:center;text-wrap:balance;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif;font-size:clamp(2.35rem,7.8vw,3.55rem);font-weight:560;letter-spacing:-.03em;line-height:1.06;background:linear-gradient(142deg,#fff,#ecfdf5,#86efac,#e0f2fe 72%,#f8fafc);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}@media (min-width: 1024px){.landing-launch-sf-heading{max-width:min(100%,42rem);font-size:clamp(2.55rem,4.5vw,3.75rem)}}.landing-launch-sf-grid{display:grid;grid-template-columns:minmax(0,1.06fr) minmax(0,1fr);gap:clamp(2rem,5vw,4.5rem);align-items:start}@media (min-width: 901px){.landing-launch-sf-visual{display:none}.landing-launch-sf-grid{grid-template-columns:1fr;gap:clamp(1.5rem,3vw,2.5rem)}}.landing-launch-sf-visual{position:relative;margin:0 calc(50% - 50vw) 0 0;width:min(88vw,1040px);min-height:clamp(620px,72vw,980px)}.landing-launch-sf-fig{position:absolute;margin:0;overflow:hidden;border-radius:clamp(14px,2vw,20px);box-shadow:0 24px 48px #00000073,0 0 0 1px #ffffff0d}.landing-launch-sf-img{display:block;width:100%;height:100%;object-fit:cover}.landing-launch-sf-fig--primary{top:0;right:0;left:auto;width:clamp(500px,88%,980px);aspect-ratio:3 / 4.05;z-index:1;overflow:visible;border-radius:0;box-shadow:none}.landing-launch-sf-fig--overlap{right:min(12%,0);bottom:0;width:clamp(196px,52%,270px);aspect-ratio:3 / 3.92;z-index:2}.landing-launch-sf-fig--overlap .landing-launch-sf-img{object-position:50% 36%}.landing-launch-sf-fig--primary .landing-launch-sf-img{object-fit:contain;object-position:100% 50%}.landing-launch-sf-steps-wrap{min-width:0}.landing-launch-sf-list{margin:0;padding:0;list-style:none}.landing-launch-sf-row{display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(.95rem,2.2vw,1.4rem);align-items:baseline;padding:clamp(1.15rem,2.2vw,1.55rem) 0 clamp(1.05rem,2vw,1.35rem);border-bottom:1px solid var(--ls-rule)}.landing-launch-sf-row:first-child{padding-top:0}.landing-launch-sf-num{font-variant-numeric:tabular-nums;font-size:clamp(.95rem,1.85vw,1.0625rem);font-weight:700;letter-spacing:.06em;color:var(--ls-num);text-shadow:0 0 20px rgba(0,255,146,.25),0 1px 0 rgba(0,0,0,.45)}.landing-launch-sf-num--soft{color:var(--ls-accent-b);text-shadow:none}.landing-launch-sf-step-title{margin:0;font-size:clamp(1.68rem,3.6vw,2.85rem);font-weight:500;letter-spacing:-.036em;line-height:1.04;color:var(--ls-text);transition:color .24s ease,text-shadow .24s ease,transform .24s cubic-bezier(.22,1,.36,1),opacity .24s ease}.landing-launch-sf-row--dim .landing-launch-sf-step-title{opacity:.78}@media (hover: hover) and (pointer: fine){.landing-launch-sf-row:hover .landing-launch-sf-step-title{opacity:1;color:#f6fbff;text-shadow:0 0 24px rgba(79,143,255,.2),0 0 14px rgba(0,255,146,.14);transform:translate(3px)}.landing-launch-sf-row:hover .landing-launch-sf-num{color:#23ffd0;text-shadow:0 0 22px rgba(0,255,146,.34),0 1px 0 rgba(0,0,0,.45)}}.landing-launch-sf-cta{display:inline-flex;align-items:center;justify-content:center;margin-top:clamp(1.85rem,4vw,2.85rem);padding:.75rem clamp(2.2rem,4vw,2.95rem);min-height:48px;border-radius:999px;border:none;background:#fff;color:#0a0d0f;font:inherit;font-size:.9625rem;font-weight:600;letter-spacing:-.02em;cursor:pointer;text-decoration:none;white-space:nowrap;transition:transform .2s cubic-bezier(.22,1,.36,1),filter .2s ease}.landing-launch-sf-cta:hover{filter:brightness(1.02)}.landing-launch-sf-cta:active{transform:scale(.985)}.landing-launch-sf-video-tease{position:absolute;right:max(.85rem,calc(50vw - 672px - 1rem));bottom:max(1.25rem,3vw);width:clamp(232px,28vw,302px);padding:0;margin:0;border:none;background:transparent;cursor:pointer;text-align:left;color:inherit;text-decoration:none}.landing-launch-sf-video-inner{display:flex;align-items:center;gap:.65rem;padding:.5rem .72rem .5rem .5rem;border-radius:12px;background:#0a0c109e;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 8px 26px #0006,0 1px #ffffff14;outline:none}.landing-launch-sf-video-inner:focus-visible{outline:2px solid #fff;outline-offset:3px}.landing-launch-sf-video-thumb-wrap{position:relative;flex-shrink:0}.landing-launch-sf-video-thumb{display:block;width:72px;height:48px;border-radius:8px;overflow:hidden;object-fit:cover}.landing-launch-sf-video-play{position:absolute;left:50%;top:50%;width:32px;height:32px;margin:-16px 0 0 -16px;border-radius:50%;border:none;background:#fffffff2;box-shadow:0 2px 8px #0006,inset 0 1px #fff;pointer-events:none}.landing-launch-sf-video-play:after{content:"";position:absolute;left:50%;top:50%;transform:translate(-40%,-50%);border-style:solid;border-width:6px 0 6px 9px;border-color:transparent transparent transparent #000}.landing-launch-sf-video-cap{font-size:.75rem;font-weight:600;line-height:1.32;letter-spacing:-.01em;color:#fffffff5}@media (max-width: 900px){.landing-launch-sf{padding-top:clamp(1.75rem,4.5vw,2.5rem);padding-bottom:clamp(.7rem,2.4vw,1.2rem)}.landing-launch-sf-heading{margin-bottom:clamp(1.25rem,3.5vw,2rem)}.landing-launch-sf-grid{grid-template-columns:1fr;gap:clamp(.3rem,1.4vw,.6rem)}.landing-launch-sf-visual{width:min(268px,78vw);max-width:78vw;min-height:clamp(220px,56vw,340px);margin-left:auto;margin-right:calc(-1*max(1.25rem,calc(50vw - 672px)))}.landing-launch-sf-fig--primary{width:100%;max-width:none;left:auto;right:0;transform:none}.landing-launch-sf-fig--overlap{display:none}.landing-launch-sf-video-tease{position:static;width:100%;margin-top:.2rem}.landing-launch-sf-cta{display:flex;width:min(100%,440px);margin-inline:auto;padding:.95rem 1.35rem;min-height:56px;font-size:1.08rem;font-weight:620}}@media (max-width: 640px){.landing-launch-sf-cta{width:100%}}@media (prefers-reduced-motion: reduce){.landing-launch-sf-cta{transition:none}.landing-launch-sf-cta:active{transform:none}}
 
-/* Notifications sous le titre (« Lancez-vous rapidement ») — sans visuel iPhone */
-.landing-launch-sf-inner .landing-launch-sf-heading{margin-bottom:clamp(.65rem,2vw,1.15rem)}
-.landing-launch-sf-notifs{margin:0 auto clamp(1.35rem,3.5vw,2.35rem);width:100%;max-width:min(22rem,100%);padding:0 clamp(1rem,3.5vw,2rem);box-sizing:border-box}
-.landing-launch-sf-notifs .tracker-sale-notifs{width:100%;max-width:21.5rem;margin-left:auto;margin-right:auto}
 .landing-launch-sf-grid.landing-launch-sf-grid--solo{grid-template-columns:1fr!important;gap:clamp(1.25rem,3.2vw,2rem)!important}
 .landing-launch-sf-grid--solo .landing-launch-sf-steps-wrap{max-width:min(100%,42rem);margin-inline:auto;width:100%}
-@media (max-width:900px){.landing-launch-sf-inner .landing-launch-sf-heading{margin-bottom:clamp(.5rem,1.8vw,.9rem)}.landing-launch-sf-notifs{margin-bottom:clamp(1rem,2.8vw,1.65rem)}}
+
+/* FAQ — section « Lancez-vous rapidement » */
+.launch-sf-faq {
+  width: 100%;
+}
+
+.launch-sf-faq-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 clamp(1.15rem, 2.8vw, 1.65rem);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(134, 239, 172, 0.88);
+}
+
+.launch-sf-faq-kicker-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--ls-num);
+  box-shadow: 0 0 12px rgba(0, 255, 146, 0.45);
+}
+
+.launch-sf-faq-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 48%),
+    rgba(8, 12, 16, 0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 18px 48px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.launch-sf-faq-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.launch-sf-faq-item:last-child {
+  border-bottom: none;
+}
+
+.launch-sf-faq-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: clamp(1rem, 2.4vw, 1.2rem) clamp(1.05rem, 2.8vw, 1.35rem);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: var(--ls-text);
+  transition: background 0.22s ease;
+}
+
+.launch-sf-faq-trigger:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.launch-sf-faq-trigger:focus-visible {
+  outline: 2px solid rgba(134, 239, 172, 0.65);
+  outline-offset: -2px;
+}
+
+.launch-sf-faq-item[data-open="true"] .launch-sf-faq-trigger {
+  background: rgba(0, 255, 146, 0.04);
+}
+
+.launch-sf-faq-question {
+  font-size: clamp(0.9375rem, 2vw, 1.0625rem);
+  font-weight: 560;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+}
+
+.launch-sf-faq-chevron {
+  flex-shrink: 0;
+  width: 1.125rem;
+  height: 1.125rem;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.launch-sf-faq-item[data-open="true"] .launch-sf-faq-chevron {
+  color: var(--ls-num);
+}
+
+.launch-sf-faq-panel {
+  overflow: hidden;
+}
+
+.launch-sf-faq-panel-inner {
+  padding: 0 clamp(1.05rem, 2.8vw, 1.35rem) clamp(1.05rem, 2.4vw, 1.25rem);
+}
+
+.launch-sf-faq-panel-inner p {
+  margin: 0;
+  max-width: 38rem;
+  font-size: clamp(0.8125rem, 1.8vw, 0.9375rem);
+  font-weight: 450;
+  line-height: 1.58;
+  color: var(--ls-muted);
+}
+
+@media (max-width: 900px) {
+  .launch-sf-faq-kicker {
+    margin-bottom: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .launch-sf-faq-trigger {
+    transition: none;
+  }
+}

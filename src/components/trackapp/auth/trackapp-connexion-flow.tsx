@@ -9,7 +9,6 @@ import {
   PromoPanel,
   SvgApple,
   SvgGoogle,
-  SvgMicrosoft,
   SvgCloudSmall,
   TaAuthLegalFooter,
   TaAuthSuspended,
@@ -49,7 +48,7 @@ function ConnexionExperienceInner({
   }, [nextHrefSafe]);
 
   const oauth = useCallback(
-    async (provider: "google" | "apple" | "azure") => {
+    async (provider: "google" | "apple") => {
       if (!sb) return;
       setBusy(true);
       setError(null);
@@ -143,10 +142,6 @@ function ConnexionExperienceInner({
             <button type="button" className="ta-auth-oauth-row" disabled={busy} onClick={() => oauth("apple")}>
               <SvgApple />
               Continuer avec Apple
-            </button>
-            <button type="button" className="ta-auth-oauth-row" disabled={busy} onClick={() => oauth("azure")}>
-              <SvgMicrosoft />
-              Continuer avec Microsoft
             </button>
           </div>
 

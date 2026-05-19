@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import { TrackappLogoMark } from "@/components/trackapp/trackapp-logo-mark";
 import type { ComponentType } from "react";
 import { useCallback, useLayoutEffect } from "react";
+import Link from "next/link";
 
 import { TrackappSidebarFavoritesGroup } from "@/components/trackapp/trackapp-sidebar-favorites-group";
 import { TrackappSidebarFooter } from "@/components/trackapp/trackapp-sidebar-footer";
@@ -129,9 +130,7 @@ export function TrackappFidelitySidebar({
 
       <div className="app-sidebar-brand">
         <Link href="/trackapp/accueil" className="app-sidebar-logo" aria-label="Trackapp — Accueil" onClick={() => onNavigate?.()}>
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/10 text-[11px] font-extrabold text-white">
-            TA
-          </span>
+          <TrackappLogoMark size="sm" className="app-sidebar-logo-img app-sidebar-logo-img--brand" decorative />
           <span className="app-sidebar-logo-text">Trackapp</span>
         </Link>
       </div>
