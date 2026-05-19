@@ -7,6 +7,7 @@ import { TrackappPlanBillingSwitcher } from "@/components/trackapp/trackapp-plan
 import { TrackappPaiementOrderForm } from "@/components/trackapp/trackapp-paiement-order-form";
 import { TrackerHeroSocialProofBadge } from "@/components/tracker/tracker-hero-social-proof-badge";
 import { getTrackappPaiementPlan, setTrackappPaiementPlan } from "@/lib/trackapp-paiement-plan-storage";
+import { trackappPricingSummary } from "@/lib/trackapp/pricing";
 
 function CheckoutBackIcon() {
   return (
@@ -23,26 +24,24 @@ export function TrackappPaymentPage({
 }: Readonly<{
   embedded?: boolean;
   onRequestClose?: () => void;
-  /** false sur la page landing : le hero marketing est au-dessus */
   showHeroBlock?: boolean;
-}> = {}) {
+}>) {
   const switcherRef = useRef<HTMLFieldSetElement | null>(null);
-  /** true = abonnement annuel (99 € / an) */
-  const [yearly, setYearly] = useState(true);
+  const [lifetime, setLifetime] = useState(true);
 
-  const syncYearlyFromStore = useCallback(() => {
-    setYearly(getTrackappPaiementPlan() === "yearly");
+  const syncFromStore = useCallback(() => {
+    setLifetime(getTrackappPaiementPlan() === "lifetime");
   }, []);
 
   useEffect(() => {
-    syncYearlyFromStore();
-    window.addEventListener("trackapp-paiement-plan", syncYearlyFromStore);
-    return () => window.removeEventListener("trackapp-paiement-plan", syncYearlyFromStore);
-  }, [syncYearlyFromStore]);
+    syncFromStore();
+    window.addEventListener("trackapp-paiement-plan", syncFromStore);
+    return () => window.removeEventListener("trackapp-paiement-plan", syncFromStore);
+  }, [syncFromStore]);
 
-  const setYearlyAndStore = (y: boolean) => {
-    setYearly(y);
-    setTrackappPaiementPlan(y ? "yearly" : "monthly");
+  const setLifetimeAndStore = (value: boolean) => {
+    setLifetime(value);
+    setTrackappPaiementPlan(value ? "lifetime" : "monthly");
   };
   const [country, setCountry] = useState("FR");
 
@@ -67,8 +66,7 @@ export function TrackappPaymentPage({
             <>
               <h1 id={embedded ? "trackapp-payment-dialog-title" : undefined}>CHOISISSEZ VOTRE ACCÈS</h1>
               <p className="saas-pay-checkout-trust-lead">
-                <strong>39&nbsp;€</strong> / mois ou <strong>99&nbsp;€</strong> / an — même produit, tu choisis ta
-                cadence.
+                <strong>{trackappPricingSummary()}</strong> — même produit, tu choisis ta formule.
               </p>
               <div className="tpl-pick__badge-wrap">
                 <TrackerHeroSocialProofBadge />
@@ -80,7 +78,7 @@ export function TrackappPaymentPage({
                 Finaliser sur Stripe
               </h1>
               <p className="tpl-paiement-form-intro__lead">
-                Choisis ton offre ci-dessous — paiement sécurisé via Stripe (mensuel ou annuel).
+                Choisis ton offre ci-dessous — paiement sécurisé via Stripe (mensuel ou à vie).
               </p>
             </div>
           )}
@@ -90,14 +88,18 @@ export function TrackappPaymentPage({
           <div className="saas-pay-billing-liquid">
             <TrackappPlanBillingSwitcher
               switcherRef={switcherRef}
-              yearly={yearly}
-              onYearlyChange={setYearlyAndStore}
+              lifetime={lifetime}
+              onLifetimeChange={setLifetimeAndStore}
               radioName="trackappPlanCheckout"
             />
           </div>
         </div>
 
-        <TrackappPaiementOrderForm plan={yearly ? "yearly" : "monthly"} country={country} onCountryChange={setCountry} />
+        <TrackappPaiementOrderForm
+          plan={lifetime ? "lifetime" : "monthly"}
+          country={country}
+          onCountryChange={setCountry}
+        />
       </main>
     </div>
   );

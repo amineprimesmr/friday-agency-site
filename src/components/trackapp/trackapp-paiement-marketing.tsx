@@ -12,7 +12,10 @@ import {
 } from "@/components/trackapp/trackapp-paiement-testimonials-marquee";
 import { TrackerHeroSocialProofBadge } from "@/components/tracker/tracker-hero-social-proof-badge";
 
-/** Page longue mobile (et desktop) : sections commerciales avant le bloc paiement Stripe. */
+import "@/styles/trackapp-paiement-landing.css";
+import "@/styles/trackapp-payment-modal.css";
+
+/** Page paiement pleine : hero, plans, avis membres et pied de page (mobile + desktop). */
 export function TrackappPaiementMarketing() {
   const [checkoutRevealed, setCheckoutRevealed] = useState(false);
 
@@ -20,7 +23,6 @@ export function TrackappPaiementMarketing() {
     <div className="tpl-paiement-marketing">
       <TrackappPaiementMarketingHero />
 
-      {/* Bloc principal chevauché */}
       <div className="tpl-shell">
         <section className="tpl-pick" aria-labelledby="tpl-pick-title">
           <h2 className="tpl-pick__title" id="tpl-pick-title">
@@ -32,7 +34,20 @@ export function TrackappPaiementMarketing() {
             <TrackerHeroSocialProofBadge />
           </div>
 
-          <div className={`tpl-pick__spotlight-stack${checkoutRevealed ? " tpl-pick__spotlight-stack--checkout-open" : ""}`}>
+          {/* Desktop : 2 cartes côte à côte, clic Rejoindre → Stripe */}
+          <div className="tpl-pick__spotlight-stack tpl-pick__spotlight-stack--desktop-only">
+            <TrackappPaiementPlanSpotlightCards mode="modal" />
+          </div>
+
+          {/* Mobile / tablette : carousel + switcher mensuel / à vie */}
+          <div
+            className={[
+              "tpl-pick__spotlight-stack tpl-pick__spotlight-stack--mobile-only",
+              checkoutRevealed ? "tpl-pick__spotlight-stack--checkout-open" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          >
             {!checkoutRevealed ? <TrackappPaiementMarketingPlanSwitcher /> : null}
             <TrackappPaiementPlanSpotlightCards
               checkoutReveal

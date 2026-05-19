@@ -2,14 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { getTrackappPaiementPlan, setTrackappPaiementPlan } from "@/lib/trackapp-paiement-plan-storage";
 import { TrackappPlanBillingSwitcher } from "@/components/trackapp/trackapp-plan-billing-switcher";
+import { getTrackappPaiementPlan, setTrackappPaiementPlan } from "@/lib/trackapp-paiement-plan-storage";
 
 export function TrackappPaiementMarketingPlanSwitcher() {
-  const [yearly, setYearly] = useState(true);
+  const [lifetime, setLifetime] = useState(true);
 
   const syncFromStore = useCallback(() => {
-    setYearly(getTrackappPaiementPlan() === "yearly");
+    setLifetime(getTrackappPaiementPlan() === "lifetime");
   }, []);
 
   useEffect(() => {
@@ -18,8 +18,8 @@ export function TrackappPaiementMarketingPlanSwitcher() {
     return () => window.removeEventListener("trackapp-paiement-plan", syncFromStore);
   }, [syncFromStore]);
 
-  const handleYearlyChange = (y: boolean) => {
-    setTrackappPaiementPlan(y ? "yearly" : "monthly");
+  const handleLifetimeChange = (value: boolean) => {
+    setTrackappPaiementPlan(value ? "lifetime" : "monthly");
   };
 
   return (
@@ -27,8 +27,8 @@ export function TrackappPaiementMarketingPlanSwitcher() {
       <div className="saas-pay-billing saas-pay-billing--checkout tpl-shell-plan-switcher__billing">
         <div className="saas-pay-billing-liquid">
           <TrackappPlanBillingSwitcher
-            yearly={yearly}
-            onYearlyChange={handleYearlyChange}
+            lifetime={lifetime}
+            onLifetimeChange={handleLifetimeChange}
             radioName="trackappPlanMarketing"
           />
         </div>

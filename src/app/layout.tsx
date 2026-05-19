@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+
+import { TRACKAPP_ICON_SRC } from "@/lib/trackapp-brand";
+
 import "./globals.css";
 
 /** Évite crash au boot si NEXT_PUBLIC_APP_URL est vide ou invalide (new URL(...) throw → 500 opaque). */
@@ -30,8 +33,9 @@ export const metadata: Metadata = {
     locale: "fr_FR",
   },
   icons: {
-    icon: [{ url: "/assets/trackappicon.png", type: "image/png" }],
-    apple: [{ url: "/assets/trackappicon.png", type: "image/png" }],
+    icon: [{ url: TRACKAPP_ICON_SRC, type: "image/png" }],
+    apple: [{ url: TRACKAPP_ICON_SRC, type: "image/png" }],
+    shortcut: [{ url: TRACKAPP_ICON_SRC, type: "image/png" }],
   },
 };
 

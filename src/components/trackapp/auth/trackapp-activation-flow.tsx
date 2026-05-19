@@ -15,19 +15,20 @@ import {
   TrackappLimeLogo,
 } from "@/components/trackapp/auth/trackapp-auth-shared";
 import { createClient } from "@/lib/supabase/client";
+import { trackappPlanDisplayLabel, type TrackappBillingPlan } from "@/lib/trackapp/pricing";
 
 type CheckoutInfo = {
   paid: boolean;
   email: string | null;
   email_masked: string | null;
-  plan: "monthly" | "yearly";
+  plan: TrackappBillingPlan;
   already_linked: boolean;
 };
 
 type Step = "loading" | "celebrate" | "account" | "linking" | "done" | "error";
 
-function planLabel(plan: "monthly" | "yearly"): string {
-  return plan === "yearly" ? "Abonnement annuel" : "Abonnement mensuel";
+function planLabel(plan: TrackappBillingPlan): string {
+  return trackappPlanDisplayLabel(plan);
 }
 
 function ActivationExperienceInner() {

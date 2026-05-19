@@ -192,6 +192,117 @@
   }
 }
 
+@media (min-width: 1024px) {
+  .tpl-paiement-marketing .tpl-shell {
+    max-width: min(88rem, calc(100vw - 2rem));
+    padding-left: clamp(1.25rem, 3vw, 2rem);
+    padding-right: clamp(1.25rem, 3vw, 2rem);
+  }
+}
+
+.tpl-pick__spotlight-stack--desktop-only {
+  display: none;
+}
+
+.tpl-pick__spotlight-stack--mobile-only {
+  display: block;
+}
+
+@media (min-width: 1024px) {
+  .tpl-pick__spotlight-stack--desktop-only {
+    display: block;
+  }
+
+  .tpl-pick__spotlight-stack--mobile-only {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .tpl-pick .tpl-spotlight-carousel--modal-grid {
+    margin-top: 0.65rem;
+    width: 100%;
+  }
+
+  .tpl-pick .tpl-spotlight-carousel--modal-grid .tpl-spotlight-carousel__viewport {
+    overflow: visible;
+  }
+
+  .tpl-pick .tpl-spotlight-carousel--modal-grid .tpl-spotlight-carousel__track {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(1rem, 2.5vw, 1.65rem);
+    width: 100%;
+    max-width: 100%;
+    transform: none !important;
+    align-items: stretch;
+  }
+
+  .tpl-pick .tpl-spotlight-carousel--modal-grid .tpl-spotlight-carousel__slide {
+    flex: none;
+    width: auto;
+    min-width: 0;
+    display: flex;
+  }
+
+  .tpl-pick .tpl-spotlight-carousel--modal-grid .tpl-spotlight {
+    margin-top: 0;
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tpl-pick .tpl-spotlight-carousel--modal-grid .tpl-spotlight__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(0.95rem, 2vw, 1.15rem) clamp(0.85rem, 1.8vw, 1rem) clamp(1rem, 2vw, 1.15rem);
+  }
+
+  .tpl-pick .tpl-spotlight-carousel--modal-grid .tpl-spotlight__checkout-intro {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tpl-pick .tpl-spotlight-carousel--modal-grid .tpl-credit-box {
+    flex: 1;
+    margin-top: 0.7rem;
+    padding: 0.75rem 0.8rem;
+  }
+
+  .tpl-pick .tpl-spotlight-carousel--modal-grid .tpl-spotlight__name {
+    font-size: clamp(1.05rem, 2vw, 1.35rem);
+  }
+
+  .tpl-pick .tpl-spotlight-carousel--modal-grid .tpl-spotlight__desc {
+    font-size: clamp(0.72rem, 1.4vw, 0.8rem);
+    line-height: 1.45;
+    margin-top: 0.35rem;
+  }
+
+  .tpl-pick .tpl-spotlight-carousel--modal-grid .tpl-credit-box__price-value {
+    font-size: clamp(1.4rem, 2.8vw, 1.65rem);
+  }
+
+  .tpl-pick .tpl-spotlight-carousel--modal-grid .tpl-credit-box__list {
+    font-size: clamp(0.62rem, 1.1vw, 0.68rem);
+    gap: 0.38rem;
+  }
+
+  .tpl-pick .tpl-spotlight-carousel--modal-grid .tpl-spotlight__join {
+    min-height: 2.85rem;
+    margin-top: auto;
+    padding-top: 0.85rem;
+    font-size: 0.92rem;
+  }
+
+  .tpl-pick .tpl-spotlight-carousel--modal-grid .tpl-spotlight__chip-reduction-inner {
+    font-size: 0.62rem;
+  }
+}
+
 .tpl-pick__kicker {
   margin: 0;
   text-align: center;

@@ -1,5 +1,7 @@
 import type Stripe from "stripe";
 
+import { trackappPlanFromStripeMetadata, type TrackappBillingPlan } from "@/lib/trackapp/pricing";
+
 export function resolveTrackappOrigin(): string {
   const originRaw = process.env.NEXT_PUBLIC_APP_URL?.trim();
   if (!originRaw) return "http://127.0.0.1:3000";
@@ -28,9 +30,8 @@ export function checkoutSessionCustomerEmail(sess: Stripe.Checkout.Session): str
   return email.length > 3 && email.includes("@") ? email : null;
 }
 
-export function checkoutSessionPlanLabel(sess: Stripe.Checkout.Session): "monthly" | "yearly" {
-  const meta = sess.metadata?.trackapp_plan ?? "";
-  return meta === "subscription_monthly" ? "monthly" : "yearly";
+export function checkoutSessionPlanLabel(sess: Stripe.Checkout.Session): TrackappBillingPlan {
+  return trackappPlanFromStripeMetadata(sess.metadata?.trackapp_plan ?? "");
 }
 
 export function maskEmail(email: string): string {

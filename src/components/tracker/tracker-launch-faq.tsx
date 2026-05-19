@@ -18,11 +18,11 @@ const FAQ_ITEMS = [
   },
   {
     q: "Combien coûte l’accès ?",
-    a: "L’abonnement Trackapp est à 39 € / mois ou 99 € / an — même produit, vous choisissez la facturation. L’affiliation peut rembourser une partie de votre abonnement dès votre premier filleul actif.",
+    a: "Trackapp est à 29 € / mois ou 59 € à vie (paiement unique). L’affiliation peut rembourser une partie de ton abonnement dès ton premier filleul actif.",
   },
   {
     q: "Puis-je annuler quand je veux ?",
-    a: "Oui. Vous gérez votre abonnement depuis votre espace ; l’accès reste actif jusqu’à la fin de la période en cours, sans engagement long terme.",
+    a: "Pour l’offre mensuelle, oui : tu gères ton abonnement depuis ton espace et tu résilies en un clic. L’accès à vie ne nécessite aucun renouvellement.",
   },
 ] as const;
 

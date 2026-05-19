@@ -68,7 +68,7 @@ export function TrackappPaymentOverlay({
             transition={reduce ? { duration: 0.12 } : { type: "spring", damping: 28, stiffness: 340 }}
           >
             <motion.div
-              className="pointer-events-auto w-[min(68rem,calc(100vw-1.25rem))] max-w-full lg:w-[min(72rem,calc(100vw-2rem))]"
+              className="pointer-events-auto w-[min(88rem,calc(100vw-2rem))] max-w-full"
               onClick={(e) => e.stopPropagation()}
             >
               <TrackappPaymentFlow onClose={onClose} />

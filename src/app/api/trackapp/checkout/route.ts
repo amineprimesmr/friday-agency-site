@@ -5,41 +5,48 @@ import type Stripe from "stripe";
 import { AFFILIATE_REF_COOKIE } from "@/lib/trackapp/affiliate/config";
 import { resolveReferrerByCode } from "@/lib/trackapp/affiliate/referral";
 import { resolveTrackappOrigin } from "@/lib/trackapp/checkout-session";
+import { trackappPlanStripeMetadata, TRACKAPP_PRICING, type TrackappBillingPlan } from "@/lib/trackapp/pricing";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe";
+
+function parseBillingPlan(body: { plan?: unknown } | null): TrackappBillingPlan {
+  if (body?.plan === "monthly") return "monthly";
+  if (body?.plan === "lifetime" || body?.plan === "yearly") return "lifetime";
+  return "lifetime";
+}
 
 export async function POST(req: Request) {
   const stripe = getStripe();
 
-  type BillingPlan = "monthly" | "yearly";
-  let plan: BillingPlan = "yearly";
+  let plan: TrackappBillingPlan = "lifetime";
   try {
     const ct = req.headers.get("content-type") ?? "";
     if (ct.includes("application/json")) {
       const body = (await req.json()) as { plan?: unknown };
-      if (body?.plan === "monthly" || body?.plan === "yearly") {
-        plan = body.plan;
-      }
+      plan = parseBillingPlan(body);
     }
   } catch {
-    plan = "yearly";
+    plan = "lifetime";
   }
 
   const priceMonthly =
     process.env.STRIPE_PRICE_ID_TRACKAPP?.trim()
     ?? process.env.STRIPE_PRICE_ID_MONTHLY?.trim()
     ?? "";
-  const priceYearly = process.env.STRIPE_PRICE_ID_YEARLY?.trim() ?? "";
-  const price = plan === "yearly" ? priceYearly : priceMonthly;
+  const priceLifetime =
+    process.env.STRIPE_PRICE_ID_LIFETIME?.trim()
+    ?? process.env.STRIPE_PRICE_ID_YEARLY?.trim()
+    ?? "";
+  const price = plan === "lifetime" ? priceLifetime : priceMonthly;
 
   if (!stripe) {
     return NextResponse.json({ error: "Stripe non configuré (STRIPE_SECRET_KEY)." }, { status: 503 });
   }
   if (!price) {
     const msg =
-      plan === "yearly" ?
-        "Définir STRIPE_PRICE_ID_YEARLY dans .env (abonnement annuel 99 € / an)."
-      : "Définir STRIPE_PRICE_ID_TRACKAPP ou STRIPE_PRICE_ID_MONTHLY dans .env.local (abonnement 39 € / mois).";
+      plan === "lifetime" ?
+        `Définir STRIPE_PRICE_ID_LIFETIME dans .env (accès à vie ${TRACKAPP_PRICING.lifetime.display}).`
+      : `Définir STRIPE_PRICE_ID_TRACKAPP ou STRIPE_PRICE_ID_MONTHLY dans .env.local (abonnement ${TRACKAPP_PRICING.monthly.display}${TRACKAPP_PRICING.monthly.period}).`;
     return NextResponse.json({ error: msg }, { status: 400 });
   }
 
@@ -48,7 +55,7 @@ export async function POST(req: Request) {
 
   const metadata: Record<string, string> = {
     product: "trackapp_full_access",
-    trackapp_plan: plan === "yearly" ? "subscription_yearly" : "subscription_monthly",
+    trackapp_plan: trackappPlanStripeMetadata(plan),
   };
 
   const refCode = cookieStore.get(AFFILIATE_REF_COOKIE)?.value?.trim();
@@ -63,9 +70,10 @@ export async function POST(req: Request) {
 
   try {
     const referralFriendCoupon = process.env.STRIPE_COUPON_ID_REFERRAL_FRIEND?.trim();
+    const isLifetime = plan === "lifetime";
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
-      mode: "subscription",
+      mode: isLifetime ? "payment" : "subscription",
       customer_creation: "always",
       line_items: [{ price, quantity: 1 }],
       success_url: `${origin}/trackapp/activation?session_id={CHECKOUT_SESSION_ID}`,

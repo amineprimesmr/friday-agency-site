@@ -3,14 +3,16 @@
 import type { RefObject } from "react";
 import { useId } from "react";
 
+import { TRACKAPP_PRICING } from "@/lib/trackapp/pricing";
+
 export function TrackappPlanBillingSwitcher({
-  yearly,
-  onYearlyChange,
+  lifetime,
+  onLifetimeChange,
   radioName,
   switcherRef,
 }: Readonly<{
-  yearly: boolean;
-  onYearlyChange: (yearly: boolean) => void;
+  lifetime: boolean;
+  onLifetimeChange: (lifetime: boolean) => void;
   radioName: string;
   switcherRef?: RefObject<HTMLFieldSetElement | null>;
 }>) {
@@ -23,37 +25,37 @@ export function TrackappPlanBillingSwitcher({
         ref={switcherRef}
         className="switcher"
         role="radiogroup"
-        aria-label="Mensuel ou annuel"
-        {...{ "c-previous": yearly ? "1" : "2" }}
+        aria-label="Mensuel ou à vie"
+        {...{ "c-previous": lifetime ? "1" : "2" }}
       >
-        <legend className="switcher__legend">Mensuel ou annuel</legend>
+        <legend className="switcher__legend">Mensuel ou à vie</legend>
         <label className="switcher__option" title="Abonnement mensuel">
           <input
             className="switcher__input"
             type="radio"
             name={radioName}
             value="monthly"
-            checked={!yearly}
-            onChange={() => onYearlyChange(false)}
-            aria-label="Mensuel — 39 euros par mois, résiliation possible"
+            checked={!lifetime}
+            onChange={() => onLifetimeChange(false)}
+            aria-label={`Mensuel — ${TRACKAPP_PRICING.monthly.display} par mois, résiliation possible`}
             {...{ "c-option": "1" }}
           />
           <span className="switcher__text">Mensuel</span>
         </label>
-        <label className="switcher__option switcher__option--yearly" title="Abonnement annuel">
+        <label className="switcher__option switcher__option--yearly" title="Accès à vie">
           <input
             className="switcher__input"
             type="radio"
             name={radioName}
-            value="yearly"
-            checked={yearly}
-            onChange={() => onYearlyChange(true)}
-            aria-label="Annuel — 99 euros par an, abonnement annuel"
+            value="lifetime"
+            checked={lifetime}
+            onChange={() => onLifetimeChange(true)}
+            aria-label={`À vie — ${TRACKAPP_PRICING.lifetime.display} en une fois`}
             {...{ "c-option": "2" }}
           />
-          <span className="switcher__text">Annuel</span>
+          <span className="switcher__text">À vie</span>
           <span className="saas-pay-billing-pct-badge" aria-hidden="true">
-            −79&nbsp;%
+            {TRACKAPP_PRICING.lifetime.display}
           </span>
         </label>
         <svg className="switcher__filter" aria-hidden="true">

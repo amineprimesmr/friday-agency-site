@@ -7,19 +7,21 @@ import { TrackappPaiementOrderForm } from "@/components/trackapp/trackapp-paieme
 import { openTrackappStripeCheckout } from "@/lib/trackapp/stripe-payment-links";
 import { TRACKAPP_PAIEMENT_UNLOCK_ITEMS } from "@/lib/trackapp-paiement-unlock-items";
 import { getTrackappPaiementPlan, setTrackappPaiementPlan } from "@/lib/trackapp-paiement-plan-storage";
+import { TRACKAPP_PRICING, type TrackappBillingPlan } from "@/lib/trackapp/pricing";
 
 function UnlockCreditBox({
   priceAmount,
-  priceNote = "sans engagement",
-}: Readonly<{ priceAmount: string; priceNote?: string }>) {
+  pricePeriod,
+  priceNote,
+}: Readonly<{ priceAmount: string; pricePeriod: string; priceNote?: string }>) {
   return (
     <div className="tpl-credit-box">
       <div className="tpl-credit-box__price">
         <p className="tpl-credit-box__price-value">
           {priceAmount}
-          <span className="tpl-credit-box__price-period"> /mois</span>
+          <span className="tpl-credit-box__price-period">{pricePeriod}</span>
         </p>
-        <p className="tpl-credit-box__price-note">{priceNote}</p>
+        {priceNote ? <p className="tpl-credit-box__price-note">{priceNote}</p> : null}
       </div>
       <p className="tpl-credit-box__title">Ce que tu débloques après achat :</p>
       <ul className="tpl-credit-box__list">
@@ -36,8 +38,19 @@ function UnlockCreditBox({
   );
 }
 
+function LifetimeChip() {
+  return (
+    <span className="tpl-spotlight__chip tpl-spotlight__chip--reduction">
+      <span className="tpl-spotlight__chip-reduction-wrap">
+        <span className="tpl-spotlight__chip-reduction-inner">
+          <span className="tpl-spotlight__chip-reduction-pct">{TRACKAPP_PRICING.lifetime.shortLabel}</span>
+        </span>
+      </span>
+    </span>
+  );
+}
+
 function SimpleChevron({ toward }: Readonly<{ toward: "next" | "prev" }>) {
-  /* next = vers la droite (carte suivante), prev = vers la gauche (retour) */
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
       <path
@@ -54,6 +67,7 @@ function SimpleChevron({ toward }: Readonly<{ toward: "next" | "prev" }>) {
 function SpotlightOfferCheckout({
   plan,
   priceAmount,
+  pricePeriod,
   priceNote,
   checkoutReveal,
   checkoutRevealed,
@@ -62,8 +76,9 @@ function SpotlightOfferCheckout({
   country,
   onCountryChange,
 }: Readonly<{
-  plan: "monthly" | "yearly";
+  plan: TrackappBillingPlan;
   priceAmount: string;
+  pricePeriod: string;
   priceNote?: string;
   checkoutReveal: boolean;
   checkoutRevealed: boolean;
@@ -87,7 +102,7 @@ function SpotlightOfferCheckout({
   if (directStripeLink) {
     return (
       <div className="tpl-spotlight__checkout-intro">
-        <UnlockCreditBox priceAmount={priceAmount} priceNote={priceNote} />
+        <UnlockCreditBox priceAmount={priceAmount} pricePeriod={pricePeriod} priceNote={priceNote} />
         <button type="button" className="tpl-spotlight__join" onClick={goStripe} disabled={stripeBusy}>
           {stripeBusy ? "Redirection…" : "Rejoindre"}
         </button>
@@ -98,7 +113,7 @@ function SpotlightOfferCheckout({
   if (checkoutReveal && !checkoutRevealed) {
     return (
       <div className="tpl-spotlight__checkout-intro">
-        <UnlockCreditBox priceAmount={priceAmount} priceNote={priceNote} />
+        <UnlockCreditBox priceAmount={priceAmount} pricePeriod={pricePeriod} priceNote={priceNote} />
         <button type="button" className="tpl-spotlight__join" onClick={onRevealCheckout}>
           Rejoindre
         </button>
@@ -120,7 +135,7 @@ function SpotlightOfferCheckout({
 
   return (
     <>
-      <UnlockCreditBox priceAmount={priceAmount} priceNote={priceNote} />
+      <UnlockCreditBox priceAmount={priceAmount} pricePeriod={pricePeriod} priceNote={priceNote} />
       <TrackappPaiementOrderForm
         plan={plan}
         country={country}
@@ -131,7 +146,7 @@ function SpotlightOfferCheckout({
   );
 }
 
-/** Deux cartes offre (Annuel / Mensuel) + flèches, synchro avec le toggle et le checkout. */
+/** Deux cartes offre (À vie / Mensuel) + flèches, synchro avec le toggle et le checkout. */
 export function TrackappPaiementPlanSpotlightCards({
   className,
   mode = "page",
@@ -140,7 +155,6 @@ export function TrackappPaiementPlanSpotlightCards({
   onCheckoutRevealedChange,
 }: Readonly<{
   className?: string;
-  /** Modale bureau : 2 cartes côte à côte, clic Rejoindre → Payment Link Stripe. */
   mode?: "page" | "modal";
   checkoutReveal?: boolean;
   checkoutRevealed?: boolean;
@@ -171,7 +185,7 @@ function PageSpotlightCarousel({
   checkoutRevealed?: boolean;
   onCheckoutRevealedChange?: (revealed: boolean) => void;
 }>) {
-  /** 0 = annuel, 1 = mensuel */
+  /** 0 = à vie, 1 = mensuel */
   const [index, setIndex] = useState(0);
   const [internalCheckoutRevealed, setInternalCheckoutRevealed] = useState(false);
   const isCheckoutControlled = checkoutRevealedProp !== undefined && onCheckoutRevealedChange !== undefined;
@@ -187,9 +201,9 @@ function PageSpotlightCarousel({
     else setInternalCheckoutRevealed(false);
   }, [isCheckoutControlled, onCheckoutRevealedChange]);
 
-  const goAnnual = useCallback(() => {
+  const goLifetime = useCallback(() => {
     setIndex(0);
-    setTrackappPaiementPlan("yearly");
+    setTrackappPaiementPlan("lifetime");
   }, []);
 
   const goMonthly = useCallback(() => {
@@ -198,7 +212,7 @@ function PageSpotlightCarousel({
   }, []);
 
   const syncFromStore = useCallback(() => {
-    setIndex(getTrackappPaiementPlan() === "yearly" ? 0 : 1);
+    setIndex(getTrackappPaiementPlan() === "lifetime" ? 0 : 1);
   }, []);
 
   useEffect(() => {
@@ -213,10 +227,12 @@ function PageSpotlightCarousel({
 
   const [country, setCountry] = useState("FR");
 
-  /* 0 = carte mensuelle (1re dans le DOM), 1 = carte annuelle (2e) — centrage du peek dans le CSS */
   const carouselIndex = index === 0 ? 1 : 0;
   const showMonthlySlide = !checkoutReveal || !checkoutRevealed || index === 1;
-  const showAnnualSlide = !checkoutReveal || !checkoutRevealed || index === 0;
+  const showLifetimeSlide = !checkoutReveal || !checkoutRevealed || index === 0;
+
+  const monthly = TRACKAPP_PRICING.monthly;
+  const lifetime = TRACKAPP_PRICING.lifetime;
 
   return (
     <div
@@ -247,12 +263,12 @@ function PageSpotlightCarousel({
                   <div className="tpl-spotlight__head">
                     <p className="tpl-spotlight__name">TRACKAPP</p>
                   </div>
-                  <p className="tpl-spotlight__desc">
-                    Sans engagement — tu résilies en un clic quand tu veux.
-                  </p>
+                  <p className="tpl-spotlight__desc">{monthly.cardDesc}</p>
                   <SpotlightOfferCheckout
                     plan="monthly"
-                    priceAmount="39€"
+                    priceAmount={monthly.display}
+                    pricePeriod={monthly.period}
+                    priceNote={monthly.note}
                     checkoutReveal={checkoutReveal}
                     checkoutRevealed={checkoutRevealed && index === 1}
                     onRevealCheckout={revealCheckout}
@@ -264,7 +280,7 @@ function PageSpotlightCarousel({
             </div>
           ) : null}
 
-          {showAnnualSlide ? (
+          {showLifetimeSlide ? (
             <div className="tpl-spotlight-carousel__slide">
               <div className="tpl-spotlight">
                 <span className="tpl-spotlight__glow-ring" aria-hidden />
@@ -272,22 +288,14 @@ function PageSpotlightCarousel({
                 <div className="tpl-spotlight__content">
                   <div className="tpl-spotlight__head">
                     <p className="tpl-spotlight__name">TRACKAPP</p>
-                    <span className="tpl-spotlight__chip tpl-spotlight__chip--reduction">
-                      <span className="tpl-spotlight__chip-reduction-wrap">
-                        <span className="tpl-spotlight__chip-reduction-inner">
-                          <span className="tpl-spotlight__chip-reduction-lead">Réduction de </span>
-                          <span className="tpl-spotlight__chip-reduction-pct">-79%</span>
-                        </span>
-                      </span>
-                    </span>
+                    <LifetimeChip />
                   </div>
-                  <p className="tpl-spotlight__desc">
-                    Le meilleur rapport pour rester à long terme.
-                  </p>
+                  <p className="tpl-spotlight__desc">{lifetime.cardDesc}</p>
                   <SpotlightOfferCheckout
-                    plan="yearly"
-                    priceAmount="8,25€"
-                    priceNote="sans engagement - facturé annuellement"
+                    plan="lifetime"
+                    priceAmount={lifetime.display}
+                    pricePeriod={lifetime.period}
+                    priceNote={lifetime.note}
                     checkoutReveal={checkoutReveal}
                     checkoutRevealed={checkoutRevealed && index === 0}
                     onRevealCheckout={revealCheckout}
@@ -316,8 +324,8 @@ function PageSpotlightCarousel({
         <button
           type="button"
           className="tpl-spotlight-carousel__arrow tpl-spotlight-carousel__arrow--right"
-          onClick={goAnnual}
-          aria-label={"Voir l'offre annuelle"}
+          onClick={goLifetime}
+          aria-label={"Voir l'offre à vie"}
         >
           <SimpleChevron toward="next" />
         </button>
@@ -327,6 +335,9 @@ function PageSpotlightCarousel({
 }
 
 function ModalSpotlightGrid({ className }: Readonly<{ className?: string }>) {
+  const monthly = TRACKAPP_PRICING.monthly;
+  const lifetime = TRACKAPP_PRICING.lifetime;
+
   return (
     <div
       className={[
@@ -343,26 +354,19 @@ function ModalSpotlightGrid({ className }: Readonly<{ className?: string }>) {
       <div className="tpl-spotlight-carousel__viewport">
         <div className="tpl-spotlight-carousel__track">
           <div className="tpl-spotlight-carousel__slide">
-            <div className="tpl-spotlight">
+            <div className="tpl-spotlight tpl-spotlight--monthly">
               <span className="tpl-spotlight__glow-ring" aria-hidden />
               <span className="tpl-spotlight__vignette" aria-hidden />
               <div className="tpl-spotlight__content">
                 <div className="tpl-spotlight__head">
                   <p className="tpl-spotlight__name">TRACKAPP</p>
-                  <span className="tpl-spotlight__chip tpl-spotlight__chip--reduction">
-                    <span className="tpl-spotlight__chip-reduction-wrap">
-                      <span className="tpl-spotlight__chip-reduction-inner">
-                        <span className="tpl-spotlight__chip-reduction-lead">Réduction de </span>
-                        <span className="tpl-spotlight__chip-reduction-pct">-79%</span>
-                      </span>
-                    </span>
-                  </span>
                 </div>
-                <p className="tpl-spotlight__desc">Le meilleur rapport pour rester à long terme.</p>
+                <p className="tpl-spotlight__desc">{monthly.cardDesc}</p>
                 <SpotlightOfferCheckout
-                  plan="yearly"
-                  priceAmount="8,25€"
-                  priceNote="sans engagement - facturé annuellement"
+                  plan="monthly"
+                  priceAmount={monthly.display}
+                  pricePeriod={monthly.period}
+                  priceNote={monthly.note}
                   checkoutReveal
                   checkoutRevealed={false}
                   onRevealCheckout={() => {}}
@@ -375,17 +379,20 @@ function ModalSpotlightGrid({ className }: Readonly<{ className?: string }>) {
           </div>
 
           <div className="tpl-spotlight-carousel__slide">
-            <div className="tpl-spotlight tpl-spotlight--monthly">
+            <div className="tpl-spotlight">
               <span className="tpl-spotlight__glow-ring" aria-hidden />
               <span className="tpl-spotlight__vignette" aria-hidden />
               <div className="tpl-spotlight__content">
                 <div className="tpl-spotlight__head">
                   <p className="tpl-spotlight__name">TRACKAPP</p>
+                  <LifetimeChip />
                 </div>
-                <p className="tpl-spotlight__desc">Sans engagement — tu résilies en un clic quand tu veux.</p>
+                <p className="tpl-spotlight__desc">{lifetime.cardDesc}</p>
                 <SpotlightOfferCheckout
-                  plan="monthly"
-                  priceAmount="39€"
+                  plan="lifetime"
+                  priceAmount={lifetime.display}
+                  pricePeriod={lifetime.period}
+                  priceNote={lifetime.note}
                   checkoutReveal
                   checkoutRevealed={false}
                   onRevealCheckout={() => {}}

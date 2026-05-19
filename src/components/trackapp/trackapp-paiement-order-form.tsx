@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { TrackappDevPremiumBypassButton } from "@/components/trackapp/trackapp-dev-premium-bypass-button";
+import type { TrackappBillingPlan } from "@/lib/trackapp/pricing";
 
 const COUNTRIES = [
   { code: "FR", label: "France" },
@@ -20,7 +21,7 @@ export function TrackappPaiementOrderForm({
   className,
   hideWalletHero = false,
 }: Readonly<{
-  plan: "monthly" | "yearly";
+  plan: TrackappBillingPlan;
   country: string;
   onCountryChange: (code: string) => void;
   className?: string;
@@ -44,7 +45,7 @@ export function TrackappPaiementOrderForm({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          plan: plan === "yearly" ? "yearly" : "monthly",
+          plan,
         }),
       });
       const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
