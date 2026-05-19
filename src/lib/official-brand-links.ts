@@ -229,6 +229,7 @@ async function inferOfficialLinksWithOpenAI(args: {
       Authorization: `Bearer ${key}`,
       "Content-Type": "application/json",
     },
+    signal: AbortSignal.timeout(55_000),
     body: JSON.stringify({
       model,
       tool_choice: "auto",
@@ -754,7 +755,7 @@ export async function resolveOfficialBrandLinksCached(app: AppDetail): Promise<O
   const run = unstable_cache(
     async () => resolveOfficialBrandLinks(app),
     [
-      "official-brand-links-v6",
+      "official-brand-links-v7",
       isOfficialLinksOpenAiConfigured() ? "openai-on" : "openai-off",
       app.id,
       app.name.trim().toLowerCase(),

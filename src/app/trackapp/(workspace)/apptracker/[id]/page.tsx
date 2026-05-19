@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 import {
   COUNTRY_MAP,
@@ -15,12 +16,13 @@ import {
   type CountryCode,
 } from "@/lib/apple-charts";
 import { getTrackappProfileFavorites } from "@/lib/trackapp-profile-favorites";
-import { buildOfficialBrandPresenceContext } from "@/lib/official-brand-presence";
-import { isOfficialLinksOpenAiConfigured } from "@/lib/official-brand-links";
 import { fetchAppDetailCached } from "@/lib/tracker-server-cache";
 import { TrackappAppFavoriteButton } from "@/components/trackapp/trackapp-app-favorite-button";
-import { TrackappOfficialPresencePanel } from "@/components/trackapp/trackapp-official-presence-panel";
+import { TrackappOfficialPresenceLoading } from "@/components/trackapp/trackapp-official-presence-loading";
+import { TrackappOfficialPresenceSection } from "@/components/trackapp/trackapp-official-presence-section";
 
+/** OpenAI web search peut prendre 15–45 s */
+export const maxDuration = 60;
 export const revalidate = 900;
 
 type PageProps = Readonly<{
@@ -77,12 +79,8 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
   const revEst = formatEstimatedMonthlyRevenuePrecise(50, app.price, app.categoryId, country, app.id);
   const appAge = app.releaseDate ? daysSince(app.releaseDate) : Number.NaN;
   const screenshots = [...(app.screenshotUrls ?? []), ...(app.ipadScreenshotUrls ?? [])].slice(0, 6);
-  const [presence, { loggedIn, appIds }] = await Promise.all([
-    buildOfficialBrandPresenceContext(app),
-    favoritesPromise,
-  ]);
+  const { loggedIn, appIds } = await favoritesPromise;
   const appFav = appIds.includes(app.id);
-  const openAiConfigured = isOfficialLinksOpenAiConfigured();
 
   return (
     <div className="relative z-[1] dashboard-main pb-16">
@@ -141,25 +139,9 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
         <MetricCard label="Ancienneté" value={Number.isFinite(appAge) ? timeAgo(app.releaseDate) : "—"} sub={app.version ? `Version ${app.version}` : undefined} />
       </section>
 
-      <section className="mt-5">
-        <div className="mb-4 flex justify-end">
-          <Link
-            href={`/tracker/apps/${app.id}?country=${country}&tab=official`}
-            className="inline-flex min-h-10 items-center justify-center rounded-full border border-slate-200 bg-white px-4 text-[0.85rem] font-bold text-slate-700 no-underline shadow-sm transition hover:border-slate-300"
-          >
-            Vue Tracker complète →
-          </Link>
-        </div>
-        <TrackappOfficialPresencePanel
-          appName={app.name}
-          officialLinks={presence.officialLinks}
-          profiles={presence.socialProfiles}
-          confidence={presence.confidence}
-          openAiEnriched={presence.openAiEnriched}
-          openAiConfigured={openAiConfigured}
-          sources={presence.sources}
-        />
-      </section>
+      <Suspense fallback={<TrackappOfficialPresenceLoading />}>
+        <TrackappOfficialPresenceSection app={app} country={country as CountryCode} />
+      </Suspense>
 
       <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.75fr)]">
         <article className="rounded-[24px] border border-[var(--dash-border)] bg-white p-5 shadow-[var(--dash-shadow)]">
