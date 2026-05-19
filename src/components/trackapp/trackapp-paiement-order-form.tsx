@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { TrackappDevPremiumBypassButton } from "@/components/trackapp/trackapp-dev-premium-bypass-button";
+
 const COUNTRIES = [
   { code: "FR", label: "France" },
   { code: "BE", label: "Belgique" },
@@ -114,6 +116,8 @@ export function TrackappPaiementOrderForm({
         <button type="button" className="saas-pay-continue" onClick={beginCheckout} disabled={busy}>
           <span className="saas-pay-continue-label">{continueLabel}</span>
         </button>
+
+        <TrackappDevPremiumBypassButton />
       </section>
     </div>
   );
