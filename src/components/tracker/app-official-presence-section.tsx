@@ -1,5 +1,6 @@
 import { OfficialPresenceHub, SimilarShopsCarousel } from "@/components/tracker/official-presence-hub";
 import { buildOfficialBrandPresenceContext } from "@/lib/official-brand-presence";
+import { isOfficialLinksOpenAiConfigured } from "@/lib/official-brand-links";
 import type { AppDetail, AppEntry, CountryCode } from "@/lib/apple-charts";
 
 type Props = {
@@ -15,7 +16,11 @@ export async function AppOfficialPresenceSection({ app, appId, country, sidebarA
 
   return (
     <div className="space-y-6">
-      <OfficialPresenceHub appName={app.name} presence={presence} />
+      <OfficialPresenceHub
+        appName={app.name}
+        presence={presence}
+        openAiConfigured={isOfficialLinksOpenAiConfigured()}
+      />
       <SimilarShopsCarousel
         apps={sidebarApps}
         currentId={appId}

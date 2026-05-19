@@ -754,7 +754,8 @@ export async function resolveOfficialBrandLinksCached(app: AppDetail): Promise<O
   const run = unstable_cache(
     async () => resolveOfficialBrandLinks(app),
     [
-      "official-brand-links-v5",
+      "official-brand-links-v6",
+      isOfficialLinksOpenAiConfigured() ? "openai-on" : "openai-off",
       app.id,
       app.name.trim().toLowerCase(),
       app.sellerName.trim().toLowerCase(),
@@ -768,4 +769,9 @@ export async function resolveOfficialBrandLinksCached(app: AppDetail): Promise<O
 
 export function officialLinkFallbackText(link: OfficialLinkValidation): string {
   return link.validated && link.url ? link.url : "pas de lien officiel validé";
+}
+
+/** Requis pour valider les réseaux quand le site officiel est une SPA (HTML sans liens sociaux). */
+export function isOfficialLinksOpenAiConfigured(): boolean {
+  return Boolean(process.env.OPENAI_API_KEY?.trim());
 }

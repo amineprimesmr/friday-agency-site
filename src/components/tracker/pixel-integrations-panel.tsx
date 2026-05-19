@@ -112,6 +112,7 @@ export function SocialPresenceStrip({
   profiles,
   appName,
   openAiEnriched,
+  openAiConfigured = true,
   officialWebsite,
   confidence,
   sources,
@@ -120,6 +121,7 @@ export function SocialPresenceStrip({
   profiles: DetectedSocialProfile[];
   appName: string;
   openAiEnriched?: boolean;
+  openAiConfigured?: boolean;
   officialWebsite?: string | null;
   confidence?: number;
   sources?: BrandResolutionSource[];
@@ -211,8 +213,11 @@ export function SocialPresenceStrip({
 
       {profiles.length === 0 ? (
         <p className="rounded-xl bg-neutral-50 px-4 py-6 text-center text-sm text-neutral-500">
-          Aucun lien social officiel détecté pour l’instant. Ajoute une clé OpenAI API côté serveur pour activer la
-          validation web complète quand le site ne liste pas ses réseaux.
+          {!openAiConfigured
+            ? "Aucun réseau validé — configure OPENAI_API_KEY sur le serveur pour les sites en JavaScript (Duolingo, etc.)."
+            : openAiEnriched
+              ? "Aucun réseau social validé après vérification stricte."
+              : "Aucun réseau trouvé dans le HTML du site. La validation OpenAI web est en cours ou en cache (~24h)."}
         </p>
       ) : (
         <ul className="flex flex-wrap gap-2">

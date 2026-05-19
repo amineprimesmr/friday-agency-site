@@ -10,9 +10,11 @@ import { SocialPresenceStrip } from "@/components/tracker/pixel-integrations-pan
 export function OfficialPresenceHub({
   appName,
   presence,
+  openAiConfigured = true,
 }: {
   appName: string;
   presence: OfficialBrandPresenceContext;
+  openAiConfigured?: boolean;
 }) {
   const effectivePresence = useMemo(() => presence, [presence]);
 
@@ -31,6 +33,7 @@ export function OfficialPresenceHub({
         profiles={effectivePresence.socialProfiles}
         appName={appName}
         openAiEnriched={effectivePresence.openAiEnriched}
+        openAiConfigured={openAiConfigured}
         officialWebsite={effectivePresence.officialWebsite}
         confidence={effectivePresence.confidence}
         sources={effectivePresence.sources}

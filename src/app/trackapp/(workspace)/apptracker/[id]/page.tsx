@@ -16,9 +16,10 @@ import {
 } from "@/lib/apple-charts";
 import { getTrackappProfileFavorites } from "@/lib/trackapp-profile-favorites";
 import { buildOfficialBrandPresenceContext } from "@/lib/official-brand-presence";
-import { officialLinkFallbackText } from "@/lib/official-brand-links";
+import { isOfficialLinksOpenAiConfigured } from "@/lib/official-brand-links";
 import { fetchAppDetailCached } from "@/lib/tracker-server-cache";
 import { TrackappAppFavoriteButton } from "@/components/trackapp/trackapp-app-favorite-button";
+import { TrackappOfficialPresencePanel } from "@/components/trackapp/trackapp-official-presence-panel";
 
 export const revalidate = 900;
 
@@ -81,6 +82,7 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
     favoritesPromise,
   ]);
   const appFav = appIds.includes(app.id);
+  const openAiConfigured = isOfficialLinksOpenAiConfigured();
 
   return (
     <div className="relative z-[1] dashboard-main pb-16">
@@ -139,81 +141,24 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
         <MetricCard label="Ancienneté" value={Number.isFinite(appAge) ? timeAgo(app.releaseDate) : "—"} sub={app.version ? `Version ${app.version}` : undefined} />
       </section>
 
-      <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-        <article className="rounded-[24px] border border-[var(--dash-border)] bg-white p-5 shadow-[var(--dash-shadow)]">
-          <h2 className="m-0 text-[1.25rem] font-bold tracking-tight text-[var(--dash-text)]">Réseaux officiels</h2>
-          {presence.officialWebsite ? (
-            <a
-              href={presence.officialWebsite}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-4 inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[0.82rem] font-bold text-slate-700 no-underline hover:bg-white"
-            >
-              Site officiel ↗
-            </a>
-          ) : null}
-          {presence.socialProfiles.length > 0 ? (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {presence.socialProfiles.map((profile) => (
-                <a
-                  key={`${profile.id}-${profile.url}`}
-                  href={profile.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[0.82rem] font-bold text-slate-700 no-underline hover:bg-white"
-                >
-                  {profile.label}
-                  {profile.hint ? ` · ${profile.hint}` : ""} ↗
-                </a>
-              ))}
-            </div>
-          ) : (
-            <p className="mt-4 text-[0.9rem] leading-relaxed text-[var(--dash-muted-light)]">
-              Aucun réseau officiel détecté pour l&apos;instant.
-            </p>
-          )}
-        </article>
-
-        <article className="rounded-[24px] border border-[var(--dash-border)] bg-white p-5 shadow-[var(--dash-shadow)]">
-          <h2 className="m-0 text-[1.25rem] font-bold tracking-tight text-[var(--dash-text)]">Meta Ads Library</h2>
-          {presence.officialLinks.metaAdsLibrary.validated && presence.officialLinks.metaAdsLibrary.url ? (
-            <>
-              <p className="mt-3 text-[0.92rem] leading-relaxed text-[var(--dash-muted-light)]">
-                Lien page-only validé
-                {presence.metaPageName ? (
-                  <>
-                    {" "}
-                    · <strong className="text-slate-950">{presence.metaPageName}</strong>
-                  </>
-                ) : presence.metaPageId ? (
-                  <>
-                    {" "}
-                    · Page ID <strong className="text-slate-950">{presence.metaPageId}</strong>
-                  </>
-                ) : null}
-                .
-              </p>
-              <a
-                href={presence.officialLinks.metaAdsLibrary.url}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-[#0f172a] px-5 text-[0.88rem] font-bold text-white no-underline transition hover:bg-[#111827]"
-              >
-                Ouvrir Meta Ads Library ↗
-              </a>
-            </>
-          ) : (
-            <p className="mt-3 text-[0.92rem] leading-relaxed text-[var(--dash-muted-light)]">
-              {officialLinkFallbackText(presence.officialLinks.metaAdsLibrary)} — jamais de recherche mot-clé.
-            </p>
-          )}
+      <section className="mt-5">
+        <div className="mb-4 flex justify-end">
           <Link
             href={`/tracker/apps/${app.id}?country=${country}&tab=official`}
-            className="mt-3 inline-flex text-[0.88rem] font-semibold text-slate-600 no-underline hover:text-slate-950"
+            className="inline-flex min-h-10 items-center justify-center rounded-full border border-slate-200 bg-white px-4 text-[0.85rem] font-bold text-slate-700 no-underline shadow-sm transition hover:border-slate-300"
           >
-            Voir tous les liens officiels →
+            Vue Tracker complète →
           </Link>
-        </article>
+        </div>
+        <TrackappOfficialPresencePanel
+          appName={app.name}
+          officialLinks={presence.officialLinks}
+          profiles={presence.socialProfiles}
+          confidence={presence.confidence}
+          openAiEnriched={presence.openAiEnriched}
+          openAiConfigured={openAiConfigured}
+          sources={presence.sources}
+        />
       </section>
 
       <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.75fr)]">
