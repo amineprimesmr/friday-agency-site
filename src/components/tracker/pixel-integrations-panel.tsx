@@ -212,8 +212,8 @@ export function SocialPresenceStrip({
 
       {profiles.length === 0 ? (
         <p className="rounded-xl bg-neutral-50 px-4 py-6 text-center text-sm text-neutral-500">
-          Aucun lien social officiel détecté pour l’instant. La Librairie Ads restera bloquée tant qu’une Page Meta fiable
-          n’est pas résolue.
+          Aucun lien social officiel détecté pour l’instant. Ajoute une clé OpenAI API côté serveur pour activer la
+          validation web complète quand le site ne liste pas ses réseaux.
         </p>
       ) : (
         <ul className="flex flex-wrap gap-2">

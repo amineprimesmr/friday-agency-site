@@ -208,6 +208,14 @@ function pickSources(v: unknown): string[] {
     .slice(0, 10);
 }
 
+function metaPageIdFromAdLibraryUrl(raw: string | null): string | null {
+  if (!raw) return null;
+  const url = parseUrl(raw);
+  if (!url) return null;
+  const pageId = url.searchParams.get("view_all_page_id")?.trim();
+  return pageId && /^\d{6,24}$/.test(pageId) ? pageId : null;
+}
+
 async function inferOfficialLinksWithOpenAI(args: {
   app: AppDetail;
   officialSiteHint: string | null;
@@ -224,8 +232,10 @@ async function inferOfficialLinksWithOpenAI(args: {
     },
     body: JSON.stringify({
       model,
+      tool_choice: "auto",
+      include: ["web_search_call.action.sources"],
       temperature: 0,
-      tools: [{ type: "web_search" }],
+      tools: [{ type: "web_search", external_web_access: true }],
       text: {
         format: {
           type: "json_schema",
@@ -301,8 +311,10 @@ async function inferOfficialLinksWithOpenAI(args: {
           role: "system",
           content:
             "Tu es un vérificateur strict de liens officiels d'apps mobiles. " +
-            "Trouve d'abord le site officiel, puis valide les réseaux via branding, bio, contenu, lien vers le site officiel/app et cohérence produit. " +
-            "Ne renvoie jamais de compte fan, affilié, UGC, page parasite, post, vidéo, reel ou recherche keyword. " +
+            "Trouve d'abord le site officiel de l'app. Le site officiel est la source principale pour valider les réseaux. " +
+            "Inspecte ensuite header, footer, About, Contact, Press, Careers et les résultats web publics utiles. " +
+            "Valide chaque réseau uniquement si branding, nom/logo, bio, contenu, site officiel/app et cohérence produit correspondent. " +
+            "Ne renvoie jamais de compte fan, affilié, UGC, page parasite, post, vidéo, reel, story ou recherche keyword. " +
             "Si un lien n'est pas officiellement validé, renvoie null et explique brièvement pourquoi dans validation_notes. " +
             "Pour Meta Ads Library, renvoie uniquement un Page ID Facebook officiel validé et une URL avec view_all_page_id. " +
             "N'utilise jamais q=nomdelapp ni search_type=keyword_unordered.",
@@ -320,6 +332,8 @@ async function inferOfficialLinksWithOpenAI(args: {
             "",
             "Retourne uniquement les liens officiels validés pour: site, Instagram, TikTok, X/Twitter, YouTube, Facebook, LinkedIn, App Store, Google Play, Meta Ads Library.",
             "Méthode obligatoire: recherche web, site officiel source principale, validation de branding/bio/contenu/lien officiel. Si doute: null.",
+            "Pour App Store et Google Play: vérifie nom, développeur/éditeur, logo/screenshots cohérents et site développeur cohérent.",
+            "Pour Meta Ads Library: trouve la page Facebook officielle, récupère uniquement view_all_page_id, jamais une recherche keyword.",
             "",
             "Description App Store:",
             (args.app.description ?? "").slice(0, 1400),
@@ -529,7 +543,7 @@ function googlePlayUrlMatchesApp(app: AppDetail, urlString: string): boolean {
   if (!packageId) return false;
   const bundle = app.bundleId.trim().toLowerCase();
   if (bundle && packageId === bundle) return true;
-  return true;
+  return false;
 }
 
 function metaAdsLibraryUrl(pageId: string): string {
@@ -701,14 +715,15 @@ async function resolveOfficialBrandLinks(app: AppDetail): Promise<OfficialBrandL
   }
   report.socialProfiles = profiles;
 
-  if (ai?.meta_page_id) {
-    report.metaPageId = ai.meta_page_id;
+  const openAiMetaPageId = ai?.meta_page_id ?? metaPageIdFromAdLibraryUrl(ai?.meta_ads_library_url ?? null);
+  if (openAiMetaPageId) {
+    report.metaPageId = openAiMetaPageId;
     report.metaPageName = null;
     report.metaAdsLibrary = {
       label: "Meta Ads Library",
-      url: metaAdsLibraryUrl(ai.meta_page_id),
+      url: metaAdsLibraryUrl(openAiMetaPageId),
       validated: true,
-      reason: ai.validation_notes.meta_ads_library || "Page ID officiel validé par OpenAI web search",
+      reason: ai?.validation_notes?.meta_ads_library || "Page ID officiel validé par OpenAI web search",
       source: "openai_web",
     };
   }
@@ -751,7 +766,7 @@ export async function resolveOfficialBrandLinksCached(app: AppDetail): Promise<O
   const run = unstable_cache(
     async () => resolveOfficialBrandLinks(app),
     [
-      "official-brand-links-v3",
+      "official-brand-links-v4",
       app.id,
       app.name.trim().toLowerCase(),
       app.sellerName.trim().toLowerCase(),
