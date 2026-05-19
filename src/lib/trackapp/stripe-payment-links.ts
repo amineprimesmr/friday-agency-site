@@ -1,30 +1,24 @@
 export type TrackappBillingPlan = "monthly" | "yearly";
 
-/** Liens Stripe Payment Link statiques (optionnels — à renseigner plus tard). */
-export function staticStripePaymentLink(plan: TrackappBillingPlan): string | null {
-  const url =
+/** Payment Links Stripe (publics) — surchargeables via .env / Vercel. */
+export const TRACKAPP_STRIPE_PAYMENT_LINK_MONTHLY =
+  "https://buy.stripe.com/00w4gteXI6Q31BQfssbMQ00";
+
+export const TRACKAPP_STRIPE_PAYMENT_LINK_YEARLY =
+  "https://buy.stripe.com/fZufZbeXI0rF94i2FGbMQ01";
+
+export function staticStripePaymentLink(plan: TrackappBillingPlan): string {
+  const fromEnv =
     plan === "yearly" ?
       process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK_YEARLY?.trim()
     : process.env.NEXT_PUBLIC_STRIPE_PAYMENT_LINK_MONTHLY?.trim();
-  return url && url.startsWith("http") ? url : null;
+
+  if (fromEnv?.startsWith("http")) return fromEnv;
+
+  return plan === "yearly" ? TRACKAPP_STRIPE_PAYMENT_LINK_YEARLY : TRACKAPP_STRIPE_PAYMENT_LINK_MONTHLY;
 }
 
-/** Ouvre le checkout Stripe pour le plan (lien statique ou session API). */
+/** Ouvre le Payment Link Stripe pour le plan. */
 export async function openTrackappStripeCheckout(plan: TrackappBillingPlan): Promise<void> {
-  const staticUrl = staticStripePaymentLink(plan);
-  if (staticUrl) {
-    window.location.href = staticUrl;
-    return;
-  }
-
-  const res = await fetch("/api/trackapp/checkout", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ plan }),
-  });
-  const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
-  if (!res.ok || !data.url) {
-    throw new Error(data.error || "Impossible d'ouvrir le paiement Stripe.");
-  }
-  window.location.href = data.url;
+  window.location.href = staticStripePaymentLink(plan);
 }

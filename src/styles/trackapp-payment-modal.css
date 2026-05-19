@@ -1,186 +1,100 @@
-/* Modale paiement bureau — même format que connexion, 2 cartes côte à côte */
+/* Modale paiement bureau — grille 2 cartes spotlight (même design que mobile) */
 
 .ta-auth-pane--payment-modal {
   justify-content: flex-start;
+  overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
 
-.ta-auth-pane--payment-modal .ta-auth-lead {
-  margin-bottom: 1.35rem;
+.ta-auth-pane--payment-modal .ta-auth-lead--payment-modal {
+  margin-bottom: 0.85rem;
 }
 
-.ta-pay-modal-cards {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.75rem;
+.ta-pay-modal-badge {
+  display: flex;
+  justify-content: center;
   width: 100%;
+  margin-bottom: 0.35rem;
+}
+
+.ta-auth-pane--payment-modal .tpl-spotlight-carousel--modal-grid {
+  margin-top: 0.5rem;
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
+}
+
+.ta-auth-pane--payment-modal .tpl-spotlight-carousel--modal-grid .tpl-spotlight-carousel__viewport {
+  overflow: visible;
+}
+
+.ta-auth-pane--payment-modal .tpl-spotlight-carousel--modal-grid .tpl-spotlight-carousel__track {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  width: 100%;
+  max-width: 100%;
+  transform: none !important;
+}
+
+.ta-auth-pane--payment-modal .tpl-spotlight-carousel--modal-grid .tpl-spotlight-carousel__slide {
+  flex: none;
+  width: auto;
   min-width: 0;
 }
 
-@media (min-width: 520px) {
-  .ta-pay-modal-cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.85rem;
-  }
+.ta-auth-pane--payment-modal .tpl-spotlight-carousel--modal-grid .tpl-spotlight {
+  margin-top: 0;
+  height: 100%;
 }
 
-.ta-pay-modal-cards__error {
-  grid-column: 1 / -1;
-  margin: 0.35rem 0 0;
-  font-size: 0.82rem;
-  color: #fca5a5;
-  text-align: center;
+.ta-auth-pane--payment-modal .tpl-spotlight-carousel--modal-grid .tpl-spotlight__content {
+  padding: 0.85rem 0.75rem 0.95rem;
 }
 
-.ta-pay-modal-card {
-  position: relative;
-  display: block;
-  width: 100%;
-  min-height: 100%;
-  padding: 0;
-  border: none;
-  border-radius: 1.15rem;
-  background: transparent;
-  cursor: pointer;
-  text-align: left;
-  font: inherit;
-  color: inherit;
-  transition:
-    transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
-    opacity 0.18s ease;
+.ta-auth-pane--payment-modal .tpl-spotlight-carousel--modal-grid .tpl-spotlight__name {
+  font-size: clamp(1rem, 2.2vw, 1.25rem);
 }
 
-.ta-pay-modal-card.is-dimmed {
-  opacity: 0.45;
-  pointer-events: none;
-}
-
-.ta-pay-modal-card:not(:disabled):hover {
-  transform: translateY(-3px);
-}
-
-.ta-pay-modal-card:not(:disabled):active {
-  transform: translateY(-1px) scale(0.99);
-}
-
-.ta-pay-modal-card:focus-visible {
-  outline: 2px solid rgb(212 255 51 / 0.65);
-  outline-offset: 3px;
-}
-
-.ta-pay-modal-card__glow {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background:
-    radial-gradient(ellipse 120% 80% at 50% 0%, rgb(56 189 248 / 0.22), transparent 58%),
-    linear-gradient(165deg, rgb(30 41 59 / 0.95) 0%, rgb(15 23 42 / 0.98) 100%);
-  border: 1px solid rgb(255 255 255 / 0.1);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.06),
-    0 18px 40px rgb(0 0 0 / 0.35);
-}
-
-.ta-pay-modal-card--monthly .ta-pay-modal-card__glow {
-  background:
-    radial-gradient(ellipse 120% 80% at 50% 0%, rgb(148 163 184 / 0.14), transparent 58%),
-    linear-gradient(165deg, rgb(28 32 38 / 0.96) 0%, rgb(12 14 18 / 0.98) 100%);
-}
-
-.ta-pay-modal-card--annual .ta-pay-modal-card__glow {
-  border-color: rgb(56 189 248 / 0.28);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.08),
-    0 0 0 1px rgb(56 189 248 / 0.12),
-    0 20px 48px rgb(14 165 233 / 0.12);
-}
-
-.ta-pay-modal-card__inner {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.35rem;
-  min-height: 11.5rem;
-  padding: 1rem 1rem 1.05rem;
-}
-
-.ta-pay-modal-card__brand {
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  color: rgb(255 255 255 / 0.72);
-}
-
-.ta-pay-modal-card__badge {
-  display: inline-flex;
-  margin-top: 0.15rem;
-  padding: 0.22rem 0.55rem;
-  border-radius: 999px;
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: #e0f2fe;
-  background: linear-gradient(90deg, rgb(14 165 233 / 0.35), rgb(56 189 248 / 0.2));
-  border: 1px solid rgb(125 211 252 / 0.35);
-}
-
-.ta-pay-modal-card__price {
+.ta-auth-pane--payment-modal .tpl-spotlight-carousel--modal-grid .tpl-spotlight__desc {
+  font-size: 0.72rem;
+  line-height: 1.4;
   margin-top: 0.35rem;
-  font-size: clamp(1.55rem, 4vw, 1.85rem);
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 1;
-  color: #fff;
 }
 
-.ta-pay-modal-card__price-suffix {
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0;
-  color: rgb(255 255 255 / 0.55);
+.ta-auth-pane--payment-modal .tpl-spotlight-carousel--modal-grid .tpl-credit-box {
+  margin-top: 0.65rem;
+  padding: 0.65rem 0.7rem;
 }
 
-.ta-pay-modal-card__note {
-  font-size: 0.72rem;
-  color: rgb(255 255 255 / 0.48);
+.ta-auth-pane--payment-modal .tpl-spotlight-carousel--modal-grid .tpl-credit-box__price-value {
+  font-size: clamp(1.35rem, 3vw, 1.55rem);
 }
 
-.ta-pay-modal-card__desc {
-  flex: 1;
-  margin-top: 0.25rem;
-  font-size: 0.78rem;
-  line-height: 1.45;
-  color: rgb(255 255 255 / 0.62);
+.ta-auth-pane--payment-modal .tpl-spotlight-carousel--modal-grid .tpl-credit-box__list {
+  font-size: 0.62rem;
+  gap: 0.35rem;
 }
 
-.ta-pay-modal-card__cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  margin-top: 0.55rem;
-  padding: 0.62rem 0.85rem;
-  border-radius: 999px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #0a0a0a;
-  background: #fff;
-  box-shadow: 0 8px 24px rgb(0 0 0 / 0.22);
+.ta-auth-pane--payment-modal .tpl-spotlight-carousel--modal-grid .tpl-spotlight__join {
+  min-height: 2.75rem;
+  margin-top: 0.75rem;
+  font-size: 0.88rem;
 }
 
-.ta-pay-modal-card.is-busy .ta-pay-modal-card__cta {
-  opacity: 0.75;
+.ta-auth-pane--payment-modal .tpl-spotlight-carousel--modal-grid .tpl-spotlight__chip-reduction-inner {
+  font-size: 0.58rem;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .ta-pay-modal-card {
-    transition: opacity 0.15s ease;
+@media (max-width: 899px) {
+  .ta-auth-pane--payment-modal .tpl-spotlight-carousel--modal-grid .tpl-spotlight-carousel__track {
+    grid-template-columns: 1fr;
   }
+}
 
-  .ta-pay-modal-card:not(:disabled):hover {
-    transform: none;
+@media (min-width: 900px) {
+  .ta-auth-root--embedded:has(.ta-auth-pane--payment-modal) .ta-auth-modal {
+    max-height: min(96dvh, 860px);
   }
 }

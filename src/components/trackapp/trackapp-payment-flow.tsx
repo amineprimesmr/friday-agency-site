@@ -7,12 +7,14 @@ import {
   PromoPanel,
   TrackappLimeLogo,
 } from "@/components/trackapp/auth/trackapp-auth-shared";
-import { TrackappPaymentModalCards } from "@/components/trackapp/trackapp-payment-modal-cards";
+import { TrackappPaiementPlanSpotlightCards } from "@/components/trackapp/trackapp-paiement-plan-spotlight-cards";
+import { TrackerHeroSocialProofBadge } from "@/components/tracker/tracker-hero-social-proof-badge";
 
 import "@/styles/trackapp-auth-modal.css";
+import "@/styles/trackapp-paiement-landing.css";
 import "@/styles/trackapp-payment-modal.css";
 
-/** Modale paiement bureau — même coque et dimensions que la connexion. */
+/** Modale paiement bureau — même coque que la connexion, cartes identiques au mobile. */
 export function TrackappPaymentFlow({ onClose }: Readonly<{ onClose: () => void }>) {
   const [slide, setSlide] = useState(0);
 
@@ -35,8 +37,15 @@ export function TrackappPaymentFlow({ onClose }: Readonly<{ onClose: () => void 
           <h1 id="trackapp-payment-dialog-title" className="ta-auth-headline">
             Choisissez votre plan
           </h1>
-          <p className="ta-auth-lead">Clique sur une formule pour payer sur Stripe.</p>
-          <TrackappPaymentModalCards />
+          <p className="ta-auth-lead ta-auth-lead--payment-modal">
+            Trouvez les apps qui scalent en ce moment.
+          </p>
+
+          <div className="ta-pay-modal-badge">
+            <TrackerHeroSocialProofBadge />
+          </div>
+
+          <TrackappPaiementPlanSpotlightCards mode="modal" />
         </div>
 
         <PromoPanel active={slide} />

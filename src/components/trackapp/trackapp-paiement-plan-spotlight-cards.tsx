@@ -4,6 +4,7 @@ import type { CSSProperties } from "react";
 import { useCallback, useEffect, useState } from "react";
 
 import { TrackappPaiementOrderForm } from "@/components/trackapp/trackapp-paiement-order-form";
+import { openTrackappStripeCheckout } from "@/lib/trackapp/stripe-payment-links";
 import { TRACKAPP_PAIEMENT_UNLOCK_ITEMS } from "@/lib/trackapp-paiement-unlock-items";
 import { getTrackappPaiementPlan, setTrackappPaiementPlan } from "@/lib/trackapp-paiement-plan-storage";
 
@@ -57,6 +58,7 @@ function SpotlightOfferCheckout({
   checkoutReveal,
   checkoutRevealed,
   onRevealCheckout,
+  directStripeLink = false,
   country,
   onCountryChange,
 }: Readonly<{
@@ -66,9 +68,33 @@ function SpotlightOfferCheckout({
   checkoutReveal: boolean;
   checkoutRevealed: boolean;
   onRevealCheckout: () => void;
+  directStripeLink?: boolean;
   country: string;
   onCountryChange: (code: string) => void;
 }>) {
+  const [stripeBusy, setStripeBusy] = useState(false);
+
+  const goStripe = useCallback(async () => {
+    if (stripeBusy) return;
+    setStripeBusy(true);
+    try {
+      await openTrackappStripeCheckout(plan);
+    } catch {
+      setStripeBusy(false);
+    }
+  }, [plan, stripeBusy]);
+
+  if (directStripeLink) {
+    return (
+      <div className="tpl-spotlight__checkout-intro">
+        <UnlockCreditBox priceAmount={priceAmount} priceNote={priceNote} />
+        <button type="button" className="tpl-spotlight__join" onClick={goStripe} disabled={stripeBusy}>
+          {stripeBusy ? "Redirection…" : "Rejoindre"}
+        </button>
+      </div>
+    );
+  }
+
   if (checkoutReveal && !checkoutRevealed) {
     return (
       <div className="tpl-spotlight__checkout-intro">
@@ -108,15 +134,24 @@ function SpotlightOfferCheckout({
 /** Deux cartes offre (Annuel / Mensuel) + flèches, synchro avec le toggle et le checkout. */
 export function TrackappPaiementPlanSpotlightCards({
   className,
+  mode = "page",
   checkoutReveal = false,
   checkoutRevealed: checkoutRevealedProp,
   onCheckoutRevealedChange,
 }: Readonly<{
   className?: string;
+  /** Modale bureau : 2 cartes côte à côte, clic Rejoindre → Payment Link Stripe. */
+  mode?: "page" | "modal";
   checkoutReveal?: boolean;
   checkoutRevealed?: boolean;
   onCheckoutRevealedChange?: (revealed: boolean) => void;
 }>) {
+  if (mode === "modal") {
+    return (
+      <ModalSpotlightGrid className={className} />
+    );
+  }
+
   /** 0 = annuel, 1 = mensuel */
   const [index, setIndex] = useState(0);
   const [internalCheckoutRevealed, setInternalCheckoutRevealed] = useState(false);
@@ -268,6 +303,82 @@ export function TrackappPaiementPlanSpotlightCards({
           <SimpleChevron toward="next" />
         </button>
       ) : null}
+    </div>
+  );
+}
+
+function ModalSpotlightGrid({ className }: Readonly<{ className?: string }>) {
+  return (
+    <div
+      className={[
+        "tpl-spotlight-carousel",
+        "tpl-spotlight-carousel--modal-grid",
+        "tpl-spotlight-carousel--checkout-reveal",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      role="group"
+      aria-label="Formules Trackapp"
+    >
+      <div className="tpl-spotlight-carousel__viewport">
+        <div className="tpl-spotlight-carousel__track">
+          <div className="tpl-spotlight-carousel__slide">
+            <div className="tpl-spotlight">
+              <span className="tpl-spotlight__glow-ring" aria-hidden />
+              <span className="tpl-spotlight__vignette" aria-hidden />
+              <div className="tpl-spotlight__content">
+                <div className="tpl-spotlight__head">
+                  <p className="tpl-spotlight__name">TRACKAPP</p>
+                  <span className="tpl-spotlight__chip tpl-spotlight__chip--reduction">
+                    <span className="tpl-spotlight__chip-reduction-wrap">
+                      <span className="tpl-spotlight__chip-reduction-inner">
+                        <span className="tpl-spotlight__chip-reduction-lead">Réduction de </span>
+                        <span className="tpl-spotlight__chip-reduction-pct">-79%</span>
+                      </span>
+                    </span>
+                  </span>
+                </div>
+                <p className="tpl-spotlight__desc">Le meilleur rapport pour rester à long terme.</p>
+                <SpotlightOfferCheckout
+                  plan="yearly"
+                  priceAmount="8,25€"
+                  priceNote="sans engagement - facturé annuellement"
+                  checkoutReveal
+                  checkoutRevealed={false}
+                  onRevealCheckout={() => {}}
+                  directStripeLink
+                  country="FR"
+                  onCountryChange={() => {}}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="tpl-spotlight-carousel__slide">
+            <div className="tpl-spotlight tpl-spotlight--monthly">
+              <span className="tpl-spotlight__glow-ring" aria-hidden />
+              <span className="tpl-spotlight__vignette" aria-hidden />
+              <div className="tpl-spotlight__content">
+                <div className="tpl-spotlight__head">
+                  <p className="tpl-spotlight__name">TRACKAPP</p>
+                </div>
+                <p className="tpl-spotlight__desc">Sans engagement — tu résilies en un clic quand tu veux.</p>
+                <SpotlightOfferCheckout
+                  plan="monthly"
+                  priceAmount="39€"
+                  checkoutReveal
+                  checkoutRevealed={false}
+                  onRevealCheckout={() => {}}
+                  directStripeLink
+                  country="FR"
+                  onCountryChange={() => {}}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
