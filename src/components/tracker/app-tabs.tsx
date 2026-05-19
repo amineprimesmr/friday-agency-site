@@ -5,7 +5,7 @@ import { LayoutGroup, motion, useReducedMotion } from "framer-motion";
 
 const TABS = [
   { id: "overview", label: "Vue d'ensemble" },
-  { id: "ads", label: "Publicités" },
+  { id: "official", label: "Présence officielle" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];

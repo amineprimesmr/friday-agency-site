@@ -37,7 +37,6 @@ const PROTECT_PREFIXES = [
   "/trackapp/accueil",
   "/trackapp/apptracker",
   "/trackapp/creer-mon-app",
-  "/trackapp/ads",
   "/trackapp/organique",
   "/trackapp/logiciels",
   "/trackapp/ressources",

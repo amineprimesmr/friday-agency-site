@@ -15,7 +15,8 @@ import {
   type CountryCode,
 } from "@/lib/apple-charts";
 import { getTrackappProfileFavorites } from "@/lib/trackapp-profile-favorites";
-import { buildTrackerMetaAdLibraryContext } from "@/lib/tracker-meta-ad-resolution";
+import { buildOfficialBrandPresenceContext } from "@/lib/official-brand-presence";
+import { officialLinkFallbackText } from "@/lib/official-brand-links";
 import { fetchAppDetailCached } from "@/lib/tracker-server-cache";
 import { TrackappAppFavoriteButton } from "@/components/trackapp/trackapp-app-favorite-button";
 
@@ -75,11 +76,8 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
   const revEst = formatEstimatedMonthlyRevenuePrecise(50, app.price, app.categoryId, country, app.id);
   const appAge = app.releaseDate ? daysSince(app.releaseDate) : Number.NaN;
   const screenshots = [...(app.screenshotUrls ?? []), ...(app.ipadScreenshotUrls ?? [])].slice(0, 6);
-  const [metaLibraryContext, { loggedIn, appIds }] = await Promise.all([
-    buildTrackerMetaAdLibraryContext({
-      app,
-      country,
-    }),
+  const [presence, { loggedIn, appIds }] = await Promise.all([
+    buildOfficialBrandPresenceContext(app),
     favoritesPromise,
   ]);
   const appFav = appIds.includes(app.id);
@@ -144,9 +142,9 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
       <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
         <article className="rounded-[24px] border border-[var(--dash-border)] bg-white p-5 shadow-[var(--dash-shadow)]">
           <h2 className="m-0 text-[1.25rem] font-bold tracking-tight text-[var(--dash-text)]">Réseaux officiels</h2>
-          {metaLibraryContext.officialWebsite ? (
+          {presence.officialWebsite ? (
             <a
-              href={metaLibraryContext.officialWebsite}
+              href={presence.officialWebsite}
               target="_blank"
               rel="noreferrer"
               className="mt-4 inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[0.82rem] font-bold text-slate-700 no-underline hover:bg-white"
@@ -154,9 +152,9 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
               Site officiel ↗
             </a>
           ) : null}
-          {metaLibraryContext.socialProfiles.length > 0 ? (
+          {presence.socialProfiles.length > 0 ? (
             <div className="mt-4 flex flex-wrap gap-2">
-              {metaLibraryContext.socialProfiles.map((profile) => (
+              {presence.socialProfiles.map((profile) => (
                 <a
                   key={`${profile.id}-${profile.url}`}
                   href={profile.url}
@@ -177,31 +175,44 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
         </article>
 
         <article className="rounded-[24px] border border-[var(--dash-border)] bg-white p-5 shadow-[var(--dash-shadow)]">
-          <h2 className="m-0 text-[1.25rem] font-bold tracking-tight text-[var(--dash-text)]">Librairie Ads</h2>
-          {metaLibraryContext.primaryMetaPageId ? (
+          <h2 className="m-0 text-[1.25rem] font-bold tracking-tight text-[var(--dash-text)]">Meta Ads Library</h2>
+          {presence.officialLinks.metaAdsLibrary.validated && presence.officialLinks.metaAdsLibrary.url ? (
             <>
               <p className="mt-3 text-[0.92rem] leading-relaxed text-[var(--dash-muted-light)]">
-                Page Meta résolue :{" "}
-                <strong className="text-slate-950">
-                  {metaLibraryContext.entries[0]?.pageName ?? `ID ${metaLibraryContext.primaryMetaPageId}`}
-                </strong>
-                . Les créatives seront chargées uniquement via cette Page, sans recherche mot-clé.
+                Lien page-only validé
+                {presence.metaPageName ? (
+                  <>
+                    {" "}
+                    · <strong className="text-slate-950">{presence.metaPageName}</strong>
+                  </>
+                ) : presence.metaPageId ? (
+                  <>
+                    {" "}
+                    · Page ID <strong className="text-slate-950">{presence.metaPageId}</strong>
+                  </>
+                ) : null}
+                .
               </p>
-              <Link
-                href={`/tracker/apps/${app.id}?country=${country}&tab=ads`}
+              <a
+                href={presence.officialLinks.metaAdsLibrary.url}
+                target="_blank"
+                rel="noreferrer"
                 className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-[#0f172a] px-5 text-[0.88rem] font-bold text-white no-underline transition hover:bg-[#111827]"
               >
-                Ouvrir les créatives page-only
-              </Link>
+                Ouvrir Meta Ads Library ↗
+              </a>
             </>
           ) : (
-            <>
-              <p className="mt-3 text-[0.92rem] leading-relaxed text-[var(--dash-muted-light)]">
-                Meta Ads Library : pas de page officielle validée. Les ads par mot-clé sont bloquées pour éviter les faux
-                positifs.
-              </p>
-            </>
+            <p className="mt-3 text-[0.92rem] leading-relaxed text-[var(--dash-muted-light)]">
+              {officialLinkFallbackText(presence.officialLinks.metaAdsLibrary)} — jamais de recherche mot-clé.
+            </p>
           )}
+          <Link
+            href={`/tracker/apps/${app.id}?country=${country}&tab=official`}
+            className="mt-3 inline-flex text-[0.88rem] font-semibold text-slate-600 no-underline hover:text-slate-950"
+          >
+            Voir tous les liens officiels →
+          </Link>
         </article>
       </section>
 

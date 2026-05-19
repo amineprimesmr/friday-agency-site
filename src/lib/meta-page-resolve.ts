@@ -1,6 +1,6 @@
 /**
- * Résolution d’ID Page Facebook (Graph) à partir d’URL ou d’identifiant,
- * pour enchaîner sur Ad Library `search_page_ids`.
+ * Résolution d’ID Page Facebook (Graph) à partir d’URL officielle,
+ * pour construire le lien Meta Ads Library (view_all_page_id).
  */
 
 const SKIP_PATH_PREFIXES = new Set([

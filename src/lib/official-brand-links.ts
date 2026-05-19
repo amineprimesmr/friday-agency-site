@@ -1,7 +1,6 @@
 import { unstable_cache } from "next/cache";
 
 import type { AppDetail } from "@/lib/apple-charts";
-import { fetchAdsArchive } from "@/lib/meta-ad-library";
 import {
   facebookGraphIdentifierFromUrl,
   resolveFacebookPageNode,
@@ -563,7 +562,6 @@ function metaAdsLibraryUrl(pageId: string): string {
 async function resolveOfficialMetaPage(facebookUrl: string): Promise<{
   pageId: string;
   pageName?: string;
-  adsProbeCount?: number;
 } | null> {
   const token = process.env.META_AD_LIBRARY_ACCESS_TOKEN?.trim();
   if (!token) return null;
@@ -574,16 +572,9 @@ async function resolveOfficialMetaPage(facebookUrl: string): Promise<{
   const node = await resolveFacebookPageNode(token, identifier);
   if (!node) return null;
 
-  const probe = await fetchAdsArchive({
-    searchPageIds: [node.id],
-    countries: ["ALL"],
-    limit: 3,
-  });
-
   return {
     pageId: node.id,
     pageName: node.name,
-    adsProbeCount: probe.metaError ? undefined : probe.data.length,
   };
 }
 
@@ -737,10 +728,7 @@ async function resolveOfficialBrandLinks(app: AppDetail): Promise<OfficialBrandL
         label: "Meta Ads Library",
         url: metaAdsLibraryUrl(meta.pageId),
         validated: true,
-        reason:
-          typeof meta.adsProbeCount === "number"
-            ? `Page ID officiel validee par Graph (${meta.adsProbeCount} publicite(s) sondee(s))`
-            : "Page ID officiel validee par Graph",
+        reason: "Page ID officiel validee par Graph (search_type=page, view_all_page_id)",
         source: "meta_graph",
       };
     }
@@ -766,7 +754,7 @@ export async function resolveOfficialBrandLinksCached(app: AppDetail): Promise<O
   const run = unstable_cache(
     async () => resolveOfficialBrandLinks(app),
     [
-      "official-brand-links-v4",
+      "official-brand-links-v5",
       app.id,
       app.name.trim().toLowerCase(),
       app.sellerName.trim().toLowerCase(),

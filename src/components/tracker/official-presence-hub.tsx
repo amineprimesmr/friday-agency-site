@@ -3,61 +3,39 @@
 import { useMemo } from "react";
 import { estimateMonthlyDownloads, type AppEntry, type CountryCode } from "@/lib/apple-charts";
 import Image from "next/image";
-import type { TrackerMetaAdLibraryContext } from "@/lib/tracker-meta-ad-library-context";
+import type { OfficialBrandPresenceContext } from "@/lib/official-brand-presence-context";
 import { TrackerNavLink } from "@/components/tracker/tracker-navigation";
 import { SocialPresenceStrip } from "@/components/tracker/pixel-integrations-panel";
 
-export function AdIntelligenceHub({
+export function OfficialPresenceHub({
   appName,
-  metaLibraryContext,
+  presence,
 }: {
   appName: string;
-  metaLibraryContext: TrackerMetaAdLibraryContext;
+  presence: OfficialBrandPresenceContext;
 }) {
-  const effectiveContext = useMemo(() => metaLibraryContext, [metaLibraryContext]);
+  const effectivePresence = useMemo(() => presence, [presence]);
 
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-transparent p-5 sm:p-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/35">Marketing tracker</p>
-        <h2 className="mt-1 text-lg font-semibold text-white">Liens officiels & organique</h2>
+        <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/35">Présence officielle</p>
+        <h2 className="mt-1 text-lg font-semibold text-white">Liens validés</h2>
         <p className="mt-1 max-w-2xl text-sm text-white/45">
-          Meta Ads Library est désactivé pour le moment. On garde la partie fiable : site officiel, réseaux validés et
-          base pour tracker les vidéos organiques récentes qui performent.
+          Site officiel en source principale, réseaux sociaux validés par branding et cohérence produit. Meta Ads
+          Library uniquement via la page Facebook officielle (view_all_page_id) — jamais de recherche mot-clé.
         </p>
       </div>
 
       <SocialPresenceStrip
-        profiles={effectiveContext.socialProfiles}
+        profiles={effectivePresence.socialProfiles}
         appName={appName}
-        openAiEnriched={effectiveContext.openAiEnriched}
-        officialWebsite={effectiveContext.officialWebsite}
-        confidence={effectiveContext.confidence}
-        sources={effectiveContext.sources}
-        officialLinks={effectiveContext.officialLinks}
+        openAiEnriched={effectivePresence.openAiEnriched}
+        officialWebsite={effectivePresence.officialWebsite}
+        confidence={effectivePresence.confidence}
+        sources={effectivePresence.sources}
+        officialLinks={effectivePresence.officialLinks}
       />
-
-      <div className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5 sm:p-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/40">Organic video tracker</p>
-        <h3 className="mt-1 text-base font-semibold text-white">Prochaine brique recommandée</h3>
-        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/45">
-          Oui, on peut créer un système qui part des comptes officiels validés, puis récupère les vidéos récentes et les
-          classe par vues, likes, commentaires, partages et vitesse de croissance. Le plus fiable sera TikTok, YouTube
-          Shorts et Instagram Reels quand les APIs/exports disponibles le permettent.
-        </p>
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-          {[
-            { title: "TikTok organique", text: "Dernières vidéos du compte officiel, vues, likes, commentaires, partages, lien direct." },
-            { title: "YouTube Shorts", text: "Shorts récents, vues publiques, engagement, date de publication et top hooks." },
-            { title: "Instagram Reels", text: "Lien des reels détectés, validation du compte officiel, scoring manuel/API selon accès." },
-          ].map((item) => (
-            <div key={item.title} className="rounded-xl border border-white/[0.07] bg-black/30 p-4">
-              <p className="text-sm font-semibold text-white/85">{item.title}</p>
-              <p className="mt-1 text-xs leading-relaxed text-white/40">{item.text}</p>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
@@ -97,7 +75,7 @@ export function SimilarShopsCarousel({
           {peers.map((app) => (
             <TrackerNavLink
               key={app.id}
-              href={`/tracker/apps/${app.id}?country=${country}&tab=ads`}
+              href={`/tracker/apps/${app.id}?country=${country}&tab=official`}
               className="flex w-[min(100vw-2rem,240px)] shrink-0 flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-50/50 transition hover:border-neutral-300 hover:bg-white"
             >
               <div className="flex items-center gap-2 border-b border-neutral-100 px-3 py-2">

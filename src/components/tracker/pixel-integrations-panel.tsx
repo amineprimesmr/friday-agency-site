@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { officialLinkFallbackText, type OfficialBrandLinksReport, type OfficialLinkKey } from "@/lib/official-brand-links";
 import type { DetectedSocialProfile } from "@/lib/social-presence";
-import type { BrandResolutionSource } from "@/lib/tracker-meta-ad-library-context";
+import type { BrandResolutionSource } from "@/lib/official-brand-presence-context";
 
 function IconInstagram({ className }: { className?: string }) {
   return (
@@ -262,118 +261,4 @@ export function SocialPresenceStrip({
       ) : null}
     </div>
   );
-}
-
-type PixelId =
-  | "ga"
-  | "gtm"
-  | "pinterest"
-  | "microsoft"
-  | "meta"
-  | "google_ads"
-  | "snap"
-  | "tiktok";
-
-const PIXELS: { id: PixelId; label: string }[] = [
-  { id: "ga", label: "Google Analytics" },
-  { id: "gtm", label: "Google Tag Manager" },
-  { id: "pinterest", label: "Pinterest Ads" },
-  { id: "microsoft", label: "Microsoft Advertising" },
-  { id: "meta", label: "Meta Pixel" },
-  { id: "google_ads", label: "Google Ads" },
-  { id: "snap", label: "Snap Pixel" },
-  { id: "tiktok", label: "TikTok Pixel" },
-];
-
-export function PixelIntegrationsPanel({
-  metaLibraryConfigured,
-}: {
-  /** Jeton serveur Meta Ad Library présent */
-  metaLibraryConfigured: boolean;
-}) {
-  const [tab, setTab] = useState<"pixels" | "shopify">("pixels");
-
-  return (
-    <div className="rounded-2xl border border-neutral-200 bg-white shadow-sm">
-      <div className="flex border-b border-neutral-200 p-1">
-        <button
-          type="button"
-          onClick={() => setTab("pixels")}
-          className={`flex-1 rounded-xl py-2.5 text-sm font-semibold transition ${
-            tab === "pixels" ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500"
-          }`}
-        >
-          Pixels
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab("shopify")}
-          className={`flex-1 rounded-xl py-2.5 text-sm font-semibold transition ${
-            tab === "shopify" ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500"
-          }`}
-        >
-          Apps Shopify
-        </button>
-      </div>
-
-      <div className="p-5">
-        {tab === "pixels" ? (
-          <>
-            <p className="mb-4 text-xs text-neutral-500">
-              Phase 1 · La collecte des pubs passe par{" "}
-              <strong className="font-medium text-neutral-700">Meta Ad Library (API)</strong>. Les pixels ci‑dessous seront
-              branchés quand tu connecteras tes comptes media (OAuth) — pour l’instant c’est un plan de route.
-            </p>
-            <div className="grid grid-cols-2 gap-2 sm:gap-3">
-              {PIXELS.map((p) => {
-                const isMeta = p.id === "meta";
-                const ready = isMeta && metaLibraryConfigured;
-                return (
-                  <div
-                    key={p.id}
-                    className={`flex items-center gap-2 rounded-xl border px-3 py-3 text-left text-sm font-medium ${
-                      ready ? "border-emerald-200 bg-emerald-50/60 text-emerald-950" : "border-neutral-200 text-neutral-800"
-                    }`}
-                  >
-                    <span className="min-w-0 flex-1 truncate">{p.label}</span>
-                    {ready ? (
-                      <span className="shrink-0 rounded-md bg-emerald-600/90 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
-                        API
-                      </span>
-                    ) : (
-                      <span className="shrink-0 text-[10px] font-medium uppercase text-neutral-400">Bientôt</span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        ) : (
-          <p className="rounded-xl bg-neutral-50 px-4 py-8 text-center text-sm text-neutral-500">
-            Connexion Shopify + catalogue produits — prévu dans une prochaine itération.
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-export function useMetaLibraryConfigured(): boolean {
-  const [ok, setOk] = useState(false);
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch("/api/meta/status");
-        const j = (await res.json()) as { configured?: boolean };
-        if (!cancelled) setOk(Boolean(j.configured));
-      } catch {
-        if (!cancelled) setOk(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-  return ok;
 }

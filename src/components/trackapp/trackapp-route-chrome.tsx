@@ -21,8 +21,6 @@ function isWorkspacePath(pathname: string): boolean {
     || pathname.startsWith("/trackapp/apptracker/")
     || pathname === "/trackapp/creer-mon-app"
     || pathname.startsWith("/trackapp/creer-mon-app/")
-    || pathname === "/trackapp/ads"
-    || pathname.startsWith("/trackapp/ads/")
     || pathname === "/trackapp/organique"
     || pathname.startsWith("/trackapp/organique/")
     || pathname === "/trackapp/logiciels"

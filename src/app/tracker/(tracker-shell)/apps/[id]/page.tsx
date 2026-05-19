@@ -17,7 +17,7 @@ import {
   type CountryRanking,
   type AppEntry,
 } from "@/lib/apple-charts";
-import { AppAdIntelligenceSection } from "@/components/tracker/app-ad-intelligence-section";
+import { AppOfficialPresenceSection } from "@/components/tracker/app-official-presence-section";
 import {
   fetchAppDetailCached,
   fetchCountryRankingsCached,
@@ -247,7 +247,8 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
   const countryData = COUNTRY_MAP[country as CountryCode];
   const ageYears = app.releaseDate ? Math.floor(daysSince(app.releaseDate) / 365) : null;
 
-  const activeTab: "overview" | "ads" = tab === "ads" ? "ads" : "overview";
+  const activeTab: "overview" | "official" =
+    tab === "official" || tab === "ads" ? "official" : "overview";
 
   const notesFreshBadge =
     app.currentVersionReleaseDate && app.averageUserRating > 0
@@ -458,7 +459,7 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
             </>
           )}
 
-          {activeTab === "ads" && (
+          {activeTab === "official" && (
             <Suspense
               fallback={
                 <div className="space-y-4" aria-busy="true">
@@ -467,7 +468,7 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
                 </div>
               }
             >
-              <AppAdIntelligenceSection app={app} appId={id} country={country as CountryCode} sidebarApps={sidebarApps} />
+              <AppOfficialPresenceSection app={app} appId={id} country={country as CountryCode} sidebarApps={sidebarApps} />
             </Suspense>
           )}
         </div>

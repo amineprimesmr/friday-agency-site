@@ -35,15 +35,6 @@ const IconRessources = () => (
   </svg>
 );
 
-const IconAds = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 11h3l8-5v12l-8-5H3z" />
-    <path d="M6 13v5a2 2 0 0 0 2 2h1" />
-    <path d="M18 9a4 4 0 0 1 0 6" />
-    <path d="M21 7a7 7 0 0 1 0 10" />
-  </svg>
-);
-
 const IconOrganic = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M7 20c0-6 4-10 10-10h4v4c0 6-4 10-10 10H7z" />
@@ -82,7 +73,6 @@ const LINKS: readonly SidebarLink[] = [
   { href: "/trackapp/accueil", label: "Accueil", section: "accueil", Icon: IconHome },
   { href: "/trackapp/apptracker", label: "Apps du mois", section: "apptracker", Icon: IconSearchApp },
   { href: "/trackapp/creer-mon-app", label: "Créer mon app", section: "creer-mon-app", Icon: IconRocket },
-  { href: "/trackapp/ads", label: "Ads", section: "ads", Icon: IconAds },
   { href: "/trackapp/organique", label: "Organique", section: "organique", Icon: IconOrganic, soon: true },
   { href: "/trackapp/logiciels", label: "Logiciels", section: "logiciels", Icon: IconSoftware },
   { href: "/trackapp/ressources", label: "Ressources", section: "ressources", Icon: IconRessources },

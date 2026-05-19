@@ -33,7 +33,6 @@ const IconChevronRight = () => (
 
 const SUBLINKS = [
   { href: "/trackapp/favoris/apps", label: "Apps" },
-  { href: "/trackapp/favoris/ads", label: "Ads" },
   { href: "/trackapp/favoris/ressources", label: "Ressources" },
 ] as const;
 
