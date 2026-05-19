@@ -1,3 +1,4 @@
+import { isTrackappCreerDepuisAppPath } from "@/lib/trackapp-app-clone-paths";
 import {
   isTrackappApptrackerDetailPath,
   TRACKAPP_ACCUEIL_BASE,
@@ -85,6 +86,15 @@ export function resolveTrackappBreadcrumb(pathname: string): TrackappBreadcrumb 
       hubLabel: "Apptracker",
       hubHref: TRACKAPP_ACCUEIL_BASE,
       pageLabel: "Fiche app",
+    };
+  }
+
+  if (isTrackappCreerDepuisAppPath(pathname)) {
+    return {
+      sectionLabel: "appLAB",
+      hubLabel: "Formation",
+      hubHref: "/trackapp/creer-mon-app",
+      pageLabel: "Créer cette app",
     };
   }
 

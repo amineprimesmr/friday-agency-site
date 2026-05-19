@@ -757,9 +757,15 @@ export function CreateAppJourney() {
             <section className="rounded-[22px] border border-slate-200 bg-slate-950 p-5 text-white">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h3 className="m-0 text-[1rem] font-bold">Prompt IA à utiliser</h3>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-[0.72rem] font-bold uppercase tracking-[0.14em] text-white/60">
-                  Copier dans Cursor/Claude
-                </span>
+                <button
+                  type="button"
+                  className="rounded-full bg-white/10 px-3 py-1 text-[0.72rem] font-bold uppercase tracking-[0.14em] text-white/60 transition hover:bg-white/20"
+                  onClick={() => {
+                    void navigator.clipboard.writeText(active.prompt);
+                  }}
+                >
+                  Copier le prompt
+                </button>
               </div>
               <p className="mt-4 whitespace-pre-wrap rounded-2xl border border-white/10 bg-white/[0.04] p-4 font-mono text-[0.82rem] leading-relaxed text-white/78">
                 {active.prompt}

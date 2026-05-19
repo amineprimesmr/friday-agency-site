@@ -1,0 +1,130 @@
+.trackapp-clone-hero {
+  border-radius: 28px;
+  border: 1px solid var(--dash-border);
+  background: linear-gradient(145deg, #0f172a 0%, #1e293b 48%, #0f172a 100%);
+  color: #f8fafc;
+  box-shadow: var(--dash-shadow-lg);
+}
+
+.trackapp-clone-hero-kicker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(248, 250, 252, 0.55);
+}
+
+.trackapp-clone-prompt-preview {
+  max-height: min(52vh, 520px);
+  overflow: auto;
+  border-radius: 18px;
+  border: 1px solid var(--dash-border);
+  background: #0b1220;
+  color: rgba(248, 250, 252, 0.88);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  padding: 1rem 1.1rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.trackapp-clone-ide-btn {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0 1.15rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.trackapp-clone-ide-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.trackapp-clone-ide-btn--cursor {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #e2e8f0;
+}
+
+.trackapp-clone-ide-btn--cursor:hover:not(:disabled) {
+  background: #fff;
+}
+
+.trackapp-clone-ide-btn--claude {
+  background: #d97706;
+  color: #fffbeb;
+  border-color: #b45309;
+}
+
+.trackapp-clone-ide-btn--claude:hover:not(:disabled) {
+  background: #ea580c;
+}
+
+.trackapp-clone-ide-btn--ghost {
+  background: transparent;
+  color: var(--dash-text);
+  border-color: var(--dash-border);
+}
+
+.trackapp-clone-ide-btn--ghost:hover:not(:disabled) {
+  background: #f8fafc;
+}
+
+.trackapp-clone-option {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  border-radius: 16px;
+  border: 1px solid var(--dash-border);
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  background: #fff;
+  text-align: left;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.trackapp-clone-option:hover {
+  border-color: #94a3b8;
+}
+
+.trackapp-clone-option[data-active="true"] {
+  border-color: #0f172a;
+  box-shadow: 0 0 0 1px #0f172a;
+}
+
+.trackapp-clone-option-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--dash-text);
+}
+
+.trackapp-clone-option-desc {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--dash-muted-light);
+}
+
+.trackapp-clone-toast {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 80;
+  max-width: min(360px, calc(100vw - 2rem));
+  border-radius: 14px;
+  border: 1px solid var(--dash-border);
+  background: #fff;
+  padding: 0.85rem 1rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--dash-text);
+  box-shadow: var(--dash-shadow-lg);
+}

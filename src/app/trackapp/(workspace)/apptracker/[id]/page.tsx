@@ -22,6 +22,7 @@ import { TrackappApptrackerDetailContext } from "@/components/trackapp/trackapp-
 import { TrackappAppFavoriteButton } from "@/components/trackapp/trackapp-app-favorite-button";
 import { TrackappAppStoreScreenshots } from "@/components/trackapp/trackapp-app-store-screenshots";
 import { TrackappOfficialPresenceLoading } from "@/components/trackapp/trackapp-official-presence-loading";
+import { TrackappCreateAppCta } from "@/components/trackapp/trackapp-create-app-cta";
 import { TrackappOfficialPresenceSection } from "@/components/trackapp/trackapp-official-presence-section";
 
 /** OpenAI web search peut prendre 15–45 s */
@@ -126,6 +127,7 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2 self-start sm:justify-end lg:items-start">
+              <TrackappCreateAppCta appId={app.id} country={country} />
               {loggedIn ? (
                 <TrackappAppFavoriteButton appId={app.id} initialFavorite={appFav} enabled />
               ) : null}
