@@ -3,10 +3,8 @@ import { unstable_cache } from "next/cache";
 import type { CountryCode } from "@/lib/apple-charts";
 import { canonicalSiteOrigin } from "@/lib/embed-url";
 import { buildOfficialBrandPresenceContext } from "@/lib/official-brand-presence";
-import {
-  trackappApptrackerAppHref,
-  trackappCreerDepuisAppHref,
-} from "@/lib/trackapp-app-clone-paths";
+import { trackappCreerDepuisAppHref } from "@/lib/trackapp-app-clone-paths";
+import { trackappApptrackerAppHref } from "@/lib/trackapp-apptracker-paths";
 import { assembleTrackappClonePromptBundle } from "@/lib/trackapp-clone-prompt/build-prompt";
 import type { TrackappCloneAngle, TrackappCloneStack } from "@/lib/trackapp-clone-prompt/types";
 import { metricsFromEmbedContext } from "@/lib/trackapp-app-display-metrics";

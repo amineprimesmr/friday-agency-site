@@ -2,7 +2,6 @@ import { isTrackappCreerDepuisAppPath } from "@/lib/trackapp-app-clone-paths";
 import {
   isTrackappApptrackerDetailPath,
   TRACKAPP_ACCUEIL_BASE,
-  TRACKAPP_APPTRACKER_BASE,
 } from "@/lib/trackapp-apptracker-paths";
 
 export type TrackappNavItem = Readonly<{
