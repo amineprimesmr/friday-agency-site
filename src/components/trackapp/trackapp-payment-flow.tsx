@@ -1,23 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
+  PROMO_SLIDES,
+  PromoPanel,
   TrackappLimeLogo,
 } from "@/components/trackapp/auth/trackapp-auth-shared";
-import { TrackappPaiementMarketingPlanSwitcher } from "@/components/trackapp/trackapp-paiement-marketing-plan-switcher";
-import { TrackappPaiementPlanSpotlightCards } from "@/components/trackapp/trackapp-paiement-plan-spotlight-cards";
-import { TrackappPaymentReviewsPane } from "@/components/trackapp/trackapp-payment-reviews-pane";
-import { TrackerHeroSocialProofBadge } from "@/components/tracker/tracker-hero-social-proof-badge";
+import { TrackappPaymentModalCards } from "@/components/trackapp/trackapp-payment-modal-cards";
 
 import "@/styles/trackapp-auth-modal.css";
-import "@/styles/trackapp-paiement-landing.css";
 import "@/styles/trackapp-payment-modal.css";
-import "@/styles/trackapp-saas-pro-payment-page.css";
 
-/** Modale paiement bureau — même coque que la connexion (panneau promo + formulaire). */
+/** Modale paiement bureau — même coque et dimensions que la connexion. */
 export function TrackappPaymentFlow({ onClose }: Readonly<{ onClose: () => void }>) {
-  const [checkoutRevealed, setCheckoutRevealed] = useState(false);
+  const [slide, setSlide] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setSlide((s) => (s + 1) % PROMO_SLIDES.length), 4200);
+    return () => clearInterval(t);
+  }, []);
 
   return (
     <div className="ta-auth-root ta-auth-root--embedded ta-font">
@@ -28,31 +30,16 @@ export function TrackappPaymentFlow({ onClose }: Readonly<{ onClose: () => void 
           </svg>
         </button>
 
-        <div className="ta-auth-pane ta-auth-pane--payment">
+        <div className="ta-auth-pane ta-auth-pane--payment-modal">
           <TrackappLimeLogo />
-          <div className="ta-pay-pick-head">
-            <h1 id="trackapp-payment-dialog-title" className="tpl-pick__title">
-              Choisissez votre plan
-            </h1>
-            <p className="tpl-pick__sub">Trouvez les apps qui scalent en ce moment.</p>
-          </div>
-
-          <div className="tpl-pick__badge-wrap">
-            <TrackerHeroSocialProofBadge />
-          </div>
-
-          <div className={`ta-pay-spotlight-stack${checkoutRevealed ? " ta-pay-spotlight-stack--checkout-open" : ""}`}>
-            {!checkoutRevealed ? <TrackappPaiementMarketingPlanSwitcher /> : null}
-            <TrackappPaiementPlanSpotlightCards
-              className="tpl-spotlight-carousel--payment-modal"
-              checkoutReveal
-              checkoutRevealed={checkoutRevealed}
-              onCheckoutRevealedChange={setCheckoutRevealed}
-            />
-          </div>
+          <h1 id="trackapp-payment-dialog-title" className="ta-auth-headline">
+            Choisissez votre plan
+          </h1>
+          <p className="ta-auth-lead">Clique sur une formule pour payer sur Stripe.</p>
+          <TrackappPaymentModalCards />
         </div>
 
-        <TrackappPaymentReviewsPane />
+        <PromoPanel active={slide} />
       </div>
     </div>
   );

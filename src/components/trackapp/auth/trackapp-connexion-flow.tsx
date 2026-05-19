@@ -8,11 +8,11 @@ import {
   PROMO_SLIDES,
   PromoPanel,
   SvgGoogle,
-  SvgCloudSmall,
   TaAuthLegalFooter,
   TaAuthSuspended,
   TrackappLimeLogo,
 } from "@/components/trackapp/auth/trackapp-auth-shared";
+import { TrackappPaymentNavLink } from "@/components/trackapp/trackapp-payment-nav-link";
 import { createClient } from "@/lib/supabase/client";
 
 function ConnexionExperienceInner({
@@ -167,18 +167,10 @@ function ConnexionExperienceInner({
               Mot de passe oublié ?
             </Link>
             <span>
-              Pas encore abonné ?{" "}
-              <Link prefetch={false} href="/trackapp/paiement">
-                Choisir un plan
-              </Link>
-            </span>
-          </div>
-
-          <div className="ta-auth-sso-note mt-12 border-t border-white/[0.06] pt-6">
-            <SvgCloudSmall />
-            <span>
-              Premier achat ?{" "}
-              <Link href="/trackapp/paiement">Commencer par le paiement</Link>, puis crée ton compte.
+              Pas de compte ?{" "}
+              <TrackappPaymentNavLink className="hover:text-white hover:underline" onBeforeOpen={onClose}>
+                S&apos;inscrire
+              </TrackappPaymentNavLink>
             </span>
           </div>
 
