@@ -6,6 +6,9 @@ import { useEffect, useRef } from "react";
 import type { CountryCode, CountryRanking } from "@/lib/apple-charts";
 import { COUNTRY_GLOBE_CENTROIDS } from "@/lib/country-globe-centroids";
 
+const GLOBE_SIZE_PX = 360;
+const GLOBE_DPR = typeof window !== "undefined" ? Math.min(2, window.devicePixelRatio || 1) : 2;
+
 function countryToGlobeAngles(lat: number, lng: number): { phi: number; theta: number } {
   return {
     phi: Math.PI - (lng * Math.PI) / 180 - Math.PI / 2,
@@ -50,6 +53,7 @@ type Props = Readonly<{
 }>;
 
 export function TrackappCountryRankingsGlobe({ rankings, focusCountry, onFocusCountry }: Props) {
+  const rootRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const focusRef = useRef(focusCountry);
   const pointerInteracting = useRef<number | null>(null);
@@ -72,26 +76,21 @@ export function TrackappCountryRankingsGlobe({ rankings, focusCountry, onFocusCo
   rankingsRef.current = rankings;
 
   useEffect(() => {
+    const root = rootRef.current;
     const canvas = canvasRef.current;
-    if (!canvas) return undefined;
+    if (!root || !canvas) return undefined;
 
-    let width = canvas.parentElement?.offsetWidth ?? 400;
-
-    const onResize = () => {
-      width = canvas.parentElement?.offsetWidth ?? 400;
-    };
-    onResize();
-    window.addEventListener("resize", onResize);
+    const pixelSize = Math.round(GLOBE_SIZE_PX * GLOBE_DPR);
 
     const globe = createGlobe(canvas, {
-      devicePixelRatio: 2,
-      width: width * 2,
-      height: width * 2,
+      devicePixelRatio: GLOBE_DPR,
+      width: pixelSize,
+      height: pixelSize,
       phi: phiRef.current,
       theta: thetaRef.current,
       dark: 1,
       diffuse: 1.15,
-      mapSamples: 20000,
+      mapSamples: 12_000,
       mapBrightness: 5.5,
       baseColor: [0.12, 0.14, 0.2],
       markerColor: [0.2, 0.85, 0.45],
@@ -101,7 +100,14 @@ export function TrackappCountryRankingsGlobe({ rankings, focusCountry, onFocusCo
     });
 
     let frameId = 0;
+    let visible = true;
+
     const tick = () => {
+      if (!visible) {
+        frameId = requestAnimationFrame(tick);
+        return;
+      }
+
       const focus = focusRef.current;
       const target = focus ? focusAnglesRef.current : null;
 
@@ -119,8 +125,6 @@ export function TrackappCountryRankingsGlobe({ rankings, focusCountry, onFocusCo
       globe.update({
         phi: phiRef.current,
         theta: thetaRef.current,
-        width: width * 2,
-        height: width * 2,
         markers: buildMarkers(rankingsRef.current, focus),
       });
 
@@ -128,18 +132,28 @@ export function TrackappCountryRankingsGlobe({ rankings, focusCountry, onFocusCo
     };
     frameId = requestAnimationFrame(tick);
 
+    const visibilityObserver = new IntersectionObserver(
+      ([entry]) => {
+        visible = entry?.isIntersecting ?? true;
+      },
+      { rootMargin: "120px", threshold: 0.05 },
+    );
+    visibilityObserver.observe(root);
+
     return () => {
       cancelAnimationFrame(frameId);
-      window.removeEventListener("resize", onResize);
+      visibilityObserver.disconnect();
       globe.destroy();
     };
   }, []);
 
   return (
-    <div className="trackapp-country-globe">
+    <div ref={rootRef} className="trackapp-country-globe">
       <canvas
         ref={canvasRef}
         className="trackapp-country-globe__canvas"
+        width={GLOBE_SIZE_PX}
+        height={GLOBE_SIZE_PX}
         aria-hidden
         onPointerDown={(e) => {
           pointerInteracting.current = e.clientX - pointerInteractingMovement.current;

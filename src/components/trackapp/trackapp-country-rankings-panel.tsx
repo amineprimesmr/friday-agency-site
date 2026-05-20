@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
 
 import type { CountryCode, CountryRanking } from "@/lib/apple-charts";
@@ -11,9 +12,22 @@ import {
 } from "@/lib/country-rankings-display";
 import { cn } from "@/lib/utils";
 
-import { TrackappCountryRankingsGlobe } from "@/components/trackapp/trackapp-country-rankings-globe";
-
 import "@/styles/trackapp-country-rankings.css";
+
+const TrackappCountryRankingsGlobe = dynamic(
+  () =>
+    import("@/components/trackapp/trackapp-country-rankings-globe").then(
+      (m) => m.TrackappCountryRankingsGlobe,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="trackapp-country-globe trackapp-country-globe--loading" aria-hidden>
+        <span className="trackapp-country-globe__loading-label">Globe…</span>
+      </div>
+    ),
+  },
+);
 
 function tierBadgeClass(tier: ReturnType<typeof countryRankTier>): string {
   if (tier === "top") return "trackapp-country-rankings__badge--top";
