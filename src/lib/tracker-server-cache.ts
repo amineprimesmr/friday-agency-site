@@ -48,7 +48,7 @@ export async function getTrackerCuratedPotentialAppsCached() {
 export function loadTrackerAppEmbedContextCached(appId: string, country: CountryCode) {
   return unstable_cache(
     () => loadTrackerAppEmbedContext(appId, country),
-    ["tracker-app-embed-v2", appId, country],
+    ["tracker-app-embed-v3", appId, country],
     { revalidate: REVALIDATE_TRACKER },
   )();
 }
@@ -66,7 +66,7 @@ export function loadAppStoreWebScreenshotsCached(appId: string, country: Country
 export function loadAppStoreInAppOffersCached(appId: string, country: CountryCode) {
   return unstable_cache(
     () => fetchAppStoreInAppOffers(appId, country),
-    ["app-store-in-app-offers-v1", appId, country],
+    ["app-store-in-app-offers-v2", appId, country],
     { revalidate: REVALIDATE_TRACKER },
   )();
 }

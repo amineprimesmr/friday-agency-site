@@ -12,6 +12,7 @@ import {
   type CountryCode,
 } from "@/lib/apple-charts";
 import { metricsFromEmbedContext } from "@/lib/trackapp-app-display-metrics";
+import { finalizeTrackappRevenueEurLabel } from "@/lib/trackapp-revenue-display";
 import { getTrackappProfileFavorites } from "@/lib/trackapp-profile-favorites";
 import {
   fetchAppDetailCached,
@@ -95,7 +96,7 @@ export default async function TrackappAccueilAppDetailPage({ params, searchParam
     genreSliceRank,
   );
   const downloadsValue = listMetrics.downloadsDisplay;
-  const revenueValue = listMetrics.revenueDisplay;
+  const revenueValue = finalizeTrackappRevenueEurLabel(listMetrics.revenueDisplay);
   const metricSource = listMetrics.metricSource;
   const appAge = app.releaseDate ? daysSince(app.releaseDate) : Number.NaN;
   const screenshotUrls =
@@ -166,6 +167,8 @@ export default async function TrackappAccueilAppDetailPage({ params, searchParam
         <MetricCard label="Ancienneté" value={Number.isFinite(appAge) ? timeAgo(app.releaseDate) : "—"} sub={app.version ? `Version ${app.version}` : undefined} />
       </section>
 
+      <TrackappInAppOffersSection data={inAppOffers} className="mt-5" />
+
       <Suspense fallback={<TrackappOfficialPresenceLoading />}>
         <TrackappOfficialPresenceSection
           app={app}
@@ -202,8 +205,6 @@ export default async function TrackappAccueilAppDetailPage({ params, searchParam
           </div>
         </article>
       </section>
-
-      <TrackappInAppOffersSection data={inAppOffers} className="mt-5" />
 
       <TrackappAppStoreScreenshots urls={screenshotUrls} title="Screenshots App Store" />
 

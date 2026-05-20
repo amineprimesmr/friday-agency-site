@@ -97,6 +97,9 @@ export function formatTrackappAggregateRevenueEur(
 
   const fromString = parseUsdCurrencyLabel(agg.revenueString);
   if (fromString != null) {
+    if (/€|eur/i.test(agg.revenueString) && isTrackappSentinelOrZeroRevenueEur(fromString)) {
+      return formatTrackappZeroRevenueEur();
+    }
     return formatTrackappRevenueFromUsdAnchor(fromString, appId);
   }
 

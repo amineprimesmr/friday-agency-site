@@ -190,16 +190,12 @@ function extractEmbeddedProductJson(html: string): unknown | null {
   }
 }
 
-/**
- * Offres d’achats intégrés / abonnements affichées sur la fiche apps.apple.com (pays donné).
- * Source publique Apple — pas le paywall in-app ni les promos personnalisées.
- */
-export async function fetchAppStoreInAppOffers(
+const IAP_FALLBACK_COUNTRIES: readonly CountryCode[] = ["fr", "us", "gb", "de"];
+
+async function fetchOffersForCountry(
   appId: string,
   country: CountryCode,
-): Promise<AppStoreInAppOffers> {
-  const empty: AppStoreInAppOffers = { offers: [], country, source: "unavailable" };
-
+): Promise<{ offers: AppStoreInAppOffer[]; sectionTitle: string } | null> {
   try {
     const res = await fetch(appStoreProductUrl(appId, country), {
       headers: {
@@ -211,20 +207,39 @@ export async function fetchAppStoreInAppOffers(
       cache: "no-store",
       signal: AbortSignal.timeout(FETCH_MS),
     });
-    if (!res.ok) return empty;
+    if (!res.ok) return null;
 
     const html = await res.text();
     const embedded = extractEmbeddedProductJson(html);
     const parsed = parseOffersFromEmbeddedJson(embedded, country);
-    if (!parsed?.offers.length) return empty;
-
-    return {
-      offers: parsed.offers,
-      sectionTitle: parsed.sectionTitle,
-      country,
-      source: "app-store-web",
-    };
+    if (!parsed?.offers.length) return null;
+    return parsed;
   } catch {
-    return empty;
+    return null;
   }
+}
+
+/**
+ * Offres d’achats intégrés / abonnements affichées sur la fiche apps.apple.com.
+ * Essaie le pays demandé puis fr / us / gb / de si la section IAP est vide.
+ */
+export async function fetchAppStoreInAppOffers(
+  appId: string,
+  country: CountryCode,
+): Promise<AppStoreInAppOffers> {
+  const empty: AppStoreInAppOffers = { offers: [], country, source: "unavailable" };
+  const tryOrder = [country, ...IAP_FALLBACK_COUNTRIES.filter((c) => c !== country)];
+
+  for (const cc of tryOrder) {
+    const parsed = await fetchOffersForCountry(appId, cc);
+    if (parsed?.offers.length) {
+      return {
+        offers: parsed.offers,
+        sectionTitle: parsed.sectionTitle,
+        country: cc,
+        source: "app-store-web",
+      };
+    }
+  }
+  return empty;
 }

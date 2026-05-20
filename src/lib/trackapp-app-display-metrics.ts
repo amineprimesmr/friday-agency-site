@@ -93,7 +93,7 @@ const sensorTowerAggregateCached = (appId: string) =>
       const agg = await fetchSensorTowerAggregateWithRetry(appId);
       return agg && hasAnyTrackerAggregateSignal(agg) ? agg : null;
     },
-    ["trackapp-sensor-tower-aggregate-v3", appId],
+    ["trackapp-sensor-tower-aggregate-v4", appId],
     { revalidate: 3600 },
   );
 
@@ -208,7 +208,7 @@ async function resolveTrackappAppDisplayMetricsCanonical(
 export function getTrackappAppDisplayMetricsCached(appId: string, country: CountryCode) {
   return unstable_cache(
     () => resolveTrackappAppDisplayMetricsCanonical(appId, country),
-    ["trackapp-display-metrics-canonical-v6", appId, country],
+    ["trackapp-display-metrics-canonical-v7", appId, country],
     { revalidate: 3600 },
   )();
 }
