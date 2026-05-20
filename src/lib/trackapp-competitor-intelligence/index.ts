@@ -11,25 +11,39 @@ export type { HydratedCompetitorReport, CompetitorIntelligenceReport } from "@/l
 export type RunCompetitorIntelligenceResult = Readonly<{
   report: HydratedCompetitorReport | null;
   error: "not_found" | "openai_unavailable" | "analysis_failed" | null;
+  detail?: string;
 }>;
 
 async function runUncached(appId: string, country: CountryCode): Promise<RunCompetitorIntelligenceResult> {
   const ctx = await buildCompetitorAnalysisContext(appId, country);
   if (!ctx) return { report: null, error: "not_found" };
 
-  const raw = await analyzeCompetitorsWithOpenAI(ctx);
-  if (!raw) {
+  const analyzed = await analyzeCompetitorsWithOpenAI(ctx);
+  if (!analyzed.report) {
     const hasKey = Boolean(process.env.OPENAI_API_KEY?.trim());
-    return { report: null, error: hasKey ? "analysis_failed" : "openai_unavailable" };
+    return {
+      report: null,
+      error: hasKey ? "analysis_failed" : "openai_unavailable",
+      detail: analyzed.failureDetail,
+    };
   }
 
-  const hydrated = await hydrateCompetitorReport(raw, country, appId);
+  const hydrated = await hydrateCompetitorReport(analyzed.report, country, appId);
   return { report: hydrated, error: null };
 }
 
-const cachedRun = unstable_cache(
-  async (appId: string, country: CountryCode) => runUncached(appId, country),
-  ["trackapp-competitor-intelligence-v1"],
+/** Ne met en cache que les succès (unstable_cache ne doit pas mémoriser les échecs). */
+async function runCachedSuccess(appId: string, country: CountryCode): Promise<HydratedCompetitorReport> {
+  const result = await runUncached(appId, country);
+  if (!result.report) {
+    throw new Error(result.detail || result.error || "competitor_analysis_failed");
+  }
+  return result.report;
+}
+
+const cachedSuccessOnly = unstable_cache(
+  runCachedSuccess,
+  ["trackapp-competitor-intelligence-v2"],
   { revalidate: 3600 },
 );
 
@@ -44,5 +58,11 @@ export async function runTrackappCompetitorIntelligence(
     return { report: null, error: "not_found" };
   }
   if (options?.bypassCache) return runUncached(id, country);
-  return cachedRun(id, country);
+
+  try {
+    const cached = await cachedSuccessOnly(id, country);
+    return { report: cached, error: null };
+  } catch {
+    return runUncached(id, country);
+  }
 }

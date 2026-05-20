@@ -1,3 +1,7 @@
+import {
+  extractOpenAiResponseText,
+  readOpenAiResponsesError,
+} from "@/lib/openai-responses";
 import type { CompetitorAnalysisContext } from "@/lib/trackapp-competitor-intelligence/build-context";
 import { buildCompetitorAnalysisUserPrompt } from "@/lib/trackapp-competitor-intelligence/prompts";
 import { COMPETITOR_INTELLIGENCE_JSON_SCHEMA } from "@/lib/trackapp-competitor-intelligence/schema";
@@ -8,21 +12,17 @@ import type {
   CompetitorType,
 } from "@/lib/trackapp-competitor-intelligence/types";
 
-function extractResponseText(record: Record<string, unknown>): string | null {
-  const output = record.output;
-  if (!Array.isArray(output)) return null;
-  for (const item of output) {
-    if (!item || typeof item !== "object") continue;
-    const content = (item as Record<string, unknown>).content;
-    if (!Array.isArray(content)) continue;
-    for (const part of content) {
-      if (!part || typeof part !== "object") continue;
-      const text = (part as Record<string, unknown>).text;
-      if (typeof text === "string" && text.trim()) return text;
-    }
-  }
-  return null;
-}
+export type CompetitorAnalyzeFailure =
+  | "openai_http"
+  | "openai_empty"
+  | "openai_parse"
+  | "openai_report_parse";
+
+export type CompetitorAnalyzeResult = Readonly<{
+  report: CompetitorIntelligenceReport | null;
+  failure?: CompetitorAnalyzeFailure;
+  failureDetail?: string;
+}>;
 
 function asString(v: unknown, fallback = ""): string {
   return typeof v === "string" ? v.trim() : fallback;
@@ -176,9 +176,9 @@ function parseReport(raw: unknown, ctx: CompetitorAnalysisContext): CompetitorIn
 
 export async function analyzeCompetitorsWithOpenAI(
   ctx: CompetitorAnalysisContext,
-): Promise<CompetitorIntelligenceReport | null> {
+): Promise<CompetitorAnalyzeResult> {
   const key = process.env.OPENAI_API_KEY?.trim();
-  if (!key) return null;
+  if (!key) return { report: null };
 
   const model =
     process.env.TRACKAPP_COMPETITOR_OPENAI_MODEL?.trim() ||
@@ -226,15 +226,29 @@ export async function analyzeCompetitorsWithOpenAI(
     }),
   });
 
-  if (!response.ok) return null;
-  const record = (await response.json()) as Record<string, unknown>;
-  const text = extractResponseText(record);
-  if (!text) return null;
+  if (!response.ok) {
+    const err = await readOpenAiResponsesError(response);
+    console.error("[competitors] OpenAI HTTP", err.status, err.message);
+    return { report: null, failure: "openai_http", failureDetail: `${err.status}: ${err.message}` };
+  }
+
+  const record = await response.json();
+  const text = extractOpenAiResponseText(record);
+  if (!text) {
+    console.error("[competitors] OpenAI empty output", JSON.stringify(record).slice(0, 800));
+    return { report: null, failure: "openai_empty", failureDetail: "Réponse OpenAI sans texte JSON" };
+  }
 
   try {
     const parsed = JSON.parse(text) as unknown;
-    return parseReport(parsed, ctx);
-  } catch {
-    return null;
+    const report = parseReport(parsed, ctx);
+    if (!report) {
+      return { report: null, failure: "openai_report_parse", failureDetail: "JSON invalide pour le rapport" };
+    }
+    return { report };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "parse error";
+    console.error("[competitors] JSON parse", msg);
+    return { report: null, failure: "openai_parse", failureDetail: msg };
   }
 }

@@ -23,7 +23,11 @@ export async function GET(req: Request) {
       const status =
         result.error === "not_found" ? 404 : result.error === "openai_unavailable" ? 503 : 502;
       return NextResponse.json(
-        { error: result.error ?? "analysis_failed", report: null },
+        {
+          error: result.error ?? "analysis_failed",
+          detail: result.detail ?? null,
+          report: null,
+        },
         { status },
       );
     }

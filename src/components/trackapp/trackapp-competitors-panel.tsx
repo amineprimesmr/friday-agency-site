@@ -167,15 +167,18 @@ export function TrackappCompetitorsPanel({ appId, appName, country }: Props) {
           const data = (await res.json()) as {
             report?: HydratedCompetitorReport | null;
             error?: string | null;
+            detail?: string | null;
           };
           if (ac.signal.aborted) return;
           if (!res.ok || !data.report) {
             setReport(null);
-            setError(
-              data.error === "openai_unavailable"
-                ? "Analyse IA indisponible (clé OpenAI manquante)."
-                : "Impossible de générer l’analyse concurrentielle.",
-            );
+            if (data.error === "openai_unavailable") {
+              setError("Analyse IA indisponible — ajoutez OPENAI_API_KEY sur Vercel.");
+            } else if (data.detail) {
+              setError(`Analyse impossible : ${data.detail}`);
+            } else {
+              setError("Impossible de générer l’analyse concurrentielle.");
+            }
             return;
           }
           setReport(data.report);
