@@ -41,6 +41,64 @@
   z-index: 1;
 }
 
+#app-app .app-main .trackapp-workspace-loading {
+  display: grid;
+  gap: 1rem;
+  padding-top: 2rem;
+}
+
+#app-app .app-main .trackapp-workspace-loading__bar,
+#app-app .app-main .trackapp-workspace-loading__hero,
+#app-app .app-main .trackapp-workspace-loading__line,
+#app-app .app-main .trackapp-workspace-loading__grid span {
+  display: block;
+  overflow: hidden;
+  border-radius: 14px;
+  background: linear-gradient(90deg, #eef2f7 0%, #ffffff 42%, #eef2f7 76%);
+  background-size: 220% 100%;
+  animation: trackapp-workspace-skeleton 0.9s ease-in-out infinite;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+#app-app .app-main .trackapp-workspace-loading__bar {
+  width: min(18rem, 72vw);
+  height: 0.8rem;
+}
+
+#app-app .app-main .trackapp-workspace-loading__hero {
+  width: 100%;
+  height: clamp(8rem, 18vw, 13rem);
+  border-radius: 20px;
+}
+
+#app-app .app-main .trackapp-workspace-loading__line {
+  width: min(24rem, 84vw);
+  height: 0.75rem;
+}
+
+#app-app .app-main .trackapp-workspace-loading__line--wide {
+  width: min(36rem, 92vw);
+}
+
+#app-app .app-main .trackapp-workspace-loading__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+#app-app .app-main .trackapp-workspace-loading__grid span {
+  height: 6.5rem;
+}
+
+@keyframes trackapp-workspace-skeleton {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
 #app-app .app-main .dashboard-section {
   margin-bottom: 2rem;
 }

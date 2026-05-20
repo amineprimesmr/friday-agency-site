@@ -139,6 +139,15 @@ body.trackapp-fidelity-body #app-app {
   background: rgba(255, 255, 255, 0.04);
 }
 
+.trackapp-lab-nav__item--pending {
+  color: rgba(255, 255, 255, 0.86);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.trackapp-lab-nav__item--pending .trackapp-lab-nav__item-icon {
+  animation: trackapp-nav-pending-pulse 0.75s ease-in-out infinite alternate;
+}
+
 .trackapp-lab-nav__item--active {
   color: #fff !important;
   font-weight: 600;
@@ -168,6 +177,15 @@ body.trackapp-fidelity-body #app-app {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+@keyframes trackapp-nav-pending-pulse {
+  from {
+    opacity: 0.42;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* —— Topbar breadcrumb —— */
@@ -231,5 +249,11 @@ body.trackapp-fidelity-body #app-app .trackapp-lab-topbar .app-desktop-topbar__s
 
   body.trackapp-fidelity-body #app-app .trackapp-lab-topbar__crumbs {
     font-size: 0.8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trackapp-lab-nav__item--pending .trackapp-lab-nav__item-icon {
+    animation: none;
   }
 }

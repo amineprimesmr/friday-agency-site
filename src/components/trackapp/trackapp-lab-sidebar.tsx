@@ -46,15 +46,20 @@ function NavSubLink({
   item,
   pathname,
   onNavigate,
+  onPendingNavigate,
+  pending,
 }: Readonly<{
   item: TrackappNavItem;
   pathname: string;
   onNavigate?: () => void;
+  onPendingNavigate?: (href: string) => void;
+  pending?: boolean;
 }>) {
   const active = isNavItemActive(pathname, item);
   const className = cn(
     "trackapp-lab-nav__item",
     active && "trackapp-lab-nav__item--active",
+    pending && "trackapp-lab-nav__item--pending",
     item.soon && "trackapp-lab-nav__item--soon",
   );
 
@@ -74,7 +79,15 @@ function NavSubLink({
   }
 
   return (
-    <Link href={item.href} className={className} onClick={() => onNavigate?.()}>
+    <Link
+      href={item.href}
+      prefetch
+      className={className}
+      onClick={() => {
+        if (!active) onPendingNavigate?.(item.href);
+        onNavigate?.();
+      }}
+    >
       {body}
     </Link>
   );
@@ -93,6 +106,7 @@ export function TrackappLabSidebar({
   email?: string;
   signOutHref?: string;
 }>) {
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = {};
     for (const g of TRACKAPP_NAV_GROUPS) {
@@ -102,6 +116,7 @@ export function TrackappLabSidebar({
   });
 
   useEffect(() => {
+    setPendingHref(null);
     setOpenGroups((prev) => {
       const next = { ...prev };
       for (const g of TRACKAPP_NAV_GROUPS) {
@@ -161,7 +176,14 @@ export function TrackappLabSidebar({
               {hasItems && open ? (
                 <div className="trackapp-lab-nav__children">
                   {group.items.map((item) => (
-                    <NavSubLink key={`${group.id}-${item.label}`} item={item} pathname={pathname} onNavigate={onNavigate} />
+                    <NavSubLink
+                      key={`${group.id}-${item.label}`}
+                      item={item}
+                      pathname={pathname}
+                      onNavigate={onNavigate}
+                      onPendingNavigate={setPendingHref}
+                      pending={pendingHref === item.href}
+                    />
                   ))}
                 </div>
               ) : null}

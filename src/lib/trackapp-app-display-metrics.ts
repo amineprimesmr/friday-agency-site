@@ -154,13 +154,18 @@ export async function enrichSearchResultsWithTrackappMetrics(
   country: CountryCode,
 ): Promise<SearchResultWithTrackappMetrics[]> {
   if (apps.length === 0) return [];
-  const metricsMap = await resolveTrackappAppsDisplayMetricsBatch(
-    apps.map((a) => a.id),
-    country,
-  );
+
+  // Search must stay instant. The detail page still resolves SensorTower/global metrics,
+  // but the result list uses deterministic estimates from the iTunes Search payload.
   return apps.map((app) => ({
     ...app,
-    trackappMetrics: metricsMap.get(app.id) ?? EMPTY_METRICS,
+    trackappMetrics: computeTrackappAppDisplayMetrics(
+      app,
+      country,
+      null,
+      null,
+      Math.max(1, Math.min(app.rank || TRACKAPP_DETAIL_FALLBACK_ESTIMATE_RANK, 100)),
+    ),
   }));
 }
 

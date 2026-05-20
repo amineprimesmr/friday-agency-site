@@ -9,7 +9,7 @@ function isDevUnlockVisible(): boolean {
   );
 }
 
-/** Bypass temporaire : même effet que verify-checkout après paiement Stripe. */
+/** Bypass temporaire : même effet qu'une activation Stripe finalisée. */
 export function TrackappDevPremiumBypassButton() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");

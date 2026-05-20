@@ -7,7 +7,6 @@ const TRACKAPP_PUBLIC_PREFIXES = [
   "/trackapp/connexion",
   "/trackapp/inscription",
   "/trackapp/paiement",
-  "/trackapp/onboarding",
   "/trackapp/mot-de-passe-oublie",
   "/trackapp/auth",
   "/trackapp/deconnexion",

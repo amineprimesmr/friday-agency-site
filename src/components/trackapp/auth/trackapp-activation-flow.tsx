@@ -39,6 +39,7 @@ function ActivationExperienceInner() {
 
   const sessionId = sp?.get("session_id")?.trim() ?? "";
   const oauthReturn = sp?.get("oauth") === "1";
+  const returnedFirstName = sp?.get("first_name")?.trim().slice(0, 80) ?? "";
 
   const [step, setStep] = useState<Step>("loading");
   const [checkout, setCheckout] = useState<CheckoutInfo | null>(null);
@@ -60,9 +61,11 @@ function ActivationExperienceInner() {
       typeof window !== "undefined" ?
         window.location.origin
       : (process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "");
-    const nextEnc = encodeURIComponent(`/trackapp/activation?session_id=${sessionId}&oauth=1`);
+    const firstNameParam = firstName.trim();
+    const firstNameQs = firstNameParam ? `&first_name=${encodeURIComponent(firstNameParam)}` : "";
+    const nextEnc = encodeURIComponent(`/trackapp/activation?session_id=${sessionId}&oauth=1${firstNameQs}`);
     return `${origin}/trackapp/auth/callback?next=${nextEnc}`;
-  }, [sessionId]);
+  }, [firstName, sessionId]);
 
   const finishToAccueil = useCallback(() => {
     setStep("done");
@@ -87,6 +90,7 @@ function ActivationExperienceInner() {
         if (!data.paid) throw new Error("Paiement non confirmé. Attends quelques secondes puis recharge.");
         setCheckout(data);
         if (data.email) setEmail(data.email);
+        if (returnedFirstName) setFirstName(returnedFirstName);
 
         const { data: auth } = sb ? await sb.auth.getUser() : { data: { user: null } };
         const loggedIn = Boolean(auth.user);
@@ -97,7 +101,7 @@ function ActivationExperienceInner() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
-            body: JSON.stringify({ session_id: sessionId }),
+            body: JSON.stringify({ session_id: sessionId, first_name: returnedFirstName }),
           });
           const linkData = (await linkRes.json().catch(() => ({}))) as { error?: string };
           if (!linkRes.ok) throw new Error(linkData.error || "Impossible de lier ton paiement.");
@@ -111,7 +115,7 @@ function ActivationExperienceInner() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
-            body: JSON.stringify({ session_id: sessionId }),
+            body: JSON.stringify({ session_id: sessionId, first_name: returnedFirstName }),
           });
           const linkData = (await linkRes.json().catch(() => ({}))) as { error?: string };
           if (linkRes.ok) {
@@ -134,7 +138,7 @@ function ActivationExperienceInner() {
     return () => {
       if (celebrateTimer) clearTimeout(celebrateTimer);
     };
-  }, [sessionId, oauthReturn, sb, reduce, finishToAccueil]);
+  }, [sessionId, oauthReturn, returnedFirstName, sb, reduce, finishToAccueil]);
 
   const oauthGoogle = useCallback(async () => {
     if (!sb || firstName.trim().length < 2) {

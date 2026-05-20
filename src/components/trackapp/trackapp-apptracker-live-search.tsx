@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef } from "react";
+import { useId, useMemo, useRef } from "react";
 
 import { TrackappAppFavoriteRow } from "@/components/trackapp/trackapp-app-favorite-row";
 import { TrackappApptrackerAppResultCard } from "@/components/trackapp/trackapp-apptracker-app-result-card";
@@ -33,7 +33,7 @@ export function TrackappApptrackerLiveSearch({
 }: Props) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
-  const favSet = new Set(favoriteAppIds);
+  const favSet = useMemo(() => new Set(favoriteAppIds), [favoriteAppIds]);
   const { query, setQuery, debouncedQ, results, loading, showResults, showHint } = useTrackappLiveAppSearch({
     country,
     initialQuery,
