@@ -98,30 +98,38 @@ export function TrackappCountryRankingsGlobe({ rankings, focusCountry, onFocusCo
       glowColor: [0.12, 0.28, 0.14],
       markers: buildMarkers(rankingsRef.current, focusRef.current),
       markerElevation: 0.04,
-      onRender: (state) => {
-        const focus = focusRef.current;
-        const target = focus ? focusAnglesRef.current : null;
-
-        if (target && pointerInteracting.current === null) {
-          const drift = 0.04;
-          phiRef.current += (target.phi - phiRef.current) * drift;
-          thetaRef.current += (target.theta - thetaRef.current) * drift;
-        } else if (pointerInteracting.current === null) {
-          phiRef.current += 0.004;
-        } else {
-          phiRef.current += pointerInteractingMovement.current / 200;
-          pointerInteractingMovement.current *= 0.92;
-        }
-
-        state.phi = phiRef.current;
-        state.theta = thetaRef.current;
-        state.width = width * 2;
-        state.height = width * 2;
-        state.markers = buildMarkers(rankingsRef.current, focus);
-      },
     });
 
+    let frameId = 0;
+    const tick = () => {
+      const focus = focusRef.current;
+      const target = focus ? focusAnglesRef.current : null;
+
+      if (target && pointerInteracting.current === null) {
+        const drift = 0.04;
+        phiRef.current += (target.phi - phiRef.current) * drift;
+        thetaRef.current += (target.theta - thetaRef.current) * drift;
+      } else if (pointerInteracting.current === null) {
+        phiRef.current += 0.004;
+      } else {
+        phiRef.current += pointerInteractingMovement.current / 200;
+        pointerInteractingMovement.current *= 0.92;
+      }
+
+      globe.update({
+        phi: phiRef.current,
+        theta: thetaRef.current,
+        width: width * 2,
+        height: width * 2,
+        markers: buildMarkers(rankingsRef.current, focus),
+      });
+
+      frameId = requestAnimationFrame(tick);
+    };
+    frameId = requestAnimationFrame(tick);
+
     return () => {
+      cancelAnimationFrame(frameId);
       window.removeEventListener("resize", onResize);
       globe.destroy();
     };

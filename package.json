@@ -24,6 +24,7 @@
     "deploy:prod": "npx vercel deploy --prod --yes",
     "deploy:watch": "node scripts/watch-deploy.mjs",
     "ship": "npm run typecheck && npm run deploy:prod",
+    "ship:fast": "npm run deploy:prod",
     "tiktok:compress-demo": "bash scripts/compress-tiktok-demo-video.sh"
   },
   "dependencies": {
