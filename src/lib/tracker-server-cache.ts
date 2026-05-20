@@ -10,6 +10,7 @@ import {
   type CountryCode,
   type MultiCountryApp,
 } from "@/lib/apple-charts";
+import { fetchAppStoreInAppOffers } from "@/lib/apple-app-store-in-app-offers";
 import { fetchAppStoreWebScreenshots } from "@/lib/apple-app-store-web-screenshots";
 import { loadTrackerAppEmbedContext } from "@/lib/tracker-app-embed-data";
 import { getTrackerCuratedPotentialApps } from "@/lib/tracker-curated-potential-apps";
@@ -57,6 +58,15 @@ export function loadAppStoreWebScreenshotsCached(appId: string, country: Country
   return unstable_cache(
     () => fetchAppStoreWebScreenshots(appId, country),
     ["app-store-web-screenshots-v2", appId, country],
+    { revalidate: REVALIDATE_TRACKER },
+  )();
+}
+
+/** Abonnements & achats intégrés listés sur apps.apple.com (section « Achats intégrés »). */
+export function loadAppStoreInAppOffersCached(appId: string, country: CountryCode) {
+  return unstable_cache(
+    () => fetchAppStoreInAppOffers(appId, country),
+    ["app-store-in-app-offers-v1", appId, country],
     { revalidate: REVALIDATE_TRACKER },
   )();
 }

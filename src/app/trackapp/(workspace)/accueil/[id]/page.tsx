@@ -15,12 +15,14 @@ import { metricsFromEmbedContext } from "@/lib/trackapp-app-display-metrics";
 import { getTrackappProfileFavorites } from "@/lib/trackapp-profile-favorites";
 import {
   fetchAppDetailCached,
+  loadAppStoreInAppOffersCached,
   loadAppStoreWebScreenshotsCached,
   loadTrackerAppEmbedContextCached,
 } from "@/lib/tracker-server-cache";
 import { TrackappBreadcrumbOverride } from "@/components/trackapp/trackapp-breadcrumb-context";
 import { TrackappAppFavoriteButton } from "@/components/trackapp/trackapp-app-favorite-button";
 import { TrackappAppStoreScreenshots } from "@/components/trackapp/trackapp-app-store-screenshots";
+import { TrackappInAppOffersSection } from "@/components/trackapp/trackapp-in-app-offers-section";
 import { TrackappOfficialPresenceLoading } from "@/components/trackapp/trackapp-official-presence-loading";
 import { TrackappSearchHistoryRecorder } from "@/components/trackapp/trackapp-search-history-recorder";
 import { TrackappCompetitorsPanel } from "@/components/trackapp/trackapp-competitors-panel";
@@ -75,10 +77,11 @@ export default async function TrackappAccueilAppDetailPage({ params, searchParam
   const sp = await searchParams;
   const country = normalizeTrackerCountryParam(sp.country);
   const countryCode = country as CountryCode;
-  const [context, favorites, webScreenshots] = await Promise.all([
+  const [context, favorites, webScreenshots, inAppOffers] = await Promise.all([
     loadTrackerAppEmbedContextCached(id, countryCode),
     getTrackappProfileFavorites(),
     loadAppStoreWebScreenshotsCached(id, countryCode),
+    loadAppStoreInAppOffersCached(id, countryCode),
   ]);
   if (!context) notFound();
 
@@ -199,6 +202,8 @@ export default async function TrackappAccueilAppDetailPage({ params, searchParam
           </div>
         </article>
       </section>
+
+      <TrackappInAppOffersSection data={inAppOffers} className="mt-5" />
 
       <TrackappAppStoreScreenshots urls={screenshotUrls} title="Screenshots App Store" />
 
