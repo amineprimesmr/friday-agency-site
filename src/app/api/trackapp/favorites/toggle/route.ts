@@ -65,7 +65,11 @@ export async function POST(req: Request) {
     .maybeSingle();
 
   if (selErr) {
-    return NextResponse.json({ error: selErr.message }, { status: 500 });
+    const hint =
+      selErr.message.includes("app_favorites") || selErr.message.includes("does not exist")
+        ? "Migration Supabase manquante (app_favorites). Exécute les migrations du dossier supabase/migrations."
+        : selErr.message;
+    return NextResponse.json({ error: hint }, { status: 500 });
   }
 
   const parseArr = (raw: unknown) =>

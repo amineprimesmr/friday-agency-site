@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { TrackappCloneAppActions } from "@/components/trackapp/trackapp-clone-app-actions";
-import { TrackappApptrackerDetailContext } from "@/components/trackapp/trackapp-apptracker-detail-context";
+import { TrackappBreadcrumbOverride } from "@/components/trackapp/trackapp-breadcrumb-context";
 import { normalizeTrackerCountryParam, type CountryCode } from "@/lib/apple-charts";
 import { fetchAppDetailCached } from "@/lib/tracker-server-cache";
 import { loadTrackappClonePromptBundle } from "@/lib/trackapp-clone-prompt/load-bundle";
@@ -52,7 +52,7 @@ export default async function TrackappCreerDepuisAppPage({ params, searchParams 
 
   return (
     <div className="relative z-[1] dashboard-main pb-16">
-      <TrackappApptrackerDetailContext appName={app.name} />
+      <TrackappBreadcrumbOverride pageLabel={app.name} />
       <TrackappCloneAppActions
         initialBundle={bundle}
         appId={id}

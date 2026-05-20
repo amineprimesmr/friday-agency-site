@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
+import { HeartIcon } from "@/components/icons/heart-icon";
 import { cn } from "@/lib/utils";
 
 export function TrackappResourceFavoriteButton({
@@ -26,7 +27,8 @@ export function TrackappResourceFavoriteButton({
       const res = await fetch("/api/trackapp/favorites/toggle", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ designId }),
+        body: JSON.stringify({ type: "design", designId }),
+        credentials: "same-origin",
       });
       const data = (await res.json().catch(() => null)) as { favorites?: string[]; error?: string } | null;
       if (!res.ok) {
@@ -56,15 +58,7 @@ export function TrackappResourceFavoriteButton({
         favorite && "border-red-400/35 bg-red-500/15 text-red-100",
       )}
     >
-      <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill={favorite ? "currentColor" : "none"} aria-hidden>
-        <path
-          d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-          stroke="currentColor"
-          strokeWidth="1.65"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <HeartIcon filled={favorite} className="h-[18px] w-[18px]" strokeWidth={1.75} />
     </button>
   );
 }

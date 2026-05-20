@@ -21,7 +21,7 @@ export function useTrackappBreadcrumbOverride(): BreadcrumbOverride | null {
   return useContext(TrackappBreadcrumbContext)?.override ?? null;
 }
 
-/** Affiche le nom de l’app dans le fil d’Ariane (fiche Apptracker). */
+/** Affiche le nom de l’app dans le fil d’Ariane (fiche Accueil). */
 export function TrackappBreadcrumbOverride({ pageLabel }: Readonly<{ pageLabel: string }>) {
   const setOverride = useContext(TrackappBreadcrumbContext)?.setOverride;
 

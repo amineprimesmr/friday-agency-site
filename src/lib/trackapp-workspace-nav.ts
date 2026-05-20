@@ -1,6 +1,6 @@
 import { isTrackappCreerDepuisAppPath } from "@/lib/trackapp-app-clone-paths";
 import {
-  isTrackappApptrackerDetailPath,
+  isTrackappAccueilAppDetailPath,
   TRACKAPP_ACCUEIL_BASE,
 } from "@/lib/trackapp-apptracker-paths";
 
@@ -18,21 +18,19 @@ export type TrackappNavGroup = Readonly<{
   items: readonly TrackappNavItem[];
 }>;
 
+/** Titre de section sidebar + fil d’Ariane (recherche apps, favoris, sélection). */
+export const TRACKAPP_DISCOVERY_SECTION_LABEL = "AppTracker";
+
 export const TRACKAPP_NAV_GROUPS: readonly TrackappNavGroup[] = [
   {
     id: "tracker",
-    label: "tracker",
+    label: TRACKAPP_DISCOVERY_SECTION_LABEL,
     defaultOpen: true,
     items: [
       {
         href: TRACKAPP_ACCUEIL_BASE,
         label: "Accueil",
-        match: (p) => p === TRACKAPP_ACCUEIL_BASE,
-      },
-      {
-        href: TRACKAPP_ACCUEIL_BASE,
-        label: "Apptracker",
-        match: (p) => isTrackappApptrackerDetailPath(p),
+        match: (p) => p === TRACKAPP_ACCUEIL_BASE || isTrackappAccueilAppDetailPath(p),
       },
       {
         href: "/trackapp/favoris/apps",
@@ -79,12 +77,12 @@ function matchItem(pathname: string, item: TrackappNavItem): boolean {
 }
 
 export function resolveTrackappBreadcrumb(pathname: string): TrackappBreadcrumb {
-  if (isTrackappApptrackerDetailPath(pathname)) {
+  if (isTrackappAccueilAppDetailPath(pathname)) {
     return {
-      sectionLabel: "tracker",
-      hubLabel: "Apptracker",
+      sectionLabel: TRACKAPP_DISCOVERY_SECTION_LABEL,
+      hubLabel: "Accueil",
       hubHref: TRACKAPP_ACCUEIL_BASE,
-      pageLabel: "Fiche app",
+      pageLabel: "App",
     };
   }
 
@@ -98,7 +96,7 @@ export function resolveTrackappBreadcrumb(pathname: string): TrackappBreadcrumb 
   }
 
   if (pathname === TRACKAPP_ACCUEIL_BASE) {
-    return { sectionLabel: "tracker", pageLabel: "Accueil" };
+    return { sectionLabel: TRACKAPP_DISCOVERY_SECTION_LABEL, pageLabel: "Accueil" };
   }
 
   for (const group of TRACKAPP_NAV_GROUPS) {
@@ -110,7 +108,7 @@ export function resolveTrackappBreadcrumb(pathname: string): TrackappBreadcrumb 
     }
   }
 
-  return { sectionLabel: "tracker", pageLabel: "Accueil" };
+  return { sectionLabel: TRACKAPP_DISCOVERY_SECTION_LABEL, pageLabel: "Accueil" };
 }
 
 export function isNavItemActive(pathname: string, item: TrackappNavItem): boolean {

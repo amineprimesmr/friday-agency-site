@@ -8,11 +8,7 @@ import {
   type SearchResult,
 } from "@/lib/apple-charts";
 import { appDetailToSearchResultForFavorites } from "@/lib/trackapp-app-favorites-map";
-import {
-  metricsFromAppDetail,
-  TRACKAPP_DETAIL_FALLBACK_ESTIMATE_RANK,
-  type TrackappAppDisplayMetrics,
-} from "@/lib/trackapp-app-display-metrics";
+import { metricsFromAppDetail, type TrackappAppDisplayMetrics } from "@/lib/trackapp-app-display-metrics";
 
 /** Libellé affiché en tête de page — à mettre à jour chaque mois. */
 export const TRACKAPP_APPTRACKER_PICKS_MONTH_LABEL = "Mai 2026";
@@ -87,7 +83,6 @@ export const getTrackappApptrackerMonthlyPicks = unstable_cache(
         country,
         aggregateMetricsList[i] ?? null,
         enrichedNationalTop,
-        TRACKAPP_DETAIL_FALLBACK_ESTIMATE_RANK,
       );
       return {
         app: appDetailToSearchResultForFavorites(detail, i + 1),

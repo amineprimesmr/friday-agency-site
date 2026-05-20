@@ -688,14 +688,18 @@ function formatIosAggDownloadCount(n: number): string {
 /** Sensor Tower est hors chemin critique : un fetch lent bloquait toute la fiche (timeout global 12s). */
 const IOS_AGG_FETCH_MS = 3500;
 
-export async function fetchIosAggregateAppMetrics(appId: string | number): Promise<IosAggregateAppMetrics | null> {
+export async function fetchIosAggregateAppMetrics(
+  appId: string | number,
+  options?: Readonly<{ timeoutMs?: number }>,
+): Promise<IosAggregateAppMetrics | null> {
+  const timeoutMs = options?.timeoutMs ?? IOS_AGG_FETCH_MS;
   try {
     const res = await fetch(`https://app.sensortower.com/api/ios/apps?app_ids=${appId}`, {
       headers: {
         "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15",
       },
       next: { revalidate: 3600 },
-      signal: AbortSignal.timeout(IOS_AGG_FETCH_MS),
+      signal: AbortSignal.timeout(timeoutMs),
     });
     if (!res.ok) return null;
     const data = (await res.json()) as { apps?: Record<string, unknown>[] };
@@ -715,12 +719,13 @@ export async function fetchIosAggregateAppMetrics(appId: string | number): Promi
     const dlStrRaw = String(dl?.string ?? "—").trim();
     const revStrRaw = String(rev?.string ?? "—").trim();
     const revResolved = resolveSensorTowerRevenueUsd(rev);
+    const revUsd =
+      revResolved != null && Number.isFinite(revResolved) && revResolved > 0 ? revResolved : 0;
     const rowId = String(row.app_id ?? appId);
     const revKey = `ios-agg-rev:${rowId}`;
     const revDisplayPrecise =
-      revResolved != null && revResolved > 0
-        ? derivePreciseRevenueDisplayUsd(revResolved, revKey)
-        : 0;
+      revUsd > 0 ? derivePreciseRevenueDisplayUsd(revUsd, revKey) : 0;
+    const revStrNegative = /^-\s*/.test(revStrRaw);
 
     return {
       downloads: dlN,
@@ -732,11 +737,11 @@ export async function fetchIosAggregateAppMetrics(appId: string | number): Promi
             : dlStrRaw === "" || dlStrRaw === "—"
               ? "—"
               : normalizeIosAggDisplayString(dlStrRaw),
-      revenue: revResolved ?? 0,
+      revenue: revUsd,
       revenueString:
-        revResolved != null && revResolved > 0
+        revUsd > 0
           ? formatUsdTrackerPrecise(revDisplayPrecise)
-          : revStrRaw === "" || revStrRaw === "—"
+          : revStrRaw === "" || revStrRaw === "—" || revStrNegative
             ? "—"
             : normalizeIosAggDisplayString(revStrRaw),
       globalRatingCount: Number(row.global_rating_count ?? 0),

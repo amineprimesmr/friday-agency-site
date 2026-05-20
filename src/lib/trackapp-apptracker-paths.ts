@@ -1,10 +1,12 @@
-/** Recherche / landing workspace Trackapp. */
+/** Recherche workspace Trackapp. */
 export const TRACKAPP_ACCUEIL_BASE = "/trackapp/accueil";
 
-/** Fiches app (détail) — pas de page liste sur cette URL (redirige vers Accueil). */
+/** @deprecated Ancienne base fiche — redirigée vers Accueil. */
 export const TRACKAPP_APPTRACKER_BASE = "/trackapp/apptracker";
 
 export const TRACKAPP_NOTRE_SELECTION_PATH = "/trackapp/notre-selection";
+
+const APP_ID_PATTERN = /^\d{6,12}$/;
 
 export function trackappAccueilHref(options?: { country?: string; q?: string }): string {
   const params = new URLSearchParams();
@@ -14,14 +16,32 @@ export function trackappAccueilHref(options?: { country?: string; q?: string }):
   return qs ? `${TRACKAPP_ACCUEIL_BASE}?${qs}` : TRACKAPP_ACCUEIL_BASE;
 }
 
-/** @deprecated Préférer `trackappAccueilHref`. */
-export const trackappApptrackerHubHref = trackappAccueilHref;
-
-export function trackappApptrackerAppHref(appId: string, country: string): string {
+/** Fiche app sous Accueil : `/trackapp/accueil/[id]`. */
+export function trackappAccueilAppHref(appId: string, country: string): string {
   const params = new URLSearchParams({ country });
-  return `${TRACKAPP_APPTRACKER_BASE}/${appId}?${params.toString()}`;
+  return `${TRACKAPP_ACCUEIL_BASE}/${appId}?${params.toString()}`;
 }
 
+/** @deprecated Utiliser `trackappAccueilAppHref`. */
+export const trackappApptrackerHubHref = trackappAccueilHref;
+
+/** @deprecated Utiliser `trackappAccueilAppHref`. */
+export const trackappApptrackerAppHref = trackappAccueilAppHref;
+
+export function isTrackappAccueilAppDetailPath(pathname: string): boolean {
+  const path = pathname.split("?")[0] ?? pathname;
+  const prefix = `${TRACKAPP_ACCUEIL_BASE}/`;
+  if (!path.startsWith(prefix)) return false;
+  const id = path.slice(prefix.length);
+  return APP_ID_PATTERN.test(id);
+}
+
+/** @deprecated Utiliser `isTrackappAccueilAppDetailPath`. */
 export function isTrackappApptrackerDetailPath(pathname: string): boolean {
-  return pathname.startsWith(`${TRACKAPP_APPTRACKER_BASE}/`);
+  const path = pathname.split("?")[0] ?? pathname;
+  if (isTrackappAccueilAppDetailPath(path)) return true;
+  const prefix = `${TRACKAPP_APPTRACKER_BASE}/`;
+  if (!path.startsWith(prefix)) return false;
+  const id = path.slice(prefix.length);
+  return APP_ID_PATTERN.test(id);
 }

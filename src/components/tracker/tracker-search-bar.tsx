@@ -49,6 +49,9 @@ type SearchHit = {
   releaseLine: string;
   rating: number;
   langLabel: string;
+  /** Revenus ST (EUR) — API Trackapp live-search uniquement. */
+  revenueDisplay?: string;
+  metricSource?: string;
 };
 
 function formatReleaseMeta(raw: string) {
@@ -87,18 +90,33 @@ export function TrackerSearchBar({
   onClose,
   onOpen,
   embedded = false,
+  hideFeaturedWhenEmpty = false,
+  trackappLiveMetrics = false,
   country,
   initialQuery = "",
+  onNavigateToApp,
 }: {
   searchSurface?: TrackerSearchSurface;
   isOpen: boolean;
   onClose: () => void;
   /** Ouvre le panneau (desktop : au focus de l’input). */
   onOpen?: () => void;
-  /** Page Accueil workspace : même UX que la landing, liens vers `/trackapp/apptracker`. */
+  /** Page Accueil workspace : même UX que la landing, liens vers `/trackapp/accueil/[id]`. */
   embedded?: boolean;
+  /** Accueil : pas de suggestions « top apps » quand le champ est vide — historique en dessous. */
+  hideFeaturedWhenEmpty?: boolean;
+  /** Accueil SaaS : revenus Sensor Tower dans les résultats (API `/api/trackapp/live-search`). */
+  trackappLiveMetrics?: boolean;
   country?: CountryCode;
   initialQuery?: string;
+  /** Enregistre l’app dans l’historique Accueil avant navigation. */
+  onNavigateToApp?: (app: Readonly<{
+    id: string;
+    name: string;
+    artistName: string;
+    artworkUrl: string;
+    category: string;
+  }>) => void;
 }) {
   const router = useRouter();
   const isLg = useMediaQuery("(min-width: 1024px)");
@@ -112,12 +130,11 @@ export function TrackerSearchBar({
   const storeCountry = country ?? TRACKER_DEFAULT_COUNTRY;
   const storeCc = storeCountry.toUpperCase();
   const storeCountryName = COUNTRY_MAP[storeCountry].name;
-  const panelOpen = isOpen || embedded;
 
   const appDetailHref = useCallback(
     (appId: string) =>
       embedded
-        ? `/trackapp/apptracker/${appId}?country=${storeCountry}`
+        ? `/trackapp/accueil/${appId}?country=${storeCountry}`
         : `/tracker/apps/${appId}?country=${storeCountry}`,
     [embedded, storeCountry],
   );
@@ -136,6 +153,22 @@ export function TrackerSearchBar({
   );
 
   const trimmed = query.trim();
+  const panelOpen = isOpen || (embedded && !hideFeaturedWhenEmpty);
+  const showSearchPanel = hideFeaturedWhenEmpty ? trimmed.length >= 1 : panelOpen;
+
+  const notifyAppNavigate = useCallback(
+    (app: SearchHit | FeaturedAppLite) => {
+      onNavigateToApp?.({
+        id: app.id,
+        name: app.name,
+        artistName: app.artistName,
+        artworkUrl: app.artworkUrl,
+        category: app.category,
+      });
+    },
+    [onNavigateToApp],
+  );
+
   const debounceWaiting =
     trimmed.length >= 1 && trimmed !== debouncedQ;
   const showSearchSkeleton =
@@ -177,10 +210,11 @@ export function TrackerSearchBar({
   }, []);
 
   useEffect(() => {
+    if (hideFeaturedWhenEmpty) return;
     if (!panelOpen && featured.length === 0) return;
     if (featured.length > 0) return;
     void loadFeatured();
-  }, [featured.length, panelOpen, loadFeatured]);
+  }, [featured.length, hideFeaturedWhenEmpty, panelOpen, loadFeatured]);
 
   useEffect(() => {
     const t = trimmed;
@@ -202,10 +236,10 @@ export function TrackerSearchBar({
     setSearchLoading(true);
     void (async () => {
       try {
-        const res = await fetch(
-          `/api/tracker/search?q=${encodeURIComponent(debouncedQ)}&country=${storeCountry}&limit=12`,
-          { signal: ac.signal, cache: "force-cache" },
-        );
+        const searchPath = trackappLiveMetrics
+          ? `/api/trackapp/live-search?q=${encodeURIComponent(debouncedQ)}&country=${storeCountry}&limit=12`
+          : `/api/tracker/search?q=${encodeURIComponent(debouncedQ)}&country=${storeCountry}&limit=12`;
+        const res = await fetch(searchPath, { signal: ac.signal, cache: "no-store" });
         const data = (await res.json()) as { apps?: SearchHit[] };
         if (!ac.signal.aborted) {
           setSearchHits(Array.isArray(data.apps) ? data.apps : []);
@@ -218,7 +252,7 @@ export function TrackerSearchBar({
       }
     })().catch(() => undefined);
     return () => abortInFlightRequest(ac);
-  }, [debouncedQ, storeCountry]);
+  }, [debouncedQ, storeCountry, trackappLiveMetrics]);
 
   useEffect(() => {
     setHighlight(0);
@@ -349,7 +383,7 @@ export function TrackerSearchBar({
     }
   }
 
-  if (!isLg && !panelOpen) {
+  if (!embedded && !isLg && !panelOpen) {
     return null;
   }
 
@@ -408,7 +442,13 @@ export function TrackerSearchBar({
               enterKeyHint="search"
               role="combobox"
               className="tracker-search-input"
-              placeholder={isLg && !panelOpen ? "Rechercher…" : "Rechercher une app…"}
+              placeholder={
+                hideFeaturedWhenEmpty
+                  ? "Rechercher une app…"
+                  : isLg && !panelOpen
+                    ? "Rechercher…"
+                    : "Rechercher une app…"
+              }
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
@@ -456,7 +496,7 @@ export function TrackerSearchBar({
             ) : null}
           </form>
 
-          {panelOpen ? (
+          {showSearchPanel ? (
           <div
             id="tracker-search-panel"
             role="region"
@@ -523,6 +563,7 @@ export function TrackerSearchBar({
                       prefetchOnHover={idx < 6}
                       onMouseEnter={() => setHighlight(idx)}
                       onClick={() => {
+                        notifyAppNavigate(app);
                         if (!embedded) onClose();
                       }}
                     >
@@ -574,11 +615,22 @@ export function TrackerSearchBar({
                         ) : null}
                       </div>
 
-                      {!embedded || app.rating > 0 ? (
+                      {!embedded || app.rating > 0 || (trackappLiveMetrics && app.revenueDisplay) ? (
                         <div className="tracker-search-stat-col tracker-search-stat-col--dark">
                           {!embedded ? (
                             <div className="tracker-search-stat-num tracker-search-stat-num--dark">
                               {app.dlEst}
+                            </div>
+                          ) : trackappLiveMetrics ? (
+                            <div
+                              className="tracker-search-stat-num tracker-search-stat-num--dark text-[0.82rem] leading-tight"
+                              title={
+                                app.metricSource === "agrégé monde / mois"
+                                  ? "Revenus mensuels agrégés (Sensor Tower)"
+                                  : "Revenus indisponibles pour cette app"
+                              }
+                            >
+                              {app.revenueDisplay ?? "—"}
                             </div>
                           ) : null}
                           {app.rating > 0 ? (
@@ -593,6 +645,10 @@ export function TrackerSearchBar({
                             <div className="tracker-search-stat-sub tracker-search-stat-sub--dark">
                               Tél. estimés
                             </div>
+                          ) : trackappLiveMetrics ? (
+                            <div className="tracker-search-stat-sub tracker-search-stat-sub--dark">
+                              Rev. / mois
+                            </div>
                           ) : null}
                         </div>
                       ) : null}
@@ -604,7 +660,7 @@ export function TrackerSearchBar({
                   );
                 })}
 
-                {!showSearchSkeleton && trimmed.length < 1 ? (
+                {!hideFeaturedWhenEmpty && !showSearchSkeleton && trimmed.length < 1 ? (
                   <>
                     {featuredLoading && featuredSorted.length === 0
                       ? Array.from({ length: 5 }).map((_, i) => (

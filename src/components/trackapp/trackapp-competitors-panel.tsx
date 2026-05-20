@@ -95,7 +95,7 @@ function CompetitorCard({
         ) : null}
         {competitor.app_id ? (
           <Link
-            href={`${trackappApptrackerAppHref(sourceAppId, country)}?compare=${competitor.app_id}`}
+            href={`${trackappApptrackerAppHref(sourceAppId, country)}&compare=${competitor.app_id}`}
             className="trackapp-competitor-card__btn"
           >
             Comparer
@@ -261,19 +261,6 @@ export function TrackappCompetitorsPanel({ appId, appName, country }: Props) {
           <CompetitorGroup title="Concurrents proches" items={close} country={country} sourceAppId={appId} />
           <CompetitorGroup title="Indirects & historiques" items={indirect} country={country} sourceAppId={appId} />
           <CompetitorGroup title="Apps en croissance" items={rising} country={country} sourceAppId={appId} />
-
-          {report.rejected_apps.length > 0 ? (
-            <section className="trackapp-competitors__rejected">
-              <h2 className="trackapp-competitors__group-title">Apps rejetées (faux concurrents)</h2>
-              <ul>
-                {report.rejected_apps.map((r) => (
-                  <li key={r.name}>
-                    <strong>{r.name}</strong> — {r.reason}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
         </>
       ) : null}
     </section>
