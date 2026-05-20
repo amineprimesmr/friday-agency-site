@@ -175,8 +175,6 @@ export default async function TrackappAccueilAppDetailPage({ params, searchParam
 
       <TrackappInAppOffersSection data={inAppOffers} className="mt-5" />
 
-      <TrackappCountryRankingsPanel rankings={countryRankings} className="mt-5" />
-
       <Suspense fallback={<TrackappOfficialPresenceLoading />}>
         <TrackappOfficialPresenceSection
           app={app}
@@ -185,6 +183,8 @@ export default async function TrackappAccueilAppDetailPage({ params, searchParam
           favoritesEnabled={loggedIn}
         />
       </Suspense>
+
+      <TrackappCountryRankingsPanel rankings={countryRankings} className="mt-5" />
 
       <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.75fr)]">
         <article className="rounded-[24px] border border-[var(--dash-border)] bg-white p-5 shadow-[var(--dash-shadow)]">

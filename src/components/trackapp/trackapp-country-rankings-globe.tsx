@@ -6,8 +6,10 @@ import { useEffect, useRef } from "react";
 import type { CountryCode, CountryRanking } from "@/lib/apple-charts";
 import { COUNTRY_GLOBE_CENTROIDS } from "@/lib/country-globe-centroids";
 
-const GLOBE_SIZE_PX = 360;
-const GLOBE_DPR = typeof window !== "undefined" ? Math.min(2, window.devicePixelRatio || 1) : 2;
+const GLOBE_PX = 320;
+const GLOBE_DPR =
+  typeof window !== "undefined" ? Math.min(1.5, window.devicePixelRatio || 1) : 1;
+const FRAME_MS = 1000 / 30;
 
 function countryToGlobeAngles(lat: number, lng: number): { phi: number; theta: number } {
   return {
@@ -30,6 +32,7 @@ function markerSize(rank: number | null, selected: boolean): number {
   return Math.max(0.045, 0.11 - rank / 900);
 }
 
+/** Sans `id` : évite les ancres CSS cobe qui réécrivent `:root` à chaque frame (repaint page entière). */
 function buildMarkers(
   rankings: readonly CountryRanking[],
   focusCountry: CountryCode | null,
@@ -38,7 +41,6 @@ function buildMarkers(
     const loc = COUNTRY_GLOBE_CENTROIDS[r.country];
     const selected = focusCountry === r.country;
     return {
-      id: r.country,
       location: [loc[0], loc[1]],
       size: markerSize(r.rank, selected),
       color: markerColor(r.rank, selected),
@@ -80,7 +82,10 @@ export function TrackappCountryRankingsGlobe({ rankings, focusCountry, onFocusCo
     const canvas = canvasRef.current;
     if (!root || !canvas) return undefined;
 
-    const pixelSize = Math.round(GLOBE_SIZE_PX * GLOBE_DPR);
+    const pixelSize = Math.round(GLOBE_PX * GLOBE_DPR);
+    let visible = false;
+    let frameId = 0;
+    let lastTick = 0;
 
     const globe = createGlobe(canvas, {
       devicePixelRatio: GLOBE_DPR,
@@ -90,7 +95,7 @@ export function TrackappCountryRankingsGlobe({ rankings, focusCountry, onFocusCo
       theta: thetaRef.current,
       dark: 1,
       diffuse: 1.15,
-      mapSamples: 12_000,
+      mapSamples: 8_000,
       mapBrightness: 5.5,
       baseColor: [0.12, 0.14, 0.2],
       markerColor: [0.2, 0.85, 0.45],
@@ -99,14 +104,14 @@ export function TrackappCountryRankingsGlobe({ rankings, focusCountry, onFocusCo
       markerElevation: 0.04,
     });
 
-    let frameId = 0;
-    let visible = true;
+    const tick = (now: number) => {
+      if (!visible) return;
 
-    const tick = () => {
-      if (!visible) {
+      if (now - lastTick < FRAME_MS) {
         frameId = requestAnimationFrame(tick);
         return;
       }
+      lastTick = now;
 
       const focus = focusRef.current;
       const target = focus ? focusAnglesRef.current : null;
@@ -130,17 +135,25 @@ export function TrackappCountryRankingsGlobe({ rankings, focusCountry, onFocusCo
 
       frameId = requestAnimationFrame(tick);
     };
-    frameId = requestAnimationFrame(tick);
 
     const visibilityObserver = new IntersectionObserver(
       ([entry]) => {
-        visible = entry?.isIntersecting ?? true;
+        const nextVisible = entry?.isIntersecting ?? false;
+        if (nextVisible && !visible) {
+          visible = true;
+          lastTick = 0;
+          frameId = requestAnimationFrame(tick);
+        } else if (!nextVisible && visible) {
+          visible = false;
+          cancelAnimationFrame(frameId);
+        }
       },
-      { rootMargin: "120px", threshold: 0.05 },
+      { rootMargin: "80px", threshold: 0.08 },
     );
     visibilityObserver.observe(root);
 
     return () => {
+      visible = false;
       cancelAnimationFrame(frameId);
       visibilityObserver.disconnect();
       globe.destroy();
@@ -152,8 +165,8 @@ export function TrackappCountryRankingsGlobe({ rankings, focusCountry, onFocusCo
       <canvas
         ref={canvasRef}
         className="trackapp-country-globe__canvas"
-        width={GLOBE_SIZE_PX}
-        height={GLOBE_SIZE_PX}
+        width={GLOBE_PX}
+        height={GLOBE_PX}
         aria-hidden
         onPointerDown={(e) => {
           pointerInteracting.current = e.clientX - pointerInteractingMovement.current;
@@ -171,10 +184,10 @@ export function TrackappCountryRankingsGlobe({ rankings, focusCountry, onFocusCo
           }
         }}
       />
-      <div className="trackapp-country-globe__chips" aria-hidden>
+      <div className="trackapp-country-globe__chips">
         {rankings
           .filter((r): r is CountryRanking & { rank: number } => r.rank !== null)
-          .slice(0, 8)
+          .slice(0, 6)
           .map((r) => (
             <button
               key={r.country}

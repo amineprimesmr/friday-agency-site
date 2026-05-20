@@ -17,11 +17,6 @@
   color: rgb(6 95 70);
 }
 
-.trackapp-country-rankings {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 520px;
-}
-
 .trackapp-country-rankings__layout {
   display: grid;
   gap: 1.25rem;
@@ -44,15 +39,51 @@
 .trackapp-country-globe {
   position: relative;
   flex-shrink: 0;
-  width: min(100%, 360px);
-  height: 360px;
-  max-width: 360px;
+  width: min(100%, 320px);
+  height: 320px;
+  max-width: 320px;
   border-radius: 1.25rem;
   background: radial-gradient(circle at 50% 45%, #1a2332 0%, #0a0e14 72%);
   overflow: hidden;
-  contain: layout style paint;
   isolation: isolate;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
+}
+
+.trackapp-country-globe--placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 1px dashed rgb(148 163 184 / 0.45);
+  cursor: pointer;
+  padding: 1rem;
+  text-align: center;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.trackapp-country-globe--placeholder:hover {
+  border-color: rgb(16 185 129 / 0.55);
+  background: radial-gradient(circle at 50% 45%, #1e2a3d 0%, #0d1118 72%);
+}
+
+.trackapp-country-globe__placeholder-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.trackapp-country-globe__placeholder-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: rgb(226 232 240);
+}
+
+.trackapp-country-globe__placeholder-sub {
+  font-size: 0.72rem;
+  color: rgb(148 163 184);
+  max-width: 16rem;
 }
 
 /* cobe v2 injecte un wrapper autour du canvas */

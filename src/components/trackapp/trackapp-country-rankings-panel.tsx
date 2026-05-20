@@ -23,7 +23,7 @@ const TrackappCountryRankingsGlobe = dynamic(
     ssr: false,
     loading: () => (
       <div className="trackapp-country-globe trackapp-country-globe--loading" aria-hidden>
-        <span className="trackapp-country-globe__loading-label">Globe…</span>
+        <span className="trackapp-country-globe__loading-label">Chargement…</span>
       </div>
     ),
   },
@@ -47,6 +47,7 @@ export function TrackappCountryRankingsPanel({ rankings, className }: Props) {
   const [focusCountry, setFocusCountry] = useState<CountryCode | null>(
     summary.best?.country ?? null,
   );
+  const [globeEnabled, setGlobeEnabled] = useState(false);
 
   const focusRow = focusCountry ? sorted.find((r) => r.country === focusCountry) : null;
 
@@ -77,11 +78,27 @@ export function TrackappCountryRankingsPanel({ rankings, className }: Props) {
 
       <div className="trackapp-country-rankings__layout">
         <div className="trackapp-country-rankings__globe-col">
-          <TrackappCountryRankingsGlobe
-            rankings={sorted}
-            focusCountry={focusCountry}
-            onFocusCountry={setFocusCountry}
-          />
+          {globeEnabled ? (
+            <TrackappCountryRankingsGlobe
+              rankings={sorted}
+              focusCountry={focusCountry}
+              onFocusCountry={setFocusCountry}
+            />
+          ) : (
+            <button
+              type="button"
+              className="trackapp-country-globe trackapp-country-globe--placeholder"
+              onClick={() => setGlobeEnabled(true)}
+            >
+              <span className="trackapp-country-globe__placeholder-icon" aria-hidden>
+                🌍
+              </span>
+              <span className="trackapp-country-globe__placeholder-title">Voir le globe interactif</span>
+              <span className="trackapp-country-globe__placeholder-sub">
+                Carte 3D · classements par pays (clic pour charger)
+              </span>
+            </button>
+          )}
           {focusRow ? (
             <div className="trackapp-country-rankings__tooltip" role="status">
               <span className="trackapp-country-rankings__tooltip-flag">{focusRow.flag}</span>
@@ -99,7 +116,9 @@ export function TrackappCountryRankingsPanel({ rankings, className }: Props) {
             </div>
           ) : (
             <p className="trackapp-country-rankings__hint">
-              Faites glisser le globe · cliquez un pays dans la liste
+              {globeEnabled
+                ? "Glissez le globe · cliquez un pays dans la liste"
+                : "Cliquez un pays dans la liste · activez le globe pour la vue 3D"}
             </p>
           )}
         </div>
