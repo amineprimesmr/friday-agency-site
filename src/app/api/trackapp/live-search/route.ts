@@ -5,6 +5,7 @@ import {
   enrichSearchResultsWithTrackappMetricsForLiveSearch,
   TRACKAPP_METRICS_UNAVAILABLE_LABEL,
 } from "@/lib/trackapp-app-display-metrics";
+import { finalizeTrackappRevenueEurLabel } from "@/lib/trackapp-revenue-display";
 
 export const maxDuration = 60;
 
@@ -16,8 +17,9 @@ function langChip(codes: string[] | undefined): string {
 }
 
 function revenueForSearchRow(revenueDisplay: string): string {
-  if (!revenueDisplay || revenueDisplay === TRACKAPP_METRICS_UNAVAILABLE_LABEL) return "—";
-  return revenueDisplay;
+  if (revenueDisplay === TRACKAPP_METRICS_UNAVAILABLE_LABEL) return "—";
+  const raw = revenueDisplay || "—";
+  return raw === "—" ? raw : finalizeTrackappRevenueEurLabel(raw);
 }
 
 export async function GET(req: Request) {
@@ -54,7 +56,7 @@ export async function GET(req: Request) {
       {
         status: 200,
         headers: {
-          "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600",
+          "Cache-Control": "private, no-store, max-age=0",
         },
       },
     );

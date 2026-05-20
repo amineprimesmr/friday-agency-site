@@ -11,7 +11,12 @@ import {
   type IosAggregateAppMetrics,
   type SearchResult,
 } from "@/lib/apple-charts";
-import { formatTrackappAggregateRevenueEur } from "@/lib/trackapp-revenue-display";
+import {
+  finalizeTrackappRevenueEurLabel,
+  formatTrackappLiveSearchRevenueEur,
+  hasAnyTrackerAggregateSignal,
+  TRACKAPP_ZERO_REVENUE_MAX_USD,
+} from "@/lib/trackapp-revenue-display";
 
 /** Affiché quand Sensor Tower n’a pas livré téléchargements + revenus agrégés. */
 export const TRACKAPP_METRICS_UNAVAILABLE_LABEL = "Indisponible — à corriger";
@@ -55,29 +60,40 @@ const BATCH_METRICS_CONCURRENCY = 3;
 /** Live search : moins de requêtes ST simultanées (évite timeouts / 429). */
 const LIVE_SEARCH_ST_CONCURRENCY = 2;
 const ST_FETCH_TIMEOUT_MS = 9_000;
-const ST_RETRY_ATTEMPTS = 3;
-const ST_RETRY_DELAY_MS = 350;
+/** Recherche live : pas de cache + timeout plus long (évite les « — » intermittents). */
+const LIVE_SEARCH_ST_FETCH_TIMEOUT_MS = 12_000;
+const ST_RETRY_ATTEMPTS = 4;
+const ST_RETRY_DELAY_MS = 400;
 
 async function sleep(ms: number): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function fetchSensorTowerAggregateWithRetry(appId: string): Promise<IosAggregateAppMetrics | null> {
+async function fetchSensorTowerAggregateWithRetry(
+  appId: string,
+  options?: Readonly<{ timeoutMs?: number }>,
+): Promise<IosAggregateAppMetrics | null> {
+  const timeoutMs = options?.timeoutMs ?? ST_FETCH_TIMEOUT_MS;
   let last: IosAggregateAppMetrics | null = null;
   for (let attempt = 0; attempt < ST_RETRY_ATTEMPTS; attempt += 1) {
-    last = await fetchIosAggregateAppMetrics(appId, { timeoutMs: ST_FETCH_TIMEOUT_MS });
-    if (isTrackerAggregateDisplayReady(last)) return last;
+    last = await fetchIosAggregateAppMetrics(appId, { timeoutMs });
+    if (last && (isTrackerAggregateDisplayReady(last) || hasAnyTrackerAggregateSignal(last))) {
+      return last;
+    }
     if (attempt < ST_RETRY_ATTEMPTS - 1) {
       await sleep(ST_RETRY_DELAY_MS * (attempt + 1));
     }
   }
-  return last;
+  return last && hasAnyTrackerAggregateSignal(last) ? last : null;
 }
 
 const sensorTowerAggregateCached = (appId: string) =>
   unstable_cache(
-    () => fetchSensorTowerAggregateWithRetry(appId),
-    ["trackapp-sensor-tower-aggregate-v1", appId],
+    async () => {
+      const agg = await fetchSensorTowerAggregateWithRetry(appId);
+      return agg && hasAnyTrackerAggregateSignal(agg) ? agg : null;
+    },
+    ["trackapp-sensor-tower-aggregate-v3", appId],
     { revalidate: 3600 },
   );
 
@@ -126,16 +142,26 @@ export function computeTrackappAppDisplayMetrics(
   aggregateMetrics: IosAggregateAppMetrics | null,
   chartRank: number | null,
 ): TrackappAppDisplayMetrics {
-  if (isTrackerAggregateDisplayReady(aggregateMetrics)) {
-    const downloadsDisplay = aggregateMetrics.downloadsString.toUpperCase();
-    const revenueDisplay = formatTrackappAggregateRevenueEur(aggregateMetrics, app.id);
+  if (aggregateMetrics && hasAnyTrackerAggregateSignal(aggregateMetrics)) {
+    const hasDl =
+      aggregateMetrics.downloadsString.trim() !== "" &&
+      aggregateMetrics.downloadsString !== "—";
+    const downloadsDisplay = hasDl
+      ? aggregateMetrics.downloadsString.toUpperCase()
+      : "—";
+    const revenueDisplay = finalizeTrackappRevenueEurLabel(
+      formatTrackappLiveSearchRevenueEur(aggregateMetrics, app.id),
+    );
 
     return {
       downloadsDisplay,
       revenueDisplay,
       metricSource: "agrégé monde / mois",
       chartRank,
-      sortRevenueUsd: aggregateMetrics.revenue > 0 ? aggregateMetrics.revenue : 0,
+      sortRevenueUsd:
+        aggregateMetrics.revenue > TRACKAPP_ZERO_REVENUE_MAX_USD
+          ? aggregateMetrics.revenue
+          : 0,
       sortDownloads: parseDownloadsDisplayToSortValue(
         downloadsDisplay,
         aggregateMetrics.downloads,
@@ -182,7 +208,7 @@ async function resolveTrackappAppDisplayMetricsCanonical(
 export function getTrackappAppDisplayMetricsCached(appId: string, country: CountryCode) {
   return unstable_cache(
     () => resolveTrackappAppDisplayMetricsCanonical(appId, country),
-    ["trackapp-display-metrics-canonical-v5", appId, country],
+    ["trackapp-display-metrics-canonical-v6", appId, country],
     { revalidate: 3600 },
   )();
 }
@@ -281,7 +307,9 @@ export async function enrichSearchResultsWithTrackappMetricsForLiveSearch(
   if (apps.length === 0) return [];
 
   const metricsRows = await mapPool(apps, LIVE_SEARCH_ST_CONCURRENCY, async (app) => {
-    const aggregateMetrics = await sensorTowerAggregateCached(app.id)();
+    const aggregateMetrics = await fetchSensorTowerAggregateWithRetry(app.id, {
+      timeoutMs: LIVE_SEARCH_ST_FETCH_TIMEOUT_MS,
+    });
     const metrics = computeTrackappAppDisplayMetrics(
       {
         id: app.id,

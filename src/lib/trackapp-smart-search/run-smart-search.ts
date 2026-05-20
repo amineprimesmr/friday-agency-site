@@ -56,7 +56,7 @@ async function runSmartSearchUncached(
 const cachedSmartSearch = unstable_cache(
   async (q: string, country: CountryCode, limit: number, sort: TrackappSearchSort) =>
     runSmartSearchUncached(q, country, limit, sort),
-  ["trackapp-smart-search-v3-canonical-metrics"],
+  ["trackapp-smart-search-v4-zero-revenue-floor"],
   { revalidate: 300 },
 );
 
