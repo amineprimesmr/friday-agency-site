@@ -1,0 +1,19 @@
+/* Accueil workspace : recherche landing (TrackerSearchBar) intégrée en page */
+
+.trackapp-accueil-search {
+  width: 100%;
+  max-width: 42rem;
+}
+
+.trackapp-accueil-search .tracker-search-desktop-host {
+  width: 100%;
+}
+
+.trackapp-accueil-search .tracker-search-stack--desktop {
+  width: 100%;
+}
+
+.trackapp-accueil-search .tracker-search-panel {
+  margin-top: 0.5rem;
+  max-height: min(70vh, 520px);
+}

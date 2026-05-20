@@ -1,21 +1,15 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import { TrackappAccueilLanding } from "@/components/trackapp/trackapp-accueil-landing";
-import { TrackappApptrackerSearchSection } from "@/components/trackapp/trackapp-apptracker-search-section";
+import { TrackappAccueilSearch } from "@/components/trackapp/trackapp-accueil-search";
 import { TrackappCursorPromoBanner } from "@/components/trackapp/trackapp-cursor-promo-banner";
 import { StripeReturnHandler } from "@/components/trackapp/stripe-return-handler";
-import { normalizeTrackerCountryParam } from "@/lib/apple-charts";
-import { TRACKAPP_ACCUEIL_BASE } from "@/lib/trackapp-apptracker-paths";
-import { cachedTrackappApptrackerSearch } from "@/lib/trackapp-apptracker-search";
-import { getTrackappProfileFavorites } from "@/lib/trackapp-profile-favorites";
+import { normalizeTrackerCountryParam, type CountryCode } from "@/lib/apple-charts";
 
 export const metadata: Metadata = {
   title: "Accueil — Trackapp",
-  description: "Recherche App Store et analyse d’apps dans l’espace Trackapp.",
+  description: "Recherche App Store — même expérience que la landing Trackapp.",
 };
-
-export const revalidate = 300;
 
 export default async function TrackappAccueilPage({
   searchParams,
@@ -24,34 +18,30 @@ export default async function TrackappAccueilPage({
 }>) {
   const sp = await searchParams;
   const q = typeof sp.q === "string" ? sp.q.trim() : "";
-  const country = normalizeTrackerCountryParam(sp.country);
-  const [results, { loggedIn, appIds }] = await Promise.all([
-    q.length >= 2 ? cachedTrackappApptrackerSearch(q, country) : Promise.resolve([]),
-    getTrackappProfileFavorites(),
-  ]);
+  const country = normalizeTrackerCountryParam(sp.country) as CountryCode;
 
   return (
     <div className="trackapp-accueil-page">
       <TrackappCursorPromoBanner />
 
       <div className="trackapp-accueil-page__body">
-        <div className="w-full max-w-[720px]">
+        <div className="w-full max-w-[42rem]">
           <Suspense fallback={null}>
             <StripeReturnHandler />
           </Suspense>
         </div>
-        <div className="w-full max-w-[720px]">
-          <TrackappAccueilLanding />
+
+        <div className="flex w-full max-w-[42rem] flex-col items-center text-center">
+          <h1 className="text-balance text-[2rem] font-bold leading-[1.15] tracking-tight text-[var(--dash-text,#1a202c)] sm:text-[2.35rem] md:text-[2.75rem]">
+            Recherchez n&apos;importe quel app, obtenez des insights instantanés
+          </h1>
+          <p className="mt-5 max-w-[540px] text-pretty text-[1.05rem] leading-relaxed text-[var(--dash-muted-light,#64748b)] italic">
+            Explorez les classements et signaux publics de l&apos;App&nbsp;Store.
+          </p>
         </div>
-        <div className="dashboard-main mt-10 w-full max-w-[1100px] pb-16">
-          <TrackappApptrackerSearchSection
-            q={q}
-            country={country}
-            results={results}
-            favoritesEnabled={loggedIn}
-            favoriteAppIds={appIds}
-            syncUrlPath={TRACKAPP_ACCUEIL_BASE}
-          />
+
+        <div className="mt-8 w-full max-w-[42rem]">
+          <TrackappAccueilSearch country={country} initialQuery={q} />
         </div>
       </div>
     </div>

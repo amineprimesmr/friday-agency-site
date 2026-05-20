@@ -19,12 +19,10 @@ import {
 import "@/styles/tracker-search-bar.css";
 
 import { abortInFlightRequest, isAbortError } from "@/lib/abort-signal";
-import { COUNTRY_MAP, TRACKER_DEFAULT_COUNTRY } from "@/lib/apple-charts";
+import { COUNTRY_MAP, TRACKER_DEFAULT_COUNTRY, type CountryCode } from "@/lib/apple-charts";
 
 export type TrackerSearchSurface = "dark" | "light";
 
-const trackerSearchStoreCc = TRACKER_DEFAULT_COUNTRY.toUpperCase();
-const trackerSearchCountryName = COUNTRY_MAP[TRACKER_DEFAULT_COUNTRY].name;
 
 export type FeaturedAppLite = {
   id: string;
@@ -88,12 +86,19 @@ export function TrackerSearchBar({
   isOpen,
   onClose,
   onOpen,
+  embedded = false,
+  country,
+  initialQuery = "",
 }: {
   searchSurface?: TrackerSearchSurface;
   isOpen: boolean;
   onClose: () => void;
   /** Ouvre le panneau (desktop : au focus de l’input). */
   onOpen?: () => void;
+  /** Page Accueil workspace : même UX que la landing, liens vers `/trackapp/apptracker`. */
+  embedded?: boolean;
+  country?: CountryCode;
+  initialQuery?: string;
 }) {
   const router = useRouter();
   const isLg = useMediaQuery("(min-width: 1024px)");
@@ -104,8 +109,21 @@ export function TrackerSearchBar({
   const mobileSheetRef = useRef<HTMLDivElement>(null);
   const startTrackerNav = useTrackerNavStart();
 
-  const [query, setQuery] = useState("");
-  const [debouncedQ, setDebouncedQ] = useState("");
+  const storeCountry = country ?? TRACKER_DEFAULT_COUNTRY;
+  const storeCc = storeCountry.toUpperCase();
+  const storeCountryName = COUNTRY_MAP[storeCountry].name;
+  const panelOpen = isOpen || embedded;
+
+  const appDetailHref = useCallback(
+    (appId: string) =>
+      embedded
+        ? `/trackapp/apptracker/${appId}?country=${storeCountry}`
+        : `/tracker/apps/${appId}?country=${storeCountry}`,
+    [embedded, storeCountry],
+  );
+
+  const [query, setQuery] = useState(initialQuery);
+  const [debouncedQ, setDebouncedQ] = useState(initialQuery.trim());
   const [featuredLoading, setFeaturedLoading] = useState(true);
   const [featured, setFeatured] = useState<FeaturedAppLite[]>([]);
   const [searchHits, setSearchHits] = useState<SearchHit[]>([]);
@@ -159,10 +177,10 @@ export function TrackerSearchBar({
   }, []);
 
   useEffect(() => {
-    if (!isOpen && featured.length === 0) return;
+    if (!panelOpen && featured.length === 0) return;
     if (featured.length > 0) return;
     void loadFeatured();
-  }, [featured.length, isOpen, loadFeatured]);
+  }, [featured.length, panelOpen, loadFeatured]);
 
   useEffect(() => {
     const t = trimmed;
@@ -185,7 +203,7 @@ export function TrackerSearchBar({
     void (async () => {
       try {
         const res = await fetch(
-          `/api/tracker/search?q=${encodeURIComponent(debouncedQ)}&country=${TRACKER_DEFAULT_COUNTRY}&limit=12`,
+          `/api/tracker/search?q=${encodeURIComponent(debouncedQ)}&country=${storeCountry}&limit=12`,
           { signal: ac.signal, cache: "force-cache" },
         );
         const data = (await res.json()) as { apps?: SearchHit[] };
@@ -200,7 +218,7 @@ export function TrackerSearchBar({
       }
     })().catch(() => undefined);
     return () => abortInFlightRequest(ac);
-  }, [debouncedQ]);
+  }, [debouncedQ, storeCountry]);
 
   useEffect(() => {
     setHighlight(0);
@@ -214,7 +232,7 @@ export function TrackerSearchBar({
   }, [navigIds.length, highlight]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!panelOpen) return;
     let el: HTMLElement | null = null;
     if (trimmed.length >= 1 && !showSearchSkeleton && !showEmptySearch && searchHits.length > 0) {
       el = document.getElementById(`${listId}-nav-s-${String(highlight)}`);
@@ -228,7 +246,7 @@ export function TrackerSearchBar({
   }, [
     highlight,
     listId,
-    isOpen,
+    panelOpen,
     trimmed,
     showSearchSkeleton,
     showEmptySearch,
@@ -238,16 +256,16 @@ export function TrackerSearchBar({
   ]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!panelOpen || embedded) return;
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
     }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [isOpen, onClose]);
+  }, [panelOpen, embedded, onClose]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!panelOpen || embedded) return;
     function onDocMouseDown(e: MouseEvent) {
       const root = isLg ? stackRef.current : mobileSheetRef.current;
       if (!root?.contains(e.target as Node)) {
@@ -256,46 +274,53 @@ export function TrackerSearchBar({
     }
     document.addEventListener("mousedown", onDocMouseDown);
     return () => document.removeEventListener("mousedown", onDocMouseDown);
-  }, [isOpen, onClose, isLg]);
+  }, [panelOpen, embedded, onClose, isLg]);
 
   useEffect(() => {
-    if (isLg || !isOpen) return;
+    if (isLg || !panelOpen) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prev;
     };
-  }, [isLg, isOpen]);
+  }, [isLg, panelOpen]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!panelOpen) return;
     const id = window.requestAnimationFrame(() => {
       inputRef.current?.focus();
     });
     return () => window.cancelAnimationFrame(id);
-  }, [isOpen]);
+  }, [panelOpen]);
 
   function submitSearch() {
     const q = trimmed;
+    if (embedded) {
+      if (!q) return;
+      if (searchHits.length > 0) {
+        goHit(appDetailHref(searchHits[highlight]?.id ?? searchHits[0].id));
+      }
+      return;
+    }
     if (!q) {
       startTrackerNav?.();
-      router.push(`/tracker/search?country=${TRACKER_DEFAULT_COUNTRY}`);
+      router.push(`/tracker/search?country=${storeCountry}`);
       onClose();
       return;
     }
     startTrackerNav?.();
-    router.push(`/tracker/search?q=${encodeURIComponent(q)}&country=${TRACKER_DEFAULT_COUNTRY}`);
+    router.push(`/tracker/search?q=${encodeURIComponent(q)}&country=${storeCountry}`);
     onClose();
   }
 
   function goHit(href: string) {
-    onClose();
+    if (!embedded) onClose();
     startTrackerNav?.();
     router.push(href);
   }
 
   function onInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (!isOpen) return;
+    if (!panelOpen) return;
     const n = navigIds.length;
     if (n === 0) {
       if (e.key === "Enter") {
@@ -314,17 +339,17 @@ export function TrackerSearchBar({
       e.preventDefault();
       if (trimmed.length >= 1 && !showSearchSkeleton && !showEmptySearch) {
         const hit = searchHits[highlight];
-        if (hit) goHit(`/tracker/apps/${hit.id}?country=${TRACKER_DEFAULT_COUNTRY}`);
+        if (hit) goHit(appDetailHref(hit.id));
       } else if (trimmed.length < 1) {
         const app = featuredSorted[highlight];
-        if (app) goHit(`/tracker/apps/${app.id}?country=${TRACKER_DEFAULT_COUNTRY}`);
+        if (app) goHit(appDetailHref(app.id));
       } else {
         submitSearch();
       }
     }
   }
 
-  if (!isLg && !isOpen) {
+  if (!isLg && !panelOpen) {
     return null;
   }
 
@@ -383,15 +408,15 @@ export function TrackerSearchBar({
               enterKeyHint="search"
               role="combobox"
               className="tracker-search-input"
-              placeholder={isLg && !isOpen ? "Rechercher…" : "Rechercher une app…"}
+              placeholder={isLg && !panelOpen ? "Rechercher…" : "Rechercher une app…"}
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
               spellCheck={false}
-              aria-expanded={isOpen}
+              aria-expanded={panelOpen}
               aria-autocomplete="list"
               aria-haspopup="listbox"
-              aria-controls={isOpen ? "tracker-search-panel" : undefined}
+              aria-controls={panelOpen ? "tracker-search-panel" : undefined}
               value={query}
               onChange={(e) => {
                 const v = e.target.value;
@@ -431,7 +456,7 @@ export function TrackerSearchBar({
             ) : null}
           </form>
 
-          {isOpen ? (
+          {panelOpen ? (
           <div
             id="tracker-search-panel"
             role="region"
@@ -488,7 +513,7 @@ export function TrackerSearchBar({
                       key={app.id}
                       id={`${listId}-nav-s-${String(idx)}`}
                       role="listitem"
-                      href={`/tracker/apps/${app.id}?country=${TRACKER_DEFAULT_COUNTRY}`}
+                      href={appDetailHref(app.id)}
                       className={`tracker-search-row tracker-search-row--dark tracker-touch ${selected ? "tracker-search-row--active" : "tracker-rise"}`}
                       style={
                         selected
@@ -497,7 +522,9 @@ export function TrackerSearchBar({
                       }
                       prefetchOnHover={idx < 6}
                       onMouseEnter={() => setHighlight(idx)}
-                      onClick={() => onClose()}
+                      onClick={() => {
+                        if (!embedded) onClose();
+                      }}
                     >
                       <div className="tracker-search-row-art relative bg-zinc-800">
                         {app.artworkUrl ? (
@@ -592,7 +619,7 @@ export function TrackerSearchBar({
                     ) : null}
 
                     {featuredSorted.map((app, idx) => {
-                      const chips = [`${trackerSearchStoreCc} · #${String(app.rank)}`, categorySlug(app.category)].filter(
+                      const chips = [`${storeCc} · #${String(app.rank)}`, categorySlug(app.category)].filter(
                         Boolean,
                       );
                       const meta = formatReleaseMeta(app.releaseDate);
@@ -603,7 +630,7 @@ export function TrackerSearchBar({
                           key={`${app.id}-f-${String(idx)}`}
                           id={`${listId}-nav-f-${String(idx)}`}
                           role="listitem"
-                          href={`/tracker/apps/${app.id}?country=${TRACKER_DEFAULT_COUNTRY}`}
+                          href={appDetailHref(app.id)}
                           className={`tracker-search-row tracker-search-row--dark tracker-touch ${selected ? "tracker-search-row--active" : "tracker-rise"}`}
                           style={
                             selected
@@ -612,7 +639,9 @@ export function TrackerSearchBar({
                           }
                           prefetchOnHover={idx < 4}
                           onMouseEnter={() => setHighlight(idx)}
-                          onClick={() => onClose()}
+                          onClick={() => {
+                            if (!embedded) onClose();
+                          }}
                         >
                           <div className="tracker-search-row-art relative bg-zinc-800">
                             {app.artworkUrl ? (
@@ -661,7 +690,7 @@ export function TrackerSearchBar({
                               {app.dlEst}
                             </div>
                             <div className="tracker-search-stat-sub tracker-search-stat-sub--dark">
-                              / mois · {trackerSearchCountryName}
+                              / mois · {storeCountryName}
                             </div>
                           </div>
 
@@ -675,37 +704,39 @@ export function TrackerSearchBar({
                 ) : null}
               </div>
 
-              <div className="tracker-search-panel-footer tracker-search-panel-footer--dark">
-                <div className="tracker-search-kbd-hints hidden lg:flex">
-                  <span className="tracker-kbd-group">
-                    <kbd className="tracker-kbd">↑</kbd>
-                    <kbd className="tracker-kbd">↓</kbd>
-                    <span>naviguer</span>
-                  </span>
-                  <span className="tracker-kbd-group">
-                    <kbd className="tracker-kbd">ret</kbd>
-                    <span>ouvrir</span>
-                  </span>
-                  <span className="tracker-kbd-group">
-                    <kbd className="tracker-kbd">esc</kbd>
-                    <span>fermer</span>
-                  </span>
+              {!embedded ? (
+                <div className="tracker-search-panel-footer tracker-search-panel-footer--dark">
+                  <div className="tracker-search-kbd-hints hidden lg:flex">
+                    <span className="tracker-kbd-group">
+                      <kbd className="tracker-kbd">↑</kbd>
+                      <kbd className="tracker-kbd">↓</kbd>
+                      <span>naviguer</span>
+                    </span>
+                    <span className="tracker-kbd-group">
+                      <kbd className="tracker-kbd">ret</kbd>
+                      <span>ouvrir</span>
+                    </span>
+                    <span className="tracker-kbd-group">
+                      <kbd className="tracker-kbd">esc</kbd>
+                      <span>fermer</span>
+                    </span>
+                  </div>
+                  <TrackerNavLink
+                    href={`/tracker/search?country=${storeCountry}`}
+                    className="tracker-search-advanced-link"
+                    onClick={() => onClose()}
+                  >
+                    Recherche avancée →
+                  </TrackerNavLink>
                 </div>
-                <TrackerNavLink
-                  href={`/tracker/search?country=${TRACKER_DEFAULT_COUNTRY}`}
-                  className="tracker-search-advanced-link"
-                  onClick={() => onClose()}
-                >
-                  Recherche avancée →
-                </TrackerNavLink>
-              </div>
+              ) : null}
           </div>
           ) : null}
         </div>
   );
 
-  if (isLg) {
-    return <div className="tracker-search-desktop-host">{searchStack}</div>;
+  if (embedded || isLg) {
+    return <div className="tracker-search-desktop-host w-full">{searchStack}</div>;
   }
 
   const sheetEase = reduceMotion
@@ -721,7 +752,7 @@ export function TrackerSearchBar({
 
   return createPortal(
     <AnimatePresence mode="sync">
-      {isOpen ? (
+      {panelOpen ? (
         <>
           <motion.button
             key="tracker-msearch-backdrop"
