@@ -10,7 +10,12 @@ function metricsLabels(metrics: TrackappAppDisplayMetrics): Readonly<{
   downloads: string;
   revenue: string;
 } | null> {
-  if (metrics.metricSource === "donnée indisponible") return null;
+  if (
+    metrics.metricSource === "donnée indisponible" ||
+    (metrics.downloadsDisplay === "—" && metrics.revenueDisplay === "—")
+  ) {
+    return null;
+  }
   if (metrics.metricSource === "agrégé monde / mois") {
     return {
       downloads: "Téléchargements / mois",

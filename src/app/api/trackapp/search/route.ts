@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 
 import { normalizeTrackerCountryParam } from "@/lib/apple-charts";
+
+/** Enrichissement Sensor Tower (cache + file d’attente) — peut dépasser 10 s à froid. */
+export const maxDuration = 60;
 import { runTrackappSmartSearch } from "@/lib/trackapp-smart-search/run-smart-search";
 import type { TrackappSearchSort } from "@/lib/trackapp-smart-search/rank-results";
 

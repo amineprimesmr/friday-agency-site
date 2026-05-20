@@ -4,21 +4,12 @@ import { TrackappAppFavoriteRow } from "@/components/trackapp/trackapp-app-favor
 import { TrackappApptrackerAppResultCard } from "@/components/trackapp/trackapp-apptracker-app-result-card";
 import { fetchAppDetail, normalizeTrackerCountryParam } from "@/lib/apple-charts";
 import { appDetailToSearchResultForFavorites } from "@/lib/trackapp-app-favorites-map";
-import { resolveTrackappAppsDisplayMetricsBatch } from "@/lib/trackapp-app-display-metrics";
+import { EMPTY_METRICS, resolveTrackappAppsDisplayMetricsBatch } from "@/lib/trackapp-app-display-metrics";
 import { getTrackappProfileFavorites } from "@/lib/trackapp-profile-favorites";
 
 export const metadata: Metadata = {
   title: "Favoris — Apps",
   description: "Apps que tu as enregistrées en favori.",
-};
-
-const EMPTY_METRICS = {
-  downloadsDisplay: "—",
-  revenueDisplay: "—",
-  metricSource: "donnée indisponible" as const,
-  chartRank: null,
-  sortRevenueUsd: 0,
-  sortDownloads: 0,
 };
 
 export default async function TrackappFavoriteAppsPage({

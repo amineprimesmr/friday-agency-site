@@ -1,3 +1,5 @@
+import { unstable_cache } from "next/cache";
+
 import {
   estimateMonthlyDownloads,
   estimateMonthlyRevenueUsd,
@@ -16,14 +18,12 @@ import {
   formatTrackappAggregateRevenueEur,
 } from "@/lib/trackapp-revenue-display";
 
-/** Métriques mensuelles affichées sur cartes liste / sélection — même logique que la fiche app. */
+/** Métriques mensuelles — une seule résolution pour fiche, recherche, favoris, tri. */
 export type TrackappAppDisplayMetrics = Readonly<{
   downloadsDisplay: string;
   revenueDisplay: string;
   metricSource: "agrégé monde / mois" | "estimation / mois" | "estimation indicative / mois" | "donnée indisponible";
-  /** Classement top 100 national (ou slice genre) — pas le rang dans les résultats iTunes Search. */
   chartRank: number | null;
-  /** Clés internes pour trier les listes sans réutiliser le faux rang Search. */
   sortRevenueUsd: number;
   sortDownloads: number;
 }>;
@@ -37,7 +37,7 @@ type AppMetricInput = Readonly<{
 
 type EnrichedTop = Awaited<ReturnType<typeof fetchEnrichedTopFree>>;
 
-const EMPTY_METRICS: TrackappAppDisplayMetrics = {
+export const EMPTY_METRICS: TrackappAppDisplayMetrics = {
   downloadsDisplay: "—",
   revenueDisplay: "—",
   metricSource: "donnée indisponible",
@@ -45,6 +45,13 @@ const EMPTY_METRICS: TrackappAppDisplayMetrics = {
   sortRevenueUsd: 0,
   sortDownloads: 0,
 };
+
+/** Rang indicatif hors top 100 — identique fiche Apptracker. */
+export const TRACKAPP_DETAIL_FALLBACK_ESTIMATE_RANK = 50;
+
+const ST_RETRY_ATTEMPTS = 3;
+const ST_RETRY_DELAY_MS = 400;
+const BATCH_METRICS_CONCURRENCY = 3;
 
 function parseDownloadsDisplayToSortValue(label: string, aggregateDownloads: number): number {
   if (aggregateDownloads > 0) return aggregateDownloads;
@@ -61,36 +68,81 @@ function parseDownloadsDisplayToSortValue(label: string, aggregateDownloads: num
   return n;
 }
 
-function chartRankForApp(appId: string, primaryGenreId: string | undefined, enrichedNationalTop: EnrichedTop): number | null {
+function hasUsableAggregate(aggregateMetrics: IosAggregateAppMetrics): boolean {
+  const hasDl =
+    aggregateMetrics.downloads > 0 ||
+    (aggregateMetrics.downloadsString.trim() !== "" && aggregateMetrics.downloadsString !== "—");
+  const hasRev =
+    aggregateMetrics.revenue > 0 ||
+    (aggregateMetrics.revenueString.trim() !== "" && aggregateMetrics.revenueString !== "—");
+  return hasDl || hasRev;
+}
+
+function chartRankForApp(
+  appId: string,
+  primaryGenreId: string | undefined,
+  enrichedNationalTop: EnrichedTop,
+): number | null {
   const overallRank = overallRankInTop100Free(appId, enrichedNationalTop);
   const genreSliceRank = genreSliceRankInTop100Free(appId, primaryGenreId ?? "", enrichedNationalTop);
   return overallRank ?? genreSliceRank;
 }
 
-/** Rang indicatif hors top 100 — même comportement que l’ancienne fiche apptracker. */
-export const TRACKAPP_DETAIL_FALLBACK_ESTIMATE_RANK = 50;
+async function sleep(ms: number): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
 
-/** Calcule téléchargements + revenus comme sur `/trackapp/apptracker/[id]`. */
+async function fetchIosAggregateAppMetricsWithRetry(
+  appId: string,
+): Promise<IosAggregateAppMetrics | null> {
+  for (let attempt = 0; attempt < ST_RETRY_ATTEMPTS; attempt += 1) {
+    const metrics = await fetchIosAggregateAppMetrics(appId);
+    if (metrics && hasUsableAggregate(metrics)) return metrics;
+    if (attempt < ST_RETRY_ATTEMPTS - 1) {
+      await sleep(ST_RETRY_DELAY_MS * (attempt + 1));
+    }
+  }
+  return null;
+}
+
+const getIosAggregateAppMetricsCached = (appId: string) =>
+  unstable_cache(
+    () => fetchIosAggregateAppMetricsWithRetry(appId),
+    ["trackapp-ios-aggregate-metrics-v2", appId],
+    { revalidate: 3600 },
+  );
+
+/** Calcule téléchargements + revenus — toujours avec fallback #50 comme la fiche. */
 export function computeTrackappAppDisplayMetrics(
   app: AppMetricInput,
   country: CountryCode,
   aggregateMetrics: IosAggregateAppMetrics | null,
   chartRank: number | null,
-  fallbackEstimateRank: number | null = null,
+  fallbackEstimateRank: number | null = TRACKAPP_DETAIL_FALLBACK_ESTIMATE_RANK,
 ): TrackappAppDisplayMetrics {
-  const useAggregateMetrics = Boolean(
-    aggregateMetrics && aggregateMetrics.downloadsString !== "—" && aggregateMetrics.revenueString !== "—",
-  );
+  if (aggregateMetrics && hasUsableAggregate(aggregateMetrics)) {
+    const downloadsDisplay =
+      aggregateMetrics.downloadsString !== "—" && aggregateMetrics.downloadsString.trim()
+        ? aggregateMetrics.downloadsString.toUpperCase()
+        : aggregateMetrics.downloads > 0
+          ? estimateMonthlyDownloads(
+              chartRank ?? fallbackEstimateRank ?? TRACKAPP_DETAIL_FALLBACK_ESTIMATE_RANK,
+              country,
+            )
+          : "—";
 
-  if (useAggregateMetrics && aggregateMetrics) {
-    const downloadsDisplay = aggregateMetrics.downloadsString.toUpperCase();
+    const revenueDisplay = formatTrackappAggregateRevenueEur(aggregateMetrics, app.id);
+
     return {
       downloadsDisplay,
-      revenueDisplay: formatTrackappAggregateRevenueEur(aggregateMetrics, app.id),
+      revenueDisplay,
       metricSource: "agrégé monde / mois",
       chartRank,
       sortRevenueUsd: aggregateMetrics.revenue > 0 ? aggregateMetrics.revenue : 0,
-      sortDownloads: parseDownloadsDisplayToSortValue(downloadsDisplay, aggregateMetrics.downloads),
+      sortDownloads: parseDownloadsDisplayToSortValue(
+        downloadsDisplay,
+        aggregateMetrics.downloads,
+      ),
     };
   }
 
@@ -117,22 +169,68 @@ export function computeTrackappAppDisplayMetrics(
   return EMPTY_METRICS;
 }
 
+async function resolveTrackappAppDisplayMetricsCanonical(
+  appId: string,
+  country: CountryCode,
+): Promise<TrackappAppDisplayMetrics> {
+  const [app, aggregateMetrics, enrichedNationalTop] = await Promise.all([
+    fetchAppDetail(appId, country),
+    getIosAggregateAppMetricsCached(appId)(),
+    fetchEnrichedTopFree(country, 100),
+  ]);
+
+  if (!app) return EMPTY_METRICS;
+
+  const chartRank = chartRankForApp(app.id, app.primaryGenreId, enrichedNationalTop);
+  return computeTrackappAppDisplayMetrics(
+    app,
+    country,
+    aggregateMetrics,
+    chartRank,
+    TRACKAPP_DETAIL_FALLBACK_ESTIMATE_RANK,
+  );
+}
+
+/** Cache cross-requêtes : recherche et fiche lisent la même résolution. */
+export function getTrackappAppDisplayMetricsCached(appId: string, country: CountryCode) {
+  return unstable_cache(
+    () => resolveTrackappAppDisplayMetricsCanonical(appId, country),
+    ["trackapp-display-metrics-canonical-v3", appId, country],
+    { revalidate: 3600 },
+  )();
+}
+
 export async function resolveTrackappAppDisplayMetrics(
   appId: string,
   country: CountryCode,
 ): Promise<TrackappAppDisplayMetrics | null> {
-  const [app, aggregateMetrics, enrichedNationalTop] = await Promise.all([
-    fetchAppDetail(appId, country),
-    fetchIosAggregateAppMetrics(appId),
-    fetchEnrichedTopFree(country, 100),
-  ]);
-  if (!app) return null;
-
-  const chartRank = chartRankForApp(app.id, app.primaryGenreId, enrichedNationalTop);
-  return computeTrackappAppDisplayMetrics(app, country, aggregateMetrics, chartRank);
+  const metrics = await getTrackappAppDisplayMetricsCached(appId, country);
+  return metrics.metricSource === "donnée indisponible" ? null : metrics;
 }
 
-/** Enrichit plusieurs apps en une passe (top 100 national chargé une seule fois). */
+async function mapPool<T, R>(
+  items: readonly T[],
+  concurrency: number,
+  worker: (item: T, index: number) => Promise<R>,
+): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let next = 0;
+
+  async function runWorker(): Promise<void> {
+    for (;;) {
+      const index = next;
+      next += 1;
+      if (index >= items.length) return;
+      results[index] = await worker(items[index]!, index);
+    }
+  }
+
+  const workers = Math.min(Math.max(concurrency, 1), items.length);
+  await Promise.all(Array.from({ length: workers }, () => runWorker()));
+  return results;
+}
+
+/** Batch recherche : cache par app + file Sensor Tower (évite 429). */
 export async function resolveTrackappAppsDisplayMetricsBatch(
   appIds: readonly string[],
   country: CountryCode,
@@ -140,29 +238,12 @@ export async function resolveTrackappAppsDisplayMetricsBatch(
   const uniqueIds = [...new Set(appIds.filter(Boolean))];
   if (uniqueIds.length === 0) return new Map();
 
-  const enrichedNationalTop = await fetchEnrichedTopFree(country, 100);
+  const rows = await mapPool(uniqueIds, BATCH_METRICS_CONCURRENCY, async (appId) => {
+    const metrics = await getTrackappAppDisplayMetricsCached(appId, country);
+    return [appId, metrics] as const;
+  });
 
-  /** Sensor Tower limite en rafale (429) — séquentiel comme sur la fiche / notre sélection. */
-  const entries: Array<readonly [string, TrackappAppDisplayMetrics] | null> = [];
-  for (const appId of uniqueIds) {
-    const app = await fetchAppDetail(appId, country);
-    if (!app) {
-      entries.push(null);
-      continue;
-    }
-    const aggregateMetrics = await fetchIosAggregateAppMetrics(appId);
-    const chartRank = chartRankForApp(app.id, app.primaryGenreId, enrichedNationalTop);
-    entries.push([
-      appId,
-      computeTrackappAppDisplayMetrics(app, country, aggregateMetrics, chartRank),
-    ] as const);
-  }
-
-  const map = new Map<string, TrackappAppDisplayMetrics>();
-  for (const row of entries) {
-    if (row) map.set(row[0], row[1]);
-  }
-  return map;
+  return new Map(rows);
 }
 
 export function metricsFromAppDetail(
@@ -170,7 +251,7 @@ export function metricsFromAppDetail(
   country: CountryCode,
   aggregateMetrics: IosAggregateAppMetrics | null,
   enrichedNationalTop: EnrichedTop,
-  fallbackEstimateRank: number | null = null,
+  fallbackEstimateRank: number | null = TRACKAPP_DETAIL_FALLBACK_ESTIMATE_RANK,
 ): TrackappAppDisplayMetrics {
   const chartRank = chartRankForApp(detail.id, detail.primaryGenreId, enrichedNationalTop);
   return computeTrackappAppDisplayMetrics(
@@ -186,10 +267,6 @@ export type SearchResultWithTrackappMetrics = SearchResult & {
   trackappMetrics: TrackappAppDisplayMetrics;
 };
 
-/**
- * Même source de vérité que `/trackapp/apptracker/[id]` :
- * agrégat Sensor Tower si dispo, sinon estimation via top 100 (jamais le rang #1/#2 de la recherche iTunes).
- */
 export async function enrichSearchResultsWithTrackappMetrics(
   apps: readonly SearchResult[],
   country: CountryCode,
@@ -207,7 +284,14 @@ export async function enrichSearchResultsWithTrackappMetrics(
   }));
 }
 
-/** Utilitaire fiche détail — évite de dupliquer la logique dans la page. */
+/** Fiche détail — aligné sur le cache canonique (même chiffres que la recherche). */
+export async function metricsForApptrackerDetailPage(
+  appId: string,
+  country: CountryCode,
+): Promise<TrackappAppDisplayMetrics> {
+  return getTrackappAppDisplayMetricsCached(appId, country);
+}
+
 export function metricsFromEmbedContext(
   app: AppMetricInput,
   country: CountryCode,

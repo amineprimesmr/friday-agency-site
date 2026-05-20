@@ -11,7 +11,7 @@ import {
   timeAgo,
   type CountryCode,
 } from "@/lib/apple-charts";
-import { metricsFromEmbedContext } from "@/lib/trackapp-app-display-metrics";
+import { metricsForApptrackerDetailPage } from "@/lib/trackapp-app-display-metrics";
 import { getTrackappProfileFavorites } from "@/lib/trackapp-profile-favorites";
 import {
   fetchAppDetailCached,
@@ -75,21 +75,15 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
   const sp = await searchParams;
   const country = normalizeTrackerCountryParam(sp.country);
   const countryCode = country as CountryCode;
-  const [context, favorites, webScreenshots] = await Promise.all([
+  const [context, favorites, webScreenshots, listMetrics] = await Promise.all([
     loadTrackerAppEmbedContextCached(id, countryCode),
     getTrackappProfileFavorites(),
     loadAppStoreWebScreenshotsCached(id, countryCode),
+    metricsForApptrackerDetailPage(id, countryCode),
   ]);
   if (!context) notFound();
 
-  const { app, aggregateMetrics: agg, overallRank, genreSliceRank } = context;
-  const listMetrics = metricsFromEmbedContext(
-    app,
-    country,
-    agg,
-    overallRank,
-    genreSliceRank,
-  );
+  const { app } = context;
   const downloadsValue = listMetrics.downloadsDisplay;
   const revenueValue = listMetrics.revenueDisplay;
   const metricSource = listMetrics.metricSource;

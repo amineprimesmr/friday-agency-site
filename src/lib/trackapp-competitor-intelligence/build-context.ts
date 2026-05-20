@@ -1,5 +1,5 @@
 import type { AppDetail, CountryCode } from "@/lib/apple-charts";
-import { computeTrackappAppDisplayMetrics } from "@/lib/trackapp-app-display-metrics";
+import { getTrackappAppDisplayMetricsCached } from "@/lib/trackapp-app-display-metrics";
 import { resolveOfficialSiteHomeUrl } from "@/lib/official-brand-site-home";
 import { loadTrackerAppEmbedContext } from "@/lib/tracker-app-embed-data";
 
@@ -29,15 +29,8 @@ export async function buildCompetitorAnalysisContext(
   const embed = await loadTrackerAppEmbedContext(appId, country);
   if (!embed) return null;
 
-  const { app, aggregateMetrics, overallRank, genreSliceRank, categoryPeers } = embed;
-  const chartRank = overallRank ?? genreSliceRank;
-  const metrics = computeTrackappAppDisplayMetrics(
-    app,
-    country,
-    aggregateMetrics,
-    chartRank,
-    50,
-  );
+  const { app, categoryPeers } = embed;
+  const metrics = await getTrackappAppDisplayMetricsCached(appId, country);
 
   const officialSiteHint = officialSiteHintFromApp(app.sellerUrl, app.supportUrl);
 
