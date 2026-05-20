@@ -47,7 +47,7 @@ export function buildCompetitorAnalysisUserPrompt(args: {
     "2) Remplis le profil de compréhension (core problem, cible, use cases, features, NOT competitors).",
     "3) Liste les catégories de concurrents pertinentes.",
     "4) Génère search_queries_used (requêtes sémantiques, pas seulement le nom de l'app).",
-    "5) Propose 8 à 15 concurrents scorés (similarity_score 0-100) : direct / close / indirect / old / rising.",
+    "5) Propose 6 à 8 concurrents scorés (similarity_score 0-100) : direct / close / indirect / old / rising. JSON compact : phrases courtes.",
     "6) Rejette 3 à 8 faux concurrents populaires avec raison.",
     "",
     "Scoring (similarity_score) :",

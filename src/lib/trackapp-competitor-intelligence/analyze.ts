@@ -194,61 +194,80 @@ export async function analyzeCompetitorsWithOpenAI(
     officialSiteHint: ctx.officialSiteHint,
   });
 
-  const response = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-    },
-    signal: AbortSignal.timeout(58_000),
-    body: JSON.stringify({
-      model,
-      tool_choice: "auto",
-      include: ["web_search_call.action.sources"],
-      temperature: 0.1,
-      tools: [{ type: "web_search", external_web_access: true }],
-      input: [
-        {
-          role: "system",
-          content:
-            "Tu identifies les vrais concurrents d'apps mobiles iOS. Sois strict : même transformation utilisateur, pas la popularité ni les mots-clés superficiels.",
-        },
-        { role: "user", content: prompt },
-      ],
-      text: {
-        format: {
-          type: "json_schema",
-          name: "trackapp_competitor_intelligence",
-          strict: true,
-          schema: COMPETITOR_INTELLIGENCE_JSON_SCHEMA,
-        },
+  async function callOpenAi(userPrompt: string, useWebSearch: boolean): Promise<CompetitorAnalyzeResult> {
+    const response = await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
       },
-    }),
-  });
+      signal: AbortSignal.timeout(58_000),
+      body: JSON.stringify({
+        model,
+        max_output_tokens: 12_000,
+        ...(useWebSearch
+          ? {
+              tool_choice: "auto" as const,
+              include: ["web_search_call.action.sources"],
+              tools: [{ type: "web_search", external_web_access: true }],
+            }
+          : { tool_choice: "none" as const }),
+        temperature: 0.1,
+        input: [
+          {
+            role: "system",
+            content:
+              "Tu identifies les vrais concurrents d'apps mobiles iOS. Sois strict : même transformation utilisateur. JSON compact obligatoire.",
+          },
+          { role: "user", content: userPrompt },
+        ],
+        text: {
+          format: {
+            type: "json_schema",
+            name: "trackapp_competitor_intelligence",
+            strict: true,
+            schema: COMPETITOR_INTELLIGENCE_JSON_SCHEMA,
+          },
+        },
+      }),
+    });
 
-  if (!response.ok) {
-    const err = await readOpenAiResponsesError(response);
-    console.error("[competitors] OpenAI HTTP", err.status, err.message);
-    return { report: null, failure: "openai_http", failureDetail: `${err.status}: ${err.message}` };
-  }
-
-  const record = await response.json();
-  const text = extractOpenAiResponseText(record);
-  if (!text) {
-    console.error("[competitors] OpenAI empty output", JSON.stringify(record).slice(0, 800));
-    return { report: null, failure: "openai_empty", failureDetail: "Réponse OpenAI sans texte JSON" };
-  }
-
-  try {
-    const parsed = JSON.parse(text) as unknown;
-    const report = parseReport(parsed, ctx);
-    if (!report) {
-      return { report: null, failure: "openai_report_parse", failureDetail: "JSON invalide pour le rapport" };
+    if (!response.ok) {
+      const err = await readOpenAiResponsesError(response);
+      console.error("[competitors] OpenAI HTTP", err.status, err.message);
+      return { report: null, failure: "openai_http", failureDetail: `${err.status}: ${err.message}` };
     }
-    return { report };
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : "parse error";
-    console.error("[competitors] JSON parse", msg);
-    return { report: null, failure: "openai_parse", failureDetail: msg };
+
+    const record = await response.json();
+    const text = extractOpenAiResponseText(record);
+    if (!text) {
+      console.error("[competitors] OpenAI empty output", JSON.stringify(record).slice(0, 800));
+      return { report: null, failure: "openai_empty", failureDetail: "Réponse OpenAI sans texte JSON" };
+    }
+
+    try {
+      const parsed = JSON.parse(text) as unknown;
+      const report = parseReport(parsed, ctx);
+      if (!report) {
+        return { report: null, failure: "openai_report_parse", failureDetail: "JSON invalide pour le rapport" };
+      }
+      return { report };
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "parse error";
+      console.error("[competitors] JSON parse", msg, "len", text.length);
+      return { report: null, failure: "openai_parse", failureDetail: msg };
+    }
   }
+
+  const first = await callOpenAi(prompt, true);
+  if (first.report) return first;
+
+  if (first.failure === "openai_parse" || first.failure === "openai_empty") {
+    const retryPrompt = `${prompt}\n\nIMPORTANT : réponse JSON courte, max 6 concurrents, champs texte ≤ 120 caractères.`;
+    const second = await callOpenAi(retryPrompt, false);
+    if (second.report) return second;
+    return second.failure ? second : first;
+  }
+
+  return first;
 }
