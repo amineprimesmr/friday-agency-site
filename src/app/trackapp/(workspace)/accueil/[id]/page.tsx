@@ -12,10 +12,14 @@ import {
   type CountryCode,
 } from "@/lib/apple-charts";
 import { metricsFromEmbedContext } from "@/lib/trackapp-app-display-metrics";
-import { finalizeTrackappRevenueEurLabel } from "@/lib/trackapp-revenue-display";
+import {
+  finalizeTrackappDownloadsLabel,
+  finalizeTrackappRevenueEurLabel,
+} from "@/lib/trackapp-revenue-display";
 import { getTrackappProfileFavorites } from "@/lib/trackapp-profile-favorites";
 import {
   fetchAppDetailCached,
+  fetchCountryRankingsCached,
   loadAppStoreInAppOffersCached,
   loadAppStoreWebScreenshotsCached,
   loadTrackerAppEmbedContextCached,
@@ -23,6 +27,7 @@ import {
 import { TrackappBreadcrumbOverride } from "@/components/trackapp/trackapp-breadcrumb-context";
 import { TrackappAppFavoriteButton } from "@/components/trackapp/trackapp-app-favorite-button";
 import { TrackappAppStoreScreenshots } from "@/components/trackapp/trackapp-app-store-screenshots";
+import { TrackappCountryRankingsPanel } from "@/components/trackapp/trackapp-country-rankings-panel";
 import { TrackappInAppOffersSection } from "@/components/trackapp/trackapp-in-app-offers-section";
 import { TrackappOfficialPresenceLoading } from "@/components/trackapp/trackapp-official-presence-loading";
 import { TrackappSearchHistoryRecorder } from "@/components/trackapp/trackapp-search-history-recorder";
@@ -78,11 +83,12 @@ export default async function TrackappAccueilAppDetailPage({ params, searchParam
   const sp = await searchParams;
   const country = normalizeTrackerCountryParam(sp.country);
   const countryCode = country as CountryCode;
-  const [context, favorites, webScreenshots, inAppOffers] = await Promise.all([
+  const [context, favorites, webScreenshots, inAppOffers, countryRankings] = await Promise.all([
     loadTrackerAppEmbedContextCached(id, countryCode),
     getTrackappProfileFavorites(),
     loadAppStoreWebScreenshotsCached(id, countryCode),
     loadAppStoreInAppOffersCached(id, countryCode),
+    fetchCountryRankingsCached(id),
   ]);
   if (!context) notFound();
 
@@ -95,7 +101,7 @@ export default async function TrackappAccueilAppDetailPage({ params, searchParam
     overallRank,
     genreSliceRank,
   );
-  const downloadsValue = listMetrics.downloadsDisplay;
+  const downloadsValue = finalizeTrackappDownloadsLabel(listMetrics.downloadsDisplay);
   const revenueValue = finalizeTrackappRevenueEurLabel(listMetrics.revenueDisplay);
   const metricSource = listMetrics.metricSource;
   const appAge = app.releaseDate ? daysSince(app.releaseDate) : Number.NaN;
@@ -168,6 +174,8 @@ export default async function TrackappAccueilAppDetailPage({ params, searchParam
       </section>
 
       <TrackappInAppOffersSection data={inAppOffers} className="mt-5" />
+
+      <TrackappCountryRankingsPanel rankings={countryRankings} className="mt-5" />
 
       <Suspense fallback={<TrackappOfficialPresenceLoading />}>
         <TrackappOfficialPresenceSection

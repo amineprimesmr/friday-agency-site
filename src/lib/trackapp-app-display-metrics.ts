@@ -12,9 +12,13 @@ import {
   type SearchResult,
 } from "@/lib/apple-charts";
 import {
+  finalizeTrackappDownloadsLabel,
   finalizeTrackappRevenueEurLabel,
+  formatTrackappDownloadsDisplay,
   formatTrackappLiveSearchRevenueEur,
   hasAnyTrackerAggregateSignal,
+  parseTrackappDownloadsScalar,
+  TRACKAPP_LOW_METRICS_SORT_VALUE,
   TRACKAPP_ZERO_REVENUE_MAX_USD,
 } from "@/lib/trackapp-revenue-display";
 
@@ -93,23 +97,24 @@ const sensorTowerAggregateCached = (appId: string) =>
       const agg = await fetchSensorTowerAggregateWithRetry(appId);
       return agg && hasAnyTrackerAggregateSignal(agg) ? agg : null;
     },
-    ["trackapp-sensor-tower-aggregate-v4", appId],
+    ["trackapp-sensor-tower-aggregate-v5", appId],
     { revalidate: 3600 },
   );
 
 function parseDownloadsDisplayToSortValue(label: string, aggregateDownloads: number): number {
-  if (aggregateDownloads > 0) return aggregateDownloads;
-  const s = label.trim().toUpperCase();
-  if (!s || s === "—" || s === TRACKAPP_METRICS_UNAVAILABLE_LABEL.toUpperCase()) return 0;
-  const m = s.match(/([\d.]+)\s*([KMB])?/);
-  if (!m) return 0;
-  let n = Number(m[1]);
-  if (!Number.isFinite(n)) return 0;
-  const unit = m[2];
-  if (unit === "K") n *= 1000;
-  else if (unit === "M") n *= 1_000_000;
-  else if (unit === "B") n *= 1_000_000_000;
-  return n;
+  if (aggregateDownloads > TRACKAPP_ZERO_REVENUE_MAX_USD) return aggregateDownloads;
+  const fromLabel = parseTrackappDownloadsScalar(label);
+  if (fromLabel != null && fromLabel > TRACKAPP_ZERO_REVENUE_MAX_USD) return fromLabel;
+  if (
+    aggregateDownloads > 0 &&
+    aggregateDownloads <= TRACKAPP_ZERO_REVENUE_MAX_USD
+  ) {
+    return TRACKAPP_LOW_METRICS_SORT_VALUE;
+  }
+  if (fromLabel != null && fromLabel <= TRACKAPP_ZERO_REVENUE_MAX_USD) {
+    return TRACKAPP_LOW_METRICS_SORT_VALUE;
+  }
+  return 0;
 }
 
 /** Même critère que la fiche landing `/tracker/apps/[id]` (téléchargements + revenus agrégés). */
@@ -146,9 +151,12 @@ export function computeTrackappAppDisplayMetrics(
     const hasDl =
       aggregateMetrics.downloadsString.trim() !== "" &&
       aggregateMetrics.downloadsString !== "—";
-    const downloadsDisplay = hasDl
-      ? aggregateMetrics.downloadsString.toUpperCase()
-      : "—";
+    const downloadsDisplay = finalizeTrackappDownloadsLabel(
+      formatTrackappDownloadsDisplay(
+        aggregateMetrics.downloads,
+        hasDl ? aggregateMetrics.downloadsString : "—",
+      ),
+    );
     const revenueDisplay = finalizeTrackappRevenueEurLabel(
       formatTrackappLiveSearchRevenueEur(aggregateMetrics, app.id),
     );
@@ -161,7 +169,7 @@ export function computeTrackappAppDisplayMetrics(
       sortRevenueUsd:
         aggregateMetrics.revenue > TRACKAPP_ZERO_REVENUE_MAX_USD
           ? aggregateMetrics.revenue
-          : 0,
+          : TRACKAPP_LOW_METRICS_SORT_VALUE,
       sortDownloads: parseDownloadsDisplayToSortValue(
         downloadsDisplay,
         aggregateMetrics.downloads,
@@ -208,7 +216,7 @@ async function resolveTrackappAppDisplayMetricsCanonical(
 export function getTrackappAppDisplayMetricsCached(appId: string, country: CountryCode) {
   return unstable_cache(
     () => resolveTrackappAppDisplayMetricsCanonical(appId, country),
-    ["trackapp-display-metrics-canonical-v7", appId, country],
+    ["trackapp-display-metrics-canonical-v8", appId, country],
     { revalidate: 3600 },
   )();
 }

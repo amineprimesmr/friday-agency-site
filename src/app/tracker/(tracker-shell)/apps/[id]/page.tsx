@@ -238,7 +238,7 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
 
   const embedCountriesSrc = buildEmbedCountriesIframeSrc(id, {
     theme: "dark",
-    view: "list",
+    view: "globe",
     country,
   });
   const embedSimilarSrc = buildAppStoreTrackerSimilarEmbedSrc(id, { theme: "system", country });

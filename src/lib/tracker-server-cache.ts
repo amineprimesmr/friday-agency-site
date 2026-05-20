@@ -75,7 +75,7 @@ export function loadAppStoreInAppOffersCached(appId: string, country: CountryCod
 export function fetchCountryRankingsCached(appId: string) {
   return unstable_cache(
     () => fetchCountryRankings(appId),
-    ["tracker-country-rankings-v1", appId],
+    ["tracker-country-rankings-v2", appId],
     { revalidate: REVALIDATE_TRACKER },
   )();
 }

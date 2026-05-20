@@ -3,8 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import type { CountryRanking } from "@/lib/apple-charts";
+
+import { TrackappCountryRankingsGlobe } from "@/components/trackapp/trackapp-country-rankings-globe";
+import type { CountryCode, CountryRanking } from "@/lib/apple-charts";
 import { rankPresencePercent } from "@/lib/apple-charts";
+
+import "@/styles/trackapp-country-rankings.css";
 
 type EmbedTheme = "dark" | "light" | "system";
 type EmbedView = "list" | "globe";
@@ -67,6 +71,10 @@ export function EmbedCountriesShell({ appId, appName, artworkUrl, rankings, them
   const sorted = useMemo(() => [...rankings].sort(sortCountries), [rankings]);
   const ranked = sorted.filter((r) => r.rank !== null) as (CountryRanking & { rank: number })[];
   const rankedCount = ranked.length;
+  const [focusCountry, setFocusCountry] = useState<CountryCode | null>(
+    () => ranked[0]?.country ?? null,
+  );
+  const focusRow = focusCountry ? sorted.find((r) => r.country === focusCountry) : null;
 
   const surface =
     resolvedTheme === "light"
@@ -110,23 +118,38 @@ export function EmbedCountriesShell({ appId, appName, artworkUrl, rankings, them
       </header>
 
       {view === "globe" ? (
-        <div
-          className={`mb-5 flex flex-col items-center gap-3 rounded-xl border border-dashed px-4 py-5 text-center ${resolvedTheme === "light" ? "border-slate-200/95" : "border-white/[0.11]"}`}
-        >
-          <div className="text-[2.85rem] leading-none">🌍</div>
-          <div className="flex max-h-[220px] w-full flex-wrap justify-center gap-2 overflow-y-auto">
-            {ranked.map((r) => (
-              <span
-                key={r.country}
-                title={r.name}
-                className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-1 text-[11px] font-semibold tabular-nums ${rankBadgeClass(r.rank, resolvedTheme)}`}
-              >
-                <span>{r.flag}</span>
-                <span>#{r.rank}</span>
-              </span>
-            ))}
-          </div>
-          {ranked.length === 0 ? <p className={`text-xs ${muted}`}>Aucune position dans les marchés suivis.</p> : null}
+        <div className="trackapp-embed-country-globe mb-5">
+          {ranked.length > 0 ? (
+            <>
+              <TrackappCountryRankingsGlobe
+                rankings={sorted}
+                focusCountry={focusCountry}
+                onFocusCountry={setFocusCountry}
+              />
+              {focusRow ? (
+                <div
+                  className={`trackapp-embed-country-globe__tooltip ${resolvedTheme === "light" ? "trackapp-embed-country-globe__tooltip--light" : ""}`}
+                  role="status"
+                >
+                  <span>{focusRow.flag}</span>
+                  <span className="font-semibold">{focusRow.name}</span>
+                  {focusRow.rank ? (
+                    <span className="tabular-nums">
+                      Rang <strong>#{focusRow.rank}</strong> · plateau {rankPresencePercent(focusRow.rank)}%
+                    </span>
+                  ) : (
+                    <span>Hors top 100</span>
+                  )}
+                </div>
+              ) : (
+                <p className={`mt-2 text-center text-xs ${muted}`}>Glissez le globe · cliquez un pays ci-dessous</p>
+              )}
+            </>
+          ) : (
+            <p className={`rounded-xl border border-dashed px-4 py-8 text-center text-xs ${resolvedTheme === "light" ? "border-slate-200/95" : "border-white/[0.11]"} ${muted}`}>
+              Aucune position dans les marchés suivis.
+            </p>
+          )}
         </div>
       ) : null}
 
@@ -140,13 +163,29 @@ export function EmbedCountriesShell({ appId, appName, artworkUrl, rankings, them
             </tr>
           </thead>
           <tbody className={tbodyDivide}>
-            {sorted.map((r) => (
-              <tr key={r.country}>
+            {sorted.map((r) => {
+              const rowActive = view === "globe" && focusCountry === r.country;
+              return (
+              <tr
+                key={r.country}
+                className={rowActive ? (resolvedTheme === "light" ? "bg-emerald-500/10" : "bg-emerald-500/[0.08]") : undefined}
+              >
                 <td className={`px-3 py-2.5 align-middle ${resolvedTheme === "light" ? "text-slate-800" : "text-white/80"}`}>
-                  <span className="flex items-center gap-2 tabular-nums">
-                    <span className="text-base leading-none">{r.flag}</span>
-                    <span className="text-[12px]">{r.name}</span>
-                  </span>
+                  {view === "globe" ? (
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-2 text-left tabular-nums transition hover:opacity-90"
+                      onClick={() => setFocusCountry(r.country)}
+                    >
+                      <span className="text-base leading-none">{r.flag}</span>
+                      <span className="text-[12px]">{r.name}</span>
+                    </button>
+                  ) : (
+                    <span className="flex items-center gap-2 tabular-nums">
+                      <span className="text-base leading-none">{r.flag}</span>
+                      <span className="text-[12px]">{r.name}</span>
+                    </span>
+                  )}
                 </td>
                 <td className="whitespace-nowrap px-3 py-2.5 align-middle">
                   {r.rank ? (
@@ -179,7 +218,8 @@ export function EmbedCountriesShell({ appId, appName, artworkUrl, rankings, them
                   )}
                 </td>
               </tr>
-            ))}
+            );
+            })}
           </tbody>
         </table>
       </div>

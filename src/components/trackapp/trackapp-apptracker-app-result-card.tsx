@@ -8,7 +8,10 @@ import {
   TRACKAPP_METRICS_UNAVAILABLE_LABEL,
   type TrackappAppDisplayMetrics,
 } from "@/lib/trackapp-app-display-metrics";
-import { finalizeTrackappRevenueEurLabel } from "@/lib/trackapp-revenue-display";
+import {
+  finalizeTrackappDownloadsLabel,
+  finalizeTrackappRevenueEurLabel,
+} from "@/lib/trackapp-revenue-display";
 import { trackappApptrackerAppHref } from "@/lib/trackapp-apptracker-paths";
 import { cn } from "@/lib/utils";
 
@@ -47,6 +50,7 @@ export function TrackappApptrackerAppResultCard({
   onBeforeNavigate?: () => void;
 }>) {
   const labels = metricsLabels(metrics);
+  const downloadsDisplay = finalizeTrackappDownloadsLabel(metrics.downloadsDisplay);
   const revenueDisplay = finalizeTrackappRevenueEurLabel(metrics.revenueDisplay);
   const rankBadge =
     metrics.chartRank !== null ? `#${String(metrics.chartRank)}` : null;
@@ -98,7 +102,7 @@ export function TrackappApptrackerAppResultCard({
           <>
             <span className="mt-4 grid gap-2 text-[0.78rem] text-slate-500 sm:grid-cols-2">
               <span>
-                <strong className="block text-[0.95rem] text-slate-900">{metrics.downloadsDisplay}</strong>
+                <strong className="block text-[0.95rem] text-slate-900">{downloadsDisplay}</strong>
                 {labels.downloads}
               </span>
               <span>
