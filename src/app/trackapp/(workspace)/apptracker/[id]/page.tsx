@@ -22,6 +22,7 @@ import { TrackappApptrackerDetailContext } from "@/components/trackapp/trackapp-
 import { TrackappAppFavoriteButton } from "@/components/trackapp/trackapp-app-favorite-button";
 import { TrackappAppStoreScreenshots } from "@/components/trackapp/trackapp-app-store-screenshots";
 import { TrackappOfficialPresenceLoading } from "@/components/trackapp/trackapp-official-presence-loading";
+import { TrackappCompetitorsPanel } from "@/components/trackapp/trackapp-competitors-panel";
 import { TrackappCreateAppCta } from "@/components/trackapp/trackapp-create-app-cta";
 import { TrackappOfficialPresenceSection } from "@/components/trackapp/trackapp-official-presence-section";
 
@@ -189,6 +190,8 @@ export default async function TrackappApptrackerDetailPage({ params, searchParam
       </section>
 
       <TrackappAppStoreScreenshots urls={screenshotUrls} title="Screenshots App Store" />
+
+      <TrackappCompetitorsPanel appId={app.id} appName={app.name} country={countryCode} />
     </div>
   );
 }

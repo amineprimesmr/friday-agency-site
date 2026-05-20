@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import { TrackappAccueilSearch } from "@/components/trackapp/trackapp-accueil-search";
+import { TrackappAccueilIntelligentSearch } from "@/components/trackapp/trackapp-accueil-intelligent-search";
 import { TrackappCursorPromoBanner } from "@/components/trackapp/trackapp-cursor-promo-banner";
 import { StripeReturnHandler } from "@/components/trackapp/stripe-return-handler";
 import { normalizeTrackerCountryParam, type CountryCode } from "@/lib/apple-charts";
 
 export const metadata: Metadata = {
   title: "Accueil — Trackapp",
-  description: "Recherche App Store — même expérience que la landing Trackapp.",
+  description: "Recherche intelligente App Store — mots-clés sémantiques, tri par revenus et signaux Trackapp.",
 };
 
 export default async function TrackappAccueilPage({
@@ -40,8 +40,8 @@ export default async function TrackappAccueilPage({
           </p>
         </div>
 
-        <div className="mt-8 w-full max-w-[42rem]">
-          <TrackappAccueilSearch country={country} initialQuery={q} />
+        <div className="mt-8 w-full max-w-[52rem] px-2">
+          <TrackappAccueilIntelligentSearch country={country} initialQuery={q} />
         </div>
       </div>
     </div>

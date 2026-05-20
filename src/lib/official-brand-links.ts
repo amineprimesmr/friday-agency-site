@@ -13,6 +13,11 @@ import { detectProfileFromUrl, type DetectedSocialProfile } from "@/lib/social-p
 import { buildHeuristicSocialCandidates } from "@/lib/official-brand-social-candidates";
 import { affirmOfficialSocialProfile, isSocialBioAffirmConfigured } from "@/lib/official-brand-social-affirm";
 import { VERIFIED_OFFICIAL_SOCIAL_OVERRIDES } from "@/lib/official-brand-social-overrides";
+import {
+  isLegalOrPolicySitePath,
+  resolveOfficialSiteHomeUrl,
+  scoreOfficialSiteCandidate,
+} from "@/lib/official-brand-site-home";
 import { urlHasWebEvidence, verifyOutboundUrl } from "@/lib/official-brand-url-verify";
 
 export type OfficialLinkKey =
@@ -413,8 +418,9 @@ async function inferOfficialLinksWithOpenAI(args: {
   try {
     const parsed = JSON.parse(text) as Record<string, unknown>;
     const notes = parsed.validation_notes as Record<string, unknown> | null;
+    const rawSite = pickUrl(parsed.site_url);
     return {
-      site_url: pickUrl(parsed.site_url),
+      site_url: rawSite ? resolveOfficialSiteHomeUrl(rawSite) : null,
       instagram_url: pickUrl(parsed.instagram_url),
       tiktok_url: pickUrl(parsed.tiktok_url),
       x_url: pickUrl(parsed.x_url),
@@ -445,19 +451,45 @@ async function inferOfficialLinksWithOpenAI(args: {
   }
 }
 
-function firstOfficialSiteCandidate(app: AppDetail): URL | null {
-  const direct = [
-    app.sellerUrl,
-    app.supportUrl,
-    ...urlsFromText(app.description ?? ""),
-    ...urlsFromText(app.releaseNotes ?? ""),
-  ];
+function toOfficialSiteHomeUrl(raw: string | URL | undefined | null): URL | null {
+  if (!raw) return null;
+  const home = resolveOfficialSiteHomeUrl(raw);
+  return home ? parseUrl(home) : null;
+}
 
-  for (const raw of direct) {
+/** Choisit le meilleur lien « site » App Store et le ramène toujours vers la home (pas /terms, /privacy). */
+function pickBestOfficialSiteFromApp(app: AppDetail): URL | null {
+  const candidates: URL[] = [];
+  const seen = new Set<string>();
+
+  const add = (raw: string | undefined | null) => {
     const candidate = isLikelyOfficialSiteCandidate(raw);
-    if (candidate) return candidate;
+    if (!candidate) return;
+    const key = `${hostWithoutWww(candidate)}${candidate.pathname}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    candidates.push(candidate);
+  };
+
+  add(app.sellerUrl);
+  add(app.supportUrl);
+  for (const raw of urlsFromText(app.description ?? "")) add(raw);
+  for (const raw of urlsFromText(app.releaseNotes ?? "")) add(raw);
+
+  if (candidates.length === 0) return null;
+
+  let best = candidates[0]!;
+  let bestScore = scoreOfficialSiteCandidate(best);
+  for (let i = 1; i < candidates.length; i += 1) {
+    const c = candidates[i]!;
+    const s = scoreOfficialSiteCandidate(c);
+    if (s > bestScore) {
+      best = c;
+      bestScore = s;
+    }
   }
-  return null;
+
+  return toOfficialSiteHomeUrl(best);
 }
 
 async function fetchHtml(url: string): Promise<string | null> {
@@ -837,7 +869,7 @@ async function resolveOfficialMetaPage(facebookUrl: string): Promise<{
 
 async function resolveOfficialBrandLinks(app: AppDetail): Promise<OfficialBrandLinksReport> {
   const report = makeReportBase();
-  const localOfficialSite = firstOfficialSiteCandidate(app);
+  const localOfficialSite = pickBestOfficialSiteFromApp(app);
   const ai = await inferOfficialLinksWithOpenAI({
     app,
     officialSiteHint: localOfficialSite ? cleanUrl(localOfficialSite) : null,
@@ -854,29 +886,37 @@ async function resolveOfficialBrandLinks(app: AppDetail): Promise<OfficialBrandL
     };
   }
 
-  const officialSite =
+  const rawOfficialSite =
     localOfficialSite ??
     (() => {
       const url = isLikelyOfficialSiteCandidate(ai?.site_url);
       return url;
     })();
 
+  const officialSite = rawOfficialSite ? toOfficialSiteHomeUrl(rawOfficialSite) : null;
+
   if (!officialSite) return report;
 
   const siteUrl = cleanUrl(officialSite);
+  const redirectedFromLegal =
+    rawOfficialSite && isLegalOrPolicySitePath(rawOfficialSite.pathname);
   const siteVerify = await verifyOutboundUrl(siteUrl, "site");
   if (!siteVerify.ok) {
     report.site = emptyLink("Site", `pas de lien officiel validé (${siteVerify.reason})`);
     return report;
   }
 
+  const legalNote = redirectedFromLegal
+    ? " (URL App Store / IA pointait vers une page légale — home utilisée)"
+    : "";
+
   report.site = {
     label: "Site",
     url: siteUrl,
     validated: true,
     reason: localOfficialSite
-      ? `site officiel issu de la fiche App Store — ${siteVerify.reason}`
-      : `${ai?.validation_notes.site || "site officiel validé par recherche web"} — ${siteVerify.reason}`,
+      ? `site officiel (page d'accueil) issu de la fiche App Store${legalNote} — ${siteVerify.reason}`
+      : `${ai?.validation_notes.site || "site officiel validé par recherche web"}${legalNote} — ${siteVerify.reason}`,
     source: localOfficialSite ? "app_store" : "openai_web",
   };
   report.officialSiteOrigin = officialSite.origin;
@@ -1047,7 +1087,7 @@ export async function resolveOfficialBrandLinksCached(app: AppDetail): Promise<O
   const run = unstable_cache(
     async () => resolveOfficialBrandLinks(app),
     [
-      "official-brand-links-v14-site-social",
+      "official-brand-links-v15-site-home-canonical",
       isOfficialLinksOpenAiConfigured() ? "openai-on" : "openai-off",
       isSocialBioAffirmConfigured() ? "apify-affirm-on" : "apify-affirm-off",
       app.id,

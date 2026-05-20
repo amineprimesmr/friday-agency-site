@@ -26,6 +26,8 @@ PRIORITÉ ABSOLUE :
 MÉTHODE SITE OFFICIEL :
 Recherche "[APP NAME] official website". Valide : branding, logo, nom, HTTPS, site actif, lien App Store/Play.
 Rejette : blogs, Crunchbase, directories, Notion, Medium, Product Hunt comme site principal.
+site_url = UNIQUEMENT la page d'accueil / landing (ex. https://marque.com/ ou https://marque.com/fr/).
+INTERDIT pour site_url : /terms, /terms-of-service, /privacy, /legal, /cgu, /cookies, /conditions, /politique-confidentialite, /mentions-legales ou toute page juridique secondaire.
 
 RÉSEAUX : analyser footer, navbar, about, contact, press, careers du site officiel.
 Un réseau est validé seulement si : branding cohérent, contenu sur l'app, bio avec site officiel ou App Store, compte officiel (pas fan).
@@ -49,4 +51,5 @@ export const OFFICIAL_BRAND_OSINT_USER_SUFFIX = [
   "- Chaque URL non null doit apparaître dans sources (résultat web_search).",
   "- En cas de doute : null.",
   "- Meta Ads : uniquement view_all_page_id, jamais keyword.",
+  "- site_url : homepage uniquement, jamais CGU / confidentialité / cookies.",
 ].join("\n");

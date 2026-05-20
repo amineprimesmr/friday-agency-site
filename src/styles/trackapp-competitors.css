@@ -1,0 +1,246 @@
+.trackapp-competitors {
+  margin-top: 1.5rem;
+  border-radius: 24px;
+  border: 1px solid var(--dash-border, #e2e8f0);
+  background: #fff;
+  padding: 1.25rem 1.5rem 1.5rem;
+  box-shadow: var(--dash-shadow, 0 1px 3px rgb(15 23 42 / 0.08));
+}
+
+.trackapp-competitors__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.trackapp-competitors__kicker {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.trackapp-competitors__title {
+  margin: 0.35rem 0 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.trackapp-competitors__sub {
+  margin: 0.35rem 0 0;
+  font-size: 0.88rem;
+  color: #64748b;
+  max-width: 42rem;
+}
+
+.trackapp-competitors__refresh {
+  border: 0;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.55rem 1rem;
+  cursor: pointer;
+}
+
+.trackapp-competitors__refresh:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.trackapp-competitors__loading,
+.trackapp-competitors__error {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.trackapp-competitors__error {
+  color: #b91c1c;
+}
+
+.trackapp-competitors__profile {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border-radius: 18px;
+  background: #f8fafc;
+}
+
+.trackapp-competitors__profile-title {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.trackapp-competitors__profile-grid {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .trackapp-competitors__profile-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.trackapp-competitors__profile-grid dt {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #94a3b8;
+}
+
+.trackapp-competitors__profile-grid dd {
+  margin: 0.2rem 0 0;
+  font-size: 0.9rem;
+  color: #334155;
+}
+
+.trackapp-competitors__not {
+  margin: 0.85rem 0 0;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.trackapp-competitors__group {
+  margin-top: 1.25rem;
+}
+
+.trackapp-competitors__group-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.trackapp-competitors__grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 900px) {
+  .trackapp-competitors__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.trackapp-competitor-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 0.85rem 1rem;
+}
+
+.trackapp-competitor-card__head {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.trackapp-competitor-card__icon {
+  position: relative;
+  width: 3.5rem;
+  height: 3.5rem;
+  flex-shrink: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #f1f5f9;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+.trackapp-competitor-card__title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.trackapp-competitor-card__artist {
+  margin: 0.15rem 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.trackapp-competitor-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+}
+
+.trackapp-competitor-card__score,
+.trackapp-competitor-card__type,
+.trackapp-competitor-card__confidence {
+  font-size: 0.68rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.15rem 0.45rem;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.trackapp-competitor-card__score {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.trackapp-competitor-card__reason {
+  margin: 0.65rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #475569;
+}
+
+.trackapp-competitor-card__metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.trackapp-competitor-card__metrics strong {
+  color: #0f172a;
+}
+
+.trackapp-competitor-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.65rem;
+}
+
+.trackapp-competitor-card__btn {
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  padding: 0.35rem 0.65rem;
+  text-decoration: none;
+  color: #334155;
+  background: #fff;
+}
+
+.trackapp-competitor-card__btn--primary {
+  background: #0f172a;
+  border-color: #0f172a;
+  color: #fff;
+}
+
+.trackapp-competitors__rejected ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.trackapp-competitors__rejected li + li {
+  margin-top: 0.35rem;
+}

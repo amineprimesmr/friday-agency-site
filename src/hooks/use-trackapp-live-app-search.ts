@@ -6,6 +6,7 @@ import type { CountryCode } from "@/lib/apple-charts";
 import type { SearchResultWithTrackappMetrics } from "@/lib/trackapp-app-display-metrics";
 import { abortInFlightRequest, isAbortError } from "@/lib/abort-signal";
 import { TRACKAPP_ACCUEIL_BASE } from "@/lib/trackapp-apptracker-paths";
+import type { TrackappSearchSort } from "@/lib/trackapp-smart-search/rank-results";
 
 export const TRACKAPP_SEARCH_DEBOUNCE_MS = 160;
 export const TRACKAPP_SEARCH_MIN_QUERY_LEN = 2;
@@ -14,6 +15,7 @@ type Options = Readonly<{
   country: CountryCode;
   initialQuery?: string;
   initialResults?: SearchResultWithTrackappMetrics[];
+  sort?: TrackappSearchSort;
   /** Met à jour l’URL avec `?q=` — désactivé dans la modale ⌘K. */
   syncUrl?: boolean;
   /** Chemin de liste (défaut `/trackapp/accueil`). */
@@ -25,6 +27,7 @@ export function useTrackappLiveAppSearch({
   country,
   initialQuery = "",
   initialResults = [],
+  sort = "relevance",
   syncUrl = false,
   syncUrlPath = TRACKAPP_ACCUEIL_BASE,
   enabled = true,
@@ -84,7 +87,7 @@ export function useTrackappLiveAppSearch({
       return undefined;
     }
 
-    const cacheKey = `${country}:${term.toLowerCase()}`;
+    const cacheKey = `${country}:${sort}:${term.toLowerCase()}`;
     const cached = cacheRef.current.get(cacheKey);
     if (cached) {
       setResults(cached);
@@ -97,7 +100,7 @@ export function useTrackappLiveAppSearch({
     void (async () => {
       try {
         const res = await fetch(
-          `/api/trackapp/search?q=${encodeURIComponent(term)}&country=${country}&limit=24`,
+          `/api/trackapp/search?q=${encodeURIComponent(term)}&country=${country}&limit=24&sort=${sort}`,
           { signal: ac.signal },
         );
         const data = (await res.json()) as { apps?: SearchResultWithTrackappMetrics[] };
@@ -115,7 +118,7 @@ export function useTrackappLiveAppSearch({
     })().catch(() => undefined);
 
     return () => abortInFlightRequest(ac);
-  }, [country, debouncedQ, enabled, initialQuery, initialResults, syncUrl, syncUrlPath]);
+  }, [country, debouncedQ, enabled, initialQuery, initialResults, sort, syncUrl, syncUrlPath]);
 
   const trimmed = query.trim();
   const showResults = debouncedQ.length >= TRACKAPP_SEARCH_MIN_QUERY_LEN;
