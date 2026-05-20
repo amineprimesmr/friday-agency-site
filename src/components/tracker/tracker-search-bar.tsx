@@ -560,32 +560,42 @@ export function TrackerSearchBar({
                             ))}
                           </div>
                         </div>
-                        <div className="tracker-search-meta tracker-search-meta--dark">
-                          <span className="inline-flex items-center gap-1">
-                            <span aria-hidden>🕐</span>
-                            {timeLine || " — "}
-                          </span>
-                          <span className="inline-flex items-center gap-1 opacity-90">
-                            <span aria-hidden>📅</span>
-                            {dateCal || " — "}
-                          </span>
-                        </div>
+                        {!embedded ? (
+                          <div className="tracker-search-meta tracker-search-meta--dark">
+                            <span className="inline-flex items-center gap-1">
+                              <span aria-hidden>🕐</span>
+                              {timeLine || " — "}
+                            </span>
+                            <span className="inline-flex items-center gap-1 opacity-90">
+                              <span aria-hidden>📅</span>
+                              {dateCal || " — "}
+                            </span>
+                          </div>
+                        ) : null}
                       </div>
 
-                      <div className="tracker-search-stat-col tracker-search-stat-col--dark">
-                        <div className="tracker-search-stat-num tracker-search-stat-num--dark">
-                          {app.dlEst}
+                      {!embedded || app.rating > 0 ? (
+                        <div className="tracker-search-stat-col tracker-search-stat-col--dark">
+                          {!embedded ? (
+                            <div className="tracker-search-stat-num tracker-search-stat-num--dark">
+                              {app.dlEst}
+                            </div>
+                          ) : null}
+                          {app.rating > 0 ? (
+                            <div className="flex items-center justify-end gap-1 text-xs font-semibold tabular-nums text-white/88">
+                              <span>{ratingStr}</span>
+                              <span className="text-amber-400" aria-hidden>
+                                ★
+                              </span>
+                            </div>
+                          ) : null}
+                          {!embedded ? (
+                            <div className="tracker-search-stat-sub tracker-search-stat-sub--dark">
+                              Tél. estimés
+                            </div>
+                          ) : null}
                         </div>
-                        <div className="flex items-center justify-end gap-1 text-xs font-semibold tabular-nums text-white/88">
-                          <span>{ratingStr}</span>
-                          <span className="text-amber-400" aria-hidden>
-                            ★
-                          </span>
-                        </div>
-                        <div className="tracker-search-stat-sub tracker-search-stat-sub--dark">
-                          Tél. estimés
-                        </div>
-                      </div>
+                      ) : null}
 
                       <span className="tracker-search-chevron tracker-search-chevron--dark" aria-hidden>
                         ›
@@ -673,26 +683,30 @@ export function TrackerSearchBar({
                                 </span>
                               ))}
                             </div>
-                            <div className="tracker-search-meta tracker-search-meta--dark">
-                              <span className="inline-flex items-center gap-1">
-                                <span aria-hidden>📅</span>
-                                {meta || " — "}
-                              </span>
-                              <span className="inline-flex items-center gap-1 opacity-85">
-                                <span aria-hidden>⬇</span>
-                                Tél. estimés
-                              </span>
-                            </div>
+                            {!embedded ? (
+                              <div className="tracker-search-meta tracker-search-meta--dark">
+                                <span className="inline-flex items-center gap-1">
+                                  <span aria-hidden>📅</span>
+                                  {meta || " — "}
+                                </span>
+                                <span className="inline-flex items-center gap-1 opacity-85">
+                                  <span aria-hidden>⬇</span>
+                                  Tél. estimés
+                                </span>
+                              </div>
+                            ) : null}
                           </div>
 
-                          <div className="tracker-search-stat-col tracker-search-stat-col--dark">
-                            <div className="tracker-search-stat-num tracker-search-stat-num--dark">
-                              {app.dlEst}
+                          {!embedded ? (
+                            <div className="tracker-search-stat-col tracker-search-stat-col--dark">
+                              <div className="tracker-search-stat-num tracker-search-stat-num--dark">
+                                {app.dlEst}
+                              </div>
+                              <div className="tracker-search-stat-sub tracker-search-stat-sub--dark">
+                                / mois · {storeCountryName}
+                              </div>
                             </div>
-                            <div className="tracker-search-stat-sub tracker-search-stat-sub--dark">
-                              / mois · {storeCountryName}
-                            </div>
-                          </div>
+                          ) : null}
 
                           <span className="tracker-search-chevron tracker-search-chevron--dark" aria-hidden>
                             ›
