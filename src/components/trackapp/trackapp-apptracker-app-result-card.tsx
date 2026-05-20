@@ -6,6 +6,23 @@ import type { TrackappAppDisplayMetrics } from "@/lib/trackapp-app-display-metri
 import { trackappApptrackerAppHref } from "@/lib/trackapp-apptracker-paths";
 import { cn } from "@/lib/utils";
 
+function metricsLabels(metrics: TrackappAppDisplayMetrics): Readonly<{
+  downloads: string;
+  revenue: string;
+} | null> {
+  if (metrics.metricSource === "donnée indisponible") return null;
+  if (metrics.metricSource === "agrégé monde / mois") {
+    return {
+      downloads: "Téléchargements / mois",
+      revenue: "Revenus / mois",
+    };
+  }
+  return {
+    downloads: "Téléchargements estimés / mois",
+    revenue: "Revenus estimés / mois",
+  };
+}
+
 export function TrackappApptrackerAppResultCard({
   app,
   country,
@@ -17,8 +34,9 @@ export function TrackappApptrackerAppResultCard({
   metrics: TrackappAppDisplayMetrics;
   className?: string;
 }>) {
-  const dlEst = metrics.downloadsDisplay;
-  const revEst = metrics.revenueDisplay;
+  const labels = metricsLabels(metrics);
+  const rankBadge =
+    metrics.chartRank !== null ? `#${String(metrics.chartRank)}` : null;
 
   return (
     <Link
@@ -43,9 +61,14 @@ export function TrackappApptrackerAppResultCard({
             <span className="block truncate font-bold tracking-tight group-hover:text-slate-950">{app.name}</span>
             <span className="mt-0.5 block truncate text-[0.8rem] text-[var(--dash-muted-light)]">{app.artistName}</span>
           </span>
-          <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[0.72rem] font-bold text-slate-600">
-            #{app.rank || "—"}
-          </span>
+          {rankBadge ? (
+            <span
+              className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[0.72rem] font-bold text-slate-600"
+              title="Classement top 100 App Store (pays sélectionné)"
+            >
+              {rankBadge}
+            </span>
+          ) : null}
         </span>
         <span className="mt-3 flex flex-wrap gap-2 text-[0.75rem]">
           <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 font-semibold text-slate-600">
@@ -57,16 +80,23 @@ export function TrackappApptrackerAppResultCard({
             </span>
           ) : null}
         </span>
-        <span className="mt-4 grid gap-2 text-[0.78rem] text-slate-500 sm:grid-cols-2">
-          <span>
-            <strong className="block text-[0.95rem] text-slate-900">{dlEst}</strong>
-            téléchargements estimés / mois
-          </span>
-          <span>
-            <strong className="block text-[0.95rem] text-slate-900">{revEst}</strong>
-            revenus estimés / mois
-          </span>
-        </span>
+        {labels ? (
+          <>
+            <span className="mt-4 grid gap-2 text-[0.78rem] text-slate-500 sm:grid-cols-2">
+              <span>
+                <strong className="block text-[0.95rem] text-slate-900">{metrics.downloadsDisplay}</strong>
+                {labels.downloads}
+              </span>
+              <span>
+                <strong className="block text-[0.95rem] text-slate-900">{metrics.revenueDisplay}</strong>
+                {labels.revenue}
+              </span>
+            </span>
+            <p className="mt-2 text-[0.68rem] text-slate-400">{metrics.metricSource}</p>
+          </>
+        ) : (
+          <p className="mt-4 text-[0.78rem] text-slate-400">Métriques indisponibles — ouvrir la fiche pour plus de détails.</p>
+        )}
       </span>
     </Link>
   );

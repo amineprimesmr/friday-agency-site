@@ -16,6 +16,9 @@ const EMPTY_METRICS = {
   downloadsDisplay: "—",
   revenueDisplay: "—",
   metricSource: "donnée indisponible" as const,
+  chartRank: null,
+  sortRevenueUsd: 0,
+  sortDownloads: 0,
 };
 
 export default async function TrackappFavoriteAppsPage({

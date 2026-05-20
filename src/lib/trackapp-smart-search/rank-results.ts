@@ -1,35 +1,7 @@
-import {
-  estimateMonthlyDownloads,
-  estimateMonthlyRevenueUsd,
-  type CountryCode,
-  type SearchResult,
-} from "@/lib/apple-charts";
+import type { CountryCode, SearchResult } from "@/lib/apple-charts";
 import type { SearchResultWithTrackappMetrics } from "@/lib/trackapp-app-display-metrics";
 
 export type TrackappSearchSort = "relevance" | "revenue" | "downloads" | "rating";
-
-function revenueUsdForSort(app: SearchResult, country: CountryCode): number {
-  const rank = Math.max(1, Math.min(app.rank || 50, 100));
-  return estimateMonthlyRevenueUsd(
-    rank,
-    app.price,
-    app.categoryId,
-    country,
-  );
-}
-
-function parseDownloadsForSort(app: SearchResult, country: CountryCode): number {
-  const rank = Math.max(1, Math.min(app.rank || 50, 100));
-  const s = estimateMonthlyDownloads(rank, country).toUpperCase();
-  const m = s.match(/([\d.]+)\s*(K|M)?/);
-  if (!m) return 0;
-  let n = Number(m[1]);
-  if (!Number.isFinite(n)) return 0;
-  const unit = m[2];
-  if (unit === "K") n *= 1000;
-  if (unit === "M") n *= 1_000_000;
-  return n;
-}
 
 function relevanceScore(query: string, app: SearchResult): number {
   const q = query.trim().toLowerCase();
@@ -57,16 +29,18 @@ export function sortSearchResults(
   apps: readonly SearchResultWithTrackappMetrics[],
   sort: TrackappSearchSort,
   query: string,
-  country: CountryCode,
+  _country: CountryCode,
 ): SearchResultWithTrackappMetrics[] {
   const list = [...apps];
   switch (sort) {
     case "revenue":
-      list.sort((a, b) => revenueUsdForSort(b, country) - revenueUsdForSort(a, country));
+      list.sort(
+        (a, b) => b.trackappMetrics.sortRevenueUsd - a.trackappMetrics.sortRevenueUsd,
+      );
       break;
     case "downloads":
       list.sort(
-        (a, b) => parseDownloadsForSort(b, country) - parseDownloadsForSort(a, country),
+        (a, b) => b.trackappMetrics.sortDownloads - a.trackappMetrics.sortDownloads,
       );
       break;
     case "rating":

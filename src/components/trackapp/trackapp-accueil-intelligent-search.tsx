@@ -86,11 +86,16 @@ export function TrackappAccueilIntelligentSearch({ country, initialQuery = "" }:
         <div className="trackapp-accueil-intelligent__results">
           {metaLine ? <p className="trackapp-accueil-intelligent__meta">{metaLine}</p> : null}
           {search.loading ? (
-            <div className="trackapp-accueil-intelligent__skeleton" aria-hidden>
-              {Array.from({ length: 4 }, (_, i) => (
-                <div key={i} className="trackapp-accueil-intelligent__skeleton-card" />
-              ))}
-            </div>
+            <>
+              <p className="trackapp-accueil-intelligent__meta">
+                Chargement des métriques (même source que la fiche app)…
+              </p>
+              <div className="trackapp-accueil-intelligent__skeleton" aria-hidden>
+                {Array.from({ length: 4 }, (_, i) => (
+                  <div key={i} className="trackapp-accueil-intelligent__skeleton-card" />
+                ))}
+              </div>
+            </>
           ) : (
             <ul className="trackapp-accueil-intelligent__list">
               {search.results.map((app) => (

@@ -1,5 +1,6 @@
 import {
   estimateMonthlyDownloads,
+  estimateMonthlyRevenueUsd,
   fetchAppDetail,
   fetchEnrichedTopFree,
   fetchIosAggregateAppMetrics,
@@ -20,6 +21,11 @@ export type TrackappAppDisplayMetrics = Readonly<{
   downloadsDisplay: string;
   revenueDisplay: string;
   metricSource: "agrégé monde / mois" | "estimation / mois" | "estimation indicative / mois" | "donnée indisponible";
+  /** Classement top 100 national (ou slice genre) — pas le rang dans les résultats iTunes Search. */
+  chartRank: number | null;
+  /** Clés internes pour trier les listes sans réutiliser le faux rang Search. */
+  sortRevenueUsd: number;
+  sortDownloads: number;
 }>;
 
 type AppMetricInput = Readonly<{
@@ -35,7 +41,25 @@ const EMPTY_METRICS: TrackappAppDisplayMetrics = {
   downloadsDisplay: "—",
   revenueDisplay: "—",
   metricSource: "donnée indisponible",
+  chartRank: null,
+  sortRevenueUsd: 0,
+  sortDownloads: 0,
 };
+
+function parseDownloadsDisplayToSortValue(label: string, aggregateDownloads: number): number {
+  if (aggregateDownloads > 0) return aggregateDownloads;
+  const s = label.trim().toUpperCase();
+  if (!s || s === "—") return 0;
+  const m = s.match(/([\d.]+)\s*([KMB])?/);
+  if (!m) return 0;
+  let n = Number(m[1]);
+  if (!Number.isFinite(n)) return 0;
+  const unit = m[2];
+  if (unit === "K") n *= 1000;
+  else if (unit === "M") n *= 1_000_000;
+  else if (unit === "B") n *= 1_000_000_000;
+  return n;
+}
 
 function chartRankForApp(appId: string, primaryGenreId: string | undefined, enrichedNationalTop: EnrichedTop): number | null {
   const overallRank = overallRankInTop100Free(appId, enrichedNationalTop);
@@ -59,25 +83,34 @@ export function computeTrackappAppDisplayMetrics(
   );
 
   if (useAggregateMetrics && aggregateMetrics) {
+    const downloadsDisplay = aggregateMetrics.downloadsString.toUpperCase();
     return {
-      downloadsDisplay: aggregateMetrics.downloadsString.toUpperCase(),
+      downloadsDisplay,
       revenueDisplay: formatTrackappAggregateRevenueEur(aggregateMetrics, app.id),
       metricSource: "agrégé monde / mois",
+      chartRank,
+      sortRevenueUsd: aggregateMetrics.revenue > 0 ? aggregateMetrics.revenue : 0,
+      sortDownloads: parseDownloadsDisplayToSortValue(downloadsDisplay, aggregateMetrics.downloads),
     };
   }
 
   const estimateRank = chartRank ?? fallbackEstimateRank;
   if (estimateRank !== null) {
+    const downloadsDisplay = estimateMonthlyDownloads(estimateRank, country);
+    const categoryId = app.primaryGenreId || app.categoryId;
     return {
-      downloadsDisplay: estimateMonthlyDownloads(estimateRank, country),
+      downloadsDisplay,
       revenueDisplay: formatEstimatedMonthlyRevenuePreciseEur(
         estimateRank,
         app.price,
-        app.primaryGenreId || app.categoryId,
+        categoryId,
         country,
         app.id,
       ),
       metricSource: chartRank !== null ? "estimation / mois" : "estimation indicative / mois",
+      chartRank,
+      sortRevenueUsd: estimateMonthlyRevenueUsd(estimateRank, app.price, categoryId, country),
+      sortDownloads: parseDownloadsDisplayToSortValue(downloadsDisplay, 0),
     };
   }
 
@@ -109,17 +142,21 @@ export async function resolveTrackappAppsDisplayMetricsBatch(
 
   const enrichedNationalTop = await fetchEnrichedTopFree(country, 100);
 
-  const entries = await Promise.all(
-    uniqueIds.map(async (appId) => {
-      const [app, aggregateMetrics] = await Promise.all([
-        fetchAppDetail(appId, country),
-        fetchIosAggregateAppMetrics(appId),
-      ]);
-      if (!app) return null;
-      const chartRank = chartRankForApp(app.id, app.primaryGenreId, enrichedNationalTop);
-      return [appId, computeTrackappAppDisplayMetrics(app, country, aggregateMetrics, chartRank)] as const;
-    }),
-  );
+  /** Sensor Tower limite en rafale (429) — séquentiel comme sur la fiche / notre sélection. */
+  const entries: Array<readonly [string, TrackappAppDisplayMetrics] | null> = [];
+  for (const appId of uniqueIds) {
+    const app = await fetchAppDetail(appId, country);
+    if (!app) {
+      entries.push(null);
+      continue;
+    }
+    const aggregateMetrics = await fetchIosAggregateAppMetrics(appId);
+    const chartRank = chartRankForApp(app.id, app.primaryGenreId, enrichedNationalTop);
+    entries.push([
+      appId,
+      computeTrackappAppDisplayMetrics(app, country, aggregateMetrics, chartRank),
+    ] as const);
+  }
 
   const map = new Map<string, TrackappAppDisplayMetrics>();
   for (const row of entries) {
@@ -149,23 +186,24 @@ export type SearchResultWithTrackappMetrics = SearchResult & {
   trackappMetrics: TrackappAppDisplayMetrics;
 };
 
+/**
+ * Même source de vérité que `/trackapp/apptracker/[id]` :
+ * agrégat Sensor Tower si dispo, sinon estimation via top 100 (jamais le rang #1/#2 de la recherche iTunes).
+ */
 export async function enrichSearchResultsWithTrackappMetrics(
   apps: readonly SearchResult[],
   country: CountryCode,
 ): Promise<SearchResultWithTrackappMetrics[]> {
   if (apps.length === 0) return [];
 
-  // Search must stay instant. The detail page still resolves SensorTower/global metrics,
-  // but the result list uses deterministic estimates from the iTunes Search payload.
+  const metricsMap = await resolveTrackappAppsDisplayMetricsBatch(
+    apps.map((app) => app.id),
+    country,
+  );
+
   return apps.map((app) => ({
     ...app,
-    trackappMetrics: computeTrackappAppDisplayMetrics(
-      app,
-      country,
-      null,
-      null,
-      Math.max(1, Math.min(app.rank || TRACKAPP_DETAIL_FALLBACK_ESTIMATE_RANK, 100)),
-    ),
+    trackappMetrics: metricsMap.get(app.id) ?? EMPTY_METRICS,
   }));
 }
 
