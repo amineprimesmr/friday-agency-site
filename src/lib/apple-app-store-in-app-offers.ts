@@ -149,7 +149,7 @@ function extractPairsFromInformationItem(item: Record<string, unknown>): AppStor
 
 function parseOffersFromEmbeddedJson(
   data: unknown,
-  country: CountryCode,
+  _country: CountryCode,
 ): { offers: AppStoreInAppOffer[]; sectionTitle: string } | null {
   if (!data || typeof data !== "object") return null;
   const root = data as Record<string, unknown>;
@@ -190,7 +190,7 @@ function extractEmbeddedProductJson(html: string): unknown | null {
   }
 }
 
-const IAP_FALLBACK_COUNTRIES: readonly CountryCode[] = ["fr", "us", "gb", "de"];
+const IAP_FALLBACK_COUNTRIES: readonly CountryCode[] = ["fr", "gb", "de", "ca", "es"];
 
 async function fetchOffersForCountry(
   appId: string,

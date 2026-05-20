@@ -33,7 +33,7 @@ export function TrackappInAppOffersSection({
           Abonnements &amp; achats in-app
         </h2>
         <p className="mt-3 text-[0.88rem] leading-relaxed text-[var(--dash-muted-light)]">
-          Aucune offre listée sur la fiche App Store (FR / US / GB / DE) — souvent le paywall n&apos;est
+          Aucune offre listée sur la fiche App Store (plusieurs pays testés) — souvent le paywall n&apos;est
           visible qu&apos;après installation. Ouvre l&apos;app ou sa fiche App Store pour voir les prix réels.
         </p>
       </section>
