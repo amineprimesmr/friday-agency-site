@@ -1,17 +1,19 @@
 "use client";
 
-import Image from "next/image";
 import { useReducedMotion } from "framer-motion";
+import type { CSSProperties } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { ShowcaseAppIcon } from "@/components/tracker/showcase-app-icon";
 import { ShowcaseHeroHeader } from "@/components/tracker/showcase-hero-header";
-import type { AppShowcaseVideoItemEnriched } from "@/lib/showcase-app-videos-enrich";
+import { useTouchDevice } from "@/lib/use-touch-device";
+import type { AppShowcaseVideoItemEnriched } from "@/lib/showcase-app-videos-types";
 import { cn } from "@/lib/utils";
 
 import "@/styles/build-next-showcase.css";
 
-const SLOT_COUNT = 5;
-const MARQUEE_PX_PER_MS = 0.048;
+const MARQUEE_PX_PER_SEC = 170;
+const MARQUEE_PX_PER_SEC_TOUCH = 140;
 
 type PhoneSlideProps = {
   ariaLabel: string;
@@ -19,41 +21,68 @@ type PhoneSlideProps = {
   reduceMotion: boolean | null;
 };
 
-const PHONE_FRAME =
-  "relative mx-auto aspect-[9/19.5] w-[min(78vw,15.5rem)] max-w-[15.5rem] shrink-0 " +
-  "shadow-[0_20px_48px_rgba(0,0,0,.5)] ring-1 ring-white/[0.04] sm:w-[15.25rem]";
+const PHONE_FRAME_DEFAULT =
+  "relative mx-auto aspect-[9/19.5] w-[min(78vw,18rem)] max-w-[18rem] shrink-0 " +
+  "shadow-[0_20px_48px_rgba(0,0,0,.5)] ring-1 ring-white/[0.04] sm:w-[17.5rem]";
 
-function PhoneSlide({ ariaLabel, item, reduceMotion }: PhoneSlideProps) {
+const PHONE_FRAME_COMPACT =
+  "relative mx-auto aspect-[9/19.5] w-[min(42vw,13rem)] max-w-[13rem] shrink-0 " +
+  "shadow-[0_16px_40px_rgba(0,0,0,.45)] ring-1 ring-white/[0.06] sm:w-[12.5rem]";
+
+function PhoneSlide({
+  ariaLabel,
+  item,
+  reduceMotion,
+  compact = false,
+}: PhoneSlideProps & { compact?: boolean }) {
   const frameRef = useRef<HTMLDivElement>(null);
-  const [mediaActive, setMediaActive] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const src = item?.src ?? null;
   const title = item?.displayName ?? null;
   const artworkUrl = item?.artworkUrl ?? null;
+  const iconSrc = item?.iconSrc ?? null;
   const posterSrc = item?.posterSrc ?? null;
   const moneyLine = item?.monthlyRevenueLabel ?? null;
 
   useEffect(() => {
-    const el = frameRef.current;
-    if (!el) return;
+    const frame = frameRef.current;
+    const video = videoRef.current;
+    if (!frame || !video || !src) return;
+
+    let shouldPlay = false;
+
+    const syncPlayback = () => {
+      if (!shouldPlay || reduceMotion) {
+        video.pause();
+        return;
+      }
+      void video.play().catch(() => undefined);
+    };
 
     if (!("IntersectionObserver" in window)) {
-      setMediaActive(true);
+      shouldPlay = true;
+      syncPlayback();
       return;
     }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setMediaActive(Boolean(entry?.isIntersecting));
+        shouldPlay = Boolean(entry?.isIntersecting && (entry.intersectionRatio ?? 0) > 0.12);
+        syncPlayback();
       },
-      { rootMargin: "160px 0px", threshold: 0.01 },
+      { rootMargin: "100px 0px", threshold: [0, 0.12, 0.35] },
     );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+
+    observer.observe(frame);
+    return () => {
+      observer.disconnect();
+      video.pause();
+    };
+  }, [reduceMotion, src]);
 
   return (
-    <div className="flex shrink-0 flex-col items-center">
-      <div ref={frameRef} className={PHONE_FRAME}>
+    <div className="build-next-carousel__slide flex shrink-0 flex-col items-center">
+      <div ref={frameRef} className={compact ? PHONE_FRAME_COMPACT : PHONE_FRAME_DEFAULT}>
         <div
           className="absolute inset-0 rounded-[2.25rem] bg-gradient-to-b from-white/[0.14] to-white/[0.04] p-[3px]"
           aria-hidden
@@ -61,49 +90,29 @@ function PhoneSlide({ ariaLabel, item, reduceMotion }: PhoneSlideProps) {
           <div className="relative h-full w-full overflow-hidden rounded-[2rem] bg-neutral-950 ring-1 ring-white/10">
             {src ? (
               <>
-                {!mediaActive ? (
-                  posterSrc ? (
-                    <Image
-                      src={posterSrc}
-                      alt=""
-                      fill
-                      sizes="248px"
-                      className="object-cover"
-                      aria-label={ariaLabel}
-                    />
-                  ) : (
-                    <div className="absolute inset-0 h-full w-full bg-neutral-950" aria-label={ariaLabel} />
-                  )
-                ) : reduceMotion ? (
-                  <video
-                    className="absolute inset-0 h-full w-full object-cover"
-                    src={src}
-                    poster={posterSrc ?? undefined}
-                    muted
-                    playsInline
-                    preload="metadata"
-                    aria-label={ariaLabel}
-                  />
-                ) : (
-                  <video
-                    className="absolute inset-0 h-full w-full object-cover"
-                    src={src}
-                    poster={posterSrc ?? undefined}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="auto"
-                    aria-label={ariaLabel}
-                  />
-                )}
-                {moneyLine != null && artworkUrl != null && title != null ? (
+                <video
+                  ref={videoRef}
+                  className="build-next-carousel__video absolute inset-0 h-full w-full object-cover"
+                  src={src}
+                  poster={posterSrc ?? undefined}
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  aria-label={ariaLabel}
+                />
+                {moneyLine != null && title != null ? (
                   <div className="build-next-video-foot pointer-events-none absolute inset-x-0 bottom-0 z-10">
                     <div className="build-next-video-foot__gradient" aria-hidden />
                     <div className="build-next-video-foot__content">
                       <div className="build-next-video-foot__head">
                         <span className="build-next-video-foot__icon-ring">
-                          <Image src={artworkUrl} alt="" fill className="object-cover" sizes="40px" />
+                          <ShowcaseAppIcon
+                            artworkUrl={artworkUrl}
+                            iconSrc={iconSrc}
+                            name={title}
+                            priority={false}
+                          />
                         </span>
                         <p className="build-next-video-foot__title">{title}</p>
                       </div>
@@ -126,144 +135,89 @@ function PhoneSlide({ ariaLabel, item, reduceMotion }: PhoneSlideProps) {
   );
 }
 
-export function BuildNextShowcase({ videos }: { videos: AppShowcaseVideoItemEnriched[] }) {
+export function BuildNextShowcaseCarousel({
+  videos,
+  className,
+  compact = false,
+  ariaLabel = "Exemples d’applications en vidéo, défilant automatiquement",
+}: {
+  videos: AppShowcaseVideoItemEnriched[];
+  className?: string;
+  compact?: boolean;
+  ariaLabel?: string;
+}) {
   const reduceMotion = useReducedMotion();
-  const trackRef = useRef<HTMLDivElement>(null);
+  const touch = useTouchDevice();
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [marqueePaused, setMarqueePaused] = useState(false);
 
   const slides = useMemo(() => {
-    return Array.from({ length: SLOT_COUNT }, (_, i) => ({
+    const count = Math.max(videos.length, 1);
+    return Array.from({ length: count }, (_, i) => ({
       key: i,
       item: videos[i] ?? null,
       ariaLabel: videos[i]?.displayName ? `Vidéo ${videos[i]!.displayName}` : `Vidéo exemple ${i + 1}`,
     }));
   }, [videos]);
 
-  const loop = !reduceMotion;
+  const loop = !reduceMotion && slides.length > 1;
   const trackSlides = loop ? [...slides, ...slides] : slides;
+  const pxPerSec = touch ? MARQUEE_PX_PER_SEC_TOUCH : MARQUEE_PX_PER_SEC;
+  const marqueeDurationSec = useMemo(() => {
+    const slideWidth = compact ? 208 : 288;
+    const gap = compact ? 14 : 22;
+    const loopWidth = slides.length * slideWidth + Math.max(0, slides.length - 1) * gap;
+    return Math.max(18, loopWidth / pxPerSec);
+  }, [compact, pxPerSec, slides.length]);
 
   useEffect(() => {
     if (!loop) return;
-    const track = trackRef.current;
-    if (!track) return;
-    const el = track;
+    const viewport = viewportRef.current;
+    if (!viewport) return;
 
-    let rafId = 0;
-    let lastTime: number | null = null;
-    let paused = true;
-    let inViewport = !("IntersectionObserver" in window);
+    const syncPaused = (paused: boolean) => setMarqueePaused(paused);
 
-    const loopLength = () => {
-      const w = el.scrollWidth;
-      return w > 0 ? w / 2 : 0;
+    const onVis = () => {
+      if (document.visibilityState !== "visible") syncPaused(true);
+      else syncPaused(false);
     };
-
-    function tick(now: number) {
-      rafId = 0;
-      const half = loopLength();
-      if (half <= 40 || paused) {
-        lastTime = null;
-        return;
-      }
-      if (lastTime === null) {
-        lastTime = now;
-        rafId = requestAnimationFrame(tick);
-        return;
-      }
-      const dt = Math.min(now - lastTime, 64);
-      el.scrollLeft += MARQUEE_PX_PER_MS * dt;
-      if (el.scrollLeft >= half - 2) el.scrollLeft -= half;
-      lastTime = now;
-      rafId = requestAnimationFrame(tick);
-    }
-
-    const pause = () => {
-      paused = true;
-      lastTime = null;
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = 0;
-    };
-    const resume = () => {
-      paused = false;
-      lastTime = null;
-      if (!rafId) rafId = requestAnimationFrame(tick);
-    };
-
-    const onPointerDown = () => pause();
-    const onPointerUp = () =>
-      window.setTimeout(() => {
-        if (inViewport && document.visibilityState === "visible") resume();
-      }, 400);
-
-    track.addEventListener("pointerdown", onPointerDown);
-    track.addEventListener("pointerup", onPointerUp);
-    track.addEventListener("pointercancel", onPointerUp);
-    track.addEventListener("touchstart", onPointerDown, { passive: true });
-    track.addEventListener("touchend", onPointerUp, { passive: true });
-    const onVisibility = () => {
-      if (document.visibilityState === "visible" && inViewport) resume();
-      else pause();
-    };
-    document.addEventListener("visibilitychange", onVisibility);
+    document.addEventListener("visibilitychange", onVis);
 
     const io =
       "IntersectionObserver" in window
         ? new IntersectionObserver(
-            ([entry]) => {
-              inViewport = Boolean(entry?.isIntersecting);
-              if (inViewport && document.visibilityState === "visible") resume();
-              else pause();
-            },
+            ([entry]) => syncPaused(!entry?.isIntersecting),
             { rootMargin: "120px 0px", threshold: 0.01 },
           )
         : null;
-    io?.observe(el);
-    if (!io) resume();
-
-    const ro =
-      typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(() => {
-            const h = loopLength();
-            if (h > 40 && el.scrollLeft >= h - 8) el.scrollLeft -= h;
-          })
-        : null;
-    ro?.observe(el);
+    io?.observe(viewport);
+    onVis();
 
     return () => {
-      cancelAnimationFrame(rafId);
-      track.removeEventListener("pointerdown", onPointerDown);
-      track.removeEventListener("pointerup", onPointerUp);
-      track.removeEventListener("pointercancel", onPointerUp);
-      track.removeEventListener("touchstart", onPointerDown);
-      track.removeEventListener("touchend", onPointerUp);
-      document.removeEventListener("visibilitychange", onVisibility);
+      document.removeEventListener("visibilitychange", onVis);
       io?.disconnect();
-      ro?.disconnect();
     };
   }, [loop]);
 
   return (
-    <section className="mt-6 pt-4 sm:mt-8 sm:pt-5" aria-labelledby="build-next-heading">
-      <ShowcaseHeroHeader
-        headingId="build-next-heading"
-        title="Construisez le prochain…"
-        bleed
-        showBracketBadge={false}
-        subFooterPlacement="above"
-        className="build-next-hero--compact-carousel"
-      />
-
-      <div className="build-next-carousel mt-4 sm:mt-5 lg:mt-6">
+    <div className={cn("build-next-carousel build-next-carousel--edge", className)}>
+      <div
+        ref={viewportRef}
+        role="region"
+        aria-roledescription="carousel"
+        aria-label={ariaLabel}
+        className={cn(
+          "build-next-carousel__viewport",
+          loop ? "build-next-carousel__viewport--marquee" : "build-next-carousel__viewport--scroll",
+        )}
+      >
         <div
-          ref={trackRef}
-          role="region"
-          aria-roledescription="carousel"
-          aria-label="Exemples d’applications en vidéo, défilant automatiquement"
-          tabIndex={0}
           className={cn(
-            "build-next-carousel__track -mx-4 overscroll-x-contain px-5 sm:-mx-6 sm:px-7 md:mx-0 md:px-1",
-            loop ? "overflow-x-hidden" : "overflow-x-auto",
+            "build-next-carousel__track-inner",
+            loop && "build-next-carousel__track-inner--marquee",
+            loop && marqueePaused && "build-next-carousel__track-inner--paused",
           )}
-          data-marquee-loop={loop ? "true" : "false"}
+          style={loop ? ({ "--marquee-duration": `${marqueeDurationSec}s` } as CSSProperties) : undefined}
         >
           {trackSlides.map((s, idx) => (
             <PhoneSlide
@@ -271,10 +225,30 @@ export function BuildNextShowcase({ videos }: { videos: AppShowcaseVideoItemEnri
               ariaLabel={s.ariaLabel}
               item={s.item}
               reduceMotion={reduceMotion}
+              compact={compact}
             />
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+export function BuildNextShowcase({ videos }: { videos: AppShowcaseVideoItemEnriched[] }) {
+  return (
+    <section className="mt-6 pt-4 sm:mt-8 sm:pt-5" aria-labelledby="build-next-heading">
+      <ShowcaseHeroHeader
+        headingId="build-next-heading"
+        title="Créez le prochain…"
+        bleed
+        align="center"
+        showBracketBadge={false}
+        subFooterPlacement="above"
+        titleClassName="build-next-hero-title--fintap-match"
+        className="build-next-hero--compact-carousel"
+      />
+
+      <BuildNextShowcaseCarousel videos={videos} className="mt-4 sm:mt-5 lg:mt-6" />
     </section>
   );
 }

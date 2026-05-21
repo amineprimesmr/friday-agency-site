@@ -1,4 +1,4 @@
-/* Pile notifications — positions fixes (iOS-safe, pas de remount ni transform animé sur toute la pile) */
+/* Pile notifications « nouvelle vente » — fonds opaques (sans backdrop-blur sous la pile, pour lecture nette) */
 
 .tracker-sale-notifs {
   --c-glass: #bbbbbc;
@@ -24,29 +24,64 @@
 .tracker-sale-notif-shell {
   position: absolute;
   inset-inline: 0;
+  top: 0;
   width: 100%;
   pointer-events: none;
   transform-origin: 50% 0%;
   transition:
-    top 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.38s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.tracker-sale-notif-shell--pulse {
-  animation: tracker-sale-notif-pulse 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+.tracker-sale-notif-shell[data-depth="0"] {
+  z-index: 40;
+  transform: translate3d(0, 0, 0) scale(1);
+  opacity: 1;
 }
 
-@keyframes tracker-sale-notif-pulse {
+.tracker-sale-notif-shell[data-depth="1"] {
+  z-index: 39;
+  transform: translate3d(0, 28px, 0) scale(0.968);
+  opacity: 0.93;
+}
+
+.tracker-sale-notif-shell[data-depth="2"] {
+  z-index: 38;
+  transform: translate3d(0, 54px, 0) scale(0.936);
+  opacity: 0.86;
+}
+
+.tracker-sale-notif-shell[data-depth="3"] {
+  z-index: 37;
+  transform: translate3d(0, 78px, 0) scale(0.904);
+  opacity: 0.79;
+}
+
+.tracker-sale-notif-shell--enter[data-depth="0"] {
+  transition: none;
+  animation: tracker-sale-notif-enter 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes tracker-sale-notif-enter {
   0% {
-    filter: brightness(1);
+    opacity: 0.55;
+    transform: translate3d(0, -14px, 0) scale(0.94);
   }
-  35% {
-    filter: brightness(1.12);
-  }
+
   100% {
-    filter: brightness(1);
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
   }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .tracker-sale-notif-shell {
+    transition-duration: 0.32s;
+  }
+}
+
+.tracker-sale-notif-visual {
+  width: 100%;
 }
 
 .tracker-sale-notif {
@@ -64,13 +99,23 @@
   border: none;
   cursor: default;
   -webkit-tap-highlight-color: transparent;
+
   transform-origin: 50% 0%;
+  transition: filter 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   isolation: isolate;
   pointer-events: none;
+
+  /* Fond quasi opaque — sans backdrop-filter pour éviter que le texte des cartes en dessous se lise au travers */
   background:
-    linear-gradient(132deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 52%),
+    linear-gradient(
+      132deg,
+      rgba(255, 255, 255, 0.07) 0%,
+      rgba(255, 255, 255, 0) 52%
+    ),
     linear-gradient(to bottom, #26262e, #141418);
+
   background-color: #16161b;
+
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
   box-shadow:
@@ -87,6 +132,31 @@
   filter: brightness(0.985) saturate(0.97);
 }
 
+.tracker-sale-notif-shell[data-depth="4"] .tracker-sale-notif {
+  filter: brightness(0.97) saturate(0.94);
+}
+
+.tracker-sale-notif-shell[data-depth="5"] .tracker-sale-notif,
+.tracker-sale-notif-shell[data-depth="6"] .tracker-sale-notif {
+  background-image:
+    linear-gradient(
+      132deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0) 52%
+    ),
+    linear-gradient(to bottom, #1e1e24, #0e0e12);
+  background-color: #0f0f13;
+}
+
+.tracker-sale-notif-shell[data-depth="5"] .tracker-sale-notif {
+  filter: brightness(0.96) saturate(0.92);
+}
+
+.tracker-sale-notif-shell[data-depth="6"] .tracker-sale-notif {
+  filter: brightness(0.94) saturate(0.91);
+}
+
+/* Icône app — squircle iOS (logo direct, sans boîte imbriquée) */
 .tracker-sale-notif-icon-wrap {
   position: relative;
   width: 2.75rem;
@@ -98,8 +168,6 @@
 }
 
 .tracker-sale-notif-icon-img {
-  width: 100%;
-  height: 100%;
   object-fit: cover;
   object-position: center;
 }
@@ -143,6 +211,7 @@
   color: rgba(255, 255, 255, 0.78);
 }
 
+/* Reflet subtil façade */
 .tracker-sale-notif::after {
   content: "";
   position: absolute;
@@ -159,9 +228,234 @@
   );
 }
 
+.tracker-sale-notif-shell[data-depth="6"] .tracker-sale-notif::after {
+  opacity: 0.1;
+}
+
+.tracker-sale-notif-shell[data-depth="5"] .tracker-sale-notif::after {
+  opacity: 0.12;
+}
+
+.tracker-sale-notif-shell[data-depth="4"] .tracker-sale-notif::after,
+.tracker-sale-notif-shell[data-depth="3"] .tracker-sale-notif::after {
+  opacity: 0.17;
+}
+
+.tracker-sale-notif-shell[data-depth="2"] .tracker-sale-notif::after,
+.tracker-sale-notif-shell[data-depth="1"] .tracker-sale-notif::after {
+  opacity: 0.2;
+}
+
+/* Bannière iOS flottante (mobile) — frosted glass (backdrop-filter sur ::before, sans transform ancêtre) */
+.tracker-sale-notif-banner-slot {
+  position: fixed;
+  top: max(0.45rem, env(safe-area-inset-top, 0px));
+  left: 0;
+  right: 0;
+  z-index: 10050;
+  width: min(calc(100% - 0.65rem), 26.5rem);
+  margin-inline: auto;
+  pointer-events: none;
+}
+
+.tracker-sale-notif-banner-hit {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.tracker-sale-notif-banner-hit:active .tracker-sale-notif-banner-glass {
+  opacity: 0.94;
+}
+
+/* Calque flou séparé — iOS Safari ne floute pas si un ancêtre a transform/filter */
+.tracker-sale-notif-banner-glass {
+  position: relative;
+  border-radius: 1.55rem;
+  overflow: hidden;
+  background: transparent;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.42),
+    0 4px 14px rgba(0, 0, 0, 0.28);
+  transition: opacity 0.16s ease;
+}
+
+.tracker-sale-notif-banner-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: rgba(32, 32, 38, 0.28);
+  -webkit-backdrop-filter: blur(44px) saturate(195%);
+  backdrop-filter: blur(44px) saturate(195%);
+  transform: translateZ(0);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.tracker-sale-notif-banner-glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.55;
+  background: linear-gradient(
+    168deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.05) 36%,
+    rgba(255, 255, 255, 0) 58%
+  );
+}
+
+/* Safari iOS : repaint après mount (backdrop-filter ignoré au 1er frame) */
+.tracker-sale-notif-banner-glass--live::before {
+  -webkit-backdrop-filter: blur(44px) saturate(195%);
+  backdrop-filter: blur(44px) saturate(195%);
+}
+
+.tracker-sale-notif-banner-glass > .tracker-sale-notif-shell {
+  position: relative;
+  z-index: 1;
+}
+
+.tracker-sale-notif-shell--banner,
+.tracker-sale-notif-shell--banner[data-depth="0"] {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  transform: none !important;
+  opacity: 1;
+  transition: none;
+}
+
+.tracker-sale-notif-shell--banner .tracker-sale-notif {
+  pointer-events: auto;
+  grid-template-columns: 3.35rem minmax(0, 1fr);
+  gap: 0.8rem 1rem;
+  align-items: center;
+  padding: 0.92rem 1.1rem 0.92rem 0.88rem;
+  border-radius: 0;
+  min-height: 4.35rem;
+  isolation: auto;
+  contain: none;
+  overflow: hidden;
+  transform: none;
+  filter: none;
+  background: transparent !important;
+  background-image: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+.tracker-sale-notif-shell--banner .tracker-sale-notif::before,
+.tracker-sale-notif-shell--banner .tracker-sale-notif::after {
+  display: none;
+}
+
+.tracker-sale-notif-shell--banner .tracker-sale-notif-icon-wrap {
+  width: 3.35rem;
+  height: 3.35rem;
+  border-radius: 0.72rem;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 2px 8px rgba(0, 0, 0, 0.22);
+}
+
+.tracker-sale-notif-shell--banner .tracker-sale-notif-head {
+  font-size: 0.9375rem;
+}
+
+.tracker-sale-notif-shell--banner .tracker-sale-notif-time {
+  font-size: 0.75rem;
+}
+
+.tracker-sale-notif-shell--banner .tracker-sale-notif-sub {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  line-height: 1.42;
+}
+
+@media (max-width: 768px) {
+  .tracker-sale-notif-banner-glass::before {
+    -webkit-backdrop-filter: blur(36px) saturate(180%);
+    backdrop-filter: blur(36px) saturate(180%);
+    background: rgba(32, 32, 38, 0.32);
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .tracker-sale-notif-banner-glass::before {
+    background: rgba(38, 38, 44, 0.92);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+/* Entrée / sortie — opacity + top (pas de transform : casse backdrop-filter iOS) */
+.tracker-sale-notif-banner-slot--enter {
+  animation: tracker-ios-notif-drop 0.54s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+.tracker-sale-notif-banner-slot--exit {
+  animation: tracker-ios-notif-rise 0.32s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards;
+}
+
+@keyframes tracker-ios-notif-drop {
+  0% {
+    opacity: 0;
+    top: calc(max(0.45rem, env(safe-area-inset-top, 0px)) - 5.5rem);
+  }
+
+  58% {
+    opacity: 1;
+    top: calc(max(0.45rem, env(safe-area-inset-top, 0px)) + 0.18rem);
+  }
+
+  100% {
+    opacity: 1;
+    top: max(0.45rem, env(safe-area-inset-top, 0px));
+  }
+}
+
+@keyframes tracker-ios-notif-rise {
+  0% {
+    opacity: 1;
+    top: max(0.45rem, env(safe-area-inset-top, 0px));
+  }
+
+  100% {
+    opacity: 0;
+    top: calc(max(0.45rem, env(safe-area-inset-top, 0px)) - 5.5rem);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .tracker-sale-notif {
+    transition: none;
+  }
+
   .tracker-sale-notif-shell {
     transition: none;
+    animation: none;
+  }
+
+  .tracker-sale-notif-banner-slot--enter,
+  .tracker-sale-notif-banner-slot--exit {
     animation: none;
   }
 }

@@ -14,6 +14,7 @@ import {
   TRACKER_WORKSPACE_HREF,
   trackerAuthNavActive,
 } from "@/lib/tracker-auth-nav";
+import { useTouchDevice } from "@/lib/use-touch-device";
 import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import "@/styles/tracker-header.css";
@@ -53,6 +54,7 @@ export function TrackerHeader({
   const pathname = usePathname();
   const router = useRouter();
   const reduceMotion = useReducedMotion();
+  const touch = useTouchDevice();
   const [authOpen, setAuthOpen] = useState(false);
 
   useEffect(() => {
@@ -74,9 +76,11 @@ export function TrackerHeader({
 
     const update = () => {
       raf = 0;
-      const y = window.scrollY || document.documentElement.scrollTop;
-      const nextProgress = Math.min(1, y / 120);
-      setScrollProgress((prev) => (Math.abs(prev - nextProgress) > 0.02 ? nextProgress : prev));
+      if (!touch) {
+        const y = window.scrollY || document.documentElement.scrollTop;
+        const nextProgress = Math.min(1, y / 120);
+        setScrollProgress((prev) => (Math.abs(prev - nextProgress) > 0.02 ? nextProgress : prev));
+      }
 
       const header = document.querySelector<HTMLElement>(".tracker-header-bar");
       if (!header) return;
@@ -105,16 +109,17 @@ export function TrackerHeader({
       window.clearTimeout(t);
       if (raf) window.cancelAnimationFrame(raf);
     };
-  }, [pathname, mobileOpen, searchOpen]);
+  }, [pathname, mobileOpen, searchOpen, touch]);
 
-  const k = reduceMotion ? 1 : 1 + scrollProgress * 0.45;
-  const blurA = reduceMotion ? 14 : 18 * k;
-  const blurB = reduceMotion ? 8 : 9 * k;
-  const blurC = reduceMotion ? 4 : 5 * k;
+  const k = reduceMotion || touch ? 1 : 1 + scrollProgress * 0.45;
+  const blurA = reduceMotion ? 14 : touch ? 16 : 18 * k;
+  const blurB = reduceMotion ? 8 : touch ? 0 : 9 * k;
+  const blurC = reduceMotion ? 4 : touch ? 0 : 5 * k;
 
-  const blurTransition = reduceMotion
-    ? undefined
-    : ("backdrop-filter 0.2s cubic-bezier(0.22, 1, 0.36, 1), -webkit-backdrop-filter 0.2s cubic-bezier(0.22, 1, 0.36, 1)" as const);
+  const blurTransition =
+    reduceMotion || touch
+      ? undefined
+      : ("backdrop-filter 0.2s cubic-bezier(0.22, 1, 0.36, 1), -webkit-backdrop-filter 0.2s cubic-bezier(0.22, 1, 0.36, 1)" as const);
 
   const layerStyle = (px: number): CSSProperties => ({
     WebkitBackdropFilter: `blur(${px.toFixed(1)}px)`,

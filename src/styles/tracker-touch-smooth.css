@@ -1,0 +1,42 @@
+/**
+ * Landing /tracker sur tactile : garde le rendu visuel, réduit le coût GPU/CPU.
+ */
+
+@media (hover: none), (pointer: coarse) {
+  #tracker-app .blur-3xl {
+    filter: none;
+    opacity: 0.55;
+  }
+
+  .tracker-header-backdrop-layers .tracker-header-blur-b,
+  .tracker-header-backdrop-layers .tracker-header-blur-c {
+    display: none;
+  }
+
+  .tracker-header-backdrop-layers .tracker-header-blur-a {
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(16px) saturate(140%);
+    transition: none !important;
+  }
+
+  .tracker-fintap-steps,
+  .landing-launch-sf,
+  #tracker-affiliation .mx-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 480px;
+  }
+
+  .build-next-carousel__track--css-marquee .build-next-carousel__marquee-inner {
+    will-change: transform;
+  }
+
+  .tracker-sale-notifs-stack {
+    contain: layout style;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .build-next-carousel__marquee-inner {
+    animation: none !important;
+  }
+}

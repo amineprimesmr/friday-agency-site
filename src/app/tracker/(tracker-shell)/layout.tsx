@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import "@/styles/shiny-cta-button.css";
 import "@/styles/trackapp-purple.css";
 import "@/styles/tracker-ux.css";
+import "@/styles/tracker-touch-smooth.css";
 
 export default async function TrackerShellLayout({ children }: { children: React.ReactNode }) {
   const sb = await createClient();

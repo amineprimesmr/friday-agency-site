@@ -54,6 +54,53 @@
   color: #ffffff;
 }
 
+/* Aligné sur .fintap-steps-scroll__h2 (« Ce que vous allez obtenir ») */
+.build-next-hero-title--fintap-match {
+  margin: 0 auto;
+  width: 100%;
+  max-width: min(100%, 38rem);
+  font-family: var(--font-heading), system-ui, sans-serif;
+  font-size: clamp(2.35rem, 7.8vw, 3.55rem);
+  font-weight: 560;
+  letter-spacing: -0.03em;
+  line-height: 1.06;
+  text-align: center;
+  text-wrap: balance;
+  background: linear-gradient(142deg, #01040d 0%, #0b1120 34%, #334155 68%, #f1f5f9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+@media (min-width: 1024px) {
+  .build-next-hero-title--fintap-match {
+    max-width: min(100%, 42rem);
+    font-size: clamp(2.55rem, 4.5vw, 3.75rem);
+  }
+}
+
+.build-next-hero-description {
+  margin: 0.85rem auto 0;
+  max-width: min(36ch, 100%);
+  font-size: clamp(0.78rem, 1.35vw, 0.9rem);
+  line-height: 1.42;
+  letter-spacing: -0.01em;
+  text-align: center;
+  text-wrap: balance;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+@media (min-width: 1024px) {
+  .build-next-hero-description {
+    font-size: clamp(0.82rem, 1.15vw, 0.94rem);
+  }
+}
+
+.build-next-hero--align-center .build-next-hero-title__sub {
+  justify-content: center;
+}
+
 .build-next-hero-title__sub {
   display: flex;
   align-items: center;
@@ -127,44 +174,99 @@
   }
 }
 
-/* Carrousel vidéos — ruban horizontal unique, défilement JS (boucle avec piste doublée) */
+/* Carrousel vidéos — défilement CSS transform (GPU, indépendant du touch scroll) */
 .build-next-carousel {
   width: 100%;
 }
 
-.build-next-carousel__track {
+/* Pleine largeur écran mobile — annule le padding parent (px-4) */
+.build-next-carousel--edge {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+@media (max-width: 767px) {
+  .build-next-carousel--edge {
+    width: 100vw;
+    max-width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
+}
+
+.build-next-carousel__viewport {
+  width: 100%;
+}
+
+.build-next-carousel__viewport--marquee {
+  overflow: hidden;
+  touch-action: pan-y pinch-zoom;
+}
+
+.build-next-carousel__viewport--scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.build-next-carousel__viewport--scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.build-next-carousel__track-inner {
   display: flex;
   flex-flow: row nowrap;
   align-items: flex-start;
   gap: clamp(1.15rem, 3vw, 1.75rem);
   padding-bottom: 0.4rem;
-
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
 
-.build-next-carousel__track--touch {
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
-  overscroll-behavior-x: contain;
+.build-next-carousel__track-inner--marquee {
+  width: max-content;
+  animation: build-next-marquee var(--marquee-duration, 32s) linear infinite;
+  will-change: transform;
 }
 
-.build-next-carousel__track--touch .build-next-carousel__slide {
-  scroll-snap-align: center;
-  scroll-snap-stop: always;
+.build-next-carousel__track-inner--marquee.build-next-carousel__track-inner--paused {
+  animation-play-state: paused;
 }
 
-.build-next-carousel__track::-webkit-scrollbar {
-  display: none;
+@keyframes build-next-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
 }
 
-/* Bandeau bas : dégradé noir très étendu, typo lisible sur vidéo */
+.build-next-carousel__video {
+  background-color: #0a0a0a;
+  transform: translateZ(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .build-next-carousel__track-inner--marquee {
+    animation: none;
+    will-change: auto;
+  }
+
+  .build-next-carousel__viewport--marquee {
+    overflow-x: auto;
+    touch-action: auto;
+  }
+}
+
+/* Bandeau bas : dégradé lisible sans masquer toute la vidéo */
 .build-next-video-foot {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  min-height: 58%;
+  min-height: 42%;
   padding: 0 0.85rem 1.25rem;
 }
 
@@ -181,10 +283,9 @@
   background: linear-gradient(
     to top,
     #000000 0%,
-    #000000 24%,
-    rgba(0, 0, 0, 0.96) 38%,
-    rgba(0, 0, 0, 0.68) 52%,
-    rgba(0, 0, 0, 0.28) 72%,
+    rgba(0, 0, 0, 0.92) 22%,
+    rgba(0, 0, 0, 0.55) 42%,
+    rgba(0, 0, 0, 0.18) 62%,
     rgba(0, 0, 0, 0) 100%
   );
   pointer-events: none;
