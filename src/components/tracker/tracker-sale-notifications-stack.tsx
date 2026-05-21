@@ -1,16 +1,14 @@
 "use client";
 
-import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 
-import { TRACKAPP_ICON_SRC } from "@/lib/trackapp-brand";
+import { TRACKAPP_FAVICON_SRC } from "@/lib/trackapp-brand";
 import { cn } from "@/lib/utils";
 
 import "@/styles/tracker-sale-notifications.css";
 
-/** Logo notification — icône officielle Trackapp. */
-export const TRACKER_SALE_NOTIF_ICON_SRC = TRACKAPP_ICON_SRC;
+/** Icône légère pour les notifications (évite le PNG 1254px sur iOS). */
+export const TRACKER_SALE_NOTIF_ICON_SRC = TRACKAPP_FAVICON_SRC;
 
 type SaleDemo = {
   id: string;
@@ -20,53 +18,27 @@ type SaleDemo = {
 };
 
 const DEMO_SALES: Omit<SaleDemo, "id">[] = [
-  {
-    brand: "Nouvelle vente 🎉",
-    line: "Abonnement mensuel : +7,99 € MRR",
-    accent: "",
-  },
-  {
-    brand: "Nouvelle vente ✨",
-    line: "Vente à l’unité : 12,99 € encaissée",
-    accent: "notif-accent-a",
-  },
-  {
-    brand: "Nouvelle vente 🎉",
-    line: "Renouvellement : 29,99 € / mois confirmé",
-    accent: "notif-accent-b",
-  },
-  {
-    brand: "Nouvelle vente ✨",
-    line: "Offre annuelle : +49,99 € (Facture 12 mois)",
-    accent: "notif-accent-a",
-  },
-  {
-    brand: "Nouvelle vente 🎉",
-    line: "Achat in-app : module Pro · 9,99 €",
-    accent: "",
-  },
-  {
-    brand: "Nouvelle vente ✨",
-    line: "Essai → abonnement : 4,99 € / mois activé",
-    accent: "notif-accent-b",
-  },
-  {
-    brand: "Nouvelle vente 🎉",
-    line: "Panier complété : 24,90 € · paiement réussi",
-    accent: "notif-accent-a",
-  },
+  { brand: "Nouvelle vente 🎉", line: "Abonnement mensuel : +7,99 € MRR", accent: "" },
+  { brand: "Nouvelle vente ✨", line: "Vente à l’unité : 12,99 € encaissée", accent: "notif-accent-a" },
+  { brand: "Nouvelle vente 🎉", line: "Renouvellement : 29,99 € / mois confirmé", accent: "notif-accent-b" },
+  { brand: "Nouvelle vente ✨", line: "Offre annuelle : +49,99 € (Facture 12 mois)", accent: "notif-accent-a" },
+  { brand: "Nouvelle vente 🎉", line: "Achat in-app : module Pro · 9,99 €", accent: "" },
+  { brand: "Nouvelle vente ✨", line: "Essai → abonnement : 4,99 € / mois activé", accent: "notif-accent-b" },
+  { brand: "Nouvelle vente 🎉", line: "Panier complété : 24,90 € · paiement réussi", accent: "notif-accent-a" },
 ];
 
 const VISIBLE_COUNT = 4;
-const NEW_SALE_INTERVAL_MS = 3800;
+const NEW_SALE_INTERVAL_MS = 3600;
+const EXIT_MS = 280;
 
-/** Décalage vertical par profondeur (pile iOS). */
 const DEPTH_Y_PX = [0, 28, 54, 78] as const;
-
-const SPRING = { type: "spring" as const, stiffness: 380, damping: 32, mass: 0.82 };
 
 function shellScale(depth: number): number {
   return Number((1 - depth * 0.032).toFixed(4));
+}
+
+function shellOpacity(depth: number): number {
+  return Number((1 - depth * 0.07).toFixed(3));
 }
 
 function timeLabel(depth: number): string {
@@ -84,45 +56,49 @@ function seedInitialStack(): SaleDemo[] {
 function SaleNotificationCard({
   sale,
   depth,
-  rm,
-  isNew,
+  entering,
+  leaving,
 }: Readonly<{
   sale: SaleDemo;
   depth: number;
-  rm: boolean;
-  isNew: boolean;
+  entering?: boolean;
+  leaving?: boolean;
 }>) {
   const y = DEPTH_Y_PX[depth] ?? DEPTH_Y_PX[DEPTH_Y_PX.length - 1];
   const scale = shellScale(depth);
+  const opacity = shellOpacity(depth);
 
   return (
-    <motion.div
+    <div
       data-depth={String(depth)}
-      className={cn("tracker-sale-notif-shell", sale.accent)}
-      style={{
-        position: "absolute",
-        insetInline: 0,
-        top: 0,
-        zIndex: 40 - depth,
-        pointerEvents: "none",
-      }}
-      initial={
-        isNew && !rm
-          ? { opacity: 0, y: y - 32, scale: scale * 0.96 }
-          : { opacity: 1, y, scale }
+      data-entering={entering ? "true" : undefined}
+      data-leaving={leaving ? "true" : undefined}
+      className={cn(
+        "tracker-sale-notif-shell",
+        sale.accent,
+        entering && "tracker-sale-notif-shell--entering",
+        leaving && "tracker-sale-notif-shell--leaving",
+      )}
+      style={
+        {
+          zIndex: 40 - depth,
+          "--notif-y": `${y}px`,
+          "--notif-scale": String(scale),
+          "--notif-opacity": String(opacity),
+        } as CSSProperties
       }
-      animate={{ opacity: 1, y, scale }}
-      transition={rm ? { duration: 0.1 } : SPRING}
     >
       <div className="tracker-sale-notif">
         <div className="tracker-sale-notif-icon-wrap" aria-hidden>
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element -- favicon 32px, pas de decode lourd */}
+          <img
             src={TRACKER_SALE_NOTIF_ICON_SRC}
             alt=""
-            fill
+            width={44}
+            height={44}
             className="tracker-sale-notif-icon-img"
-            sizes="44px"
-            priority={depth === 0}
+            decoding="async"
+            loading={depth === 0 ? "eager" : "lazy"}
           />
         </div>
         <div className="tracker-sale-notif-body">
@@ -133,40 +109,59 @@ function SaleNotificationCard({
           <p className="tracker-sale-notif-sub">{sale.line}</p>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 export function TrackerSaleNotificationsStack({ className }: { className?: string }) {
-  const rm = useReducedMotion();
   const [stack, setStack] = useState<SaleDemo[]>(seedInitialStack);
   const [enteringId, setEnteringId] = useState<string | null>(null);
+  const [leaving, setLeaving] = useState<SaleDemo | null>(null);
   const saleIndexRef = useRef(VISIBLE_COUNT);
+  const reducedMotionRef = useRef(false);
+
+  useEffect(() => {
+    reducedMotionRef.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }, []);
+
+  const clearEntering = useCallback((id: string) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => setEnteringId((current) => (current === id ? null : current)));
+    });
+  }, []);
 
   const pushSale = useCallback(() => {
     const i = saleIndexRef.current;
     const template = DEMO_SALES[i % DEMO_SALES.length];
-    const entry: SaleDemo = {
-      ...template,
-      id: `live-${i}`,
-    };
-
+    const entry: SaleDemo = { ...template, id: `live-${i}` };
     saleIndexRef.current = i + 1;
-    setEnteringId(entry.id);
-    setStack((current) => [entry, ...current.slice(0, VISIBLE_COUNT - 1)]);
+
+    setStack((current) => {
+      const dropped = current[VISIBLE_COUNT - 1];
+      if (dropped && !reducedMotionRef.current) {
+        setLeaving(dropped);
+        window.setTimeout(() => setLeaving(null), EXIT_MS);
+      }
+      setEnteringId(entry.id);
+      clearEntering(entry.id);
+      return [entry, ...current.slice(0, VISIBLE_COUNT - 1)];
+    });
+  }, [clearEntering]);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onChange = () => {
+      reducedMotionRef.current = mq.matches;
+    };
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
   }, []);
 
   useEffect(() => {
-    if (!enteringId) return;
-    const timer = window.setTimeout(() => setEnteringId(null), 700);
-    return () => window.clearTimeout(timer);
-  }, [enteringId]);
-
-  useEffect(() => {
-    if (rm) return;
+    if (reducedMotionRef.current) return;
     const interval = window.setInterval(pushSale, NEW_SALE_INTERVAL_MS);
     return () => window.clearInterval(interval);
-  }, [rm, pushSale]);
+  }, [pushSale]);
 
   return (
     <figure className={cn("tracker-sale-notifs mx-auto pb-10 pt-1", className)}>
@@ -174,13 +169,20 @@ export function TrackerSaleNotificationsStack({ className }: { className?: strin
         Notifications de ventes en direct : de nouvelles alertes s’ajoutent en continu.
       </figcaption>
       <div className="tracker-sale-notifs-stack">
+        {leaving ? (
+          <SaleNotificationCard
+            key={`leaving-${leaving.id}`}
+            sale={leaving}
+            depth={VISIBLE_COUNT - 1}
+            leaving
+          />
+        ) : null}
         {stack.map((sale, depth) => (
           <SaleNotificationCard
             key={sale.id}
             sale={sale}
             depth={depth}
-            rm={Boolean(rm)}
-            isNew={sale.id === enteringId}
+            entering={sale.id === enteringId}
           />
         ))}
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { TrackappPaiementOrderForm } from "@/components/trackapp/trackapp-paiement-order-form";
 import { openTrackappStripeCheckout } from "@/lib/trackapp/stripe-payment-links";
@@ -174,6 +174,9 @@ export function TrackappPaiementPlanSpotlightCards({
   );
 }
 
+const SWIPE_THRESHOLD_PX = 44;
+const SWIPE_AXIS_LOCK_PX = 14;
+
 function PageSpotlightCarousel({
   className,
   checkoutReveal,
@@ -187,6 +190,8 @@ function PageSpotlightCarousel({
 }>) {
   /** 0 = à vie, 1 = mensuel */
   const [index, setIndex] = useState(0);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const [internalCheckoutRevealed, setInternalCheckoutRevealed] = useState(false);
   const isCheckoutControlled = checkoutRevealedProp !== undefined && onCheckoutRevealedChange !== undefined;
   const checkoutRevealed = isCheckoutControlled ? checkoutRevealedProp : internalCheckoutRevealed;
@@ -225,6 +230,55 @@ function PageSpotlightCarousel({
     resetCheckout();
   }, [index, resetCheckout]);
 
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    const onTouchStart = (event: TouchEvent) => {
+      if (checkoutRevealed) return;
+      const touch = event.touches[0];
+      if (!touch) return;
+      touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    };
+
+    const onTouchMove = (event: TouchEvent) => {
+      const start = touchStartRef.current;
+      if (!start || checkoutRevealed) return;
+      const touch = event.touches[0];
+      if (!touch) return;
+      const dx = touch.clientX - start.x;
+      const dy = touch.clientY - start.y;
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > SWIPE_AXIS_LOCK_PX) {
+        event.preventDefault();
+      }
+    };
+
+    const onTouchEnd = (event: TouchEvent) => {
+      const start = touchStartRef.current;
+      touchStartRef.current = null;
+      if (!start || checkoutRevealed) return;
+      const touch = event.changedTouches[0];
+      if (!touch) return;
+      const dx = touch.clientX - start.x;
+      const dy = touch.clientY - start.y;
+      if (Math.abs(dy) > Math.abs(dx) || Math.abs(dx) < SWIPE_THRESHOLD_PX) return;
+      if (dx < 0 && index === 0) goMonthly();
+      else if (dx > 0 && index === 1) goLifetime();
+    };
+
+    viewport.addEventListener("touchstart", onTouchStart, { passive: true });
+    viewport.addEventListener("touchmove", onTouchMove, { passive: false });
+    viewport.addEventListener("touchend", onTouchEnd, { passive: true });
+    viewport.addEventListener("touchcancel", onTouchEnd, { passive: true });
+
+    return () => {
+      viewport.removeEventListener("touchstart", onTouchStart);
+      viewport.removeEventListener("touchmove", onTouchMove);
+      viewport.removeEventListener("touchend", onTouchEnd);
+      viewport.removeEventListener("touchcancel", onTouchEnd);
+    };
+  }, [checkoutRevealed, goLifetime, goMonthly, index]);
+
   const [country, setCountry] = useState("FR");
 
   const carouselIndex = index === 0 ? 1 : 0;
@@ -249,7 +303,11 @@ function PageSpotlightCarousel({
       aria-roledescription="carousel"
       aria-label="Formules Trackapp"
     >
-      <div className="tpl-spotlight-carousel__viewport">
+      <div
+        ref={viewportRef}
+        className="tpl-spotlight-carousel__viewport"
+        data-swipe-hint={checkoutRevealed ? undefined : "true"}
+      >
         <div
           className="tpl-spotlight-carousel__track"
           style={{ "--carousel-index": checkoutRevealed ? 0 : carouselIndex } as CSSProperties}

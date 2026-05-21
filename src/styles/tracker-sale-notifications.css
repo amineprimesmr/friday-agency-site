@@ -22,8 +22,35 @@
 }
 
 .tracker-sale-notif-shell {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
   width: 100%;
+  pointer-events: none;
   transform-origin: 50% 0%;
+  transform: translate3d(0, var(--notif-y, 0), 0) scale(var(--notif-scale, 1));
+  opacity: var(--notif-opacity, 1);
+  will-change: transform, opacity;
+  transition:
+    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tracker-sale-notif-shell--entering {
+  transform: translate3d(0, calc(var(--notif-y, 0px) - 28px), 0) scale(calc(var(--notif-scale, 1) * 0.94));
+  opacity: 0;
+}
+
+.tracker-sale-notif-shell--leaving {
+  animation: tracker-sale-notif-exit 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes tracker-sale-notif-exit {
+  to {
+    transform: translate3d(0, calc(var(--notif-y, 0px) + 18px), 0) scale(calc(var(--notif-scale, 1) * 0.92));
+    opacity: 0;
+  }
 }
 
 .tracker-sale-notif-visual {
@@ -195,5 +222,15 @@
 @media (prefers-reduced-motion: reduce) {
   .tracker-sale-notif {
     transition: none;
+  }
+
+  .tracker-sale-notif-shell {
+    transition: none;
+  }
+
+  .tracker-sale-notif-shell--entering,
+  .tracker-sale-notif-shell--leaving {
+    transform: translate3d(0, var(--notif-y, 0), 0) scale(var(--notif-scale, 1));
+    opacity: var(--notif-opacity, 1);
   }
 }

@@ -1,12 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import { cn } from "@/lib/utils";
 
-/** CTA paiement depuis la landing Tracker → page pleine `/trackapp/paiement`. */
+const PAYMENT_HREF = "/trackapp/paiement";
+
+/** CTA paiement — prefetch + navigation au toucher pour réactivité iPhone. */
 export function TrackerTrackappPaymentCta({
   className,
   children,
@@ -15,25 +16,40 @@ export function TrackerTrackappPaymentCta({
   children: React.ReactNode;
 }>) {
   const router = useRouter();
+  const navigatingRef = useRef(false);
 
   useEffect(() => {
-    router.prefetch("/trackapp/paiement");
+    router.prefetch(PAYMENT_HREF);
   }, [router]);
 
-  const prefetchPayment = useCallback(() => {
-    router.prefetch("/trackapp/paiement");
+  const goPayment = useCallback(() => {
+    if (navigatingRef.current) return;
+    navigatingRef.current = true;
+    router.push(PAYMENT_HREF);
+    window.setTimeout(() => {
+      navigatingRef.current = false;
+    }, 1200);
   }, [router]);
 
   return (
-    <Link
-      href="/trackapp/paiement"
-      scroll
-      className={cn(className)}
-      onPointerEnter={prefetchPayment}
-      onPointerDown={prefetchPayment}
-      onTouchStart={prefetchPayment}
+    <a
+      href={PAYMENT_HREF}
+      className={cn(className, "tracker-hero-liquidglass--instant")}
+      onPointerDown={(event) => {
+        if (event.button !== 0) return;
+        goPayment();
+      }}
+      onClick={(event) => {
+        event.preventDefault();
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          goPayment();
+        }
+      }}
     >
       {children}
-    </Link>
+    </a>
   );
 }
