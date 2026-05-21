@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { TRACKAPP_ICON_SRC } from "@/lib/trackapp-brand";
+import { TRACKAPP_FAVICON_SRC } from "@/lib/trackapp-brand";
 
 import "./globals.css";
 
@@ -33,9 +33,13 @@ export const metadata: Metadata = {
     locale: "fr_FR",
   },
   icons: {
-    icon: [{ url: TRACKAPP_ICON_SRC, type: "image/png" }],
-    apple: [{ url: TRACKAPP_ICON_SRC, type: "image/png" }],
-    shortcut: [{ url: TRACKAPP_ICON_SRC, type: "image/png" }],
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: TRACKAPP_FAVICON_SRC, sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: [{ url: "/favicon.ico" }],
   },
 };
 

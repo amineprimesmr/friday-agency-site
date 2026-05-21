@@ -32,7 +32,6 @@ export function TrackappFidelityWorkspaceShell({
   }, []);
 
   const closeMobile = useCallback(() => setMobileMenuOpen(false), []);
-  const toggleMobile = useCallback(() => setMobileMenuOpen((v) => !v), []);
 
   useEffect(() => {
     if (mobileMenuOpen) document.body.classList.add("app-mobile-menu-open");
@@ -49,7 +48,7 @@ export function TrackappFidelityWorkspaceShell({
       <TrackappBodyClass active />
       <div id="app-app" className="app-unified-shell" data-mobile-section="dashboard" data-sidebar-expanded="false">
         <TrackerLiquidGlassFilterSvg />
-        <TrackappFidelityTopbar onMenuClick={toggleMobile} mobileMenuOpen={mobileMenuOpen} />
+        <TrackappFidelityTopbar mobileMenuOpen={mobileMenuOpen} onOpenMobileMenu={() => setMobileMenuOpen(true)} />
 
         <button
           type="button"

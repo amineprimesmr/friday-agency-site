@@ -37,23 +37,12 @@ body.trackapp-fidelity-body #app-app {
     align-items: center;
     gap: 0.85rem;
     padding: 0 1.15rem 0 0.85rem;
-    background: #0f1114;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: #000 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   body.trackapp-fidelity-body #app-app .trackapp-lab-topbar .app-desktop-topbar__menu-btn {
-    display: inline-flex !important;
-    width: 34px;
-    height: 34px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 8px;
-    background: transparent;
-    color: rgba(255, 255, 255, 0.85);
-    flex-shrink: 0;
-  }
-
-  body.trackapp-fidelity-body #app-app .trackapp-lab-topbar .app-desktop-topbar__menu-btn span {
-    display: none;
+    display: none !important;
   }
 
   body.trackapp-fidelity-body #app-app .app-main {
@@ -189,10 +178,6 @@ body.trackapp-fidelity-body #app-app {
 }
 
 /* —— Topbar breadcrumb —— */
-.trackapp-lab-topbar__panel-btn {
-  margin-right: 0.15rem;
-}
-
 .trackapp-lab-topbar__crumbs {
   display: flex;
   min-width: 0;
@@ -236,6 +221,10 @@ body.trackapp-fidelity-body #app-app {
   flex-shrink: 0;
 }
 
+.trackapp-lab-topbar__mobile-menu-btn {
+  margin-left: auto;
+}
+
 /* Masquer recherche / marque topbar legacy */
 body.trackapp-fidelity-body #app-app .trackapp-lab-topbar .app-desktop-topbar__brand,
 body.trackapp-fidelity-body #app-app .trackapp-lab-topbar .app-desktop-topbar__search-center {
@@ -243,12 +232,22 @@ body.trackapp-fidelity-body #app-app .trackapp-lab-topbar .app-desktop-topbar__s
 }
 
 @media (max-width: 900px) {
+  body.trackapp-fidelity-body #app-app .app-desktop-topbar.trackapp-lab-topbar {
+    background: #000 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    justify-content: flex-end;
+  }
+
   body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar .app-sidebar-brand {
     display: none !important;
   }
 
   body.trackapp-fidelity-body #app-app .trackapp-lab-topbar__crumbs {
-    font-size: 0.8rem;
+    display: none !important;
+  }
+
+  body.trackapp-fidelity-body #app-app .trackapp-lab-topbar__actions {
+    display: none !important;
   }
 }
 

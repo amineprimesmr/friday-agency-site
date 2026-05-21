@@ -55,7 +55,7 @@ export async function GET(req: Request) {
       artworkUrl: app.artworkUrl,
       rank: app.rank,
       releaseDate: app.releaseDate,
-      dlEst: estimateMonthlyDownloads(app.rank || 50, country),
+      dlEst: app.rank ? estimateMonthlyDownloads(app.rank, country) : "—",
       releaseLine: formatReleaseMeta(app.releaseDate),
       rating: app.averageUserRating,
       langLabel: langChip(app.languageCodesISO2A),

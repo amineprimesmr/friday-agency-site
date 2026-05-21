@@ -1,4 +1,4 @@
-/* Pile notifications « nouvelle vente » — fonds opaques (sans backdrop-blur sous la pile, pour lecture nette) */
+/* Pile notifications — positions fixes (iOS-safe, pas de remount ni transform animé sur toute la pile) */
 
 .tracker-sale-notifs {
   --c-glass: #bbbbbc;
@@ -22,12 +22,31 @@
 }
 
 .tracker-sale-notif-shell {
+  position: absolute;
+  inset-inline: 0;
   width: 100%;
+  pointer-events: none;
   transform-origin: 50% 0%;
+  transition:
+    top 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.tracker-sale-notif-visual {
-  width: 100%;
+.tracker-sale-notif-shell--pulse {
+  animation: tracker-sale-notif-pulse 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes tracker-sale-notif-pulse {
+  0% {
+    filter: brightness(1);
+  }
+  35% {
+    filter: brightness(1.12);
+  }
+  100% {
+    filter: brightness(1);
+  }
 }
 
 .tracker-sale-notif {
@@ -45,23 +64,13 @@
   border: none;
   cursor: default;
   -webkit-tap-highlight-color: transparent;
-
   transform-origin: 50% 0%;
-  transition: filter 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   isolation: isolate;
   pointer-events: none;
-
-  /* Fond quasi opaque — sans backdrop-filter pour éviter que le texte des cartes en dessous se lise au travers */
   background:
-    linear-gradient(
-      132deg,
-      rgba(255, 255, 255, 0.07) 0%,
-      rgba(255, 255, 255, 0) 52%
-    ),
+    linear-gradient(132deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 52%),
     linear-gradient(to bottom, #26262e, #141418);
-
   background-color: #16161b;
-
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
   box-shadow:
@@ -78,31 +87,6 @@
   filter: brightness(0.985) saturate(0.97);
 }
 
-.tracker-sale-notif-shell[data-depth="4"] .tracker-sale-notif {
-  filter: brightness(0.97) saturate(0.94);
-}
-
-.tracker-sale-notif-shell[data-depth="5"] .tracker-sale-notif,
-.tracker-sale-notif-shell[data-depth="6"] .tracker-sale-notif {
-  background-image:
-    linear-gradient(
-      132deg,
-      rgba(255, 255, 255, 0.06) 0%,
-      rgba(255, 255, 255, 0) 52%
-    ),
-    linear-gradient(to bottom, #1e1e24, #0e0e12);
-  background-color: #0f0f13;
-}
-
-.tracker-sale-notif-shell[data-depth="5"] .tracker-sale-notif {
-  filter: brightness(0.96) saturate(0.92);
-}
-
-.tracker-sale-notif-shell[data-depth="6"] .tracker-sale-notif {
-  filter: brightness(0.94) saturate(0.91);
-}
-
-/* Icône app — squircle iOS (logo direct, sans boîte imbriquée) */
 .tracker-sale-notif-icon-wrap {
   position: relative;
   width: 2.75rem;
@@ -114,6 +98,8 @@
 }
 
 .tracker-sale-notif-icon-img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   object-position: center;
 }
@@ -157,7 +143,6 @@
   color: rgba(255, 255, 255, 0.78);
 }
 
-/* Reflet subtil façade */
 .tracker-sale-notif::after {
   content: "";
   position: absolute;
@@ -174,26 +159,9 @@
   );
 }
 
-.tracker-sale-notif-shell[data-depth="6"] .tracker-sale-notif::after {
-  opacity: 0.1;
-}
-
-.tracker-sale-notif-shell[data-depth="5"] .tracker-sale-notif::after {
-  opacity: 0.12;
-}
-
-.tracker-sale-notif-shell[data-depth="4"] .tracker-sale-notif::after,
-.tracker-sale-notif-shell[data-depth="3"] .tracker-sale-notif::after {
-  opacity: 0.17;
-}
-
-.tracker-sale-notif-shell[data-depth="2"] .tracker-sale-notif::after,
-.tracker-sale-notif-shell[data-depth="1"] .tracker-sale-notif::after {
-  opacity: 0.2;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .tracker-sale-notif {
+  .tracker-sale-notif-shell {
     transition: none;
+    animation: none;
   }
 }

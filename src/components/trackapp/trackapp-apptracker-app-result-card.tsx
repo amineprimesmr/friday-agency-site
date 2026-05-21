@@ -1,8 +1,17 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 
 import { formatRatingCount, type CountryCode, type SearchResult } from "@/lib/apple-charts";
-import type { TrackappAppDisplayMetrics } from "@/lib/trackapp-app-display-metrics";
+import {
+  TRACKAPP_METRICS_UNAVAILABLE_LABEL,
+  type TrackappAppDisplayMetrics,
+} from "@/lib/trackapp-app-display-metrics";
+import {
+  finalizeTrackappDownloadsLabel,
+  finalizeTrackappRevenueEurLabel,
+} from "@/lib/trackapp-revenue-display";
 import { trackappApptrackerAppHref } from "@/lib/trackapp-apptracker-paths";
 import { cn } from "@/lib/utils";
 
@@ -11,7 +20,9 @@ function metricsLabels(metrics: TrackappAppDisplayMetrics): Readonly<{
   revenue: string;
 } | null> {
   if (
-    metrics.metricSource === "donnée indisponible" ||
+    metrics.metricSource === "donnée à corriger" ||
+    metrics.downloadsDisplay === TRACKAPP_METRICS_UNAVAILABLE_LABEL ||
+    metrics.revenueDisplay === TRACKAPP_METRICS_UNAVAILABLE_LABEL ||
     (metrics.downloadsDisplay === "—" && metrics.revenueDisplay === "—")
   ) {
     return null;
@@ -22,10 +33,7 @@ function metricsLabels(metrics: TrackappAppDisplayMetrics): Readonly<{
       revenue: "Revenus / mois",
     };
   }
-  return {
-    downloads: "Téléchargements estimés / mois",
-    revenue: "Revenus estimés / mois",
-  };
+  return null;
 }
 
 export function TrackappApptrackerAppResultCard({
@@ -33,19 +41,24 @@ export function TrackappApptrackerAppResultCard({
   country,
   metrics,
   className,
+  onBeforeNavigate,
 }: Readonly<{
   app: SearchResult;
   country: CountryCode;
   metrics: TrackappAppDisplayMetrics;
   className?: string;
+  onBeforeNavigate?: () => void;
 }>) {
   const labels = metricsLabels(metrics);
+  const downloadsDisplay = finalizeTrackappDownloadsLabel(metrics.downloadsDisplay);
+  const revenueDisplay = finalizeTrackappRevenueEurLabel(metrics.revenueDisplay);
   const rankBadge =
     metrics.chartRank !== null ? `#${String(metrics.chartRank)}` : null;
 
   return (
     <Link
       href={trackappApptrackerAppHref(app.id, country)}
+      onClick={() => onBeforeNavigate?.()}
       className={cn(
         "group flex w-full min-w-0 gap-4 rounded-[22px] border border-[var(--dash-border)] bg-white p-4 text-[var(--dash-text)] no-underline shadow-[var(--dash-shadow)] transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[var(--dash-shadow-lg)]",
         className,
@@ -89,18 +102,20 @@ export function TrackappApptrackerAppResultCard({
           <>
             <span className="mt-4 grid gap-2 text-[0.78rem] text-slate-500 sm:grid-cols-2">
               <span>
-                <strong className="block text-[0.95rem] text-slate-900">{metrics.downloadsDisplay}</strong>
+                <strong className="block text-[0.95rem] text-slate-900">{downloadsDisplay}</strong>
                 {labels.downloads}
               </span>
               <span>
-                <strong className="block text-[0.95rem] text-slate-900">{metrics.revenueDisplay}</strong>
+                <strong className="block text-[0.95rem] text-slate-900">{revenueDisplay}</strong>
                 {labels.revenue}
               </span>
             </span>
             <p className="mt-2 text-[0.68rem] text-slate-400">{metrics.metricSource}</p>
           </>
         ) : (
-          <p className="mt-4 text-[0.78rem] text-slate-400">Métriques indisponibles — ouvrir la fiche pour plus de détails.</p>
+          <p className="mt-4 text-[0.78rem] font-semibold text-amber-800">
+            Données réelles indisponibles (Sensor Tower ou top 100) — à corriger côté pipeline.
+          </p>
         )}
       </span>
     </Link>

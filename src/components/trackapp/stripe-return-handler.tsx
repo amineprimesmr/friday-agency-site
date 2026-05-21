@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
 
-/** Retour Stripe sur Apptracker → redirige vers la page d'activation. */
+/** Retour Stripe sur l’Accueil → redirige vers la page d'activation. */
 function Inner() {
   const sp = useSearchParams();
   const sessionId = sp?.get("session_id");

@@ -8,6 +8,8 @@
   "scripts": {
     "dev": "node scripts/launch-next-dev.mjs --turbo",
     "dev:open": "node scripts/run-dev-open.mjs",
+    "dev:3002": "node scripts/launch-next-dev.mjs -p 3002",
+    "dev:3002:open": "node scripts/run-dev-open.mjs 3002 /trackapp/accueil",
     "dev:tracker": "node scripts/free-port.mjs 3001 && node scripts/print-dev-tracker-url.mjs 3001 && next dev --hostname 127.0.0.1 -p 3001",
     "dev:turbo": "node scripts/launch-next-dev.mjs --turbo",
     "dev:homebrew-node22": "PATH=/opt/homebrew/opt/node@22/bin:${PATH} node scripts/free-port.mjs 3000 && PATH=/opt/homebrew/opt/node@22/bin:${PATH} next dev --turbo --hostname 127.0.0.1 -p 3000",
@@ -24,6 +26,7 @@
     "deploy:prod": "npx vercel deploy --prod --yes",
     "deploy:watch": "node scripts/watch-deploy.mjs",
     "ship": "npm run typecheck && npm run deploy:prod",
+    "ship:fast": "npm run deploy:prod",
     "tiktok:compress-demo": "bash scripts/compress-tiktok-demo-video.sh"
   },
   "dependencies": {
@@ -31,6 +34,7 @@
     "@supabase/supabase-js": "^2.105.4",
     "@upstash/redis": "^1.38.0",
     "clsx": "^2.1.1",
+    "cobe": "^2.0.1",
     "framer-motion": "^12.38.0",
     "jose": "^6.2.3",
     "next": "^15.5.18",

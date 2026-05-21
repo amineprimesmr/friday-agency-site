@@ -10,6 +10,7 @@ import {
   type CountryCode,
   type MultiCountryApp,
 } from "@/lib/apple-charts";
+import { fetchAppStoreInAppOffers } from "@/lib/apple-app-store-in-app-offers";
 import { fetchAppStoreWebScreenshots } from "@/lib/apple-app-store-web-screenshots";
 import { loadTrackerAppEmbedContext } from "@/lib/tracker-app-embed-data";
 import { getTrackerCuratedPotentialApps } from "@/lib/tracker-curated-potential-apps";
@@ -47,7 +48,7 @@ export async function getTrackerCuratedPotentialAppsCached() {
 export function loadTrackerAppEmbedContextCached(appId: string, country: CountryCode) {
   return unstable_cache(
     () => loadTrackerAppEmbedContext(appId, country),
-    ["tracker-app-embed-v2", appId, country],
+    ["tracker-app-embed-v3", appId, country],
     { revalidate: REVALIDATE_TRACKER },
   )();
 }
@@ -61,11 +62,31 @@ export function loadAppStoreWebScreenshotsCached(appId: string, country: Country
   )();
 }
 
+/** Cache IAP — uniquement les fiches avec offres (évite de figer « vide » après timeout Vercel). */
+export function loadAppStoreInAppOffersCached(appId: string, country: CountryCode) {
+  return unstable_cache(
+    async () => {
+      const data = await fetchAppStoreInAppOffers(appId, country);
+      if (data.source !== "app-store-web" || data.offers.length === 0) return null;
+      return data;
+    },
+    ["app-store-in-app-offers-v5", appId, country],
+    { revalidate: REVALIDATE_TRACKER },
+  )();
+}
+
+/** Fiche app : cache si succès, sinon fetch direct (ne sert jamais un « vide » mis en cache). */
+export async function loadAppStoreInAppOffersForPage(appId: string, country: CountryCode) {
+  const cached = await loadAppStoreInAppOffersCached(appId, country);
+  if (cached) return cached;
+  return fetchAppStoreInAppOffers(appId, country);
+}
+
 /** 13 flux RSS en parallèle — coûteux sans cache cross-requête. */
 export function fetchCountryRankingsCached(appId: string) {
   return unstable_cache(
     () => fetchCountryRankings(appId),
-    ["tracker-country-rankings-v1", appId],
+    ["tracker-country-rankings-v2", appId],
     { revalidate: REVALIDATE_TRACKER },
   )();
 }

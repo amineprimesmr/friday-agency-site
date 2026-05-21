@@ -7,6 +7,7 @@
 import { motion, useReducedMotion, useInView, type Transition } from "framer-motion";
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 
+
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 const VARIANTS = {

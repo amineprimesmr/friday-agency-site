@@ -165,7 +165,7 @@
   z-index: 0;
   border-radius: 2.3rem 2.3rem 0 0;
   background-color: var(--tpl-flyer-canvas, #0e1113);
-  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45);
+  box-shadow: none;
   pointer-events: none;
 }
 
@@ -748,9 +748,22 @@
   overflow: hidden;
   width: 100%;
   border-radius: 0;
+  touch-action: pan-y;
+  cursor: grab;
+  -webkit-user-select: none;
+  user-select: none;
   /* Container query : centre la carte active (~85 cqi) avec bandes égales pour le peek */
   container-type: inline-size;
   container-name: tpl-spotlight;
+}
+
+.tpl-spotlight-carousel__viewport:active {
+  cursor: grabbing;
+}
+
+.tpl-spotlight-carousel--checkout-open .tpl-spotlight-carousel__viewport {
+  touch-action: auto;
+  cursor: default;
 }
 
 .tpl-spotlight-carousel__track {
@@ -1245,4 +1258,53 @@
 .tpl-paiement-page .saas-pay-checkout {
   background: transparent;
   min-height: 0;
+}
+
+/* Skeleton navigation instantanée vers /trackapp/paiement */
+.tpl-paiement-page--loading {
+  pointer-events: none;
+}
+
+.tpl-paiement-loading-hero {
+  min-height: 10rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent);
+}
+
+.tpl-paiement-loading-shell {
+  margin: -2rem 1rem 0;
+  padding: 1.5rem 1rem;
+  border-radius: 2rem 2rem 0 0;
+  background: var(--tpl-flyer-canvas, #0e1113);
+}
+
+.tpl-paiement-loading-line {
+  height: 0.75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  margin-bottom: 0.65rem;
+  animation: tpl-paiement-loading-pulse 0.9s ease-in-out infinite;
+}
+
+.tpl-paiement-loading-line--title {
+  width: 72%;
+  height: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.tpl-paiement-loading-card {
+  margin-top: 1.25rem;
+  min-height: 14rem;
+  border-radius: 1.15rem;
+  background: rgba(255, 255, 255, 0.05);
+  animation: tpl-paiement-loading-pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes tpl-paiement-loading-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
 }

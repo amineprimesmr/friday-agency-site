@@ -106,17 +106,21 @@
 
 /* Feuille accueil : le bandeau épouse les coins arrondis de .app-main sans halo blanc */
 body.trackapp-fidelity-body #app-app .app-main:has(.trackapp-accueil-page) {
+  --trackapp-accueil-sheet-radius: clamp(14px, 1.45vw, 18px);
   padding: 0 !important;
   padding-bottom: calc(2.5rem + env(safe-area-inset-bottom, 0px)) !important;
   overflow-x: clip;
   overflow-y: auto;
+  border-top-left-radius: var(--trackapp-accueil-sheet-radius) !important;
+  border-top-right-radius: var(--trackapp-accueil-sheet-radius) !important;
   /* Retire le liseré blanc inset du desktop (visible dans les coins arrondis) */
   box-shadow: 0 -14px 44px rgba(0, 0, 0, 0.16) !important;
 }
 
+/* Coins gérés par .app-main (overflow clip) — pas de 2e radius sur le bandeau (évite le halo blanc) */
 body.trackapp-fidelity-body #app-app .app-main:has(.trackapp-accueil-page) .trackapp-cursor-promo {
-  border-top-left-radius: clamp(18px, 5vw, 24px);
-  border-top-right-radius: clamp(18px, 5vw, 24px);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 body.trackapp-fidelity-body #app-app .app-main:has(.trackapp-accueil-page) > .app-content {
@@ -172,13 +176,19 @@ body.trackapp-fidelity-body #app-app .app-main:has(.trackapp-accueil-page) > .ap
   align-items: center;
   justify-content: flex-start;
   gap: 0;
-  padding: 1.25rem var(--trackapp-accueil-pad-x, 1rem) 3rem;
+  padding: 2.25rem var(--trackapp-accueil-pad-x, 1rem) 3rem;
 }
 
 @media (min-width: 640px) {
   #app-app .trackapp-accueil-page__body {
-    padding-top: 1.75rem;
+    padding-top: 3rem;
     padding-bottom: 4rem;
+  }
+}
+
+@media (min-width: 981px) {
+  #app-app .trackapp-accueil-page__body {
+    padding-top: 3.5rem;
   }
 }
 

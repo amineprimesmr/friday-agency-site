@@ -182,7 +182,7 @@ export function TrackappTopbarSearchModal({ open, onClose }: Readonly<{ open: bo
                 </svg>
               </div>
               <p className="app-topbar-search-empty-text" id="app-topbar-search-empty-text">
-                Les résultats s&apos;affichent ici au fil de la saisie — sur Apptracker.
+                Les résultats s&apos;affichent ici au fil de la saisie — sur l&apos;Accueil.
               </p>
             </div>
           ) : null}

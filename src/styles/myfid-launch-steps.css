@@ -101,6 +101,10 @@
   color: var(--ls-num);
 }
 
+.launch-sf-faq-chevron--open {
+  transform: rotate(180deg);
+}
+
 .launch-sf-faq-panel {
   overflow: hidden;
 }

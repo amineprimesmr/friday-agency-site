@@ -42,7 +42,25 @@ function pickNodeBin() {
 
 const nodeBin = pickNodeBin();
 
-const freePortRes = spawnSync(nodeBin, [path.join(__dirname, "free-port.mjs"), "3000"], {
+function resolveDevPort() {
+  const fromEnv = process.env.TRACKAPP_DEV_PORT?.trim();
+  if (fromEnv && /^\d{2,5}$/.test(fromEnv)) return fromEnv;
+  const argv = process.argv.slice(2);
+  const flagIdx = argv.findIndex((a) => a === "-p" || a === "--port");
+  if (flagIdx >= 0 && argv[flagIdx + 1] && /^\d{2,5}$/.test(String(argv[flagIdx + 1]))) {
+    return String(argv[flagIdx + 1]);
+  }
+  return "3000";
+}
+
+const devPort = resolveDevPort();
+const nextExtraArgs = process.argv.slice(2).filter((arg, i, arr) => {
+  if (arg === "-p" || arg === "--port") return false;
+  if (i > 0 && (arr[i - 1] === "-p" || arr[i - 1] === "--port")) return false;
+  return true;
+});
+
+const freePortRes = spawnSync(nodeBin, [path.join(__dirname, "free-port.mjs"), devPort], {
   cwd: root,
   stdio: "inherit",
 });
@@ -56,12 +74,12 @@ const args = [
   "--hostname",
   "127.0.0.1",
   "-p",
-  "3000",
-  ...process.argv.slice(2),
+  devPort,
+  ...nextExtraArgs,
 ];
 
 console.log(
-  `[launch-next-dev] using ${nodeBin} (node ${spawnSync(nodeBin, ["-v"], { encoding: "utf8" }).stdout.trim()})`,
+  `[launch-next-dev] using ${nodeBin} (node ${spawnSync(nodeBin, ["-v"], { encoding: "utf8" }).stdout.trim()}) → http://127.0.0.1:${devPort}`,
 );
 
 const child = spawn(nodeBin, args, {

@@ -33,7 +33,7 @@ export function TrackappApptrackerMonthlySection({
           <h2 className="m-0 text-[1.35rem] font-bold tracking-tight text-[var(--dash-text)]">Apps du mois</h2>
         ) : (
           <>
-            <p className="trackapp-workspace-hero-kicker">Apptracker · Trackapp</p>
+            <p className="trackapp-workspace-hero-kicker">Trackapp</p>
             <h1 className="trackapp-workspace-hero-title">Notre sélection</h1>
             <p className="trackapp-workspace-hero-desc max-w-[70ch]">
               Les apps du mois à copier de A à Z — chaque fiche ouvre une analyse complète : métriques, screenshots,
@@ -100,7 +100,7 @@ export function TrackappApptrackerMonthlySection({
             href="/trackapp/accueil"
             className="mt-3 inline-flex rounded-full border border-slate-300 bg-white px-4 py-2 text-[0.84rem] font-bold text-slate-900 no-underline shadow-sm transition hover:border-slate-400 hover:bg-slate-50"
           >
-            Ouvrir la recherche Apptracker
+            Ouvrir l&apos;Accueil
           </Link>
         </section>
       ) : null}

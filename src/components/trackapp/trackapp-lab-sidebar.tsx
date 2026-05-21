@@ -25,7 +25,6 @@ import type { ComponentType, SVGProps } from "react";
 
 const ITEM_ICONS: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
   Accueil: IconNavAccueil,
-  Apptracker: IconNavChart,
   "Mes favoris": IconNavHeart,
   "Mes notes": IconNavNotes,
   "Notre sélection": IconNavChart,
@@ -81,7 +80,7 @@ function NavSubLink({
   return (
     <Link
       href={item.href}
-      prefetch
+      prefetch={false}
       className={className}
       onClick={() => {
         if (!active) onPendingNavigate?.(item.href);
@@ -125,6 +124,13 @@ export function TrackappLabSidebar({
       return next;
     });
   }, [pathname]);
+
+  /** Si la navigation Next reste bloquée, ne pas laisser l’item en « chargement » indéfiniment. */
+  useEffect(() => {
+    if (!pendingHref) return undefined;
+    const id = window.setTimeout(() => setPendingHref(null), 12_000);
+    return () => window.clearTimeout(id);
+  }, [pendingHref]);
 
   return (
     <aside

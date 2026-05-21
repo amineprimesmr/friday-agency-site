@@ -47,6 +47,7 @@
   font-weight: 700;
   padding: 0.55rem 1rem;
   cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
 }
 
 .trackapp-competitors__refresh:disabled {
@@ -232,15 +233,4 @@
   background: #0f172a;
   border-color: #0f172a;
   color: #fff;
-}
-
-.trackapp-competitors__rejected ul {
-  margin: 0;
-  padding-left: 1.1rem;
-  font-size: 0.85rem;
-  color: #64748b;
-}
-
-.trackapp-competitors__rejected li + li {
-  margin-top: 0.35rem;
 }

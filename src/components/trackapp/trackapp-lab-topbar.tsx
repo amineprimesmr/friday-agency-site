@@ -10,11 +10,11 @@ import { cn } from "@/lib/utils";
 import "@/styles/trackapp-topbar-affiliate-glass.css";
 
 export function TrackappLabTopbar({
-  onMenuClick,
   mobileMenuOpen,
+  onOpenMobileMenu,
 }: Readonly<{
-  onMenuClick: () => void;
   mobileMenuOpen: boolean;
+  onOpenMobileMenu: () => void;
 }>) {
   const pathname = usePathname() ?? "";
   const override = useTrackappBreadcrumbOverride();
@@ -25,17 +25,15 @@ export function TrackappLabTopbar({
     <header className="app-desktop-topbar trackapp-lab-topbar" id="app-desktop-topbar" aria-label="Navigation principale">
       <button
         type="button"
-        className="trackapp-lab-topbar__panel-btn app-desktop-topbar__menu-btn"
-        id="app-topbar-menu-toggle"
+        className="app-desktop-topbar__menu-btn trackapp-lab-topbar__mobile-menu-btn"
         aria-label="Ouvrir le menu"
-        aria-controls="app-sidebar"
         aria-expanded={mobileMenuOpen}
-        onClick={onMenuClick}
+        aria-controls="app-sidebar"
+        onClick={onOpenMobileMenu}
       >
-        <svg viewBox="0 0 20 20" fill="none" aria-hidden className="h-[18px] w-[18px]">
-          <rect x="2.5" y="3.5" width="15" height="13" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
-          <path d="M7 3.5v13" stroke="currentColor" strokeWidth="1.4" />
-        </svg>
+        <span aria-hidden />
+        <span aria-hidden />
+        <span aria-hidden />
       </button>
 
       <nav className="trackapp-lab-topbar__crumbs" aria-label="Fil d'Ariane">

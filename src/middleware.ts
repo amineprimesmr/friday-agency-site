@@ -52,6 +52,12 @@ export async function middleware(request: NextRequest) {
   });
   response = withReferralCookie(request, response);
 
+  if (pathname === "/trackapp/apptracker" || pathname.startsWith("/trackapp/apptracker/")) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/trackapp/accueil${pathname.slice("/trackapp/apptracker".length)}`;
+    return withReferralCookie(request, NextResponse.redirect(url));
+  }
+
   if (pathname === "/explorer" || pathname.startsWith("/explorer/")) {
     const url = request.nextUrl.clone();
     url.pathname = "/tracker";
@@ -152,7 +158,8 @@ export async function middleware(request: NextRequest) {
     (p) => pathname === p || pathname.startsWith(`${p}/`),
   );
 
-  if (needsAuth && user && !skipTrackappAuth && !isPremiumExempt) {
+  /** Favoris : session suffit (pas de double garde premium — évite 402 silencieux sur le cœur). */
+  if (needsAuth && user && !skipTrackappAuth && !isPremiumExempt && !isFavoritesApi) {
     const { data: profile } = await supabase
       .from("trackapp_profiles")
       .select("plan_unlocked_at")

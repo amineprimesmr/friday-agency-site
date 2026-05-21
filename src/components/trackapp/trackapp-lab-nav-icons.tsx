@@ -1,5 +1,7 @@
 import type { SVGProps } from "react";
 
+import { HEART_ICON_PATH } from "@/components/icons/heart-icon";
+
 const base = {
   viewBox: "0 0 24 24",
   fill: "none",
@@ -22,7 +24,7 @@ export function IconNavAccueil(props: SVGProps<SVGSVGElement>) {
 export function IconNavHeart(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base} {...props}>
-      <path d="M12 20s-6.2-3.9-8.2-7.4C2.4 10 3.6 7 6.4 7c1.6 0 2.8.9 3.6 2  .8-1.1 2-2 3.6-2 2.8 0 4 3 2.6 5.6C18.2 16.1 12 20 12 20Z" />
+      <path d={HEART_ICON_PATH} />
     </svg>
   );
 }
