@@ -13,6 +13,10 @@ import {
 } from "@/lib/apple-charts";
 import { metricsFromEmbedContext } from "@/lib/trackapp-app-display-metrics";
 import {
+  applyTrackappAppDisplayOverride,
+  getTrackappAppDisplayOverride,
+} from "@/lib/trackapp-app-display-overrides";
+import {
   finalizeTrackappDownloadsLabel,
   finalizeTrackappRevenueEurLabel,
 } from "@/lib/trackapp-revenue-display";
@@ -94,15 +98,17 @@ export default async function TrackappAccueilAppDetailPage({ params, searchParam
 
   const { app, aggregateMetrics, overallRank, genreSliceRank } = context;
   /** Même source que la landing : agrégat ST du `loadTrackerAppEmbedContext`, pas un 2ᵉ fetch + cache SaaS. */
-  const listMetrics = metricsFromEmbedContext(
-    app,
-    countryCode,
-    aggregateMetrics,
-    overallRank,
-    genreSliceRank,
+  const metricsOverride = getTrackappAppDisplayOverride(app.id);
+  const listMetrics = applyTrackappAppDisplayOverride(
+    app.id,
+    metricsFromEmbedContext(app, countryCode, aggregateMetrics, overallRank, genreSliceRank),
   );
-  const downloadsValue = finalizeTrackappDownloadsLabel(listMetrics.downloadsDisplay);
-  const revenueValue = finalizeTrackappRevenueEurLabel(listMetrics.revenueDisplay);
+  const downloadsValue = metricsOverride
+    ? listMetrics.downloadsDisplay
+    : finalizeTrackappDownloadsLabel(listMetrics.downloadsDisplay);
+  const revenueValue = metricsOverride
+    ? listMetrics.revenueDisplay
+    : finalizeTrackappRevenueEurLabel(listMetrics.revenueDisplay);
   const metricSource = listMetrics.metricSource;
   const appAge = app.releaseDate ? daysSince(app.releaseDate) : Number.NaN;
   const screenshotUrls =

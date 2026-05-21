@@ -20,12 +20,18 @@ const APP_DISPLAY_OVERRIDES: Readonly<
   },
 };
 
+export function getTrackappAppDisplayOverride(
+  appId: string,
+): (typeof APP_DISPLAY_OVERRIDES)[string] | undefined {
+  return APP_DISPLAY_OVERRIDES[appId];
+}
+
 /** Applique les valeurs d’affichage réservées à certaines apps (une seule entrée pour l’instant). */
 export function applyTrackappAppDisplayOverride(
   appId: string,
   metrics: TrackappAppDisplayMetrics,
 ): TrackappAppDisplayMetrics {
-  const patch = APP_DISPLAY_OVERRIDES[appId];
+  const patch = getTrackappAppDisplayOverride(appId);
   if (!patch) return metrics;
   return { ...metrics, ...patch };
 }
