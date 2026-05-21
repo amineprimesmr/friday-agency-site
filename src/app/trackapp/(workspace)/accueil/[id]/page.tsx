@@ -20,7 +20,7 @@ import { getTrackappProfileFavorites } from "@/lib/trackapp-profile-favorites";
 import {
   fetchAppDetailCached,
   fetchCountryRankingsCached,
-  loadAppStoreInAppOffersCached,
+  loadAppStoreInAppOffersForPage,
   loadAppStoreWebScreenshotsCached,
   loadTrackerAppEmbedContextCached,
 } from "@/lib/tracker-server-cache";
@@ -87,7 +87,7 @@ export default async function TrackappAccueilAppDetailPage({ params, searchParam
     loadTrackerAppEmbedContextCached(id, countryCode),
     getTrackappProfileFavorites(),
     loadAppStoreWebScreenshotsCached(id, countryCode),
-    loadAppStoreInAppOffersCached(id, countryCode),
+    loadAppStoreInAppOffersForPage(id, countryCode),
     fetchCountryRankingsCached(id),
   ]);
   if (!context) notFound();
@@ -173,7 +173,12 @@ export default async function TrackappAccueilAppDetailPage({ params, searchParam
         <MetricCard label="Ancienneté" value={Number.isFinite(appAge) ? timeAgo(app.releaseDate) : "—"} sub={app.version ? `Version ${app.version}` : undefined} />
       </section>
 
-      <TrackappInAppOffersSection data={inAppOffers} className="mt-5" />
+      <TrackappInAppOffersSection
+        data={inAppOffers}
+        appId={app.id}
+        country={countryCode}
+        className="mt-5"
+      />
 
       <Suspense fallback={<TrackappOfficialPresenceLoading />}>
         <TrackappOfficialPresenceSection

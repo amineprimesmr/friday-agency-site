@@ -1,13 +1,28 @@
 import type { CountryCode } from "@/lib/apple-charts";
 
-const FETCH_MS = 12_000;
+const FETCH_MS = 9_000;
+const RETRIES = 2;
 
-const IAP_SECTION_TITLES = new Set([
-  "achats intégrés",
-  "in-app purchases",
-  "in-app purchase",
-  "achats integres",
-]);
+/** Titres section IAP sur apps.apple.com (toutes langues storefront courantes). */
+const IAP_SECTION_TITLE_PATTERNS = [
+  /^achats\s+int[eé]gr[eé]s$/i,
+  /^in[- ]?app\s+purchases?$/i,
+  /^in[- ]?app[- ]?k[aä]ufe$/i,
+  /^acquisti\s+in[- ]?app$/i,
+  /^compras\s+integradas$/i,
+  /^compras\s+dentro\s+da\s+app$/i,
+];
+
+const IAP_FALLBACK_COUNTRIES: readonly CountryCode[] = [
+  "fr",
+  "gb",
+  "de",
+  "ca",
+  "es",
+  "it",
+  "au",
+  "jp",
+];
 
 export type AppStoreInAppOfferKind = "subscription" | "one_time" | "unknown";
 
@@ -15,7 +30,6 @@ export type AppStoreInAppOffer = Readonly<{
   name: string;
   priceLabel: string;
   kind: AppStoreInAppOfferKind;
-  /** Montant numérique si parseable (ex. 22.99). */
   priceAmount: number | null;
   currency: string | null;
 }>;
@@ -35,9 +49,23 @@ function appStoreProductUrl(appId: string, country: CountryCode): string {
   return `https://apps.apple.com/${country}/app/id${appId}`;
 }
 
+function normalizeIapTitle(title: string): string {
+  return title
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "");
+}
+
+function isIapSectionTitle(title: string): boolean {
+  const t = normalizeIapTitle(title);
+  if (!t) return false;
+  return IAP_SECTION_TITLE_PATTERNS.some((re) => re.test(t));
+}
+
 function parsePriceLabel(label: string): { amount: number | null; currency: string | null } {
   const s = label.replace(/\u00a0/g, " ").trim();
-  const m = s.match(/([\d]+(?:[.,]\d+)?)\s*(€|EUR|\$|US\$|USD)?/i);
+  const m = s.match(/([\d]+(?:[.,]\d+)?)\s*(€|EUR|\$|US\$|USD|£|GBP)?/i);
   if (!m) return { amount: null, currency: null };
   const amount = Number.parseFloat(m[1].replace(",", "."));
   const currencyRaw = (m[2] ?? "€").toUpperCase();
@@ -46,7 +74,9 @@ function parsePriceLabel(label: string): { amount: number | null; currency: stri
       ? "USD"
       : currencyRaw === "€" || currencyRaw === "EUR"
         ? "EUR"
-        : currencyRaw;
+        : currencyRaw === "£" || currencyRaw === "GBP"
+          ? "GBP"
+          : currencyRaw;
   return {
     amount: Number.isFinite(amount) ? amount : null,
     currency,
@@ -56,7 +86,7 @@ function parsePriceLabel(label: string): { amount: number | null; currency: stri
 function inferOfferKind(name: string): AppStoreInAppOfferKind {
   const n = name.toLowerCase();
   if (
-    /\b(week|weekly|hebdo|semaine|month|monthly|mensuel|mois|year|yearly|annual|annuel|an\b|subscription|abonnement|premium|pro\b|plus\b|unlimited)/i.test(
+    /\b(week|weekly|hebdo|semaine|month|monthly|mensuel|mois|year|yearly|annual|annuel|an\b|subscription|abonnement|premium|pro\b|plus\b|unlimited|formation)/i.test(
       n,
     ) &&
     !/\b(restore|coin|gem|credit|token|pack|boost)\b/i.test(n)
@@ -104,12 +134,15 @@ function sortOffers(offers: AppStoreInAppOffer[]): AppStoreInAppOffer[] {
   });
 }
 
-function pairToOffer(name: string, priceLabel: string): AppStoreInAppOffer {
-  const { amount, currency } = parsePriceLabel(priceLabel);
+function pairToOffer(name: string, priceLabel: string): AppStoreInAppOffer | null {
+  const n = name.trim();
+  const p = priceLabel.trim();
+  if (!n || !p || p === "—" || p === "-") return null;
+  const { amount, currency } = parsePriceLabel(p);
   return {
-    name: name.trim(),
-    priceLabel: priceLabel.trim(),
-    kind: inferOfferKind(name),
+    name: n,
+    priceLabel: p,
+    kind: inferOfferKind(n),
     priceAmount: amount,
     currency,
   };
@@ -123,9 +156,10 @@ function extractPairsFromInformationItem(item: Record<string, unknown>): AppStor
     for (const row of itemsV3) {
       if (!row || typeof row !== "object") continue;
       const r = row as Record<string, unknown>;
-      if (r.$kind === "textPair" && typeof r.leadingText === "string" && typeof r.trailingText === "string") {
-        offers.push(pairToOffer(r.leadingText, r.trailingText));
-      }
+      if (r.$kind !== "textPair") continue;
+      if (typeof r.leadingText !== "string" || typeof r.trailingText !== "string") continue;
+      const offer = pairToOffer(r.leadingText, r.trailingText);
+      if (offer) offers.push(offer);
     }
   }
 
@@ -137,9 +171,8 @@ function extractPairsFromInformationItem(item: Record<string, unknown>): AppStor
       if (!Array.isArray(textPairs)) continue;
       for (const pair of textPairs) {
         if (!Array.isArray(pair) || pair.length < 2) continue;
-        const name = String(pair[0] ?? "");
-        const price = String(pair[1] ?? "");
-        if (name && price) offers.push(pairToOffer(name, price));
+        const offer = pairToOffer(String(pair[0] ?? ""), String(pair[1] ?? ""));
+        if (offer) offers.push(offer);
       }
     }
   }
@@ -149,7 +182,6 @@ function extractPairsFromInformationItem(item: Record<string, unknown>): AppStor
 
 function parseOffersFromEmbeddedJson(
   data: unknown,
-  _country: CountryCode,
 ): { offers: AppStoreInAppOffer[]; sectionTitle: string } | null {
   if (!data || typeof data !== "object") return null;
   const root = data as Record<string, unknown>;
@@ -169,7 +201,7 @@ function parseOffersFromEmbeddedJson(
     if (!item || typeof item !== "object") continue;
     const row = item as Record<string, unknown>;
     const title = typeof row.title === "string" ? row.title : "";
-    if (!IAP_SECTION_TITLES.has(title.trim().toLowerCase())) continue;
+    if (!isIapSectionTitle(title)) continue;
     sectionTitle = normalizeSectionTitle(title);
     collected.push(...extractPairsFromInformationItem(row));
   }
@@ -178,50 +210,85 @@ function parseOffersFromEmbeddedJson(
   return { offers: sortOffers(dedupeOffers(collected)), sectionTitle };
 }
 
-function extractEmbeddedProductJson(html: string): unknown | null {
-  const match = html.match(
-    /<script[^>]*type="application\/json"[^>]*>([\s\S]*?)<\/script>/i,
-  );
-  if (!match?.[1]) return null;
-  try {
-    return JSON.parse(match[1]) as unknown;
-  } catch {
-    return null;
+/** Tous les blocs JSON embarqués (pas seulement le premier script). */
+function extractEmbeddedProductJsonList(html: string): unknown[] {
+  const out: unknown[] = [];
+  const re = /<script[^>]*type="application\/json"[^>]*>([\s\S]*?)<\/script>/gi;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(html)) !== null) {
+    try {
+      out.push(JSON.parse(match[1]) as unknown);
+    } catch {
+      /* ignore */
+    }
   }
+  return out;
 }
 
-const IAP_FALLBACK_COUNTRIES: readonly CountryCode[] = ["fr", "gb", "de", "ca", "es"];
+function parseOffersFromHtml(html: string): { offers: AppStoreInAppOffer[]; sectionTitle: string } | null {
+  const blobs = extractEmbeddedProductJsonList(html);
+  let best: { offers: AppStoreInAppOffer[]; sectionTitle: string } | null = null;
+
+  for (const blob of blobs) {
+    const parsed = parseOffersFromEmbeddedJson(blob);
+    if (!parsed?.offers.length) continue;
+    if (!best || parsed.offers.length > best.offers.length) best = parsed;
+  }
+
+  return best;
+}
+
+async function sleep(ms: number): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchOffersForCountryOnce(
+  appId: string,
+  country: CountryCode,
+): Promise<{ offers: AppStoreInAppOffer[]; sectionTitle: string } | null> {
+  const res = await fetch(appStoreProductUrl(appId, country), {
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+      Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language":
+        country === "fr"
+          ? "fr-FR,fr;q=0.9,en;q=0.5"
+          : country === "de"
+            ? "de-DE,de;q=0.9,en;q=0.5"
+            : "en-US,en;q=0.9",
+      "Cache-Control": "no-cache",
+    },
+    cache: "no-store",
+    signal: AbortSignal.timeout(FETCH_MS),
+  });
+  if (!res.ok) return null;
+
+  const html = await res.text();
+  return parseOffersFromHtml(html);
+}
 
 async function fetchOffersForCountry(
   appId: string,
   country: CountryCode,
-): Promise<{ offers: AppStoreInAppOffer[]; sectionTitle: string } | null> {
-  try {
-    const res = await fetch(appStoreProductUrl(appId, country), {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        Accept: "text/html,application/xhtml+xml",
-        "Accept-Language": `${country === "fr" ? "fr-FR,fr" : "en-US,en"};q=0.9`,
-      },
-      cache: "no-store",
-      signal: AbortSignal.timeout(FETCH_MS),
-    });
-    if (!res.ok) return null;
-
-    const html = await res.text();
-    const embedded = extractEmbeddedProductJson(html);
-    const parsed = parseOffersFromEmbeddedJson(embedded, country);
-    if (!parsed?.offers.length) return null;
-    return parsed;
-  } catch {
-    return null;
+): Promise<{ offers: AppStoreInAppOffer[]; sectionTitle: string; country: CountryCode } | null> {
+  for (let attempt = 0; attempt < RETRIES; attempt += 1) {
+    try {
+      const parsed = await fetchOffersForCountryOnce(appId, country);
+      if (parsed?.offers.length) {
+        return { ...parsed, country };
+      }
+    } catch {
+      /* retry */
+    }
+    if (attempt < RETRIES - 1) await sleep(350 * (attempt + 1));
   }
+  return null;
 }
 
 /**
- * Offres d’achats intégrés / abonnements affichées sur la fiche apps.apple.com.
- * Essaie le pays demandé puis fr / us / gb / de si la section IAP est vide.
+ * Offres IAP / abonnements listés sur apps.apple.com (section « Achats intégrés »).
+ * Pays testés en parallèle ; pas de dépendance à un seul storefront.
  */
 export async function fetchAppStoreInAppOffers(
   appId: string,
@@ -230,16 +297,23 @@ export async function fetchAppStoreInAppOffers(
   const empty: AppStoreInAppOffers = { offers: [], country, source: "unavailable" };
   const tryOrder = [country, ...IAP_FALLBACK_COUNTRIES.filter((c) => c !== country)];
 
-  for (const cc of tryOrder) {
-    const parsed = await fetchOffersForCountry(appId, cc);
-    if (parsed?.offers.length) {
-      return {
-        offers: parsed.offers,
-        sectionTitle: parsed.sectionTitle,
-        country: cc,
-        source: "app-store-web",
-      };
-    }
+  const settled = await Promise.all(
+    tryOrder.map((cc) => fetchOffersForCountry(appId, cc)),
+  );
+
+  let best: { offers: AppStoreInAppOffer[]; sectionTitle: string; country: CountryCode } | null =
+    null;
+  for (const result of settled) {
+    if (!result?.offers.length) continue;
+    if (!best || result.offers.length > best.offers.length) best = result;
   }
-  return empty;
+
+  if (!best) return empty;
+
+  return {
+    offers: best.offers,
+    sectionTitle: best.sectionTitle,
+    country: best.country,
+    source: "app-store-web",
+  };
 }

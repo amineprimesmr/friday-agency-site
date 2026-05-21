@@ -1,4 +1,9 @@
+"use client";
+
+import { useCallback, useState } from "react";
+
 import type { AppStoreInAppOffer, AppStoreInAppOffers } from "@/lib/apple-app-store-in-app-offers";
+import type { CountryCode } from "@/lib/apple-charts";
 import { cn } from "@/lib/utils";
 
 function kindLabel(kind: AppStoreInAppOffer["kind"]): string {
@@ -14,12 +19,35 @@ function kindBadgeClass(kind: AppStoreInAppOffer["kind"]): string {
 }
 
 export function TrackappInAppOffersSection({
-  data,
+  data: initialData,
+  appId,
+  country,
   className,
 }: Readonly<{
   data: AppStoreInAppOffers;
+  appId: string;
+  country: CountryCode;
   className?: string;
 }>) {
+  const [data, setData] = useState(initialData);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const refresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      const res = await fetch(
+        `/api/trackapp/in-app-offers?appId=${encodeURIComponent(appId)}&country=${encodeURIComponent(country)}&_=${Date.now()}`,
+        { cache: "no-store" },
+      );
+      if (res.ok) {
+        const json = (await res.json()) as AppStoreInAppOffers;
+        setData(json);
+      }
+    } finally {
+      setRefreshing(false);
+    }
+  }, [appId, country]);
+
   if (data.source !== "app-store-web" || data.offers.length === 0) {
     return (
       <section
@@ -29,12 +57,23 @@ export function TrackappInAppOffersSection({
         )}
         aria-label="Abonnements in-app"
       >
-        <h2 className="m-0 text-[1.25rem] font-bold tracking-tight text-[var(--dash-text)]">
-          Abonnements &amp; achats in-app
-        </h2>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <h2 className="m-0 text-[1.25rem] font-bold tracking-tight text-[var(--dash-text)]">
+            Abonnements &amp; achats in-app
+          </h2>
+          <button
+            type="button"
+            className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-[0.78rem] font-semibold text-slate-700 transition hover:border-slate-400 disabled:opacity-50"
+            onClick={() => void refresh()}
+            disabled={refreshing}
+          >
+            {refreshing ? "Recherche…" : "Actualiser les prix"}
+          </button>
+        </div>
         <p className="mt-3 text-[0.88rem] leading-relaxed text-[var(--dash-muted-light)]">
-          Aucune offre listée sur la fiche App Store (plusieurs pays testés) — souvent le paywall n&apos;est
-          visible qu&apos;après installation. Ouvre l&apos;app ou sa fiche App Store pour voir les prix réels.
+          Aucune offre récupérée sur la fiche App Store pour le moment (8 pays testés en parallèle).
+          Apple ne liste pas toujours les abonnements sur le web — le paywall peut n&apos;apparaître
+          qu&apos;in-app. Clique sur <strong>Actualiser</strong> ou ouvre la fiche App Store.
         </p>
       </section>
     );

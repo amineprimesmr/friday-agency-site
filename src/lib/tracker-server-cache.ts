@@ -62,13 +62,24 @@ export function loadAppStoreWebScreenshotsCached(appId: string, country: Country
   )();
 }
 
-/** Abonnements & achats intégrés listés sur apps.apple.com (section « Achats intégrés »). */
+/** Cache IAP — uniquement les fiches avec offres (évite de figer « vide » après timeout Vercel). */
 export function loadAppStoreInAppOffersCached(appId: string, country: CountryCode) {
   return unstable_cache(
-    () => fetchAppStoreInAppOffers(appId, country),
-    ["app-store-in-app-offers-v2", appId, country],
+    async () => {
+      const data = await fetchAppStoreInAppOffers(appId, country);
+      if (data.source !== "app-store-web" || data.offers.length === 0) return null;
+      return data;
+    },
+    ["app-store-in-app-offers-v4", appId, country],
     { revalidate: REVALIDATE_TRACKER },
   )();
+}
+
+/** Fiche app : cache si succès, sinon fetch direct (ne sert jamais un « vide » mis en cache). */
+export async function loadAppStoreInAppOffersForPage(appId: string, country: CountryCode) {
+  const cached = await loadAppStoreInAppOffersCached(appId, country);
+  if (cached) return cached;
+  return fetchAppStoreInAppOffers(appId, country);
 }
 
 /** 13 flux RSS en parallèle — coûteux sans cache cross-requête. */

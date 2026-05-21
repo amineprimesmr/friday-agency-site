@@ -18,7 +18,7 @@ export async function GET(req: Request) {
     const data = await fetchAppStoreInAppOffers(appId, country);
     return NextResponse.json(data, {
       status: 200,
-      headers: { "Cache-Control": "public, s-maxage=900, stale-while-revalidate=3600" },
+      headers: { "Cache-Control": "private, no-store, max-age=0" },
     });
   } catch {
     return NextResponse.json(
