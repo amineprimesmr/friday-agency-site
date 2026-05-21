@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 /**
- * Démarre Next en dev sur 127.0.0.1:3000 et ouvre le navigateur quand le port répond.
+ * Démarre Next en dev et ouvre le navigateur quand le port répond.
+ * Usage : node scripts/run-dev-open.mjs [port] [chemin]
+ * Ex. : node scripts/run-dev-open.mjs 3002 /trackapp/accueil
  */
 import { execSync, spawn } from "node:child_process";
 import { createConnection } from "node:net";
@@ -9,8 +11,27 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, "..");
-const port = 3000;
 const host = "127.0.0.1";
+
+function normalizeOpenPath(raw) {
+  const sub = (raw ?? "").trim();
+  if (!sub) return "/tracker";
+  return sub.startsWith("/") ? sub : `/${sub}`;
+}
+
+function resolveCli() {
+  const args = process.argv.slice(2);
+  if (args[0] && /^\d{2,5}$/.test(args[0])) {
+    return { port: Number(args[0]), openPath: normalizeOpenPath(args[1]) };
+  }
+  const envPort = process.env.TRACKAPP_DEV_PORT?.trim();
+  if (envPort && /^\d{2,5}$/.test(envPort)) {
+    return { port: Number(envPort), openPath: normalizeOpenPath(args[0]) };
+  }
+  return { port: 3000, openPath: normalizeOpenPath(args[0]) };
+}
+
+const { port, openPath } = resolveCli();
 
 function waitForPort(msTotal = 120000) {
   const started = Date.now();
@@ -33,17 +54,14 @@ function waitForPort(msTotal = 120000) {
 }
 
 function main() {
-  const sub = process.argv.slice(2).join(" ").trim();
-  const openPath = sub || "/tracker";
-
   execSync(`node "${path.join(root, "scripts/free-port.mjs")}" ${port}`, {
     cwd: root,
     stdio: "inherit",
     env: process.env,
   });
 
-  const nextCli = path.join(root, "node_modules/next/dist/bin/next");
-  const next = spawn(process.execPath, [nextCli, "dev", "--hostname", host, "-p", String(port)], {
+  const launcher = path.join(root, "scripts/launch-next-dev.mjs");
+  const next = spawn(process.execPath, [launcher, "--turbo", "-p", String(port)], {
     cwd: root,
     stdio: ["inherit", "pipe", "pipe"],
     env: { ...process.env, FORCE_COLOR: "1" },

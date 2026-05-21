@@ -286,9 +286,16 @@ async function fetchOffersForCountry(
   return null;
 }
 
+type CountryOffersResult = {
+  offers: AppStoreInAppOffer[];
+  sectionTitle: string;
+  country: CountryCode;
+};
+
 /**
  * Offres IAP / abonnements listés sur apps.apple.com (section « Achats intégrés »).
- * Pays testés en parallèle ; pas de dépendance à un seul storefront.
+ * Le storefront demandé (ex. `fr` → €) est prioritaire ; les autres pays ne servent
+ * qu’en secours si la fiche locale ne liste aucun achat intégré.
  */
 export async function fetchAppStoreInAppOffers(
   appId: string,
@@ -301,8 +308,20 @@ export async function fetchAppStoreInAppOffers(
     tryOrder.map((cc) => fetchOffersForCountry(appId, cc)),
   );
 
-  let best: { offers: AppStoreInAppOffer[]; sectionTitle: string; country: CountryCode } | null =
-    null;
+  const primary = settled.find(
+    (r): r is CountryOffersResult =>
+      r != null && r.country === country && r.offers.length > 0,
+  );
+  if (primary) {
+    return {
+      offers: primary.offers,
+      sectionTitle: primary.sectionTitle,
+      country: primary.country,
+      source: "app-store-web",
+    };
+  }
+
+  let best: CountryOffersResult | null = null;
   for (const result of settled) {
     if (!result?.offers.length) continue;
     if (!best || result.offers.length > best.offers.length) best = result;

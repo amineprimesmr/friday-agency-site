@@ -70,7 +70,7 @@ export function loadAppStoreInAppOffersCached(appId: string, country: CountryCod
       if (data.source !== "app-store-web" || data.offers.length === 0) return null;
       return data;
     },
-    ["app-store-in-app-offers-v4", appId, country],
+    ["app-store-in-app-offers-v5", appId, country],
     { revalidate: REVALIDATE_TRACKER },
   )();
 }
