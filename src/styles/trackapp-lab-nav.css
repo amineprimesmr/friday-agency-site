@@ -221,6 +221,10 @@ body.trackapp-fidelity-body #app-app {
   flex-shrink: 0;
 }
 
+.trackapp-lab-topbar__mobile-menu-btn {
+  margin-left: auto;
+}
+
 /* Masquer recherche / marque topbar legacy */
 body.trackapp-fidelity-body #app-app .trackapp-lab-topbar .app-desktop-topbar__brand,
 body.trackapp-fidelity-body #app-app .trackapp-lab-topbar .app-desktop-topbar__search-center {
@@ -231,6 +235,7 @@ body.trackapp-fidelity-body #app-app .trackapp-lab-topbar .app-desktop-topbar__s
   body.trackapp-fidelity-body #app-app .app-desktop-topbar.trackapp-lab-topbar {
     background: #000 !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    justify-content: flex-end;
   }
 
   body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar .app-sidebar-brand {
@@ -238,7 +243,11 @@ body.trackapp-fidelity-body #app-app .trackapp-lab-topbar .app-desktop-topbar__s
   }
 
   body.trackapp-fidelity-body #app-app .trackapp-lab-topbar__crumbs {
-    font-size: 0.8rem;
+    display: none !important;
+  }
+
+  body.trackapp-fidelity-body #app-app .trackapp-lab-topbar__actions {
+    display: none !important;
   }
 }
 

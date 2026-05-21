@@ -9,7 +9,13 @@ import { cn } from "@/lib/utils";
 
 import "@/styles/trackapp-topbar-affiliate-glass.css";
 
-export function TrackappLabTopbar() {
+export function TrackappLabTopbar({
+  mobileMenuOpen,
+  onOpenMobileMenu,
+}: Readonly<{
+  mobileMenuOpen: boolean;
+  onOpenMobileMenu: () => void;
+}>) {
   const pathname = usePathname() ?? "";
   const override = useTrackappBreadcrumbOverride();
   const crumb = resolveTrackappBreadcrumb(pathname);
@@ -17,6 +23,19 @@ export function TrackappLabTopbar() {
 
   return (
     <header className="app-desktop-topbar trackapp-lab-topbar" id="app-desktop-topbar" aria-label="Navigation principale">
+      <button
+        type="button"
+        className="app-desktop-topbar__menu-btn trackapp-lab-topbar__mobile-menu-btn"
+        aria-label="Ouvrir le menu"
+        aria-expanded={mobileMenuOpen}
+        aria-controls="app-sidebar"
+        onClick={onOpenMobileMenu}
+      >
+        <span aria-hidden />
+        <span aria-hidden />
+        <span aria-hidden />
+      </button>
+
       <nav className="trackapp-lab-topbar__crumbs" aria-label="Fil d'Ariane">
         <span className="trackapp-lab-topbar__crumb trackapp-lab-topbar__crumb--section">{crumb.sectionLabel}</span>
         {crumb.hubLabel && crumb.hubHref ? (

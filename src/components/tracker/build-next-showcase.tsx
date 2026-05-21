@@ -1,73 +1,117 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef } from "react";
+import { useReducedMotion } from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { ShowcaseHeroHeader } from "@/components/tracker/showcase-hero-header";
-import { useMobilePerf } from "@/lib/use-coarse-pointer";
 import type { AppShowcaseVideoItemEnriched } from "@/lib/showcase-app-videos-enrich";
 import { cn } from "@/lib/utils";
 
 import "@/styles/build-next-showcase.css";
 
-const DESKTOP_SLOT_COUNT = 5;
-const MOBILE_SLOT_COUNT = 3;
+const SLOT_COUNT = 5;
 const MARQUEE_PX_PER_MS = 0.048;
 
 type PhoneSlideProps = {
   ariaLabel: string;
   item: AppShowcaseVideoItemEnriched | null;
-  mobilePerf: boolean;
+  reduceMotion: boolean | null;
 };
 
 const PHONE_FRAME =
   "relative mx-auto aspect-[9/19.5] w-[min(78vw,15.5rem)] max-w-[15.5rem] shrink-0 " +
   "shadow-[0_20px_48px_rgba(0,0,0,.5)] ring-1 ring-white/[0.04] sm:w-[15.25rem]";
 
-function PhoneSlide({ ariaLabel, item, mobilePerf }: PhoneSlideProps) {
+function PhoneSlide({ ariaLabel, item, reduceMotion }: PhoneSlideProps) {
+  const frameRef = useRef<HTMLDivElement>(null);
+  const [mediaActive, setMediaActive] = useState(false);
   const src = item?.src ?? null;
   const title = item?.displayName ?? null;
   const artworkUrl = item?.artworkUrl ?? null;
   const posterSrc = item?.posterSrc ?? null;
   const moneyLine = item?.monthlyRevenueLabel ?? null;
 
+  useEffect(() => {
+    const el = frameRef.current;
+    if (!el) return;
+
+    if (!("IntersectionObserver" in window)) {
+      setMediaActive(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setMediaActive(Boolean(entry?.isIntersecting));
+      },
+      { rootMargin: "160px 0px", threshold: 0.01 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="build-next-carousel__slide flex shrink-0 flex-col items-center">
-      <div className={PHONE_FRAME}>
+    <div className="flex shrink-0 flex-col items-center">
+      <div ref={frameRef} className={PHONE_FRAME}>
         <div
           className="absolute inset-0 rounded-[2.25rem] bg-gradient-to-b from-white/[0.14] to-white/[0.04] p-[3px]"
           aria-hidden
         >
           <div className="relative h-full w-full overflow-hidden rounded-[2rem] bg-neutral-950 ring-1 ring-white/10">
-            {src && !mobilePerf ? (
+            {src ? (
               <>
-                <video
-                  className="absolute inset-0 h-full w-full object-cover"
-                  src={src}
-                  poster={posterSrc ?? undefined}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                  aria-label={ariaLabel}
-                />
+                {!mediaActive ? (
+                  posterSrc ? (
+                    <Image
+                      src={posterSrc}
+                      alt=""
+                      fill
+                      sizes="248px"
+                      className="object-cover"
+                      aria-label={ariaLabel}
+                    />
+                  ) : (
+                    <div className="absolute inset-0 h-full w-full bg-neutral-950" aria-label={ariaLabel} />
+                  )
+                ) : reduceMotion ? (
+                  <video
+                    className="absolute inset-0 h-full w-full object-cover"
+                    src={src}
+                    poster={posterSrc ?? undefined}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    aria-label={ariaLabel}
+                  />
+                ) : (
+                  <video
+                    className="absolute inset-0 h-full w-full object-cover"
+                    src={src}
+                    poster={posterSrc ?? undefined}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                    aria-label={ariaLabel}
+                  />
+                )}
                 {moneyLine != null && artworkUrl != null && title != null ? (
-                  <VideoFoot moneyLine={moneyLine} artworkUrl={artworkUrl} title={title} />
-                ) : null}
-              </>
-            ) : posterSrc ? (
-              <>
-                <Image
-                  src={posterSrc}
-                  alt=""
-                  fill
-                  sizes="248px"
-                  className="object-cover"
-                  aria-label={ariaLabel}
-                />
-                {moneyLine != null && artworkUrl != null && title != null ? (
-                  <VideoFoot moneyLine={moneyLine} artworkUrl={artworkUrl} title={title} />
+                  <div className="build-next-video-foot pointer-events-none absolute inset-x-0 bottom-0 z-10">
+                    <div className="build-next-video-foot__gradient" aria-hidden />
+                    <div className="build-next-video-foot__content">
+                      <div className="build-next-video-foot__head">
+                        <span className="build-next-video-foot__icon-ring">
+                          <Image src={artworkUrl} alt="" fill className="object-cover" sizes="40px" />
+                        </span>
+                        <p className="build-next-video-foot__title">{title}</p>
+                      </div>
+                      <div>
+                        <p className="build-next-video-foot__money">{moneyLine}</p>
+                      </div>
+                    </div>
+                  </div>
                 ) : null}
               </>
             ) : (
@@ -82,48 +126,19 @@ function PhoneSlide({ ariaLabel, item, mobilePerf }: PhoneSlideProps) {
   );
 }
 
-function VideoFoot({
-  moneyLine,
-  artworkUrl,
-  title,
-}: {
-  moneyLine: string;
-  artworkUrl: string;
-  title: string;
-}) {
-  return (
-    <div className="build-next-video-foot pointer-events-none absolute inset-x-0 bottom-0 z-10">
-      <div className="build-next-video-foot__gradient" aria-hidden />
-      <div className="build-next-video-foot__content">
-        <div className="build-next-video-foot__head">
-          <span className="build-next-video-foot__icon-ring">
-            <Image src={artworkUrl} alt="" fill className="object-cover" sizes="40px" />
-          </span>
-          <p className="build-next-video-foot__title">{title}</p>
-        </div>
-        <div>
-          <p className="build-next-video-foot__money">{moneyLine}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function BuildNextShowcase({ videos }: { videos: AppShowcaseVideoItemEnriched[] }) {
-  const mobilePerf = useMobilePerf();
+  const reduceMotion = useReducedMotion();
   const trackRef = useRef<HTMLDivElement>(null);
 
-  const slotCount = mobilePerf ? MOBILE_SLOT_COUNT : DESKTOP_SLOT_COUNT;
-
   const slides = useMemo(() => {
-    return Array.from({ length: slotCount }, (_, i) => ({
+    return Array.from({ length: SLOT_COUNT }, (_, i) => ({
       key: i,
       item: videos[i] ?? null,
       ariaLabel: videos[i]?.displayName ? `Vidéo ${videos[i]!.displayName}` : `Vidéo exemple ${i + 1}`,
     }));
-  }, [videos, slotCount]);
+  }, [videos]);
 
-  const loop = !mobilePerf;
+  const loop = !reduceMotion;
   const trackSlides = loop ? [...slides, ...slides] : slides;
 
   useEffect(() => {
@@ -182,6 +197,13 @@ export function BuildNextShowcase({ videos }: { videos: AppShowcaseVideoItemEnri
     track.addEventListener("pointerdown", onPointerDown);
     track.addEventListener("pointerup", onPointerUp);
     track.addEventListener("pointercancel", onPointerUp);
+    track.addEventListener("touchstart", onPointerDown, { passive: true });
+    track.addEventListener("touchend", onPointerUp, { passive: true });
+    const onVisibility = () => {
+      if (document.visibilityState === "visible" && inViewport) resume();
+      else pause();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
 
     const io =
       "IntersectionObserver" in window
@@ -197,12 +219,25 @@ export function BuildNextShowcase({ videos }: { videos: AppShowcaseVideoItemEnri
     io?.observe(el);
     if (!io) resume();
 
+    const ro =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => {
+            const h = loopLength();
+            if (h > 40 && el.scrollLeft >= h - 8) el.scrollLeft -= h;
+          })
+        : null;
+    ro?.observe(el);
+
     return () => {
       cancelAnimationFrame(rafId);
       track.removeEventListener("pointerdown", onPointerDown);
       track.removeEventListener("pointerup", onPointerUp);
       track.removeEventListener("pointercancel", onPointerUp);
+      track.removeEventListener("touchstart", onPointerDown);
+      track.removeEventListener("touchend", onPointerUp);
+      document.removeEventListener("visibilitychange", onVisibility);
       io?.disconnect();
+      ro?.disconnect();
     };
   }, [loop]);
 
@@ -222,23 +257,20 @@ export function BuildNextShowcase({ videos }: { videos: AppShowcaseVideoItemEnri
           ref={trackRef}
           role="region"
           aria-roledescription="carousel"
-          aria-label={
-            mobilePerf
-              ? "Exemples d’applications — faites glisser horizontalement"
-              : "Exemples d’applications en vidéo, défilant automatiquement"
-          }
+          aria-label="Exemples d’applications en vidéo, défilant automatiquement"
           tabIndex={0}
           className={cn(
             "build-next-carousel__track -mx-4 overscroll-x-contain px-5 sm:-mx-6 sm:px-7 md:mx-0 md:px-1",
-            loop ? "overflow-x-hidden" : "build-next-carousel__track--touch overflow-x-auto",
+            loop ? "overflow-x-hidden" : "overflow-x-auto",
           )}
+          data-marquee-loop={loop ? "true" : "false"}
         >
           {trackSlides.map((s, idx) => (
             <PhoneSlide
               key={loop ? `m-${idx}-${s.key}` : `${s.key}`}
               ariaLabel={s.ariaLabel}
               item={s.item}
-              mobilePerf={mobilePerf}
+              reduceMotion={reduceMotion}
             />
           ))}
         </div>

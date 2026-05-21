@@ -48,7 +48,7 @@ export function TrackappFidelityWorkspaceShell({
       <TrackappBodyClass active />
       <div id="app-app" className="app-unified-shell" data-mobile-section="dashboard" data-sidebar-expanded="false">
         <TrackerLiquidGlassFilterSvg />
-        <TrackappFidelityTopbar />
+        <TrackappFidelityTopbar mobileMenuOpen={mobileMenuOpen} onOpenMobileMenu={() => setMobileMenuOpen(true)} />
 
         <button
           type="button"
