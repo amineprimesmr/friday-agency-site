@@ -11,6 +11,7 @@ import {
   type IosAggregateAppMetrics,
   type SearchResult,
 } from "@/lib/apple-charts";
+import { applyTrackappAppDisplayOverride } from "@/lib/trackapp-app-display-overrides";
 import {
   finalizeTrackappDownloadsLabel,
   finalizeTrackappRevenueEurLabel,
@@ -161,7 +162,7 @@ export function computeTrackappAppDisplayMetrics(
       formatTrackappLiveSearchRevenueEur(aggregateMetrics, app.id),
     );
 
-    return {
+    return applyTrackappAppDisplayOverride(app.id, {
       downloadsDisplay,
       revenueDisplay,
       metricSource: "agrégé monde / mois",
@@ -174,10 +175,10 @@ export function computeTrackappAppDisplayMetrics(
         downloadsDisplay,
         aggregateMetrics.downloads,
       ),
-    };
+    });
   }
 
-  return { ...METRICS_TO_FIX, chartRank };
+  return applyTrackappAppDisplayOverride(app.id, { ...METRICS_TO_FIX, chartRank });
 }
 
 async function getEnrichedNationalTopCached(country: CountryCode): Promise<EnrichedTop> {
@@ -216,7 +217,7 @@ async function resolveTrackappAppDisplayMetricsCanonical(
 export function getTrackappAppDisplayMetricsCached(appId: string, country: CountryCode) {
   return unstable_cache(
     () => resolveTrackappAppDisplayMetricsCanonical(appId, country),
-    ["trackapp-display-metrics-canonical-v8", appId, country],
+    ["trackapp-display-metrics-canonical-v9", appId, country],
     { revalidate: 3600 },
   )();
 }
