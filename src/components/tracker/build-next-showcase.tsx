@@ -1,137 +1,78 @@
 "use client";
 
 import Image from "next/image";
-import { useReducedMotion } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import { ShowcaseHeroHeader } from "@/components/tracker/showcase-hero-header";
-import { useCoarsePointer } from "@/lib/use-coarse-pointer";
+import { useMobilePerf } from "@/lib/use-coarse-pointer";
 import type { AppShowcaseVideoItemEnriched } from "@/lib/showcase-app-videos-enrich";
 import { cn } from "@/lib/utils";
 
 import "@/styles/build-next-showcase.css";
 
-const SLOT_COUNT = 5;
-/** Vitesse de défilement (px / ms). ~0.048 ≈ 48 px/s */
+const DESKTOP_SLOT_COUNT = 5;
+const MOBILE_SLOT_COUNT = 3;
 const MARQUEE_PX_PER_MS = 0.048;
 
 type PhoneSlideProps = {
   ariaLabel: string;
   item: AppShowcaseVideoItemEnriched | null;
-  reduceMotion: boolean | null;
+  mobilePerf: boolean;
 };
 
-/** Une largeur lisible pour toutes les tailles — toujours en ruban horizontal */
 const PHONE_FRAME =
   "relative mx-auto aspect-[9/19.5] w-[min(78vw,15.5rem)] max-w-[15.5rem] shrink-0 " +
   "shadow-[0_20px_48px_rgba(0,0,0,.5)] ring-1 ring-white/[0.04] sm:w-[15.25rem]";
 
-function PhoneSlide({ ariaLabel, item, reduceMotion }: PhoneSlideProps) {
-  const frameRef = useRef<HTMLDivElement>(null);
-  const [mediaActive, setMediaActive] = useState(false);
+function PhoneSlide({ ariaLabel, item, mobilePerf }: PhoneSlideProps) {
   const src = item?.src ?? null;
   const title = item?.displayName ?? null;
   const artworkUrl = item?.artworkUrl ?? null;
   const posterSrc = item?.posterSrc ?? null;
-
   const moneyLine = item?.monthlyRevenueLabel ?? null;
 
-  useEffect(() => {
-    const el = frameRef.current;
-    if (!el) return;
-
-    if (!("IntersectionObserver" in window)) {
-      setMediaActive(true);
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setMediaActive(Boolean(entry?.isIntersecting));
-      },
-      { rootMargin: "160px 0px", threshold: 0.01 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
   return (
-    <div className="flex shrink-0 flex-col items-center">
-      <div ref={frameRef} className={PHONE_FRAME}>
+    <div className="build-next-carousel__slide flex shrink-0 flex-col items-center">
+      <div className={PHONE_FRAME}>
         <div
           className="absolute inset-0 rounded-[2.25rem] bg-gradient-to-b from-white/[0.14] to-white/[0.04] p-[3px]"
           aria-hidden
         >
           <div className="relative h-full w-full overflow-hidden rounded-[2rem] bg-neutral-950 ring-1 ring-white/10">
-            {src ? (
+            {src && !mobilePerf ? (
               <>
-                {!mediaActive ? (
-                  posterSrc ? (
-                    <Image
-                      src={posterSrc}
-                      alt=""
-                      fill
-                      sizes="248px"
-                      className="object-cover"
-                      aria-label={ariaLabel}
-                      priority={false}
-                    />
-                  ) : (
-                    <div className="absolute inset-0 h-full w-full bg-neutral-950" aria-label={ariaLabel} />
-                  )
-                ) : reduceMotion ? (
-                  <video
-                    className="absolute inset-0 h-full w-full object-cover"
-                    src={src}
-                    poster={posterSrc ?? undefined}
-                    muted
-                    playsInline
-                    preload="metadata"
-                    aria-label={ariaLabel}
-                  />
-                ) : (
-                  <video
-                    className="absolute inset-0 h-full w-full object-cover"
-                    src={src}
-                    poster={posterSrc ?? undefined}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="auto"
-                    aria-label={ariaLabel}
-                  />
-                )}
+                <video
+                  className="absolute inset-0 h-full w-full object-cover"
+                  src={src}
+                  poster={posterSrc ?? undefined}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  aria-label={ariaLabel}
+                />
                 {moneyLine != null && artworkUrl != null && title != null ? (
-                  <div className="build-next-video-foot pointer-events-none absolute inset-x-0 bottom-0 z-10">
-                    <div className="build-next-video-foot__gradient" aria-hidden />
-                    <div className="build-next-video-foot__content">
-                      <div className="build-next-video-foot__head">
-                        <span className="build-next-video-foot__icon-ring">
-                          <Image
-                            src={artworkUrl}
-                            alt=""
-                            fill
-                            className="object-cover"
-                            sizes="40px"
-                          />
-                        </span>
-                        <p className="build-next-video-foot__title">{title}</p>
-                      </div>
-                      <div>
-                        <p className="build-next-video-foot__money">{moneyLine}</p>
-                      </div>
-                    </div>
-                  </div>
+                  <VideoFoot moneyLine={moneyLine} artworkUrl={artworkUrl} title={title} />
+                ) : null}
+              </>
+            ) : posterSrc ? (
+              <>
+                <Image
+                  src={posterSrc}
+                  alt=""
+                  fill
+                  sizes="248px"
+                  className="object-cover"
+                  aria-label={ariaLabel}
+                />
+                {moneyLine != null && artworkUrl != null && title != null ? (
+                  <VideoFoot moneyLine={moneyLine} artworkUrl={artworkUrl} title={title} />
                 ) : null}
               </>
             ) : (
               <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-white/[0.04] px-3 text-center">
                 <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-white/25">Vidéo</span>
-                <span className="text-[11px] leading-relaxed text-white/35">
-                  Déposez un fichier .mp4 ou .webm dans{" "}
-                  <code className="rounded bg-white/[0.06] px-1 py-0.5 text-[10px] text-white/50">public/assets/appvideo</code>
-                </span>
               </div>
             )}
           </div>
@@ -141,22 +82,48 @@ function PhoneSlide({ ariaLabel, item, reduceMotion }: PhoneSlideProps) {
   );
 }
 
+function VideoFoot({
+  moneyLine,
+  artworkUrl,
+  title,
+}: {
+  moneyLine: string;
+  artworkUrl: string;
+  title: string;
+}) {
+  return (
+    <div className="build-next-video-foot pointer-events-none absolute inset-x-0 bottom-0 z-10">
+      <div className="build-next-video-foot__gradient" aria-hidden />
+      <div className="build-next-video-foot__content">
+        <div className="build-next-video-foot__head">
+          <span className="build-next-video-foot__icon-ring">
+            <Image src={artworkUrl} alt="" fill className="object-cover" sizes="40px" />
+          </span>
+          <p className="build-next-video-foot__title">{title}</p>
+        </div>
+        <div>
+          <p className="build-next-video-foot__money">{moneyLine}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function BuildNextShowcase({ videos }: { videos: AppShowcaseVideoItemEnriched[] }) {
-  const reduceMotion = useReducedMotion();
-  const coarsePointer = useCoarsePointer();
+  const mobilePerf = useMobilePerf();
   const trackRef = useRef<HTMLDivElement>(null);
 
+  const slotCount = mobilePerf ? MOBILE_SLOT_COUNT : DESKTOP_SLOT_COUNT;
+
   const slides = useMemo(() => {
-    return Array.from({ length: SLOT_COUNT }, (_, i) => ({
+    return Array.from({ length: slotCount }, (_, i) => ({
       key: i,
       item: videos[i] ?? null,
       ariaLabel: videos[i]?.displayName ? `Vidéo ${videos[i]!.displayName}` : `Vidéo exemple ${i + 1}`,
     }));
-  }, [videos]);
+  }, [videos, slotCount]);
 
-  /** RAF + scrollLeft casse le scroll tactile iOS — défilement manuel sur mobile. */
-  const loop = Boolean(!reduceMotion && !coarsePointer);
-  /** Deuxième copie permet un saut sans couture quand scrollLeft atteint la moitié */
+  const loop = !mobilePerf;
   const trackSlides = loop ? [...slides, ...slides] : slides;
 
   useEffect(() => {
@@ -172,8 +139,7 @@ export function BuildNextShowcase({ videos }: { videos: AppShowcaseVideoItemEnri
 
     const loopLength = () => {
       const w = el.scrollWidth;
-      if (w <= 0) return 0;
-      return w / 2;
+      return w > 0 ? w / 2 : 0;
     };
 
     function tick(now: number) {
@@ -198,10 +164,8 @@ export function BuildNextShowcase({ videos }: { videos: AppShowcaseVideoItemEnri
     const pause = () => {
       paused = true;
       lastTime = null;
-      if (rafId) {
-        cancelAnimationFrame(rafId);
-        rafId = 0;
-      }
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = 0;
     };
     const resume = () => {
       paused = false;
@@ -210,20 +174,14 @@ export function BuildNextShowcase({ videos }: { videos: AppShowcaseVideoItemEnri
     };
 
     const onPointerDown = () => pause();
-    const onPointerUp = () => window.setTimeout(() => {
-      if (inViewport && document.visibilityState === "visible") resume();
-    }, 400);
-    const onVisibility = () => {
-      if (document.visibilityState === "visible" && inViewport) resume();
-      else pause();
-    };
+    const onPointerUp = () =>
+      window.setTimeout(() => {
+        if (inViewport && document.visibilityState === "visible") resume();
+      }, 400);
 
     track.addEventListener("pointerdown", onPointerDown);
     track.addEventListener("pointerup", onPointerUp);
     track.addEventListener("pointercancel", onPointerUp);
-    track.addEventListener("touchstart", onPointerDown, { passive: true });
-    track.addEventListener("touchend", onPointerUp, { passive: true });
-    document.addEventListener("visibilitychange", onVisibility);
 
     const io =
       "IntersectionObserver" in window
@@ -236,28 +194,15 @@ export function BuildNextShowcase({ videos }: { videos: AppShowcaseVideoItemEnri
             { rootMargin: "120px 0px", threshold: 0.01 },
           )
         : null;
-    if (io) io.observe(el);
-    else resume();
-
-    const ro =
-      typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(() => {
-            const h = loopLength();
-            if (h > 40 && el.scrollLeft >= h - 8) el.scrollLeft -= h;
-          })
-        : null;
-    ro?.observe(el);
+    io?.observe(el);
+    if (!io) resume();
 
     return () => {
       cancelAnimationFrame(rafId);
       track.removeEventListener("pointerdown", onPointerDown);
       track.removeEventListener("pointerup", onPointerUp);
       track.removeEventListener("pointercancel", onPointerUp);
-      track.removeEventListener("touchstart", onPointerDown);
-      track.removeEventListener("touchend", onPointerUp);
-      document.removeEventListener("visibilitychange", onVisibility);
       io?.disconnect();
-      ro?.disconnect();
     };
   }, [loop]);
 
@@ -277,20 +222,23 @@ export function BuildNextShowcase({ videos }: { videos: AppShowcaseVideoItemEnri
           ref={trackRef}
           role="region"
           aria-roledescription="carousel"
-          aria-label="Exemples d’applications en vidéo, défilant automatiquement"
+          aria-label={
+            mobilePerf
+              ? "Exemples d’applications — faites glisser horizontalement"
+              : "Exemples d’applications en vidéo, défilant automatiquement"
+          }
           tabIndex={0}
           className={cn(
             "build-next-carousel__track -mx-4 overscroll-x-contain px-5 sm:-mx-6 sm:px-7 md:mx-0 md:px-1",
-            loop ? "overflow-x-hidden" : "overflow-x-auto",
+            loop ? "overflow-x-hidden" : "build-next-carousel__track--touch overflow-x-auto",
           )}
-          data-marquee-loop={loop ? "true" : "false"}
         >
           {trackSlides.map((s, idx) => (
             <PhoneSlide
               key={loop ? `m-${idx}-${s.key}` : `${s.key}`}
               ariaLabel={s.ariaLabel}
               item={s.item}
-              reduceMotion={reduceMotion}
+              mobilePerf={mobilePerf}
             />
           ))}
         </div>

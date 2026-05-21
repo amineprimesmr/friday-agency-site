@@ -1,18 +1,43 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { createContext, useContext, useSyncExternalStore, type ReactNode } from "react";
 
-/** iPhone / tactile : animations 3D et piles DOM instables sont désactivées. */
+const MobilePerfContext = createContext<boolean | null>(null);
+
+const QUERY = "(hover: none), (pointer: coarse)";
+
+function subscribe(cb: () => void) {
+  const mq = window.matchMedia(QUERY);
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+}
+
+function getSnapshot() {
+  return window.matchMedia(QUERY).matches;
+}
+
+function getServerSnapshot() {
+  return false;
+}
+
+export function TrackerMobilePerfProvider({
+  initialMobile,
+  children,
+}: {
+  initialMobile: boolean;
+  children: ReactNode;
+}) {
+  return <MobilePerfContext.Provider value={initialMobile}>{children}</MobilePerfContext.Provider>;
+}
+
+/** Mode perf (SSR UA sur /tracker, sinon matchMedia tactile). */
+export function useMobilePerf(): boolean {
+  const ctx = useContext(MobilePerfContext);
+  const coarse = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  return ctx !== null ? ctx : coarse;
+}
+
+/** Alias — même logique que useMobilePerf. */
 export function useCoarsePointer(): boolean {
-  const [coarse, setCoarse] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(hover: none), (pointer: coarse)");
-    const update = () => setCoarse(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-
-  return coarse;
+  return useMobilePerf();
 }

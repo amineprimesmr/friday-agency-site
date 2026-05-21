@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { useCoarsePointer } from "@/lib/use-coarse-pointer";
+import { useMobilePerf } from "@/lib/use-coarse-pointer";
 import { TRACKAPP_FAVICON_SRC } from "@/lib/trackapp-brand";
 import { cn } from "@/lib/utils";
 
@@ -22,23 +22,12 @@ const DEMO_SALES: Omit<SaleDemo, "id">[] = [
   { brand: "Nouvelle vente ✨", line: "Vente à l’unité : 12,99 € encaissée", accent: "notif-accent-a" },
   { brand: "Nouvelle vente 🎉", line: "Renouvellement : 29,99 € / mois confirmé", accent: "notif-accent-b" },
   { brand: "Nouvelle vente ✨", line: "Offre annuelle : +49,99 € (Facture 12 mois)", accent: "notif-accent-a" },
-  { brand: "Nouvelle vente 🎉", line: "Achat in-app : module Pro · 9,99 €", accent: "" },
-  { brand: "Nouvelle vente ✨", line: "Essai → abonnement : 4,99 € / mois activé", accent: "notif-accent-b" },
-  { brand: "Nouvelle vente 🎉", line: "Panier complété : 24,90 € · paiement réussi", accent: "notif-accent-a" },
 ];
 
 const SLOT_COUNT = 4;
 const NEW_SALE_INTERVAL_MS = 4000;
 
 const DEPTH_Y_PX = [0, 28, 54, 78] as const;
-
-function shellScale(depth: number): number {
-  return Number((1 - depth * 0.032).toFixed(4));
-}
-
-function shellOpacity(depth: number): number {
-  return Number((1 - depth * 0.07).toFixed(3));
-}
 
 function timeLabel(depth: number): string {
   if (depth === 0) return "maintenant";
@@ -56,23 +45,25 @@ function SaleNotificationCard({
   sale,
   depth,
   pulse,
+  mobilePerf,
 }: Readonly<{
   sale: SaleDemo;
   depth: number;
   pulse?: boolean;
+  mobilePerf: boolean;
 }>) {
-  const y = DEPTH_Y_PX[depth] ?? DEPTH_Y_PX[DEPTH_Y_PX.length - 1];
+  const y = mobilePerf ? 0 : (DEPTH_Y_PX[depth] ?? DEPTH_Y_PX[DEPTH_Y_PX.length - 1]);
 
   return (
     <div
       data-depth={String(depth)}
-      className={cn("tracker-sale-notif-shell", sale.accent, pulse && "tracker-sale-notif-shell--pulse")}
-      style={{
-        zIndex: 40 - depth,
-        top: y,
-        transform: `scale(${shellScale(depth)})`,
-        opacity: shellOpacity(depth),
-      }}
+      className={cn(
+        "tracker-sale-notif-shell",
+        sale.accent,
+        pulse && "tracker-sale-notif-shell--pulse",
+        mobilePerf && depth > 0 && "tracker-sale-notif-shell--hidden-mobile",
+      )}
+      style={mobilePerf ? { zIndex: 40, top: 0 } : { zIndex: 40 - depth, top: y }}
     >
       <div className="tracker-sale-notif">
         <div className="tracker-sale-notif-icon-wrap" aria-hidden>
@@ -84,7 +75,7 @@ function SaleNotificationCard({
             height={44}
             className="tracker-sale-notif-icon-img"
             decoding="async"
-            loading={depth === 0 ? "eager" : "lazy"}
+            loading="eager"
           />
         </div>
         <div className="tracker-sale-notif-body">
@@ -100,37 +91,36 @@ function SaleNotificationCard({
 }
 
 export function TrackerSaleNotificationsStack({ className }: { className?: string }) {
-  const coarsePointer = useCoarsePointer();
+  const mobilePerf = useMobilePerf();
   const [slots, setSlots] = useState<SaleDemo[]>(seedSlots);
   const [pulse, setPulse] = useState(false);
   const saleIndexRef = useRef(SLOT_COUNT);
-  const coarseRef = useRef(coarsePointer);
-  coarseRef.current = coarsePointer;
 
   const pushSale = useCallback(() => {
     const i = saleIndexRef.current;
     const template = DEMO_SALES[i % DEMO_SALES.length];
     const entry: SaleDemo = { ...template, id: `live-${i}` };
     saleIndexRef.current = i + 1;
-
     setSlots((current) => [entry, current[0], current[1], current[2]]);
-
-    if (!coarseRef.current) {
+    if (!mobilePerf) {
       setPulse(true);
       window.setTimeout(() => setPulse(false), 320);
     }
-  }, []);
+  }, [mobilePerf]);
 
   useEffect(() => {
+    if (mobilePerf) return;
     const interval = window.setInterval(pushSale, NEW_SALE_INTERVAL_MS);
     return () => window.clearInterval(interval);
-  }, [pushSale]);
+  }, [mobilePerf, pushSale]);
+
+  const visibleSlots = mobilePerf ? slots.slice(0, 1) : slots;
 
   return (
     <figure
       className={cn(
         "tracker-sale-notifs mx-auto pb-10 pt-1",
-        coarsePointer && "tracker-sale-notifs--static",
+        mobilePerf && "tracker-sale-notifs--static",
         className,
       )}
     >
@@ -138,12 +128,13 @@ export function TrackerSaleNotificationsStack({ className }: { className?: strin
         Notifications de ventes en direct : de nouvelles alertes s’ajoutent en continu.
       </figcaption>
       <div className="tracker-sale-notifs-stack">
-        {slots.map((sale, depth) => (
+        {visibleSlots.map((sale, depth) => (
           <SaleNotificationCard
             key={`slot-${depth}`}
             sale={sale}
             depth={depth}
-            pulse={!coarsePointer && pulse && depth === 0}
+            mobilePerf={mobilePerf}
+            pulse={!mobilePerf && pulse && depth === 0}
           />
         ))}
       </div>

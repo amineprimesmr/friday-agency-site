@@ -14,6 +14,7 @@ import {
   TRACKER_WORKSPACE_HREF,
   trackerAuthNavActive,
 } from "@/lib/tracker-auth-nav";
+import { useMobilePerf } from "@/lib/use-coarse-pointer";
 import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import "@/styles/tracker-header.css";
@@ -53,6 +54,7 @@ export function TrackerHeader({
   const pathname = usePathname();
   const router = useRouter();
   const reduceMotion = useReducedMotion();
+  const mobilePerf = useMobilePerf();
   const [authOpen, setAuthOpen] = useState(false);
 
   useEffect(() => {
@@ -74,9 +76,11 @@ export function TrackerHeader({
 
     const update = () => {
       raf = 0;
-      const y = window.scrollY || document.documentElement.scrollTop;
-      const nextProgress = Math.min(1, y / 120);
-      setScrollProgress((prev) => (Math.abs(prev - nextProgress) > 0.02 ? nextProgress : prev));
+      if (!mobilePerf) {
+        const y = window.scrollY || document.documentElement.scrollTop;
+        const nextProgress = Math.min(1, y / 120);
+        setScrollProgress((prev) => (Math.abs(prev - nextProgress) > 0.02 ? nextProgress : prev));
+      }
 
       const header = document.querySelector<HTMLElement>(".tracker-header-bar");
       if (!header) return;
@@ -105,16 +109,17 @@ export function TrackerHeader({
       window.clearTimeout(t);
       if (raf) window.cancelAnimationFrame(raf);
     };
-  }, [pathname, mobileOpen, searchOpen]);
+  }, [pathname, mobileOpen, searchOpen, mobilePerf]);
 
-  const k = reduceMotion ? 1 : 1 + scrollProgress * 0.45;
-  const blurA = reduceMotion ? 14 : 18 * k;
-  const blurB = reduceMotion ? 8 : 9 * k;
-  const blurC = reduceMotion ? 4 : 5 * k;
+  const k = reduceMotion || mobilePerf ? 1 : 1 + scrollProgress * 0.45;
+  const blurA = reduceMotion || mobilePerf ? 0 : 18 * k;
+  const blurB = reduceMotion || mobilePerf ? 0 : 9 * k;
+  const blurC = reduceMotion || mobilePerf ? 0 : 5 * k;
 
-  const blurTransition = reduceMotion
-    ? undefined
-    : ("backdrop-filter 0.2s cubic-bezier(0.22, 1, 0.36, 1), -webkit-backdrop-filter 0.2s cubic-bezier(0.22, 1, 0.36, 1)" as const);
+  const blurTransition =
+    reduceMotion || mobilePerf
+      ? undefined
+      : ("backdrop-filter 0.2s cubic-bezier(0.22, 1, 0.36, 1), -webkit-backdrop-filter 0.2s cubic-bezier(0.22, 1, 0.36, 1)" as const);
 
   const layerStyle = (px: number): CSSProperties => ({
     WebkitBackdropFilter: `blur(${px.toFixed(1)}px)`,
@@ -142,23 +147,32 @@ export function TrackerHeader({
     closeMobile();
   };
 
-  const mobilePanelTransition = reduceMotion
+  const liteMotion = reduceMotion || mobilePerf;
+
+  const mobilePanelTransition = liteMotion
     ? { duration: 0 }
     : { duration: 0.46, ease: [0.16, 1, 0.3, 1] as const };
 
-  const mobileBackdropTransition = reduceMotion
+  const mobileBackdropTransition = liteMotion
     ? { duration: 0 }
     : { duration: 0.34, ease: [0.22, 1, 0.36, 1] as const };
 
   return (
     <>
       <TrackerLiquidGlassFilterSvg />
-      <header className="tracker-header-bar fixed inset-x-0 top-0 z-[920] bg-transparent">
-        <div className="tracker-header-backdrop-layers" aria-hidden>
-          <div className="tracker-header-blur-a" style={layerStyle(blurA)} />
-          <div className="tracker-header-blur-b" style={layerStyle(blurB)} />
-          <div className="tracker-header-blur-c" style={layerStyle(blurC)} />
-        </div>
+      <header
+        className={cn(
+          "tracker-header-bar fixed inset-x-0 top-0 z-[920] bg-transparent",
+          mobilePerf && "tracker-header-bar--lite",
+        )}
+      >
+        {!mobilePerf ? (
+          <div className="tracker-header-backdrop-layers" aria-hidden>
+            <div className="tracker-header-blur-a" style={layerStyle(blurA)} />
+            <div className="tracker-header-blur-b" style={layerStyle(blurB)} />
+            <div className="tracker-header-blur-c" style={layerStyle(blurC)} />
+          </div>
+        ) : null}
         <div
           className={cn(
             "tracker-header-top relative z-[2] mx-auto flex max-w-[1440px] flex-wrap items-center gap-3 px-4 pb-2.5 pt-[max(0.95rem,env(safe-area-inset-top,0px))] sm:px-6 lg:gap-4 lg:px-6 xl:px-10 2xl:px-14",
@@ -290,18 +304,18 @@ export function TrackerHeader({
                 type="button"
                 aria-label="Fermer le menu"
                 className="tracker-header-mobile-scrim lg:hidden"
-                initial={reduceMotion ? false : { opacity: 0 }}
+                initial={liteMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={reduceMotion ? undefined : { opacity: 0 }}
+                exit={liteMotion ? undefined : { opacity: 0 }}
                 transition={mobileBackdropTransition}
                 onClick={closeMobile}
               />
               <motion.div
                 key="mobile-nav"
                 id={mobileId}
-                initial={reduceMotion ? false : { opacity: 0, y: -28, scaleY: 0.94 }}
+                initial={liteMotion ? false : { opacity: 0, y: -28, scaleY: 0.94 }}
                 animate={{ opacity: 1, y: 0, scaleY: 1 }}
-                exit={reduceMotion ? undefined : { opacity: 0, y: -18, scaleY: 0.97 }}
+                exit={liteMotion ? undefined : { opacity: 0, y: -18, scaleY: 0.97 }}
                 transition={mobilePanelTransition}
                 className="tracker-header-mobile-panel lg:hidden"
                 style={{ transformOrigin: "top center" }}

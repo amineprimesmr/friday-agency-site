@@ -26,8 +26,10 @@
   inset-inline: 0;
   width: 100%;
   pointer-events: none;
-  transform-origin: 50% 0%;
-  transition: opacity 0.22s ease;
+}
+
+.tracker-sale-notif-shell--hidden-mobile {
+  display: none;
 }
 
 .tracker-sale-notif-shell--pulse {

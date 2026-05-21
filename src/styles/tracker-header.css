@@ -6,6 +6,10 @@
   overflow: visible;
 }
 
+.tracker-header-bar--lite {
+  background: rgba(0, 0, 0, 0.82) !important;
+}
+
 /* Plusieurs calques blur + masques : flou fort en haut, queue courte — sans couvrir le hero en dessous */
 .tracker-header-backdrop-layers {
   position: absolute;

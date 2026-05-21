@@ -143,6 +143,18 @@
   -ms-overflow-style: none;
 }
 
+.build-next-carousel__track--touch {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+}
+
+.build-next-carousel__track--touch .build-next-carousel__slide {
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+
 .build-next-carousel__track::-webkit-scrollbar {
   display: none;
 }

@@ -3,6 +3,9 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useState } from "react";
 
+import { useMobilePerf } from "@/lib/use-coarse-pointer";
+import { cn } from "@/lib/utils";
+
 const FAQ_ITEMS = [
   {
     q: "Qu’est-ce que Trackapp ?",
@@ -28,7 +31,20 @@ const FAQ_ITEMS = [
 
 const PANEL_TRANSITION = { duration: 0.34, ease: [0.22, 1, 0.36, 1] as const };
 
-function FaqChevron({ open }: { open: boolean }) {
+function FaqChevron({ open, staticChevron }: { open: boolean; staticChevron: boolean }) {
+  if (staticChevron) {
+    return (
+      <svg
+        className={cn("launch-sf-faq-chevron", open && "launch-sf-faq-chevron--open")}
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-hidden
+      >
+        <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+
   return (
     <motion.svg
       className="launch-sf-faq-chevron"
@@ -45,6 +61,8 @@ function FaqChevron({ open }: { open: boolean }) {
 
 export function TrackerLaunchFaq() {
   const rm = useReducedMotion();
+  const mobilePerf = useMobilePerf();
+  const staticUi = rm || mobilePerf;
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
@@ -65,24 +83,34 @@ export function TrackerLaunchFaq() {
                 onClick={() => setOpenIndex(open ? null : i)}
               >
                 <span className="launch-sf-faq-question">{item.q}</span>
-                <FaqChevron open={open} />
+                <FaqChevron open={open} staticChevron={staticUi} />
               </button>
-              <AnimatePresence initial={false}>
-                {open ? (
-                  <motion.div
-                    key="panel"
-                    className="launch-sf-faq-panel"
-                    initial={rm ? false : { height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={rm ? undefined : { height: 0, opacity: 0 }}
-                    transition={rm ? { duration: 0.12 } : PANEL_TRANSITION}
-                  >
+              {staticUi ? (
+                open ? (
+                  <div className="launch-sf-faq-panel launch-sf-faq-panel--static">
                     <div className="launch-sf-faq-panel-inner">
                       <p>{item.a}</p>
                     </div>
-                  </motion.div>
-                ) : null}
-              </AnimatePresence>
+                  </div>
+                ) : null
+              ) : (
+                <AnimatePresence initial={false}>
+                  {open ? (
+                    <motion.div
+                      key="panel"
+                      className="launch-sf-faq-panel"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={PANEL_TRANSITION}
+                    >
+                      <div className="launch-sf-faq-panel-inner">
+                        <p>{item.a}</p>
+                      </div>
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+              )}
             </li>
           );
         })}

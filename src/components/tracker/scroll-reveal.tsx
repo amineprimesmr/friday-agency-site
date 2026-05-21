@@ -7,6 +7,8 @@
 import { motion, useReducedMotion, useInView, type Transition } from "framer-motion";
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 
+import { useMobilePerf } from "@/lib/use-coarse-pointer";
+
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 const VARIANTS = {
@@ -64,6 +66,7 @@ export function ScrollReveal({
   tag?: ScrollRevealTag;
 }) {
   const reduce = useReducedMotion();
+  const mobilePerf = useMobilePerf();
   const ref = useRef<HTMLDivElement | null>(null);
   const inView = useInView(ref, { amount: 0.15, margin: "0px 0px -8% 0px" });
   const [visible, setVisible] = useState(false);
@@ -99,7 +102,7 @@ export function ScrollReveal({
   const vars = VARIANTS[variant] ?? VARIANTS["fade-up"];
   const transition: Transition = { duration: 0.7, ease: EASE, delay: visible ? delay : 0 };
 
-  if (reduce) {
+  if (reduce || mobilePerf) {
     const Plain = tag;
     return <Plain className={className}>{children}</Plain>;
   }
