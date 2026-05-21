@@ -17,7 +17,6 @@ type Props = Readonly<{
   appId: string;
   appName: string;
   country: CountryCode;
-  embedded?: boolean;
 }>;
 
 const TYPE_LABELS: Record<string, string> = {
@@ -149,7 +148,7 @@ function CompetitorGroup({
   );
 }
 
-export function TrackappCompetitorsPanel({ appId, appName, country, embedded = false }: Props) {
+export function TrackappCompetitorsPanel({ appId, appName, country }: Props) {
   const [report, setReport] = useState<HydratedCompetitorReport | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -205,13 +204,7 @@ export function TrackappCompetitorsPanel({ appId, appName, country, embedded = f
   const rising = report?.competitors.filter((c) => c.type === "rising") ?? [];
 
   return (
-    <section
-      className={cn(
-        "trackapp-competitors",
-        embedded && "ta-detail-card",
-        loading && "trackapp-competitors--loading",
-      )}
-    >
+    <section className={cn("trackapp-competitors", loading && "trackapp-competitors--loading")}>
       <div className="trackapp-competitors__header">
         <div>
           <p className="trackapp-competitors__kicker">Intelligence marché</p>

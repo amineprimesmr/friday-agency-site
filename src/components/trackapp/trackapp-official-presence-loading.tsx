@@ -1,20 +1,13 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-
-export function TrackappOfficialPresenceLoading({ embedded = false }: Readonly<{ embedded?: boolean }>) {
+export function TrackappOfficialPresenceLoading() {
   return (
     <section
-      className={cn(
-        "overflow-hidden bg-white",
-        embedded
-          ? "ta-detail-card"
-          : "mt-5 rounded-[28px] border border-[var(--dash-border)] shadow-[var(--dash-shadow-lg)]",
-      )}
+      className="mt-5 overflow-hidden rounded-[28px] border border-[var(--dash-border)] bg-white shadow-[var(--dash-shadow-lg)]"
       aria-busy="true"
       aria-label="Validation des liens officiels en cours"
     >
-      <div className="border-b border-[var(--dash-border)] px-5 py-5 sm:px-6">
+      <div className="border-b border-[var(--dash-border)] bg-gradient-to-br from-slate-50 to-white px-5 py-5 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-2">
             <div className="h-3 w-32 animate-pulse rounded-full bg-slate-200" />
@@ -26,13 +19,13 @@ export function TrackappOfficialPresenceLoading({ embedded = false }: Readonly<{
             <div className="h-9 w-28 animate-pulse rounded-full bg-slate-100" />
           </div>
         </div>
-        <div className="mt-4 flex items-center gap-3 rounded-2xl border border-lime-200/80 bg-lime-50/90 px-4 py-3">
+        <div className="mt-4 flex items-center gap-3 rounded-2xl border border-violet-200/80 bg-violet-50/90 px-4 py-3">
           <span className="relative flex h-5 w-5 shrink-0">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-lime-400 opacity-60" />
-            <span className="relative inline-flex h-5 w-5 animate-spin rounded-full border-2 border-lime-300 border-t-lime-700" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 opacity-60" />
+            <span className="relative inline-flex h-5 w-5 animate-spin rounded-full border-2 border-violet-300 border-t-violet-700" />
           </span>
-          <p className="text-[0.88rem] font-semibold text-lime-900">
-            Validation des réseaux officiels… (15–45 s)
+          <p className="text-[0.88rem] font-semibold text-violet-900">
+            Validation des réseaux officiels… (OpenAI web search, 15–45 s)
           </p>
         </div>
       </div>
@@ -43,9 +36,15 @@ export function TrackappOfficialPresenceLoading({ embedded = false }: Readonly<{
           {Array.from({ length: 6 }, (_, i) => (
             <div
               key={i}
-              className="h-[118px] animate-pulse rounded-[14px] border border-slate-100 bg-slate-50"
+              className="h-[118px] animate-pulse rounded-[20px] border border-slate-100 bg-slate-50"
               style={{ animationDelay: `${i * 80}ms` }}
             />
+          ))}
+        </div>
+        <div className="mb-3 mt-8 h-3 w-24 animate-pulse rounded bg-slate-200" />
+        <div className="grid gap-3 sm:grid-cols-2">
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i} className="h-[118px] animate-pulse rounded-[20px] bg-slate-50" />
           ))}
         </div>
       </div>

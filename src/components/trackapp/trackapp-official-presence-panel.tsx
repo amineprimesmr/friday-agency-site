@@ -166,7 +166,6 @@ export function TrackappOfficialPresencePanel({
   metaPageName,
   instagramProfileUrl,
   tiktokProfileUrl,
-  embedded = false,
 }: {
   appId: string;
   appName: string;
@@ -179,7 +178,6 @@ export function TrackappOfficialPresencePanel({
   metaPageName?: string | null;
   instagramProfileUrl: string | null;
   tiktokProfileUrl: string | null;
-  embedded?: boolean;
 }) {
   const profileByKey = new Map<DetectedSocialProfile["id"], DetectedSocialProfile>();
   for (const p of profiles) profileByKey.set(p.id, p);
@@ -188,29 +186,12 @@ export function TrackappOfficialPresencePanel({
   const storeKeys = STORE_KEYS.filter((key) => isValidatedOfficialLink(officialLinks[key]));
 
   return (
-    <div
-      className={cn(
-        "overflow-hidden bg-white",
-        embedded
-          ? "ta-detail-card"
-          : "rounded-[28px] border border-[var(--dash-border)] shadow-[var(--dash-shadow-lg)]",
-      )}
-    >
-      <div
-        className={cn(
-          "border-b border-[var(--dash-border)] px-5 py-5 sm:px-6",
-          embedded ? "bg-white" : "bg-gradient-to-br from-slate-50 to-white",
-        )}
-      >
+    <div className="overflow-hidden rounded-[28px] border border-[var(--dash-border)] bg-white shadow-[var(--dash-shadow-lg)]">
+      <div className="border-b border-[var(--dash-border)] bg-gradient-to-br from-slate-50 to-white px-5 py-5 sm:px-6">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="ta-detail-card__kicker m-0">Présence officielle</p>
-            <h3 className="ta-detail-card__title mt-1">{appName}</h3>
-            {embedded ? (
-              <p className="ta-detail-card__sub mt-1">
-                Réseaux, site web et publicités Meta validés automatiquement.
-              </p>
-            ) : null}
+            <p className="m-0 text-[0.72rem] font-bold uppercase tracking-[0.18em] text-slate-400">Présence officielle</p>
+            <h3 className="mt-1 text-[1.35rem] font-black tracking-tight text-[var(--dash-text)]">{appName}</h3>
           </div>
           {favoritesEnabled ? (
             <TrackappAppFavoriteButton

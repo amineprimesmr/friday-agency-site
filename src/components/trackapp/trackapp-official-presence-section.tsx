@@ -9,13 +9,11 @@ export async function TrackappOfficialPresenceSection({
   country,
   initialFavorite,
   favoritesEnabled,
-  embedded = false,
 }: {
   app: AppDetail;
   country: CountryCode;
   initialFavorite: boolean;
   favoritesEnabled: boolean;
-  embedded?: boolean;
 }) {
   const presence = await buildOfficialBrandPresenceContext(app);
   const instagramUrl = presence.officialLinks.instagram.validated ? presence.officialLinks.instagram.url : null;
@@ -23,19 +21,20 @@ export async function TrackappOfficialPresenceSection({
   const metaAds = presence.metaPageId ? await fetchMetaAdsForPageCached(presence.metaPageId, country) : null;
 
   return (
-    <TrackappOfficialPresencePanel
-      appId={app.id}
-      appName={app.name}
-      initialFavorite={initialFavorite}
-      favoritesEnabled={favoritesEnabled}
-      officialLinks={presence.officialLinks}
-      profiles={presence.socialProfiles}
-      sources={presence.sources}
-      metaAds={metaAds}
-      metaPageName={presence.metaPageName}
-      instagramProfileUrl={instagramUrl}
-      tiktokProfileUrl={tiktokUrl}
-      embedded={embedded}
-    />
+    <section className="mt-5">
+      <TrackappOfficialPresencePanel
+        appId={app.id}
+        appName={app.name}
+        initialFavorite={initialFavorite}
+        favoritesEnabled={favoritesEnabled}
+        officialLinks={presence.officialLinks}
+        profiles={presence.socialProfiles}
+        sources={presence.sources}
+        metaAds={metaAds}
+        metaPageName={presence.metaPageName}
+        instagramProfileUrl={instagramUrl}
+        tiktokProfileUrl={tiktokUrl}
+      />
+    </section>
   );
 }

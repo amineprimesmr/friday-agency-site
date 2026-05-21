@@ -7,10 +7,6 @@
   box-shadow: var(--dash-shadow, 0 1px 3px rgb(15 23 42 / 0.08));
 }
 
-.trackapp-competitors.ta-detail-card .trackapp-competitors__header {
-  padding: 1.15rem 1.25rem 0;
-}
-
 .trackapp-competitors__header {
   display: flex;
   flex-wrap: wrap;
@@ -52,11 +48,6 @@
   padding: 0.55rem 1rem;
   cursor: pointer;
   transition: background 0.15s ease, transform 0.15s ease;
-}
-
-.trackapp-competitors__refresh:hover:not(:disabled) {
-  background: #1e293b;
-  transform: translateY(-1px);
 }
 
 .trackapp-competitors__refresh:disabled {

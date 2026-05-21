@@ -39,10 +39,9 @@ function tierBadgeClass(tier: ReturnType<typeof countryRankTier>): string {
 type Props = Readonly<{
   rankings: readonly CountryRanking[];
   className?: string;
-  embedded?: boolean;
 }>;
 
-export function TrackappCountryRankingsPanel({ rankings, className, embedded = false }: Props) {
+export function TrackappCountryRankingsPanel({ rankings, className }: Props) {
   const sorted = useMemo(() => sortCountryRankings(rankings), [rankings]);
   const summary = useMemo(() => countryRankSummary(rankings), [rankings]);
   const [focusCountry, setFocusCountry] = useState<CountryCode | null>(
@@ -55,28 +54,19 @@ export function TrackappCountryRankingsPanel({ rankings, className, embedded = f
   return (
     <section
       className={cn(
-        "trackapp-country-rankings",
-        !embedded && "rounded-[24px] border border-[var(--dash-border)] bg-white p-5 shadow-[var(--dash-shadow)]",
+        "trackapp-country-rankings rounded-[24px] border border-[var(--dash-border)] bg-white p-5 shadow-[var(--dash-shadow)]",
         className,
       )}
       aria-label="Classements App Store par pays"
     >
       <div className="trackapp-country-rankings__head">
         <div>
-          {!embedded ? (
-            <>
-              <h2 className="m-0 text-[1.25rem] font-bold tracking-tight text-[var(--dash-text)]">
-                Présence mondiale · Top 100 gratuit
-              </h2>
-              <p className="mt-1 text-[0.8rem] text-[var(--dash-muted-light)]">
-                {summary.rankedCount}/{summary.total} marchés suivis · classement App Store
-              </p>
-            </>
-          ) : (
-            <p className="m-0 text-[0.8rem] text-[var(--dash-muted-light)]">
-              {summary.rankedCount}/{summary.total} marchés · Top 100 gratuit
-            </p>
-          )}
+          <h2 className="m-0 text-[1.25rem] font-bold tracking-tight text-[var(--dash-text)]">
+            Présence mondiale · Top 100 gratuit
+          </h2>
+          <p className="mt-1 text-[0.8rem] text-[var(--dash-muted-light)]">
+            {summary.rankedCount}/{summary.total} marchés suivis · classement App Store (pas % utilisateurs)
+          </p>
         </div>
         {summary.best ? (
           <span className="trackapp-country-rankings__best">

@@ -5,6 +5,7 @@ import { useReducedMotion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { ShowcaseHeroHeader } from "@/components/tracker/showcase-hero-header";
+import { useCoarsePointer } from "@/lib/use-coarse-pointer";
 import type { AppShowcaseVideoItemEnriched } from "@/lib/showcase-app-videos-enrich";
 import { cn } from "@/lib/utils";
 
@@ -142,6 +143,7 @@ function PhoneSlide({ ariaLabel, item, reduceMotion }: PhoneSlideProps) {
 
 export function BuildNextShowcase({ videos }: { videos: AppShowcaseVideoItemEnriched[] }) {
   const reduceMotion = useReducedMotion();
+  const coarsePointer = useCoarsePointer();
   const trackRef = useRef<HTMLDivElement>(null);
 
   const slides = useMemo(() => {
@@ -152,7 +154,8 @@ export function BuildNextShowcase({ videos }: { videos: AppShowcaseVideoItemEnri
     }));
   }, [videos]);
 
-  const loop = Boolean(!reduceMotion);
+  /** RAF + scrollLeft casse le scroll tactile iOS — défilement manuel sur mobile. */
+  const loop = Boolean(!reduceMotion && !coarsePointer);
   /** Deuxième copie permet un saut sans couture quand scrollLeft atteint la moitié */
   const trackSlides = loop ? [...slides, ...slides] : slides;
 
