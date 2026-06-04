@@ -8,7 +8,7 @@ const SHORTCUT_URL =
 
 export const metadata: Metadata = {
   title: "Raccourci iOS — Trackapp",
-  description: "Scanne le QR code avec ton iPhone pour ouvrir le raccourci Trackapp.",
+  description: "Scannez le QR code avec votre iPhone pour ouvrir le raccourci Trackapp.",
 };
 
 function isMobileUserAgent(ua: string | null): boolean {

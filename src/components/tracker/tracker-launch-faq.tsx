@@ -18,11 +18,11 @@ const FAQ_ITEMS = [
   },
   {
     q: "Combien coûte l’accès ?",
-    a: "Trackapp est à 29 € / mois ou 59 € à vie (paiement unique). L’affiliation peut rembourser une partie de ton abonnement dès ton premier filleul actif.",
+    a: "Trackapp est à 29 € / mois ou 59 € à vie (paiement unique). L’affiliation peut rembourser une partie de votre abonnement dès votre premier filleul actif.",
   },
   {
     q: "Puis-je annuler quand je veux ?",
-    a: "Pour l’offre mensuelle, oui : tu gères ton abonnement depuis ton espace et tu résilies en un clic. L’accès à vie ne nécessite aucun renouvellement.",
+    a: "Pour l’offre mensuelle, oui : vous gérez votre abonnement depuis votre espace et vous résiliez en un clic. L’accès à vie ne nécessite aucun renouvellement.",
   },
 ] as const;
 
@@ -45,14 +45,10 @@ function FaqChevron({ open }: { open: boolean }) {
 
 export function TrackerLaunchFaq() {
   const rm = useReducedMotion();
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
     <div className="launch-sf-faq">
-      <p className="launch-sf-faq-kicker">
-        <span className="launch-sf-faq-kicker-dot" aria-hidden />
-        Questions fréquentes
-      </p>
       <ul className="launch-sf-faq-list">
         {FAQ_ITEMS.map((item, i) => {
           const open = openIndex === i;

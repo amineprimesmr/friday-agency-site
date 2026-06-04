@@ -14,7 +14,6 @@ import {
   TRACKER_WORKSPACE_HREF,
   trackerAuthNavActive,
 } from "@/lib/tracker-auth-nav";
-import { useTouchDevice } from "@/lib/use-touch-device";
 import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import "@/styles/tracker-header.css";
@@ -34,7 +33,6 @@ const LIGHT_SURFACE_SELECTORS = ["#comment-ca-marche", ".tt-affiliate-shell"] as
 
 const BASE_NAV = [
   { href: "/tracker", label: "Accueil" },
-  { href: "/tracker/top-charts", label: "Classements" },
   { href: "/tracker/affiliation", label: "Affiliation" },
 ] as const;
 
@@ -46,15 +44,16 @@ function navActive(pathname: string, href: string) {
 
 export function TrackerHeader({
   loggedIn = false,
+  hasPremium = false,
   searchSurface,
 }: {
   loggedIn?: boolean;
+  hasPremium?: boolean;
   searchSurface?: TrackerSearchSurface;
 }) {
   const pathname = usePathname();
   const router = useRouter();
   const reduceMotion = useReducedMotion();
-  const touch = useTouchDevice();
   const [authOpen, setAuthOpen] = useState(false);
 
   useEffect(() => {
@@ -76,11 +75,9 @@ export function TrackerHeader({
 
     const update = () => {
       raf = 0;
-      if (!touch) {
-        const y = window.scrollY || document.documentElement.scrollTop;
-        const nextProgress = Math.min(1, y / 120);
-        setScrollProgress((prev) => (Math.abs(prev - nextProgress) > 0.02 ? nextProgress : prev));
-      }
+      const y = window.scrollY || document.documentElement.scrollTop;
+      const nextProgress = Math.min(1, y / 120);
+      setScrollProgress((prev) => (Math.abs(prev - nextProgress) > 0.02 ? nextProgress : prev));
 
       const header = document.querySelector<HTMLElement>(".tracker-header-bar");
       if (!header) return;
@@ -109,17 +106,16 @@ export function TrackerHeader({
       window.clearTimeout(t);
       if (raf) window.cancelAnimationFrame(raf);
     };
-  }, [pathname, mobileOpen, searchOpen, touch]);
+  }, [pathname, mobileOpen, searchOpen]);
 
-  const k = reduceMotion || touch ? 1 : 1 + scrollProgress * 0.45;
-  const blurA = reduceMotion ? 14 : touch ? 16 : 18 * k;
-  const blurB = reduceMotion ? 8 : touch ? 0 : 9 * k;
-  const blurC = reduceMotion ? 4 : touch ? 0 : 5 * k;
+  const k = reduceMotion ? 1 : 1 + scrollProgress * 0.45;
+  const blurA = reduceMotion ? 14 : 18 * k;
+  const blurB = reduceMotion ? 8 : 9 * k;
+  const blurC = reduceMotion ? 4 : 5 * k;
 
-  const blurTransition =
-    reduceMotion || touch
-      ? undefined
-      : ("backdrop-filter 0.2s cubic-bezier(0.22, 1, 0.36, 1), -webkit-backdrop-filter 0.2s cubic-bezier(0.22, 1, 0.36, 1)" as const);
+  const blurTransition = reduceMotion
+    ? undefined
+    : ("backdrop-filter 0.2s cubic-bezier(0.22, 1, 0.36, 1), -webkit-backdrop-filter 0.2s cubic-bezier(0.22, 1, 0.36, 1)" as const);
 
   const layerStyle = (px: number): CSSProperties => ({
     WebkitBackdropFilter: `blur(${px.toFixed(1)}px)`,
@@ -239,6 +235,9 @@ export function TrackerHeader({
               isOpen={searchOpen}
               onClose={() => setSearchOpen(false)}
               onOpen={() => setSearchOpen(true)}
+              trackappLiveMetrics
+              guestPreview={!hasPremium}
+              hideFeaturedWhenEmpty
             />
           </div>
 
@@ -304,12 +303,15 @@ export function TrackerHeader({
               <motion.div
                 key="mobile-nav"
                 id={mobileId}
-                initial={reduceMotion ? false : { opacity: 0, y: -28, scaleY: 0.94 }}
-                animate={{ opacity: 1, y: 0, scaleY: 1 }}
-                exit={reduceMotion ? undefined : { opacity: 0, y: -18, scaleY: 0.97 }}
+                initial={reduceMotion ? false : { opacity: 0, y: -12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reduceMotion ? undefined : { opacity: 0, y: -8 }}
                 transition={mobilePanelTransition}
                 className="tracker-header-mobile-panel lg:hidden"
                 style={{ transformOrigin: "top center" }}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Menu principal"
               >
                 <div className="tracker-header-mobile-panel-head">
                   <p>MENU</p>
@@ -349,27 +351,7 @@ export function TrackerHeader({
                       </svg>
                     </TrackerNavLink>
                   ))}
-                  {loggedIn ? (
-                    <TrackerNavLink
-                      href={TRACKER_WORKSPACE_HREF}
-                      className={cn(
-                        "tracker-header-mobile-link",
-                        navActive(pathname, TRACKER_WORKSPACE_HREF) && "tracker-header-mobile-link--active",
-                      )}
-                      onClick={closeMobile}
-                    >
-                      <span>Mon espace</span>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-                        <path
-                          d="M7 17L17 7M9 7h8v8"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </TrackerNavLink>
-                  ) : (
+                  {!loggedIn ? (
                     <button
                       type="button"
                       className="tracker-header-mobile-link w-full text-left"
@@ -386,7 +368,7 @@ export function TrackerHeader({
                         />
                       </svg>
                     </button>
-                  )}
+                  ) : null}
                   <TrackerNavLink
                     href="/tracker/widget"
                     className={cn(

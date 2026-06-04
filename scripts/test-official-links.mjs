@@ -39,6 +39,7 @@ for (const k of [
   "youtube",
   "facebook",
   "linkedin",
+  "threads",
   "metaAdsLibrary",
 ]) {
   const row = r[k];

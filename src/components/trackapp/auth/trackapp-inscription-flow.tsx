@@ -16,6 +16,7 @@ import {
   TrackappLimeLogo,
 } from "@/components/trackapp/auth/trackapp-auth-shared";
 import { createClient } from "@/lib/supabase/client";
+import { TRACKAPP_WORKSPACE_HUB_PATH } from "@/lib/trackapp-apptracker-paths";
 
 function buildSignupExtrasQs(mode: string, appId: string, ref: string): string {
   const p = new URLSearchParams();
@@ -49,7 +50,7 @@ function InscriptionExperienceInner({
   }, []);
 
   const signupExtrasQs = useMemo(() => buildSignupExtrasQs(mode, appId, ref), [mode, appId, ref]);
-  const nextAfterAuth = `/trackapp/accueil${signupExtrasQs}`;
+  const nextAfterAuth = `${TRACKAPP_WORKSPACE_HUB_PATH}${signupExtrasQs}`;
   const callbackUrl = useMemo(() => {
     const origin =
       typeof window !== "undefined" ?
@@ -120,7 +121,7 @@ function InscriptionExperienceInner({
       return;
     }
     setError(
-      "Consulte ta boîte mail pour confirmer le compte puis reconnecte-toi. Si la confirmation mail est désactivée en dev, vérifie le projet Supabase.",
+      "Consultez votre boîte mail pour confirmer le compte puis reconnectez-vous. Si la confirmation mail est désactivée en dev, vérifiez le projet Supabase.",
     );
     router.refresh();
   }
@@ -160,7 +161,7 @@ function InscriptionExperienceInner({
           {gate === "pick" ?
             <>
               <h1 className="ta-auth-headline">Bienvenue sur Trackapp</h1>
-              <p className="ta-auth-lead">Inscris-toi gratuitement pour accéder aux outils Trackapp.</p>
+              <p className="ta-auth-lead">Inscrivez-vous gratuitement pour accéder aux outils Trackapp.</p>
 
               <div className="ta-auth-oauth-stack">
                 <button type="button" className="ta-auth-oauth-row" disabled={busy} onClick={() => oauth("google")}>
@@ -202,7 +203,7 @@ function InscriptionExperienceInner({
             </>
           : <>
               <h1 className="ta-auth-headline">Créer un compte</h1>
-              <p className="ta-auth-lead">Inscris-toi gratuitement pour accéder aux outils Trackapp.</p>
+              <p className="ta-auth-lead">Inscrivez-vous gratuitement pour accéder aux outils Trackapp.</p>
 
               <form className="ta-auth-fields w-full max-w-none" onSubmit={onSubmit}>
                 {appId ?
@@ -239,8 +240,8 @@ function InscriptionExperienceInner({
               </form>
 
               <p className="ta-auth-muted-link">
-                Tu as déjà un compte ?{" "}
-                <Link prefetch={false} href={`/trackapp/connexion?next=${encodeURIComponent(`/trackapp/accueil${signupExtrasQs}`)}`}>
+                Vous avez déjà un compte ?{" "}
+                <Link prefetch={false} href={`/trackapp/connexion?next=${encodeURIComponent(`${TRACKAPP_WORKSPACE_HUB_PATH}${signupExtrasQs}`)}`}>
                   Se connecter
                 </Link>
               </p>

@@ -21,6 +21,18 @@ function withReferralCookie(request: NextRequest, response: NextResponse): NextR
   return response;
 }
 
+const PREMIUM_COOKIE = "trackapp_plan_unlocked";
+/** 24 h — évite une requête DB premium à chaque navigation. */
+const PREMIUM_COOKIE_MAX_AGE_SEC = 86_400;
+
+function isRouterPrefetch(request: NextRequest): boolean {
+  return (
+    request.headers.get("next-router-prefetch") === "1"
+    || request.headers.get("purpose") === "prefetch"
+    || request.headers.get("x-middleware-prefetch") === "1"
+  );
+}
+
 const PREMIUM_EXEMPT_PREFIXES = [
   "/trackapp/paiement",
   "/trackapp/activation",
@@ -30,14 +42,25 @@ const PREMIUM_EXEMPT_PREFIXES = [
   "/trackapp/legal",
   "/trackapp/auth",
   "/trackapp/deconnexion",
+  "/trackapp/apercu",
+  "/trackapp/onboarding",
+  "/trackapp/creer-une-app",
 ];
+
+function isGuestPreviewPath(pathname: string): boolean {
+  return pathname === "/trackapp/apercu" || pathname.startsWith("/trackapp/apercu/");
+}
 
 const PROTECT_PREFIXES = [
   "/trackapp/accueil",
   "/trackapp/apptracker",
+  "/trackapp/marketing",
+  "/trackapp/ads",
+  "/trackapp/organique",
   "/trackapp/notre-selection",
   "/trackapp/creer-mon-app",
   "/trackapp/creer-depuis-app",
+  "/trackapp/applab",
   "/trackapp/logiciels",
   "/trackapp/ressources",
   "/trackapp/favoris",
@@ -52,7 +75,7 @@ export async function middleware(request: NextRequest) {
   });
   response = withReferralCookie(request, response);
 
-  if (pathname === "/trackapp/apptracker" || pathname.startsWith("/trackapp/apptracker/")) {
+  if (pathname.startsWith("/trackapp/apptracker/")) {
     const url = request.nextUrl.clone();
     url.pathname = `/trackapp/accueil${pathname.slice("/trackapp/apptracker".length)}`;
     return withReferralCookie(request, NextResponse.redirect(url));
@@ -72,6 +95,8 @@ export async function middleware(request: NextRequest) {
 
   const isResourcesApi = pathname.startsWith("/api/trackapp/ressources");
   const isFavoritesApi = pathname.startsWith("/api/trackapp/favorites");
+  const isProfileEnsureApi = pathname === "/api/trackapp/profile/ensure";
+  const isProfileOnboardingApi = pathname.startsWith("/api/trackapp/profile/onboarding");
   const isAffiliateApi = pathname.startsWith("/api/trackapp/affiliate");
   const isMediaProxyApi = pathname.startsWith("/api/trackapp/media-proxy");
   const isInstagramOrganicApi = pathname.startsWith("/api/trackapp/instagram-organic");
@@ -81,6 +106,8 @@ export async function middleware(request: NextRequest) {
     !pathname.startsWith("/trackapp") &&
     !isResourcesApi &&
     !isFavoritesApi &&
+    !isProfileEnsureApi &&
+    !isProfileOnboardingApi &&
     !isAffiliateApi &&
     !isMediaProxyApi &&
     !isInstagramOrganicApi &&
@@ -93,13 +120,18 @@ export async function middleware(request: NextRequest) {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   const needsAuth =
-    PROTECT_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))
-    || isResourcesApi
-    || isFavoritesApi
-    || isAffiliateApi
-    || isMediaProxyApi
-    || isInstagramOrganicApi
-    || isTikTokOrganicApi;
+    !isGuestPreviewPath(pathname)
+    && (
+      PROTECT_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))
+      || isResourcesApi
+      || isFavoritesApi
+      || isProfileEnsureApi
+      || isProfileOnboardingApi
+      || isAffiliateApi
+      || isMediaProxyApi
+      || isInstagramOrganicApi
+      || isTikTokOrganicApi
+    );
 
   /** En local tu peux ouvrir l’UI SaaS sans session ; la page serve les données maquette. */
   const skipTrackappAuth = process.env.NODE_ENV !== "production";
@@ -138,7 +170,7 @@ export async function middleware(request: NextRequest) {
   if (needsAuth && !user && !skipTrackappAuth) {
     if (pathname.startsWith("/api/")) {
       return NextResponse.json(
-        { error: "Non autorisé. Connecte-toi pour accéder aux ressources." },
+        { error: "Non autorisé. Connectez-vous pour accéder aux ressources." },
         { status: 401 },
       );
     }
@@ -158,15 +190,40 @@ export async function middleware(request: NextRequest) {
     (p) => pathname === p || pathname.startsWith(`${p}/`),
   );
 
-  /** Favoris : session suffit (pas de double garde premium — évite 402 silencieux sur le cœur). */
-  if (needsAuth && user && !skipTrackappAuth && !isPremiumExempt && !isFavoritesApi) {
-    const { data: profile } = await supabase
-      .from("trackapp_profiles")
-      .select("plan_unlocked_at")
-      .eq("id", user.id)
-      .maybeSingle();
+  /** Favoris / ensure profil : session suffit (pas de double garde premium). */
+  if (
+    needsAuth
+    && user
+    && !skipTrackappAuth
+    && !isPremiumExempt
+    && !isFavoritesApi
+    && !isProfileEnsureApi
+    && !isProfileOnboardingApi
+    && !isRouterPrefetch(request)
+  ) {
+    const premiumCookie = request.cookies.get(PREMIUM_COOKIE)?.value;
+    let hasPremium = premiumCookie === user.id;
 
-    if (!profile?.plan_unlocked_at) {
+    if (!hasPremium) {
+      const { data: profile } = await supabase
+        .from("trackapp_profiles")
+        .select("plan_unlocked_at")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      hasPremium = Boolean(profile?.plan_unlocked_at);
+      if (hasPremium) {
+        response.cookies.set(PREMIUM_COOKIE, user.id, {
+          maxAge: PREMIUM_COOKIE_MAX_AGE_SEC,
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+        });
+      }
+    }
+
+    if (!hasPremium) {
       if (pathname.startsWith("/api/")) {
         return NextResponse.json({ error: "Abonnement Trackapp requis." }, { status: 402 });
       }
@@ -194,6 +251,8 @@ export const config = {
     "/api/trackapp/ressources/:path*",
     "/api/trackapp/favorites",
     "/api/trackapp/favorites/:path*",
+    "/api/trackapp/profile/ensure",
+    "/api/trackapp/profile/onboarding",
     "/api/trackapp/affiliate",
     "/api/trackapp/affiliate/:path*",
     "/api/trackapp/media-proxy",

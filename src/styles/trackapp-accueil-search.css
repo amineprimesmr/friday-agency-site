@@ -5,6 +5,10 @@
   max-width: 42rem;
 }
 
+.trackapp-workspace-tool-page .trackapp-accueil-search {
+  max-width: 100%;
+}
+
 .trackapp-accueil-search .tracker-search-desktop-host {
   width: 100%;
 }

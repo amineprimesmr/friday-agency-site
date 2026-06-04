@@ -179,8 +179,23 @@ export function TrackappTikTokOrganicGallery({
           signal: ac.signal,
           cache: "no-store",
         });
-        const data = (await res.json()) as TikTokOrganicContentResult;
-        if (!ac.signal.aborted) setResult(data);
+        const data = (await res.json()) as TikTokOrganicContentResult & { error?: string };
+        if (ac.signal.aborted) return;
+        if (!res.ok) {
+          setResult({
+            ok: false,
+            configured: res.status !== 402,
+            profileUrl,
+            profile: null,
+            videos: [],
+            source: "error",
+            error:
+              data.error ??
+              (res.status === 402 ? "Abonnement Trackapp requis." : "Impossible de charger TikTok pour l’instant."),
+          });
+          return;
+        }
+        setResult(data);
       } catch (e) {
         if (isAbortError(e) || ac.signal.aborted) return;
         setResult({
@@ -218,7 +233,10 @@ export function TrackappTikTokOrganicGallery({
     );
   }
 
-  if (!result?.profileUrl) return null;
+  if (!result) return null;
+
+  const displayProfileUrl = result.profileUrl ?? profileUrl;
+  if (!displayProfileUrl) return null;
 
   const profile = result.profile;
   const filteredVideos = result.videos
@@ -256,11 +274,11 @@ export function TrackappTikTokOrganicGallery({
                 {profile?.displayName || profile?.handle || "Compte TikTok"}
                 {profile?.verified ? <span className="ml-2 text-sky-300">✓</span> : null}
               </h4>
-              <p className="mt-1 truncate text-[0.84rem] text-white/55">{profile?.handle ?? result.profileUrl}</p>
+              <p className="mt-1 truncate text-[0.84rem] text-white/55">{profile?.handle ?? displayProfileUrl}</p>
             </div>
           </div>
           <a
-            href={result.profileUrl}
+            href={displayProfileUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex min-h-9 items-center justify-center rounded-full bg-white px-4 text-[0.78rem] font-black text-slate-950 no-underline transition hover:bg-white/90"

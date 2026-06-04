@@ -1,7 +1,9 @@
-/** Liens Connexion / Mon espace pour la nav publique Tracker. */
-export const TRACKER_WORKSPACE_HREF = "/trackapp/accueil";
+import { TRACKAPP_LANDING_PATH, trackappConnexionNextHref } from "@/lib/trackapp-landing-paths";
 
-export const TRACKER_CONNEXION_HREF = `/trackapp/connexion?next=${encodeURIComponent(TRACKER_WORKSPACE_HREF)}`;
+/** Liens Connexion / Mon espace pour la nav publique Tracker. */
+export const TRACKER_WORKSPACE_HREF = TRACKAPP_LANDING_PATH;
+
+export const TRACKER_CONNEXION_HREF = trackappConnexionNextHref(TRACKAPP_LANDING_PATH);
 
 const TRACKAPP_PUBLIC_PREFIXES = [
   "/trackapp/connexion",
@@ -21,7 +23,10 @@ export function trackerAuthNavItem(loggedIn: boolean) {
 
 export function trackerAuthNavActive(pathname: string, href: string): boolean {
   if (href === TRACKER_WORKSPACE_HREF) {
-    if (pathname === "/trackapp" || !pathname.startsWith("/trackapp/")) return false;
+    if (!pathname.startsWith("/trackapp/")) return false;
+    if (pathname === TRACKAPP_LANDING_PATH || pathname.startsWith(`${TRACKAPP_LANDING_PATH}?`)) {
+      return true;
+    }
     return !TRACKAPP_PUBLIC_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   }
   if (href.startsWith("/trackapp/connexion")) {

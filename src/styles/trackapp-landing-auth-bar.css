@@ -1,0 +1,153 @@
+.trackapp-landing-auth-bar {
+  position: fixed;
+  top: max(0.65rem, env(safe-area-inset-top, 0px));
+  right: max(0.85rem, env(safe-area-inset-right, 0px));
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  pointer-events: none;
+}
+
+.trackapp-landing-auth-bar__btn {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.15rem;
+  padding: 0.38rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.trackapp-landing-auth-bar__btn--ghost {
+  min-height: auto;
+  padding: 0.28rem 0.5rem;
+  border-color: transparent;
+  background: transparent;
+  color: rgb(255 255 255 / 0.48);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.trackapp-landing-auth-bar__btn--ghost:hover {
+  transform: none;
+  border-color: transparent;
+  background: transparent;
+  color: rgb(255 255 255 / 0.78);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.trackapp-landing-auth-bar__btn--ghost:focus-visible {
+  outline: 1px solid rgb(255 255 255 / 0.35);
+  outline-offset: 3px;
+  border-radius: 0.35rem;
+}
+
+/* Commencer — liquid glass (même rendu que badge social proof / composer landing) */
+.trackapp-landing-auth-bar__btn--liquidglass {
+  --c-glass: #bbbbbc;
+  --c-light: #fff;
+  --c-dark: #000;
+  --glass-reflex-dark: 2;
+  --glass-reflex-light: 0.34;
+  --saturation: 158%;
+  --tracker-glass-blur: 22px;
+
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: none;
+  transform: translateZ(0);
+  color: rgba(255, 255, 255, 0.96);
+  background-color: color-mix(in srgb, var(--c-glass) 14%, transparent);
+  -webkit-backdrop-filter: blur(var(--tracker-glass-blur)) saturate(var(--saturation))
+    url(#tracker-liquid-glass-fr);
+  backdrop-filter: blur(var(--tracker-glass-blur)) saturate(var(--saturation))
+    url(#tracker-liquid-glass-fr);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 12%), transparent),
+    inset 1.8px 3px 0 -2px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 90%), transparent),
+    inset -2px -2px 0 -2px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 80%), transparent),
+    inset -3px -8px 1px -6px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 60%), transparent),
+    inset -0.3px -1px 4px 0 color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 12%), transparent),
+    inset -1.5px 2.5px 0 -2px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 20%), transparent),
+    inset 0 3px 4px -2px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 20%), transparent),
+    inset 2px -6.5px 1px -4px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
+    0 1px 5px 0 color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
+    0 8px 22px 0 color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 12%), transparent);
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.35s cubic-bezier(1, 0, 0.4, 1),
+    background-color 0.35s cubic-bezier(1, 0, 0.4, 1);
+}
+
+.trackapp-landing-auth-bar__btn--liquidglass:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background-color: color-mix(in srgb, var(--c-glass) 20%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 16%), transparent),
+    inset 1.8px 3px 0 -2px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 92%), transparent),
+    inset -2px -2px 0 -2px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 82%), transparent),
+    inset -3px -8px 1px -6px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 62%), transparent),
+    inset -0.3px -1px 4px 0 color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 14%), transparent),
+    0 2px 8px 0 color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 12%), transparent),
+    0 12px 28px 0 color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 14%), transparent);
+}
+
+.trackapp-landing-auth-bar__btn--liquidglass:focus-visible {
+  outline: 2px solid rgba(200, 255, 61, 0.85);
+  outline-offset: 3px;
+}
+
+.trackapp-landing-auth-bar__btn--liquidglass:active:not(:disabled) {
+  transform: scale(0.98);
+  transition-duration: 0.06s;
+}
+
+.trackapp-landing-auth-bar__btn--liquidglass:disabled {
+  opacity: 0.72;
+  cursor: wait;
+}
+
+@media (max-width: 768px), (prefers-reduced-motion: reduce) {
+  .trackapp-landing-auth-bar__btn--liquidglass {
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    backdrop-filter: blur(14px) saturate(130%);
+  }
+}
+
+@media (max-width: 720px) {
+  .trackapp-landing-auth-bar {
+    top: max(0.5rem, env(safe-area-inset-top, 0px));
+    right: max(0.55rem, env(safe-area-inset-right, 0px));
+  }
+
+  .trackapp-landing-auth-bar__btn--liquidglass {
+    min-height: 2rem;
+    padding: 0.32rem 0.72rem;
+    font-size: 0.66rem;
+  }
+
+  .trackapp-landing-auth-bar__btn--ghost {
+    font-size: 0.74rem;
+    padding: 0.24rem 0.35rem;
+  }
+}

@@ -62,13 +62,9 @@ export const METRICS_TO_FIX: TrackappAppDisplayMetrics = {
 export const EMPTY_METRICS = METRICS_TO_FIX;
 
 const BATCH_METRICS_CONCURRENCY = 3;
-/** Live search : moins de requêtes ST simultanées (évite timeouts / 429). */
-const LIVE_SEARCH_ST_CONCURRENCY = 2;
 const ST_FETCH_TIMEOUT_MS = 9_000;
-/** Recherche live : pas de cache + timeout plus long (évite les « — » intermittents). */
-const LIVE_SEARCH_ST_FETCH_TIMEOUT_MS = 12_000;
-const ST_RETRY_ATTEMPTS = 4;
-const ST_RETRY_DELAY_MS = 400;
+const ST_RETRY_ATTEMPTS = 2;
+const ST_RETRY_DELAY_MS = 300;
 
 async function sleep(ms: number): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -98,7 +94,7 @@ const sensorTowerAggregateCached = (appId: string) =>
       const agg = await fetchSensorTowerAggregateWithRetry(appId);
       return agg && hasAnyTrackerAggregateSignal(agg) ? agg : null;
     },
-    ["trackapp-sensor-tower-aggregate-v5", appId],
+    ["trackapp-sensor-tower-aggregate-v7-no-store", appId],
     { revalidate: 3600 },
   );
 
@@ -274,6 +270,30 @@ export async function resolveTrackappAppsDisplayMetricsBatch(
   return new Map(rows);
 }
 
+/** Batch favoris : réutilise les AppDetail déjà fetchés + un seul batch Sensor Tower. */
+export async function resolveTrackappAppsDisplayMetricsFromDetails(
+  details: readonly AppDetail[],
+  country: CountryCode,
+): Promise<Map<string, TrackappAppDisplayMetrics>> {
+  if (details.length === 0) return new Map();
+
+  const { fetchIosAggregateAppMetricsBatch } = await import("@/lib/apple-charts");
+  const enrichedNationalTop = await getEnrichedNationalTopCached(country);
+  const aggMap = await fetchIosAggregateAppMetricsBatch(
+    details.map((d) => d.id),
+    { timeoutMs: 8_000 },
+  );
+
+  const out = new Map<string, TrackappAppDisplayMetrics>();
+  for (const detail of details) {
+    out.set(
+      detail.id,
+      metricsFromAppDetail(detail, country, aggMap.get(detail.id) ?? null, enrichedNationalTop),
+    );
+  }
+  return out;
+}
+
 export function metricsFromAppDetail(
   detail: AppDetail,
   country: CountryCode,
@@ -306,8 +326,7 @@ export async function enrichSearchResultsWithTrackappMetrics(
 }
 
 /**
- * Recherche live Accueil : Sensor Tower uniquement (pas de top 100 / iTunes détail),
- * cache + retry pour limiter les « — » quand ST répond lentement.
+ * Recherche live Accueil : un seul batch Sensor Tower pour toutes les apps (rapide).
  */
 export async function enrichSearchResultsWithTrackappMetricsForLiveSearch(
   apps: readonly SearchResult[],
@@ -315,11 +334,15 @@ export async function enrichSearchResultsWithTrackappMetricsForLiveSearch(
 ): Promise<SearchResultWithTrackappMetrics[]> {
   if (apps.length === 0) return [];
 
-  const metricsRows = await mapPool(apps, LIVE_SEARCH_ST_CONCURRENCY, async (app) => {
-    const aggregateMetrics = await fetchSensorTowerAggregateWithRetry(app.id, {
-      timeoutMs: LIVE_SEARCH_ST_FETCH_TIMEOUT_MS,
-    });
-    const metrics = computeTrackappAppDisplayMetrics(
+  const { fetchIosAggregateAppMetricsBatch } = await import("@/lib/apple-charts");
+  const aggMap = await fetchIosAggregateAppMetricsBatch(
+    apps.map((a) => a.id),
+    { timeoutMs: 8_000 },
+  );
+
+  return apps.map((app) => ({
+    ...app,
+    trackappMetrics: computeTrackappAppDisplayMetrics(
       {
         id: app.id,
         price: 0,
@@ -327,16 +350,36 @@ export async function enrichSearchResultsWithTrackappMetricsForLiveSearch(
         primaryGenreId: app.categoryId,
       },
       country,
-      aggregateMetrics,
+      aggMap.get(app.id) ?? null,
       null,
-    );
-    return metrics;
-  });
-
-  return apps.map((app, index) => ({
-    ...app,
-    trackappMetrics: metricsRows[index] ?? METRICS_TO_FIX,
+    ),
   }));
+}
+
+/** Métriques batch pour enrichissement client (2ᵉ phase recherche). */
+export async function resolveTrackappMetricsForAppIds(
+  appIds: readonly string[],
+  country: CountryCode,
+): Promise<Map<string, TrackappAppDisplayMetrics>> {
+  const unique = [...new Set(appIds.filter(Boolean))];
+  if (unique.length === 0) return new Map();
+
+  const { fetchIosAggregateAppMetricsBatch } = await import("@/lib/apple-charts");
+  const aggMap = await fetchIosAggregateAppMetricsBatch(unique, { timeoutMs: 8_000 });
+
+  const out = new Map<string, TrackappAppDisplayMetrics>();
+  for (const id of unique) {
+    out.set(
+      id,
+      computeTrackappAppDisplayMetrics(
+        { id, price: 0, categoryId: "", primaryGenreId: "" },
+        country,
+        aggMap.get(id) ?? null,
+        null,
+      ),
+    );
+  }
+  return out;
 }
 
 /** Fiche détail — cache ST (pas d’estimation). */

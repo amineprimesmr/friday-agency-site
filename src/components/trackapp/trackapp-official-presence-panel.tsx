@@ -1,16 +1,14 @@
 "use client";
 
-import { TrackappAppFavoriteButton } from "@/components/trackapp/trackapp-app-favorite-button";
-import { TrackappInstagramOrganicGallery } from "@/components/trackapp/trackapp-instagram-organic-gallery";
 import { TrackappMetaAdsGallery } from "@/components/trackapp/trackapp-meta-ads-gallery";
-import { TrackappTikTokOrganicGallery } from "@/components/trackapp/trackapp-tiktok-organic-gallery";
+import { TrackappSocialGalleriesLazy } from "@/components/trackapp/trackapp-social-galleries-lazy";
 import type { OfficialBrandLinksReport, OfficialLinkKey } from "@/lib/official-brand-links";
 import type { BrandResolutionSource } from "@/lib/official-brand-presence-context";
 import type { MetaAdsLibraryFetchResult } from "@/lib/meta-ads-library";
 import type { DetectedSocialProfile } from "@/lib/social-presence";
 import { cn } from "@/lib/utils";
 
-const SOCIAL_KEYS: OfficialLinkKey[] = ["instagram", "tiktok", "x", "youtube", "facebook", "linkedin"];
+const SOCIAL_KEYS: OfficialLinkKey[] = ["instagram", "tiktok", "x", "youtube", "facebook", "linkedin", "threads"];
 
 const STORE_KEYS: OfficialLinkKey[] = ["site", "appStore", "googlePlay", "metaAdsLibrary"];
 
@@ -25,6 +23,7 @@ const KEY_META: Record<
   youtube: { short: "YouTube", social: "youtube", accent: "bg-red-50 text-red-800 ring-red-200" },
   facebook: { short: "Facebook", social: "facebook", accent: "bg-blue-50 text-blue-800 ring-blue-200" },
   linkedin: { short: "LinkedIn", social: "linkedin", accent: "bg-sky-50 text-sky-900 ring-sky-200" },
+  threads: { short: "Threads", social: "threads", accent: "bg-slate-100 text-slate-900 ring-slate-300" },
   appStore: { short: "App Store", accent: "bg-slate-100 text-slate-800 ring-slate-200" },
   googlePlay: { short: "Google Play", accent: "bg-emerald-50 text-emerald-900 ring-emerald-200" },
   metaAdsLibrary: { short: "Meta Ads", accent: "bg-indigo-50 text-indigo-900 ring-indigo-200" },
@@ -33,7 +32,7 @@ const KEY_META: Record<
 function sourceLabel(source: string): string {
   switch (source) {
     case "app_store":
-      return "App Store";
+      return "Fiche App Store";
     case "official_site":
       return "Site officiel";
     case "openai_web":
@@ -157,8 +156,6 @@ function LinkCard({
 export function TrackappOfficialPresencePanel({
   appId,
   appName,
-  initialFavorite,
-  favoritesEnabled,
   officialLinks,
   profiles,
   sources,
@@ -169,8 +166,6 @@ export function TrackappOfficialPresencePanel({
 }: {
   appId: string;
   appName: string;
-  initialFavorite: boolean;
-  favoritesEnabled: boolean;
   officialLinks: OfficialBrandLinksReport;
   profiles: DetectedSocialProfile[];
   sources: BrandResolutionSource[];
@@ -193,14 +188,6 @@ export function TrackappOfficialPresencePanel({
             <p className="m-0 text-[0.72rem] font-bold uppercase tracking-[0.18em] text-slate-400">Présence officielle</p>
             <h3 className="mt-1 text-[1.35rem] font-black tracking-tight text-[var(--dash-text)]">{appName}</h3>
           </div>
-          {favoritesEnabled ? (
-            <TrackappAppFavoriteButton
-              appId={appId}
-              initialFavorite={initialFavorite}
-              enabled
-              className="border-slate-200 bg-white text-slate-500 shadow-sm hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800"
-            />
-          ) : null}
         </div>
       </div>
 
@@ -250,8 +237,10 @@ export function TrackappOfficialPresencePanel({
         ) : null}
 
         {metaAds ? <TrackappMetaAdsGallery result={metaAds} pageName={metaPageName} /> : null}
-        <TrackappInstagramOrganicGallery profileUrl={instagramProfileUrl} />
-        <TrackappTikTokOrganicGallery profileUrl={tiktokProfileUrl} />
+        <TrackappSocialGalleriesLazy
+          instagramProfileUrl={instagramProfileUrl}
+          tiktokProfileUrl={tiktokProfileUrl}
+        />
 
         {sources.filter((s) => s.url).length > 0 ? (
           <details className="mt-6 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">

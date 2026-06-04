@@ -9,19 +9,25 @@ Monorepo [Next.js](https://nextjs.org) 15 (App Router, React 19, Tailwind CSS v4
 ## Démarrage
 
 ```bash
-cp .env.example .env.local
 npm install
-npm run dev
+npm run setup:local    # .env.local (URL locale, bypass dev, clés Supabase si CLI liée)
+# Si Supabase manque : supabase login && supabase link --project-ref djdelmktmnjaybvjcudm --yes && npm run setup:local
+npm run dev:open       # http://127.0.0.1:3000/trackapp
 ```
 
-- [http://localhost:3000](http://localhost:3000) — en dev comme en prod, `/` redirige vers `/tracker`.
-- Variables Stripe / JWT : voir `.env.example`.
+- **Landing** : [http://127.0.0.1:3000/trackapp](http://127.0.0.1:3000/trackapp) (`/` redirige ici).
+- **Sans Supabase** : AppLAB + onboarding OK ; connexion / Google nécessitent les clés dans `.env.local`.
+- **Sans login en local** : middleware désactivé en dev → liens « Explorer le SaaS » ou `/trackapp/apptracker`.
+- Auth callback local : `http://127.0.0.1:3000/trackapp/auth/callback` (Supabase → URL Configuration).
 
 ## Scripts
 
 | Commande          | Rôle                          |
 |-------------------|-------------------------------|
+| `npm run setup:local` | Prépare `.env.local` pour le dev |
 | `npm run dev`     | Serveur de développement      |
+| `npm run dev:open` | Dev + ouvre `/trackapp` dans le navigateur |
+| `npm run dev:reset` | Clean `.next` + redémarre le dev |
 | `npm run build`   | Build production                |
 | `npm run start`   | Serveur après build             |
 | `npm run lint`    | ESLint (sources Next uniquement)|

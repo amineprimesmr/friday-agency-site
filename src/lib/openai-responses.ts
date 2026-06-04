@@ -29,6 +29,34 @@ export function extractOpenAiResponseText(data: unknown): string | null {
   return null;
 }
 
+/** URLs citées par les appels web_search (Responses API). */
+export function extractWebSearchSourceUrls(data: unknown): string[] {
+  if (!data || typeof data !== "object") return [];
+  const record = data as Record<string, unknown>;
+  const urls = new Set<string>();
+  const output = record.output;
+  if (!Array.isArray(output)) return [];
+
+  for (const item of output) {
+    if (!item || typeof item !== "object") continue;
+    const row = item as Record<string, unknown>;
+    if (row.type !== "web_search_call") continue;
+    const action = row.action;
+    if (!action || typeof action !== "object") continue;
+    const sources = (action as Record<string, unknown>).sources;
+    if (!Array.isArray(sources)) continue;
+    for (const s of sources) {
+      if (!s || typeof s !== "object") continue;
+      const url = (s as Record<string, unknown>).url;
+      if (typeof url === "string" && /^https:\/\//i.test(url.trim())) {
+        urls.add(url.trim());
+      }
+    }
+  }
+
+  return [...urls];
+}
+
 export type OpenAiResponsesError = Readonly<{
   status: number;
   message: string;

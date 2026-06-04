@@ -1,17 +1,16 @@
 import { NextResponse } from "next/server";
 import { unstable_cache } from "next/cache";
-import {
-  estimateMonthlyDownloads,
-  fetchTopCharts,
-  TRACKER_DEFAULT_COUNTRY,
-} from "@/lib/apple-charts";
+
+import { fetchTopCharts, TRACKER_DEFAULT_COUNTRY } from "@/lib/apple-charts";
+import { TRACKAPP_METRICS_UNAVAILABLE_LABEL } from "@/lib/trackapp-real-metrics-only";
 
 const cachedFeaturedApps = unstable_cache(
   async () => fetchTopCharts(TRACKER_DEFAULT_COUNTRY, "top-free", 10),
-  ["tracker-featured-apps-v1"],
+  ["tracker-featured-apps-v2"],
   { revalidate: 900 },
 );
 
+/** @deprecated La landing utilise la recherche Trackapp ; pas de téléchargements estimés. */
 export async function GET() {
   try {
     const apps = await cachedFeaturedApps();
@@ -24,7 +23,7 @@ export async function GET() {
       artworkUrl: a.artworkUrl,
       rank: a.rank,
       releaseDate: a.releaseDate,
-      dlEst: estimateMonthlyDownloads(a.rank, TRACKER_DEFAULT_COUNTRY),
+      dlEst: TRACKAPP_METRICS_UNAVAILABLE_LABEL,
     }));
     return NextResponse.json(
       { apps: payload },

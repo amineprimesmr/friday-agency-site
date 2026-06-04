@@ -1,8 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
+import { TrackerAppArtwork } from "@/components/tracker/tracker-app-artwork";
 import { TrackerSearchBar } from "@/components/tracker/tracker-search-bar";
 import { useTrackappSearchHistory } from "@/hooks/use-trackapp-search-history";
 import type { CountryCode } from "@/lib/apple-charts";
@@ -18,8 +19,13 @@ type Props = Readonly<{
 
 /** Accueil — recherche mots-clés (API landing) + historique 5 apps sous la barre (style Trendtrack). */
 export function TrackappAccueilSearch({ country, initialQuery = "" }: Props) {
+  const router = useRouter();
   const history = useTrackappSearchHistory(country);
   const recent = history.entries.slice(0, 5);
+
+  const prefetchApp = (href: string) => {
+    router.prefetch(href);
+  };
 
   return (
     <div className="trackapp-accueil-search trackapp-accueil-search-host w-full min-w-0" data-search-surface="light">
@@ -43,7 +49,10 @@ export function TrackappAccueilSearch({ country, initialQuery = "" }: Props) {
               <Link
                 key={`${entry.country}:${entry.id}`}
                 href={trackappAccueilAppHref(entry.id, entry.country)}
+                prefetch
                 className="trackapp-accueil-recent__chip"
+                onPointerEnter={() => prefetchApp(trackappAccueilAppHref(entry.id, entry.country))}
+                onFocus={() => prefetchApp(trackappAccueilAppHref(entry.id, entry.country))}
                 onClick={() =>
                   history.recordApp({
                     id: entry.id,
@@ -54,12 +63,8 @@ export function TrackappAccueilSearch({ country, initialQuery = "" }: Props) {
                   })
                 }
               >
-                <span className="trackapp-accueil-recent__chip-icon">
-                  {entry.artworkUrl ? (
-                    <Image src={entry.artworkUrl} alt="" fill sizes="32px" className="object-cover" />
-                  ) : (
-                    <span aria-hidden>{entry.name.charAt(0)}</span>
-                  )}
+                <span className="trackapp-accueil-recent__chip-icon relative overflow-hidden">
+                  <TrackerAppArtwork url={entry.artworkUrl} name={entry.name} sizes="32px" />
                 </span>
                 <span className="trackapp-accueil-recent__chip-label">{entry.name}</span>
               </Link>

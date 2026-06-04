@@ -418,15 +418,16 @@
 
 .tracker-header-mobile-panel {
   position: fixed;
-  top: calc(var(--tracker-header-offset) + 0.25rem);
-  left: clamp(0.75rem, 4vw, 1.35rem);
-  right: clamp(0.75rem, 4vw, 1.35rem);
-  z-index: 5;
-  max-height: calc(100dvh - var(--tracker-header-offset) - 1.25rem);
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 6;
+  max-height: 100dvh;
   overflow: hidden auto;
   overscroll-behavior: contain;
-  border: 1px solid rgba(255, 255, 255, 0.84);
-  border-radius: 1.55rem;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.84);
+  border-radius: 0 0 1.55rem 1.55rem;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 247, 245, 0.985)),
     #f7f7f5;
@@ -439,11 +440,8 @@
 
 .tracker-header-mobile-scrim {
   position: fixed;
-  top: var(--tracker-header-offset);
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 4;
+  inset: 0;
+  z-index: 5;
   border: 0;
   padding: 0;
   cursor: pointer;
@@ -474,7 +472,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem 1rem 0.9rem 1.35rem;
+  padding: max(1rem, env(safe-area-inset-top, 0px)) 1rem 0.9rem 1.35rem;
 }
 
 .tracker-header-mobile-panel-head p {
@@ -509,7 +507,7 @@
 .tracker-header-mobile-nav {
   display: flex;
   flex-direction: column;
-  padding: 4.5rem 1.35rem 1.9rem;
+  padding: 0.35rem 1.35rem 0.5rem;
 }
 
 .tracker-header-mobile-link {
@@ -597,11 +595,7 @@
 
 @media (max-width: 380px) {
   .tracker-header-mobile-panel {
-    border-radius: 1.35rem;
-  }
-
-  .tracker-header-mobile-nav {
-    padding-top: 3rem;
+    border-radius: 0 0 1.35rem 1.35rem;
   }
 
   .tracker-header-mobile-link {

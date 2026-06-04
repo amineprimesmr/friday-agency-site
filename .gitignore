@@ -38,8 +38,15 @@ yarn-error.log*
 .env*
 !.env.example
 
+# Supabase CLI (lien local, pas versionné)
+supabase/.temp/
+
 # vercel
 .vercel
+
+# ressources générées (sync depuis Ressources/ au build)
+/public/trackapp-ressources/*
+!/public/trackapp-ressources/.gitkeep
 
 # typescript
 *.tsbuildinfo

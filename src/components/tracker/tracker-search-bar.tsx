@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { TrackerAppArtwork } from "@/components/tracker/tracker-app-artwork";
 import { TrackerNavLink, useTrackerNavStart } from "@/components/tracker/tracker-navigation";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/lib/utils";
@@ -20,6 +20,11 @@ import "@/styles/tracker-search-bar.css";
 
 import { abortInFlightRequest, isAbortError } from "@/lib/abort-signal";
 import { COUNTRY_MAP, TRACKER_DEFAULT_COUNTRY, type CountryCode } from "@/lib/apple-charts";
+import { trackappAccueilAppHref, trackappAccueilHref, trackappApercuAppHref } from "@/lib/trackapp-apptracker-paths";
+import {
+  TRACKAPP_SEARCH_SORT_OPTIONS,
+  type TrackappSearchSort,
+} from "@/lib/trackapp-smart-search/rank-results";
 
 export type TrackerSearchSurface = "dark" | "light";
 
@@ -52,7 +57,46 @@ type SearchHit = {
   /** Revenus ST (EUR) — API Trackapp live-search uniquement. */
   revenueDisplay?: string;
   metricSource?: string;
+  sortRevenueUsd?: number;
+  sortDownloads?: number;
 };
+
+function applySearchMetricsToHits(
+  hits: SearchHit[],
+  metrics: Record<
+    string,
+    {
+      revenueDisplay: string;
+      metricSource: string;
+      sortRevenueUsd: number;
+      sortDownloads: number;
+    }
+  >,
+  sort: TrackappSearchSort,
+): SearchHit[] {
+  const merged = hits.map((h) => {
+    const m = metrics[h.id];
+    if (!m) {
+      return {
+        ...h,
+        revenueDisplay: h.revenueDisplay === "…" ? "—" : (h.revenueDisplay ?? "—"),
+      };
+    }
+    return {
+      ...h,
+      revenueDisplay: m.revenueDisplay,
+      metricSource: m.metricSource,
+      sortRevenueUsd: m.sortRevenueUsd,
+      sortDownloads: m.sortDownloads,
+    };
+  });
+  if (sort === "revenue") {
+    merged.sort((a, b) => (b.sortRevenueUsd ?? 0) - (a.sortRevenueUsd ?? 0));
+  } else if (sort === "downloads") {
+    merged.sort((a, b) => (b.sortDownloads ?? 0) - (a.sortDownloads ?? 0));
+  }
+  return merged;
+}
 
 function formatReleaseMeta(raw: string) {
   if (!raw) return "";
@@ -74,6 +118,35 @@ function categorySlug(cat: string) {
   return c.length > 26 ? `${c.slice(0, 24)}…` : c;
 }
 
+/** Libellé catégorie lisible (recherche Trackapp). */
+function formatSearchCategoryLabel(cat: string) {
+  const c = cat.trim();
+  if (!c) return "";
+  return c.length > 32 ? `${c.slice(0, 30)}…` : c;
+}
+
+function searchRevenuePending(revenueDisplay: string | undefined): boolean {
+  return revenueDisplay === "…" || revenueDisplay === undefined;
+}
+
+function SearchRevenueValue({ revenueDisplay }: Readonly<{ revenueDisplay?: string }>) {
+  if (searchRevenuePending(revenueDisplay)) {
+    return (
+      <span className="tracker-search-revenue tracker-search-revenue--pending tabular-nums" aria-busy="true">
+        …
+      </span>
+    );
+  }
+  return (
+    <span
+      className="tracker-search-revenue tabular-nums"
+      title="Revenus mensuels estimés"
+    >
+      {revenueDisplay ?? "—"}
+    </span>
+  );
+}
+
 function calendarShort(raw: string) {
   if (!raw) return "";
   const d = new Date(raw);
@@ -91,7 +164,8 @@ export function TrackerSearchBar({
   onOpen,
   embedded = false,
   hideFeaturedWhenEmpty = false,
-  trackappLiveMetrics = false,
+  trackappLiveMetrics = true,
+  guestPreview = false,
   country,
   initialQuery = "",
   onNavigateToApp,
@@ -107,6 +181,8 @@ export function TrackerSearchBar({
   hideFeaturedWhenEmpty?: boolean;
   /** Accueil SaaS : revenus Sensor Tower dans les résultats (API `/api/trackapp/live-search`). */
   trackappLiveMetrics?: boolean;
+  /** Landing / aperçu invité : liens vers `/trackapp/apercu/[id]`. */
+  guestPreview?: boolean;
   country?: CountryCode;
   initialQuery?: string;
   /** Enregistre l’app dans l’historique Accueil avant navigation. */
@@ -121,6 +197,8 @@ export function TrackerSearchBar({
   const router = useRouter();
   const isLg = useMediaQuery("(min-width: 1024px)");
   const reduceMotion = useReducedMotion();
+  const isCoarseMobile = useMediaQuery("(max-width: 1023px)");
+  const motionLite = Boolean(reduceMotion || isCoarseMobile);
   const listId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const stackRef = useRef<HTMLDivElement>(null);
@@ -131,21 +209,38 @@ export function TrackerSearchBar({
   const storeCc = storeCountry.toUpperCase();
   const storeCountryName = COUNTRY_MAP[storeCountry].name;
 
+  const useTrackappAccueilRoutes = embedded || trackappLiveMetrics;
+
   const appDetailHref = useCallback(
-    (appId: string) =>
-      embedded
-        ? `/trackapp/accueil/${appId}?country=${storeCountry}`
-        : `/tracker/apps/${appId}?country=${storeCountry}`,
-    [embedded, storeCountry],
+    (appId: string) => {
+      if (guestPreview) return trackappApercuAppHref(appId, storeCountry);
+      if (useTrackappAccueilRoutes) return trackappAccueilAppHref(appId, storeCountry);
+      return `/tracker/apps/${appId}?country=${storeCountry}`;
+    },
+    [guestPreview, useTrackappAccueilRoutes, storeCountry],
   );
 
   const [query, setQuery] = useState(initialQuery);
   const [debouncedQ, setDebouncedQ] = useState(initialQuery.trim());
+
+  useEffect(() => {
+    setQuery(initialQuery);
+    setDebouncedQ(initialQuery.trim());
+    if (!initialQuery.trim()) {
+      setSearchHits([]);
+      setSearchLoading(false);
+    }
+  }, [initialQuery]);
   const [featuredLoading, setFeaturedLoading] = useState(true);
   const [featured, setFeatured] = useState<FeaturedAppLite[]>([]);
   const [searchHits, setSearchHits] = useState<SearchHit[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [highlight, setHighlight] = useState(0);
+  const [sort, setSort] = useState<TrackappSearchSort>("relevance");
+
+  /** Tri visible uniquement sur l’Accueil workspace — pas sur la landing. */
+  const showSearchSort = trackappLiveMetrics && embedded;
+  const searchSort: TrackappSearchSort = showSearchSort ? sort : "relevance";
 
   const featuredSorted = useMemo(
     () => [...featured].sort((a, b) => a.rank - b.rank),
@@ -236,13 +331,43 @@ export function TrackerSearchBar({
     setSearchLoading(true);
     void (async () => {
       try {
-        const searchPath = trackappLiveMetrics
-          ? `/api/trackapp/live-search?q=${encodeURIComponent(debouncedQ)}&country=${storeCountry}&limit=12`
-          : `/api/tracker/search?q=${encodeURIComponent(debouncedQ)}&country=${storeCountry}&limit=12`;
-        const res = await fetch(searchPath, { signal: ac.signal, cache: "no-store" });
-        const data = (await res.json()) as { apps?: SearchHit[] };
-        if (!ac.signal.aborted) {
-          setSearchHits(Array.isArray(data.apps) ? data.apps : []);
+        const quickPath = `/api/trackapp/live-search?q=${encodeURIComponent(debouncedQ)}&country=${storeCountry}&limit=12&sort=${searchSort}&quick=1`;
+        const quickRes = await fetch(quickPath, { signal: ac.signal, cache: "no-store" });
+        const quickData = (await quickRes.json()) as { apps?: SearchHit[] };
+        const quickHits = Array.isArray(quickData.apps) ? quickData.apps : [];
+        if (ac.signal.aborted) return;
+        setSearchHits(quickHits);
+        setSearchLoading(false);
+
+        const ids = quickHits.map((a) => a.id).filter(Boolean);
+        if (ids.length === 0) return;
+
+        try {
+          const metricsRes = await fetch("/api/trackapp/search-metrics", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ appIds: ids, country: storeCountry }),
+            signal: ac.signal,
+            cache: "no-store",
+          });
+          const metricsData = (await metricsRes.json()) as {
+            metrics?: Record<
+              string,
+              {
+                revenueDisplay: string;
+                metricSource: string;
+                sortRevenueUsd: number;
+                sortDownloads: number;
+              }
+            >;
+          };
+          if (ac.signal.aborted) return;
+          setSearchHits((prev) =>
+            applySearchMetricsToHits(prev, metricsData.metrics ?? {}, searchSort),
+          );
+        } catch (metricsErr) {
+          if (isAbortError(metricsErr) || ac.signal.aborted) return;
+          setSearchHits((prev) => applySearchMetricsToHits(prev, {}, searchSort));
         }
       } catch (e) {
         if (isAbortError(e) || ac.signal.aborted) return;
@@ -252,7 +377,7 @@ export function TrackerSearchBar({
       }
     })().catch(() => undefined);
     return () => abortInFlightRequest(ac);
-  }, [debouncedQ, storeCountry, trackappLiveMetrics]);
+  }, [debouncedQ, storeCountry, searchSort]);
 
   useEffect(() => {
     setHighlight(0);
@@ -338,12 +463,20 @@ export function TrackerSearchBar({
     }
     if (!q) {
       startTrackerNav?.();
-      router.push(`/tracker/search?country=${storeCountry}`);
+      router.push(
+        useTrackappAccueilRoutes
+          ? trackappAccueilHref({ country: storeCountry })
+          : `/tracker/search?country=${storeCountry}`,
+      );
       onClose();
       return;
     }
     startTrackerNav?.();
-    router.push(`/tracker/search?q=${encodeURIComponent(q)}&country=${storeCountry}`);
+    router.push(
+      useTrackappAccueilRoutes
+        ? trackappAccueilHref({ country: storeCountry, q })
+        : `/tracker/search?q=${encodeURIComponent(q)}&country=${storeCountry}`,
+    );
     onClose();
   }
 
@@ -472,7 +605,54 @@ export function TrackerSearchBar({
               }}
               onKeyDown={onInputKeyDown}
             />
-            {!isLg ? (
+            {showSearchSort ? (
+              <>
+                <span className="tracker-search-pill-divider" aria-hidden />
+                <label className="sr-only" htmlFor="tracker-search-sort">
+                  Trier les résultats
+                </label>
+                <select
+                  id="tracker-search-sort"
+                  className="tracker-search-sort"
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value as TrackappSearchSort)}
+                  aria-label="Trier les résultats"
+                >
+                  {TRACKAPP_SEARCH_SORT_OPTIONS.map((opt) => (
+                    <option key={opt.id} value={opt.id}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </>
+            ) : null}
+            {query.trim() && (embedded || !isLg) ? (
+              <button
+                type="button"
+                className="tracker-search-pill-dismiss"
+                onClick={() => {
+                  setQuery("");
+                  setSearchHits([]);
+                  setSearchLoading(false);
+                }}
+                aria-label="Effacer la recherche"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.25"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                >
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            ) : null}
+            {!isLg && !embedded ? (
               <button
                 type="button"
                 className="tracker-search-pill-dismiss"
@@ -538,15 +718,8 @@ export function TrackerSearchBar({
                 {!showSearchSkeleton &&
                 showSearchResults &&
                 searchHits.map((app, idx) => {
-                  const chips = [
-                    app.langLabel,
-                    categorySlug(app.category),
-                  ].filter(Boolean);
-                  const timeLine = app.releaseLine || formatReleaseMeta(app.releaseDate);
-                  const dateCal = calendarShort(app.releaseDate);
-                  const ratingStr =
-                    app.rating > 0 ? app.rating.toFixed(1) : "—";
                   const selected = idx === highlight;
+                  const categoryLabel = formatSearchCategoryLabel(app.category);
 
                   return (
                     <TrackerNavLink
@@ -554,7 +727,7 @@ export function TrackerSearchBar({
                       id={`${listId}-nav-s-${String(idx)}`}
                       role="listitem"
                       href={appDetailHref(app.id)}
-                      className={`tracker-search-row tracker-search-row--dark tracker-touch ${selected ? "tracker-search-row--active" : "tracker-rise"}`}
+                      className={`tracker-search-row tracker-search-row--dark tracker-search-row--live tracker-touch ${selected ? "tracker-search-row--active" : "tracker-rise"}`}
                       style={
                         selected
                           ? undefined
@@ -568,90 +741,28 @@ export function TrackerSearchBar({
                       }}
                     >
                       <div className="tracker-search-row-art relative bg-zinc-800">
-                        {app.artworkUrl ? (
-                          <Image
-                            src={app.artworkUrl}
-                            alt=""
-                            fill
-                            className="object-cover"
-                            sizes="52px"
-                          />
-                        ) : (
-                          <span className="flex h-full w-full items-center justify-center text-lg font-bold text-zinc-500">
-                            {app.name.charAt(0)}
-                          </span>
-                        )}
+                        <TrackerAppArtwork
+                          url={app.artworkUrl}
+                          name={app.name}
+                          sizes="52px"
+                          letterClassName="text-lg text-zinc-500"
+                        />
                       </div>
 
-                      <div className="tracker-search-row-main tracker-search-row-main--grow min-w-0">
-                        <div className="tracker-search-row-headline">
-                          <div className="min-w-0">
-                            <div className="tracker-search-row-title tracker-search-row-title--dark">
-                              {app.name}
-                            </div>
-                            <div className="tracker-search-row-dev tracker-search-row-dev--dark">
-                              {app.artistName}
-                            </div>
-                          </div>
-                          <div className="tracker-search-row-badges">
-                            {chips.map((c, chipIdx) => (
-                              <span key={`${String(chipIdx)}-${c}`} className="tracker-search-chip tracker-search-chip--dark">
-                                {c}
-                              </span>
-                            ))}
-                          </div>
+                      <div className="tracker-search-row-main tracker-search-row-main--live min-w-0 flex-1">
+                        <div className="tracker-search-row-title tracker-search-row-title--dark line-clamp-2">
+                          {app.name}
                         </div>
-                        {!embedded ? (
-                          <div className="tracker-search-meta tracker-search-meta--dark">
-                            <span className="inline-flex items-center gap-1">
-                              <span aria-hidden>🕐</span>
-                              {timeLine || " — "}
-                            </span>
-                            <span className="inline-flex items-center gap-1 opacity-90">
-                              <span aria-hidden>📅</span>
-                              {dateCal || " — "}
-                            </span>
-                          </div>
+                        {categoryLabel ? (
+                          <span className="tracker-search-chip tracker-search-chip--dark tracker-search-chip--category mt-1.5 inline-block max-w-full truncate">
+                            {categoryLabel}
+                          </span>
                         ) : null}
                       </div>
 
-                      {!embedded || app.rating > 0 || (trackappLiveMetrics && app.revenueDisplay) ? (
-                        <div className="tracker-search-stat-col tracker-search-stat-col--dark">
-                          {!embedded ? (
-                            <div className="tracker-search-stat-num tracker-search-stat-num--dark">
-                              {app.dlEst}
-                            </div>
-                          ) : trackappLiveMetrics ? (
-                            <div
-                              className="tracker-search-stat-num tracker-search-stat-num--dark text-[0.82rem] leading-tight"
-                              title={
-                                app.metricSource === "agrégé monde / mois"
-                                  ? "Revenus mensuels agrégés (Sensor Tower)"
-                                  : "Revenus indisponibles pour cette app"
-                              }
-                            >
-                              {app.revenueDisplay ?? "—"}
-                            </div>
-                          ) : null}
-                          {app.rating > 0 ? (
-                            <div className="flex items-center justify-end gap-1 text-xs font-semibold tabular-nums text-white/88">
-                              <span>{ratingStr}</span>
-                              <span className="text-amber-400" aria-hidden>
-                                ★
-                              </span>
-                            </div>
-                          ) : null}
-                          {!embedded ? (
-                            <div className="tracker-search-stat-sub tracker-search-stat-sub--dark">
-                              Tél. estimés
-                            </div>
-                          ) : trackappLiveMetrics ? (
-                            <div className="tracker-search-stat-sub tracker-search-stat-sub--dark">
-                              Rev. / mois
-                            </div>
-                          ) : null}
-                        </div>
-                      ) : null}
+                      <div className="tracker-search-stat-col tracker-search-stat-col--live shrink-0 self-center">
+                        <SearchRevenueValue revenueDisplay={app.revenueDisplay} />
+                      </div>
 
                       <span className="tracker-search-chevron tracker-search-chevron--dark" aria-hidden>
                         ›
@@ -685,10 +796,7 @@ export function TrackerSearchBar({
                     ) : null}
 
                     {featuredSorted.map((app, idx) => {
-                      const chips = [`${storeCc} · #${String(app.rank)}`, categorySlug(app.category)].filter(
-                        Boolean,
-                      );
-                      const meta = formatReleaseMeta(app.releaseDate);
+                      const categoryLabel = formatSearchCategoryLabel(app.category);
                       const selected = idx === highlight;
 
                       return (
@@ -697,7 +805,7 @@ export function TrackerSearchBar({
                           id={`${listId}-nav-f-${String(idx)}`}
                           role="listitem"
                           href={appDetailHref(app.id)}
-                          className={`tracker-search-row tracker-search-row--dark tracker-touch ${selected ? "tracker-search-row--active" : "tracker-rise"}`}
+                          className={`tracker-search-row tracker-search-row--dark tracker-search-row--live tracker-touch ${selected ? "tracker-search-row--active" : "tracker-rise"}`}
                           style={
                             selected
                               ? undefined
@@ -710,59 +818,18 @@ export function TrackerSearchBar({
                           }}
                         >
                           <div className="tracker-search-row-art relative bg-zinc-800">
-                            {app.artworkUrl ? (
-                              <Image
-                                src={app.artworkUrl}
-                                alt=""
-                                fill
-                                className="object-cover"
-                                sizes="52px"
-                              />
-                            ) : (
-                              <span className="flex h-full w-full items-center justify-center text-lg font-bold text-zinc-500">
-                                {app.name.charAt(0)}
-                              </span>
-                            )}
+                            <TrackerAppArtwork url={app.artworkUrl} name={app.name} sizes="52px" letterClassName="text-lg text-zinc-500" />
                           </div>
 
-                          <div className="tracker-search-row-main">
-                            <div className="tracker-search-row-title tracker-search-row-title--dark">
+                          <div className="tracker-search-row-main tracker-search-row-main--live min-w-0 flex-1">
+                            <div className="tracker-search-row-title tracker-search-row-title--dark line-clamp-2">
                               {app.name}
                             </div>
-                            <div className="tracker-search-row-dev tracker-search-row-dev--dark">
-                              {app.artistName}
-                            </div>
-                            <div className="tracker-search-row-tags">
-                              {chips.map((c) => (
-                                <span key={c} className="tracker-search-chip tracker-search-chip--dark">
-                                  {c}
-                                </span>
-                              ))}
-                            </div>
-                            {!embedded ? (
-                              <div className="tracker-search-meta tracker-search-meta--dark">
-                                <span className="inline-flex items-center gap-1">
-                                  <span aria-hidden>📅</span>
-                                  {meta || " — "}
-                                </span>
-                                <span className="inline-flex items-center gap-1 opacity-85">
-                                  <span aria-hidden>⬇</span>
-                                  Tél. estimés
-                                </span>
-                              </div>
-                            ) : null}
+                            <span className="tracker-search-chip tracker-search-chip--dark tracker-search-chip--category mt-1.5 inline-block">
+                              {`${storeCc} · #${String(app.rank)}`}
+                              {categoryLabel ? ` · ${categoryLabel}` : ""}
+                            </span>
                           </div>
-
-                          {!embedded ? (
-                            <div className="tracker-search-stat-col tracker-search-stat-col--dark">
-                              <div className="tracker-search-stat-num tracker-search-stat-num--dark">
-                                {app.dlEst}
-                              </div>
-                              <div className="tracker-search-stat-sub tracker-search-stat-sub--dark">
-                                / mois · {storeCountryName}
-                              </div>
-                            </div>
-                          ) : null}
 
                           <span className="tracker-search-chevron tracker-search-chevron--dark" aria-hidden>
                             ›
@@ -792,7 +859,11 @@ export function TrackerSearchBar({
                     </span>
                   </div>
                   <TrackerNavLink
-                    href={`/tracker/search?country=${storeCountry}`}
+                    href={
+                      useTrackappAccueilRoutes
+                        ? trackappAccueilHref({ country: storeCountry })
+                        : `/tracker/search?country=${storeCountry}`
+                    }
                     className="tracker-search-advanced-link"
                     onClick={() => onClose()}
                   >
@@ -809,14 +880,12 @@ export function TrackerSearchBar({
     return <div className="tracker-search-desktop-host w-full">{searchStack}</div>;
   }
 
-  const sheetEase = reduceMotion
+  const sheetEase = motionLite
     ? { duration: 0.14 }
     : { type: "spring" as const, stiffness: 420, damping: 34, mass: 0.78 };
-  const sheetEnter = reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: -26, scale: 0.966 };
-  const sheetExit = reduceMotion
-    ? { opacity: 0 }
-    : { opacity: 0, y: -16, scale: 0.978 };
-  const fadeEase = reduceMotion
+  const sheetEnter = motionLite ? { opacity: 1, y: 0 } : { opacity: 0, y: -26, scale: 0.966 };
+  const sheetExit = motionLite ? { opacity: 0 } : { opacity: 0, y: -16, scale: 0.978 };
+  const fadeEase = motionLite
     ? { duration: 0.12 }
     : { duration: 0.32, ease: [0.22, 1, 0.36, 1] as const };
 

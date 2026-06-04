@@ -1,0 +1,159 @@
+.trackapp-user-chip {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.trackapp-user-chip__trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: min(220px, 42vw);
+  padding: 0.28rem 0.45rem 0.28rem 0.28rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.55);
+  color: rgba(248, 250, 252, 0.95);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.trackapp-user-chip__trigger:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(30, 41, 59, 0.72);
+}
+
+.trackapp-user-chip__trigger:focus-visible {
+  outline: 2px solid rgba(96, 165, 250, 0.65);
+  outline-offset: 2px;
+}
+
+.trackapp-user-chip__avatar {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  overflow: hidden;
+  border-radius: 50%;
+  background: rgba(30, 41, 59, 0.9);
+}
+
+.trackapp-user-chip__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.trackapp-user-chip__avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.trackapp-user-chip__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  text-align: left;
+}
+
+.trackapp-user-chip__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 9rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.trackapp-user-chip__name--compact {
+  max-width: 6.5rem;
+}
+
+.trackapp-user-chip__email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 9rem;
+  font-size: 0.65rem;
+  line-height: 1.2;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+.trackapp-user-chip__email--muted {
+  color: rgba(148, 163, 184, 0.75);
+}
+
+.trackapp-user-chip__chevron {
+  flex-shrink: 0;
+  width: 0.35rem;
+  height: 0.35rem;
+  margin-right: 0.15rem;
+  border-right: 1.5px solid rgba(148, 163, 184, 0.9);
+  border-bottom: 1.5px solid rgba(148, 163, 184, 0.9);
+  transform: rotate(45deg) translateY(-1px);
+}
+
+.trackapp-user-chip__dropdown {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.35rem);
+  z-index: 40;
+  min-width: 10.5rem;
+  padding: 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.65rem;
+  background: rgba(15, 23, 42, 0.98);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+.trackapp-user-chip--studio-topbar .trackapp-user-chip__dropdown {
+  top: calc(100% + 0.35rem);
+  bottom: auto;
+}
+
+.trackapp-user-chip__dropdown a {
+  display: block;
+  padding: 0.5rem 0.65rem;
+  border-radius: 0.45rem;
+  font-size: 0.82rem;
+  color: rgba(248, 250, 252, 0.92);
+  text-decoration: none;
+}
+
+.trackapp-user-chip__dropdown a:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.trackapp-user-chip__dropdown a.danger {
+  color: #fca5a5;
+}
+
+.trackapp-user-chip--studio-sidebar {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.trackapp-user-chip--studio-sidebar .trackapp-user-chip__trigger {
+  width: 100%;
+  max-width: none;
+  border-radius: 0.75rem;
+  padding: 0.55rem 0.6rem;
+}
+
+.trackapp-user-chip--studio-sidebar .trackapp-user-chip__name,
+.trackapp-user-chip--studio-sidebar .trackapp-user-chip__email {
+  max-width: 11rem;
+}
+
+.trackapp-user-chip--studio-topbar .trackapp-user-chip__trigger {
+  max-width: none;
+  padding-right: 0.55rem;
+}
+

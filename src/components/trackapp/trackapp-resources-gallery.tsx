@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
-import { TrackappResourceFavoriteButton } from "@/components/trackapp/trackapp-resource-favorite-button";
 import type { TrackappResourceRow } from "@/lib/trackapp-ressources/scan";
 import { cn } from "@/lib/utils";
 
@@ -21,8 +20,10 @@ function formatBytes(n: number | null): string {
   return `${v.toFixed(decimals).replace(/\.0+$/, "")} ${units[i]}`;
 }
 
+import { resourcePublicPath } from "@/lib/trackapp-ressources/public-urls";
+
 function mediaUrl(filename: string): string {
-  return `/api/trackapp/ressources/file/${encodeURIComponent(filename)}`;
+  return resourcePublicPath(filename);
 }
 
 function previewVideoUrl(filename: string): string {
@@ -79,50 +80,62 @@ function LazyResourceVideo({ filename, title }: Readonly<{ filename: string; tit
 export function TrackappResourcesGallery({
   items,
   configured,
-  favoriteIds = [],
-  enableFavorites = false,
-  initialFavoritesOnly = false,
+  embedded = false,
+  studio = false,
 }: Readonly<{
   items: TrackappResourceRow[];
   configured: boolean;
-  favoriteIds?: string[];
-  enableFavorites?: boolean;
-  /** Ouvre directement la vue « favoris seulement » (page Favoris → Ressources). */
-  initialFavoritesOnly?: boolean;
+  embedded?: boolean;
+  studio?: boolean;
 }>) {
   const [query, setQuery] = useState("");
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(initialFavoritesOnly);
   const deferred = useDeferredValue(query.trim().toLowerCase());
-  const favoriteSet = useMemo(() => new Set(favoriteIds), [favoriteIds]);
-  const visibleItems = useMemo(() => {
-    if (!showFavoritesOnly) return items;
-    return items.filter((row) => favoriteSet.has(row.id));
-  }, [favoriteSet, items, showFavoritesOnly]);
 
   const filtered = useMemo(() => {
-    if (!deferred) return visibleItems;
-    return visibleItems.filter((row) => {
+    if (!deferred) return items;
+    return items.filter((row) => {
       const hay = `${row.title} ${row.videoFile}`.toLowerCase();
       return hay.includes(deferred);
     });
-  }, [deferred, visibleItems]);
+  }, [deferred, items]);
 
   const zipCount = useMemo(() => items.filter((r) => r.zipFile).length, [items]);
 
   return (
-    <div className="trackapp-resources-root relative overflow-hidden">
+    <div className={cn("trackapp-resources-root relative overflow-hidden", studio && "trackapp-resources-root--studio")}>
 
-      <section className="dashboard-section relative">
+      <section className={embedded ? undefined : "dashboard-section relative"}>
         <motion.div
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         >
-          <p className="trackapp-workspace-hero-kicker">Bibliothèque</p>
-          <h1 className="trackapp-workspace-hero-title">Ressources vidéo</h1>
-          <p className="trackapp-workspace-hero-desc max-w-[62ch]">
-            Démos UI et packs sources associés. Ajoute tes vidéos préférées en favoris et filtre-les ici, sans changer de page.
-          </p>
+          {embedded ? (
+            <>
+              <h2
+                id={studio ? "ta-home-resources-title" : undefined}
+                className={cn(
+                  "m-0 font-bold tracking-tight",
+                  studio ? "ta-applab-home-sections__title" : "text-[1.35rem] text-[var(--dash-text)]",
+                )}
+              >
+                Ressources vidéo
+              </h2>
+              {studio ? (
+                <p className="ta-applab-home-sections__desc">
+                  Démos UI et packs sources — télécharge les archives ZIP pour builder avec l&apos;IA.
+                </p>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <p className="trackapp-workspace-hero-kicker">Bibliothèque</p>
+              <h1 className="trackapp-workspace-hero-title">Ressources vidéo</h1>
+              <p className="trackapp-workspace-hero-desc max-w-[62ch]">
+                Démos UI et packs sources associés. Parcours la bibliothèque et télécharge les ZIP.
+              </p>
+            </>
+          )}
         </motion.div>
 
         {!configured ? (
@@ -132,19 +145,19 @@ export function TrackappResourcesGallery({
             className="trackapp-content-card mt-6 border-dashed border-[var(--dash-border-light)] bg-[var(--dash-surface-2)]"
           >
             <p className="trackapp-content-summary m-0 text-[var(--dash-text-secondary)]">
-              Aucun dossier média détecté. Place tes fichiers dans{" "}
-              <code className="rounded-md bg-white px-1.5 py-0.5 text-[0.8rem] text-[var(--dash-text)] shadow-sm ring-1 ring-[var(--dash-border)]">
+              Aucun dossier média détecté. Placez vos fichiers dans{" "}
+              <code className="rounded-md bg-[var(--ui-surface-soft)] px-1.5 py-0.5 text-[0.8rem] text-[var(--dash-text)] shadow-sm ring-1 ring-[var(--dash-border)]">
+                Ressources/
+              </code>{" "}
+              à la racine du projet,{" "}
+              <code className="rounded-md bg-[var(--ui-surface-soft)] px-1.5 py-0.5 text-[0.8rem] text-[var(--dash-text)] shadow-sm ring-1 ring-[var(--dash-border)]">
                 ~/Desktop/Ressources
               </code>{" "}
-              sur ce Mac, ou définis{" "}
-              <code className="rounded-md bg-white px-1.5 py-0.5 text-[0.8rem] text-[var(--dash-text)] shadow-sm ring-1 ring-[var(--dash-border)]">
-                TRACKAPP_RESOURCES_DIR
-              </code>{" "}
-              vers ton répertoire (sur serveur : copie dans{" "}
-              <code className="rounded-md bg-white px-1.5 py-0.5 text-[0.8rem] text-[var(--dash-text)] shadow-sm ring-1 ring-[var(--dash-border)]">
+              sur ce Mac, ou{" "}
+              <code className="rounded-md bg-[var(--ui-surface-soft)] px-1.5 py-0.5 text-[0.8rem] text-[var(--dash-text)] shadow-sm ring-1 ring-[var(--dash-border)]">
                 public/trackapp-ressources
-              </code>
-              ).
+              </code>{" "}
+              en prod.
             </p>
           </motion.div>
         ) : null}
@@ -158,40 +171,12 @@ export function TrackappResourcesGallery({
           <div className="flex flex-wrap gap-2">
             <span className="dashboard-badge dashboard-badge-purple">{items.length} vidéos</span>
             <span className="dashboard-badge dashboard-badge-success">{zipCount} archives ZIP</span>
-            {enableFavorites ? (
-              <span className="dashboard-badge dashboard-badge-warning">{favoriteIds.length} favoris</span>
-            ) : null}
-            {filtered.length !== visibleItems.length ? (
+            {filtered.length !== items.length ? (
               <span className="dashboard-badge dashboard-badge-warning">{filtered.length} affichées</span>
             ) : null}
           </div>
 
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
-            {enableFavorites ? (
-              <div className="inline-flex rounded-full border border-[var(--dash-border)] bg-white p-1 shadow-[var(--dash-shadow)]">
-                <button
-                  type="button"
-                  onClick={() => setShowFavoritesOnly(false)}
-                  className={cn(
-                    "rounded-full px-3 py-1.5 text-[0.78rem] font-bold transition",
-                    !showFavoritesOnly ? "bg-slate-950 text-white" : "text-slate-500 hover:text-slate-900",
-                  )}
-                >
-                  Toutes
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowFavoritesOnly(true)}
-                  className={cn(
-                    "rounded-full px-3 py-1.5 text-[0.78rem] font-bold transition",
-                    showFavoritesOnly ? "bg-slate-950 text-white" : "text-slate-500 hover:text-slate-900",
-                  )}
-                >
-                  Favoris
-                </button>
-              </div>
-            ) : null}
-
             <label className="relative flex w-full max-w-md items-center sm:w-auto">
               <span className="visually-hidden">Filtrer</span>
               <svg
@@ -211,7 +196,7 @@ export function TrackappResourcesGallery({
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filtrer par titre ou fichier…"
                 autoComplete="off"
-                className="w-full rounded-full border border-[var(--dash-border)] bg-white py-2.5 pr-4 pl-10 text-[0.9rem] text-[var(--dash-text)] shadow-[var(--dash-shadow)] outline-none transition-[box-shadow,border-color] duration-200 placeholder:text-[var(--dash-muted-light)] focus:border-[rgba(124,58,237,0.45)] focus:ring-[3px] focus:ring-[rgba(124,58,237,0.15)]"
+                className="trackapp-ui-input w-full py-2.5 pr-4 pl-10 text-[0.9rem] shadow-[var(--dash-shadow)] transition-[box-shadow,border-color] duration-200"
               />
             </label>
           </div>
@@ -249,11 +234,6 @@ export function TrackappResourcesGallery({
               className="group relative flex h-full flex-col overflow-hidden rounded-[var(--dash-radius-xl)] border border-[var(--dash-border)] bg-[var(--dash-surface)] shadow-[var(--dash-shadow)] transition-[border-color,box-shadow,transform] duration-300 ease-out hover:-translate-y-0.5 hover:border-[rgba(124,58,237,0.35)] hover:shadow-[var(--dash-shadow-lg)]"
             >
               <div className="relative aspect-video w-full overflow-hidden bg-[#0b0f18]">
-                {enableFavorites ? (
-                  <div className="absolute right-2 top-2 z-[4]">
-                    <TrackappResourceFavoriteButton designId={row.id} initialFavorite={favoriteIds.includes(row.id)} />
-                  </div>
-                ) : null}
                 <div
                   className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                   style={{
@@ -297,12 +277,12 @@ export function TrackappResourcesGallery({
 
       {configured && filtered.length === 0 ? (
         <p className="dashboard-hint mt-10 text-center text-[0.95rem]">
-          {showFavoritesOnly ? "Aucune vidéo en favori pour le moment." : "Aucun résultat pour cette recherche."}
+          Aucun résultat pour cette recherche.
         </p>
       ) : null}
 
       <p className="dashboard-hint mt-12 text-center text-[0.8rem]">
-        Les fichiers sont servis depuis ton dossier configuré ; en production, utilise{" "}
+        Les fichiers sont servis depuis votre dossier configuré ; en production, utilisez{" "}
         <code className="rounded bg-[var(--dash-surface-2)] px-1 py-0.5">TRACKAPP_RESOURCES_DIR</code> ou des fichiers dans{" "}
         <code className="rounded bg-[var(--dash-surface-2)] px-1 py-0.5">public/trackapp-ressources</code>.
       </p>

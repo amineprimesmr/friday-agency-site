@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo } from "react";
-import { estimateMonthlyDownloads, type AppEntry, type CountryCode } from "@/lib/apple-charts";
-import Image from "next/image";
+import type { AppEntry, CountryCode } from "@/lib/apple-charts";
 import type { OfficialBrandPresenceContext } from "@/lib/official-brand-presence-context";
+import { TrackerAppArtwork } from "@/components/tracker/tracker-app-artwork";
 import { TrackerNavLink } from "@/components/tracker/tracker-navigation";
 import { SocialPresenceStrip } from "@/components/tracker/pixel-integrations-panel";
 
@@ -64,10 +64,10 @@ export function SimilarShopsCarousel({
           <p className="mt-0.5 text-sm text-neutral-600">{categoryLabel}</p>
         </div>
         <TrackerNavLink
-          href={`/tracker/top-charts?country=${country}`}
+          href={`/trackapp/apptracker?country=${country}`}
           className="text-xs font-semibold text-neutral-600 underline-offset-2 hover:underline"
         >
-          Voir plus ↗
+          Explorer ↗
         </TrackerNavLink>
       </div>
 
@@ -78,18 +78,12 @@ export function SimilarShopsCarousel({
           {peers.map((app) => (
             <TrackerNavLink
               key={app.id}
-              href={`/tracker/apps/${app.id}?country=${country}&tab=official`}
+              href={`/trackapp/accueil/${app.id}?country=${country}`}
               className="flex w-[min(100vw-2rem,240px)] shrink-0 flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-50/50 transition hover:border-neutral-300 hover:bg-white"
             >
               <div className="flex items-center gap-2 border-b border-neutral-100 px-3 py-2">
                 <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg ring-1 ring-neutral-200">
-                  {app.artworkUrl ? (
-                    <Image src={app.artworkUrl} alt="" fill className="object-cover" sizes="36px" />
-                  ) : (
-                    <span className="flex h-full w-full items-center justify-center bg-neutral-200 text-xs font-bold text-neutral-600">
-                      {app.name.charAt(0)}
-                    </span>
-                  )}
+                  <TrackerAppArtwork url={app.artworkUrl} name={app.name} sizes="36px" letterClassName="bg-neutral-200 text-xs text-neutral-600" />
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[13px] font-semibold text-neutral-900">{app.name}</p>
@@ -98,13 +92,11 @@ export function SimilarShopsCarousel({
                 <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" title="Suggéré" aria-hidden />
               </div>
               <div className="relative mx-2 mt-2 aspect-[16/10] overflow-hidden rounded-xl bg-neutral-200">
-                {app.artworkUrl ? (
-                  <Image src={app.artworkUrl} alt="" fill className="object-cover" sizes="220px" />
-                ) : null}
+                <TrackerAppArtwork url={app.artworkUrl} name={app.name} sizes="220px" />
               </div>
               <div className="mt-auto flex flex-wrap gap-1.5 px-3 py-3">
                 <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-medium text-neutral-600 ring-1 ring-neutral-200">
-                  ~{estimateMonthlyDownloads(app.rank, country)}/mois
+                  {app.category || "App"}
                 </span>
               </div>
             </TrackerNavLink>

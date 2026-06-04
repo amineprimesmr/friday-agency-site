@@ -6,7 +6,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
 import { TrackappPaymentFlow } from "@/components/trackapp/trackapp-payment-flow";
 
-/** Modale bureau uniquement — le mobile va sur `/trackapp/paiement` (page pleine). */
+/** Modale plein écran pour choisir un plan Trackapp. */
 export function TrackappPaymentOverlay({
   open,
   onClose,

@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "session_id obligatoire." }, { status: 400 });
   }
   if (firstName.length < 2) {
-    return NextResponse.json({ error: "Indique ton prénom (2 caractères minimum)." }, { status: 400 });
+    return NextResponse.json({ error: "Indiquez votre prénom (2 caractères minimum)." }, { status: 400 });
   }
   if (!email.includes("@") || email.length < 5) {
     return NextResponse.json({ error: "E-mail invalide." }, { status: 400 });
@@ -94,7 +94,7 @@ export async function POST(req: Request) {
       {
         error:
           status === 409 ?
-            "Un compte existe déjà avec cet e-mail. Connecte-toi pour lier ton abonnement."
+            "Un compte existe déjà avec cet e-mail. Connectez-vous pour lier votre abonnement."
           : msg,
       },
       { status },

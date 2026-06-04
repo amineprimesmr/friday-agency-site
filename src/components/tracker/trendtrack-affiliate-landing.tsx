@@ -10,27 +10,27 @@ import "@/styles/trendtrack-affiliate.css";
 const FAQ_ITEMS: { q: string; a: string }[] = [
   {
     q: "À quelle fréquence les paiements sont effectués ?",
-    a: "Les commissions sont consolidées chaque mois et versées selon le calendrier indiqué dans ton espace affilié une fois le seuil minimal atteint.",
+    a: "Les commissions sont consolidées chaque mois et versées selon le calendrier indiqué dans votre espace affilié une fois le seuil minimal atteint.",
   },
   {
     q: "Comment suivre les inscriptions que j'ai référées ?",
-    a: "Tu accèdes à un tableau de bord avec les clics, essais et conversions attribués à ton lien ou à ton code promo.",
+    a: "Vous accédez à un tableau de bord avec les clics, essais et conversions attribués à votre lien ou à votre code promo.",
   },
   {
     q: "Le code promo tracke-t-il les affiliés même s'ils n'utilisent pas le lien affilié ?",
-    a: "Oui, lorsque le code est saisi au moment du souscription, la vente est attribuée à ton compte affilié.",
+    a: "Oui, lorsque le code est saisi au moment du souscription, la vente est attribuée à votre compte affilié.",
   },
   {
     q: "Est-ce que je peux faire de la pub avec mon lien affilié ?",
-    a: "Tu peux promouvoir ton lien dans le respect des règles Trackapp et des lois en vigueur (transparence, pas de spam, etc.).",
+    a: "Vous pouvez promouvoir votre lien dans le respect des règles Trackapp et des lois en vigueur (transparence, pas de spam, etc.).",
   },
   {
     q: "Comment fonctionne le tracking des liens ?",
-    a: "Un identifiant unique est associé à ton lien ; les visites et conversions sont mesurées côté serveur de façon sécurisée.",
+    a: "Un identifiant unique est associé à votre lien ; les visites et conversions sont mesurées côté serveur de façon sécurisée.",
   },
   {
     q: "D'autres questions ?",
-    a: "Écris-nous depuis la page contact ou ouvre un ticket depuis ton espace : on te répond sous 48h ouvrées en général.",
+    a: "Écrivez-nous depuis la page contact ou ouvrez un ticket depuis votre espace : nous vous répondons sous 48h ouvrées en général.",
   },
 ];
 

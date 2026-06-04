@@ -12,6 +12,12 @@ export function resolveResourcesDir(): string | null {
   const pub = path.join(process.cwd(), "public/trackapp-ressources");
   if (existsSync(pub)) return pub;
 
+  const projectRessources = path.join(process.cwd(), "Ressources");
+  if (existsSync(projectRessources)) return projectRessources;
+
+  const projectRessourcesLower = path.join(process.cwd(), "ressources");
+  if (existsSync(projectRessourcesLower)) return projectRessourcesLower;
+
   const home = process.env.HOME ?? process.env.USERPROFILE;
   if (home && process.platform === "darwin") {
     const desk = path.join(home, "Desktop/Ressources");

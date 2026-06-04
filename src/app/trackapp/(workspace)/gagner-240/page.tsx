@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 export const metadata: Metadata = {
   title: "Affiliation — Trackapp",
   description:
-    "Dashboard affiliation : lien à partager, −40 % pour tes filleuls sur l'abonnement, commissions et versements.",
+    "Dashboard affiliation : lien à partager, −40 % pour vos filleuls sur l'abonnement, commissions et versements.",
 };
 
 export default async function TrackappGagner240Route() {

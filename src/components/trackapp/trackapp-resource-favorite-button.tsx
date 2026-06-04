@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { HeartIcon } from "@/components/icons/heart-icon";
+import { dispatchTrackappSidebarFavoritesRefresh } from "@/lib/trackapp-favorites-events";
 import { cn } from "@/lib/utils";
 
 export function TrackappResourceFavoriteButton({
@@ -37,6 +38,7 @@ export function TrackappResourceFavoriteButton({
       }
       const list = Array.isArray(data?.favorites) ? data!.favorites! : [];
       setFavorite(list.includes(designId));
+      dispatchTrackappSidebarFavoritesRefresh();
       router.refresh();
     } finally {
       setBusy(false);

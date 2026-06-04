@@ -18,11 +18,6 @@ export function TrackerFooter({ loggedIn = false }: { loggedIn?: boolean }) {
                 </Link>
               </li>
               <li>
-                <Link className="hover:text-white" href="/tracker/top-charts">
-                  Classements
-                </Link>
-              </li>
-              <li>
                 <Link className="hover:text-white" href="/tracker/affiliation">
                   Affiliation
                 </Link>
@@ -33,8 +28,8 @@ export function TrackerFooter({ loggedIn = false }: { loggedIn?: boolean }) {
                 </Link>
               </li>
               <li>
-                <Link className="hover:text-white" href="/tracker/search">
-                  Explorer
+                <Link className="hover:text-white" href="/trackapp/apptracker">
+                  Explorer les apps
                 </Link>
               </li>
             </ul>

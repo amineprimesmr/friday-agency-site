@@ -3,7 +3,7 @@ import { unstable_cache } from "next/cache";
 import {
   fetchAppDetail,
   fetchEnrichedTopFree,
-  fetchIosAggregateAppMetrics,
+  fetchIosAggregateAppMetricsBatch,
   type CountryCode,
   type SearchResult,
 } from "@/lib/apple-charts";
@@ -19,39 +19,38 @@ export type TrackappMonthlyPickDefinition = Readonly<{
 }>;
 
 /**
- * Références App Store (trackId) + angle éditorial « quoi recopier de A à Z ».
- * Mettre à jour la liste régulièrement selon l’actualité produit.
+ * Sélection éditoriale Mai 2026 — anciennes apps du carrousel vidéo.
  */
 export const TRACKAPP_APPTRACKER_MONTHLY_PICKS: readonly TrackappMonthlyPickDefinition[] = [
   {
-    id: "6739003582",
+    id: "6745237476",
     blurb:
-      "Hooks viraux, génération IA et paywall rapide : référence pour une app créateur orientée TikTok/Reels avec forte intention d’achat.",
+      "Micro-learning et habitudes courtes : modèle efficace pour une app éducative avec streaks, notifications et abonnement mensuel.",
   },
   {
-    id: "6478868302",
+    id: "6746164787",
     blurb:
-      "Texte → vidéo, templates et crédits : modèle clair pour monétiser une app IA visuelle sans onboarding lourd.",
+      "Social léger et preuve entre amis : blueprint pour une app virale avec onboarding rapide et monétisation par abonnement.",
   },
   {
-    id: "6746838126",
+    id: "1600525061",
     blurb:
-      "Avant/après, scan facial et promesse esthétique : blueprint utilitaire bien-être avec preuve visuelle et abonnement premium.",
+      "Widget photo, partage intime et rétention émotionnelle : référence pour une app relationnelle avec forte viralité organique.",
   },
   {
-    id: "6498938838",
+    id: "1491340863",
     blurb:
-      "Suivi sommeil, routines santé et rétention quotidienne : à étudier pour les dashboards, notifications et habitude long terme.",
+      "Sommeil, routines du soir et contenu apaisant : niche wellness avec abonnement premium et habitude quotidienne.",
   },
   {
-    id: "1551099110",
+    id: "1286609883",
     blurb:
-      "Programmes guidés, exercices courts et niche wellness : exemple solide d’app niche avec contenu récurrent et upsell abonnement.",
+      "Cours de langue gamifiés, leçons courtes et paywall progressif : structure à copier pour une app éducative à fort LTV.",
   },
   {
-    id: "6478942469",
+    id: "6446290569",
     blurb:
-      "Challenge 66 jours, streaks et reset de vie : structure idéale pour gamifier les habitudes avec un arc temporel fort.",
+      "Utilitaire Apple Watch, données santé et UI minimaliste : exemple solide pour une app accessoire avec abonnement récurrent.",
   },
 ];
 
@@ -69,11 +68,10 @@ export const getTrackappApptrackerMonthlyPicks = unstable_cache(
       TRACKAPP_APPTRACKER_MONTHLY_PICKS.map((def) => fetchAppDetail(def.id, country)),
     );
 
-    /** Sensor Tower rate-limit (429) si trop d’appels parallèles — séquentiel comme sur la fiche. */
-    const aggregateMetricsList: Awaited<ReturnType<typeof fetchIosAggregateAppMetrics>>[] = [];
-    for (const def of TRACKAPP_APPTRACKER_MONTHLY_PICKS) {
-      aggregateMetricsList.push(await fetchIosAggregateAppMetrics(def.id));
-    }
+    const aggMap = await fetchIosAggregateAppMetricsBatch(
+      TRACKAPP_APPTRACKER_MONTHLY_PICKS.map((def) => def.id),
+      { timeoutMs: 8_000 },
+    );
 
     const rows = TRACKAPP_APPTRACKER_MONTHLY_PICKS.map((def, i) => {
       const detail = details[i];
@@ -81,7 +79,7 @@ export const getTrackappApptrackerMonthlyPicks = unstable_cache(
       const metrics = metricsFromAppDetail(
         detail,
         country,
-        aggregateMetricsList[i] ?? null,
+        aggMap.get(def.id) ?? null,
         enrichedNationalTop,
       );
       return {
@@ -92,6 +90,6 @@ export const getTrackappApptrackerMonthlyPicks = unstable_cache(
     });
     return rows.filter((x): x is TrackappMonthlyPickResolved => x != null);
   },
-  ["trackapp-apptracker-monthly-picks-v4"],
+  ["trackapp-apptracker-monthly-picks-v5"],
   { revalidate: 3600 },
 );

@@ -3,14 +3,14 @@ import { unstable_cache } from "next/cache";
 import type { CountryCode } from "@/lib/apple-charts";
 import { canonicalSiteOrigin } from "@/lib/embed-url";
 import { buildOfficialBrandPresenceContext } from "@/lib/official-brand-presence";
-import { trackappCreerDepuisAppHref } from "@/lib/trackapp-app-clone-paths";
+import { trackappApplabAppHref } from "@/lib/trackapp-applab-paths";
 import { trackappApptrackerAppHref } from "@/lib/trackapp-apptracker-paths";
 import { assembleTrackappClonePromptBundle } from "@/lib/trackapp-clone-prompt/build-prompt";
 import type { TrackappCloneAngle, TrackappCloneStack } from "@/lib/trackapp-clone-prompt/types";
 import { metricsFromEmbedContext } from "@/lib/trackapp-app-display-metrics";
 import {
   loadAppStoreWebScreenshotsCached,
-  loadTrackerAppEmbedContextCached,
+  loadTrackerAppWorkspaceContextCached,
 } from "@/lib/tracker-server-cache";
 
 export type LoadCloneBundleOptions = Readonly<{
@@ -26,15 +26,18 @@ async function loadTrackappClonePromptBundleUncached(
   const stack = options.stack ?? "swiftui";
   const angle = options.angle ?? "inspire";
 
-  const context = await loadTrackerAppEmbedContextCached(appId, country);
+  const context = await loadTrackerAppWorkspaceContextCached(appId, country);
   if (!context) return null;
 
-  const [webScreenshots, presence] = await Promise.all([
-    loadAppStoreWebScreenshotsCached(appId, country),
-    buildOfficialBrandPresenceContext(context.app),
-  ]);
-
   const { app, aggregateMetrics, overallRank, genreSliceRank } = context;
+  const hasScreenshots = (app.screenshotUrls?.length ?? 0) > 0;
+
+  const [webScreenshots, presence] = await Promise.all([
+    hasScreenshots
+      ? Promise.resolve({ iphone: app.screenshotUrls ?? [], ipad: app.ipadScreenshotUrls ?? [] })
+      : loadAppStoreWebScreenshotsCached(appId, country),
+    buildOfficialBrandPresenceContext(app),
+  ]);
   const metrics = metricsFromEmbedContext(
     app,
     country,
@@ -47,7 +50,7 @@ async function loadTrackappClonePromptBundleUncached(
 
   const origin = canonicalSiteOrigin();
   const trackappAppUrl = `${origin}${trackappApptrackerAppHref(app.id, country)}`;
-  const trackappSpecUrl = `${origin}${trackappCreerDepuisAppHref(app.id, country, { stack, angle })}`;
+  const trackappSpecUrl = `${origin}${trackappApplabAppHref(app.id, country, { tab: "export", stack, angle })}`;
 
   return assembleTrackappClonePromptBundle({
     app,

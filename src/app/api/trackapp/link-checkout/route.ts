@@ -59,7 +59,7 @@ export async function POST(req: Request) {
   } = await sb.auth.getUser();
 
   if (userErr || !user?.id || !user.email) {
-    return NextResponse.json({ error: "Connecte-toi pour finaliser ton compte." }, { status: 401 });
+    return NextResponse.json({ error: "Connectez-vous pour finaliser votre compte." }, { status: 401 });
   }
 
   const stripe = getStripe();
@@ -106,5 +106,5 @@ export async function POST(req: Request) {
     await processCheckoutSessionCommission(admin, session);
   }
 
-  return NextResponse.json({ ok: true, redirect: "/trackapp/accueil" });
+  return NextResponse.json({ ok: true, redirect: "/trackapp/apptracker" });
 }

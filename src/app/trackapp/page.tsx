@@ -1,6 +1,8 @@
-import { permanentRedirect } from "next/navigation";
+import { TrackappLandingPage, trackappLandingMetadata } from "@/app/trackapp/trackapp-landing-page";
 
-/** L’unique entrée publique « vitrine » est le Tracker (`/` → `/tracker`). */
-export default function TrackappMarketingRemovedRedirect() {
-  permanentRedirect("/tracker");
+export const metadata = trackappLandingMetadata;
+
+/** Entrée produit : `/trackapp` = AppLAB landing (pas de redirect). */
+export default function TrackappRootPage() {
+  return <TrackappLandingPage />;
 }

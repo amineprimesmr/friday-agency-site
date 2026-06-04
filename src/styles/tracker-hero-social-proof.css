@@ -1,24 +1,118 @@
-/* Badge social proof au-dessus du hero Tracker */
+/* Badge social proof — pilule liquid glass (même rendu que barre recherche landing) */
 
 .tracker-hero-social-proof {
+  --c-glass: #bbbbbc;
+  --c-light: #fff;
+  --c-dark: #000;
+  --glass-reflex-dark: 2;
+  --glass-reflex-light: 0.3;
+  --saturation: 155%;
+  --tracker-glass-blur: 26px;
+
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.65rem;
   margin: 0 auto 1.15rem;
   max-width: 100%;
-  padding: 0.38rem 0.85rem 0.38rem 0.42rem;
+  min-width: min(100%, 19.5rem);
+  padding: 0.42rem 0.9rem 0.42rem 0.45rem;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(24, 24, 27, 0.72);
+  border: none;
+  transform: translateZ(0);
+  background-color: color-mix(in srgb, var(--c-glass) 12%, transparent);
+  -webkit-backdrop-filter: blur(var(--tracker-glass-blur)) saturate(var(--saturation))
+    url(#tracker-liquid-glass-fr);
+  backdrop-filter: blur(var(--tracker-glass-blur)) saturate(var(--saturation))
+    url(#tracker-liquid-glass-fr);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 8px 28px rgba(0, 0, 0, 0.28);
+    inset 0 0 0 1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 10%), transparent),
+    inset 1.8px 3px 0 -2px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 90%), transparent),
+    inset -2px -2px 0 -2px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 80%), transparent),
+    inset -3px -8px 1px -6px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 60%), transparent),
+    inset -0.3px -1px 4px 0 color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 12%), transparent),
+    inset -1.5px 2.5px 0 -2px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 20%), transparent),
+    inset 0 3px 4px -2px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 20%), transparent),
+    inset 2px -6.5px 1px -4px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
+    0 1px 5px 0 color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
+    0 6px 16px 0 color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 8%), transparent);
   font-size: 0.8125rem;
   font-weight: 500;
   line-height: 1.25;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.01em;
   color: rgba(255, 255, 255, 0.88);
   -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Fond clair (checkout, etc.) */
+.tracker-hero-social-proof--light {
+  background-color: color-mix(in srgb, var(--c-light) 78%, transparent);
+  -webkit-backdrop-filter: blur(22px) saturate(var(--saturation)) url(#tracker-liquid-glass-fr);
+  backdrop-filter: blur(22px) saturate(var(--saturation)) url(#tracker-liquid-glass-fr);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--c-dark) 6%, transparent),
+    inset 1.2px 2px 0 -1px color-mix(in srgb, var(--c-light) 70%, transparent),
+    inset -1.5px -1.5px 0 -1px color-mix(in srgb, var(--c-dark) 8%, transparent),
+    0 1px 4px 0 color-mix(in srgb, var(--c-dark) 10%, transparent),
+    0 6px 18px 0 color-mix(in srgb, var(--c-dark) 8%, transparent);
+  color: rgba(10, 10, 10, 0.82);
+}
+
+.tracker-hero-social-proof--light .tracker-hero-social-proof__text strong {
+  color: #0a0a0a;
+}
+
+@media (max-width: 768px), (prefers-reduced-motion: reduce) {
+  .tracker-hero-social-proof {
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    backdrop-filter: blur(14px) saturate(130%);
+  }
+
+  .tracker-hero-social-proof--light {
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    backdrop-filter: blur(14px) saturate(130%);
+  }
+}
+
+.tracker-hero-social-proof__stage {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-height: 1.85rem;
+  animation: tracker-social-proof-enter 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.tracker-hero-social-proof__leading {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.tracker-hero-social-proof__text {
+  display: inline;
+  padding-right: 0.1rem;
+  white-space: nowrap;
+}
+
+.tracker-hero-social-proof__text strong {
+  font-weight: 600;
+  color: #fff;
+}
+
+@keyframes tracker-social-proof-enter {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+    filter: blur(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
 }
 
 .tracker-hero-social-proof__avatars {
@@ -36,22 +130,42 @@
   overflow: hidden;
   border-radius: 50%;
   margin-left: -0.42rem;
-  border: 1.5px solid #18181b;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+  border: 1.5px solid color-mix(in srgb, var(--c-dark) 55%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--c-light) 12%, transparent),
+    0 2px 6px color-mix(in srgb, var(--c-dark) 18%, transparent);
 }
 
 .tracker-hero-social-proof__avatar:first-child {
   margin-left: 0;
 }
 
-.tracker-hero-social-proof__text {
-  padding-right: 0.1rem;
-  white-space: nowrap;
+.tracker-hero-social-proof__brand-icon {
+  width: 1.85rem;
+  height: 1.85rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.22);
 }
 
-.tracker-hero-social-proof__text strong {
-  font-weight: 600;
-  color: #fff;
+.tracker-hero-social-proof__brand-icon--img {
+  display: inline-flex;
+  border-radius: 50%;
+}
+
+.tracker-hero-social-proof__brand-icon--img img {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tracker-hero-social-proof__stage {
+    animation: none;
+  }
 }
 
 @media (max-width: 420px) {
@@ -61,15 +175,24 @@
     font-size: 0.72rem;
   }
 
+  .tracker-hero-social-proof__stage {
+    gap: 0.5rem;
+    min-height: 1.45rem;
+  }
+
   .tracker-hero-social-proof__text {
     white-space: normal;
     text-align: left;
     max-width: 11.5rem;
   }
 
-  .tracker-hero-social-proof__avatar {
+  .tracker-hero-social-proof__avatar,
+  .tracker-hero-social-proof__brand-icon {
     width: 1.45rem;
     height: 1.45rem;
+  }
+
+  .tracker-hero-social-proof__avatar {
     margin-left: -0.36rem;
   }
 }

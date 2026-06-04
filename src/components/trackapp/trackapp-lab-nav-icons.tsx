@@ -81,6 +81,15 @@ export function IconNavFile(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function IconSearch(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="M20 20l-3.5-3.5" />
+    </svg>
+  );
+}
+
 export function IconNavSoftware(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base} {...props}>
@@ -95,6 +104,28 @@ export function IconNavOrganic(props: SVGProps<SVGSVGElement>) {
     <svg {...base} {...props}>
       <path d="M7 20c0-6 4-10 10-10h4v4c0 6-4 10-10 10H7z" />
       <path d="M9 18c2-4 5-6 9-6" />
+    </svg>
+  );
+}
+
+/** Panneau latéral — fermer (menu ouvert). */
+export function IconPanelClose(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="4" y="5" width="16" height="14" rx="2.5" />
+      <path d="M9 5v14" />
+    </svg>
+  );
+}
+
+/** Panneau latéral — ouvrir (menu rangé). */
+export function IconPanelOpen(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="4" y="5" width="16" height="14" rx="2.5" />
+      <path d="M9 5v14" />
+      <path d="M13 12h5" />
+      <path d="M15.5 9.5 18 12l-2.5 2.5" />
     </svg>
   );
 }

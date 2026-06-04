@@ -5,11 +5,13 @@ import { TrackerNavLink } from "@/components/tracker/tracker-navigation";
 import {
   searchApps,
   COUNTRY_MAP,
-  estimateMonthlyDownloads,
-  formatEstimatedMonthlyRevenuePrecise,
   formatRatingCount,
   normalizeTrackerCountryParam,
+  type CountryCode,
 } from "@/lib/apple-charts";
+import { METRICS_TO_FIX, resolveTrackappMetricsForAppIds } from "@/lib/trackapp-app-display-metrics";
+import { formatDisplayMetricsRevenue } from "@/lib/trackapp-real-metrics-only";
+import { trackappAccueilAppHref } from "@/lib/trackapp-apptracker-paths";
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +55,10 @@ export default async function DeveloperPage({ params, searchParams }: PageProps)
       developerName.toLowerCase().includes(a.artistName.toLowerCase()),
   );
   const displayApps = developerApps.length > 0 ? developerApps : apps.slice(0, 10);
+  const metricsMap = await resolveTrackappMetricsForAppIds(
+    displayApps.map((a) => a.id),
+    country as CountryCode,
+  );
 
   // Aggregate stats
   const totalRatings = displayApps.reduce((s, a) => s + a.userRatingCount, 0);
@@ -71,7 +77,7 @@ export default async function DeveloperPage({ params, searchParams }: PageProps)
       <nav className="flex items-center gap-2 text-xs text-white/30">
         <Link href="/tracker" className="transition hover:text-white/60">Tableau de bord</Link>
         <span>/</span>
-        <Link href="/tracker/search" className="transition hover:text-white/60">Recherche</Link>
+        <Link href="/trackapp/apptracker" className="transition hover:text-white/60">Recherche</Link>
         <span>/</span>
         <span className="text-white/55">{developerName}</span>
       </nav>
@@ -170,10 +176,10 @@ export default async function DeveloperPage({ params, searchParams }: PageProps)
           Apps publiées ({displayApps.length})
         </h2>
         <div className="space-y-2">
-          {displayApps.map((app, i) => (
+          {displayApps.map((app) => (
             <TrackerNavLink
               key={app.id}
-              href={`/tracker/apps/${app.id}?country=${country}`}
+              href={trackappAccueilAppHref(app.id, country)}
               className="group flex items-start gap-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 transition hover:border-white/15 hover:bg-white/[0.05]"
             >
               <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl ring-1 ring-white/10">
@@ -205,9 +211,9 @@ export default async function DeveloperPage({ params, searchParams }: PageProps)
                   {app.userRatingCount > 0 && (
                     <span className="text-[11px] text-white/30">{formatRatingCount(app.userRatingCount)} avis</span>
                   )}
-                  <span className="text-[11px] text-violet-300">{estimateMonthlyDownloads(i + 1, country)}/mois</span>
-                  <span className="text-[11px] text-emerald-300">
-                    {formatEstimatedMonthlyRevenuePrecise(i + 1, app.price, app.categoryId, country, app.id)}/mois
+                  <span className="text-[11px] font-semibold text-emerald-300">
+                    {formatDisplayMetricsRevenue(metricsMap.get(app.id) ?? METRICS_TO_FIX)}
+                    <span className="font-normal text-white/35"> / mois</span>
                   </span>
                 </div>
               </div>

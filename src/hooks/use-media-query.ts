@@ -2,11 +2,16 @@
 
 import { useEffect, useState } from "react";
 
+type UseMediaQueryOptions = {
+  /** Valeur initiale (SSR + 1er paint). `true` = mode mobile-first pour éviter d’activer les animations lourdes avant hydratation. */
+  defaultMatches?: boolean;
+};
+
 /**
- * Sous la largeur `query`, `matches` est false. SSR : false jusqu’au premier paint.
+ * `matches` reflète `window.matchMedia(query)` après hydratation.
  */
-export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(false);
+export function useMediaQuery(query: string, options?: UseMediaQueryOptions): boolean {
+  const [matches, setMatches] = useState(options?.defaultMatches ?? false);
 
   useEffect(() => {
     const mq = window.matchMedia(query);

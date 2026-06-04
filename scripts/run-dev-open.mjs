@@ -15,7 +15,7 @@ const host = "127.0.0.1";
 
 function normalizeOpenPath(raw) {
   const sub = (raw ?? "").trim();
-  if (!sub) return "/tracker";
+  if (!sub) return "/trackapp";
   return sub.startsWith("/") ? sub : `/${sub}`;
 }
 

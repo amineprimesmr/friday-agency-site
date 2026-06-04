@@ -234,3 +234,14 @@
   border-color: #0f172a;
   color: #fff;
 }
+
+.trackapp-competitor-card__unavailable {
+  margin: 0.5rem 0 0;
+  padding: 0.45rem 0.65rem;
+  border-radius: 10px;
+  background: rgb(254 243 199);
+  border: 1px solid rgb(253 230 138);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgb(120 53 15);
+}

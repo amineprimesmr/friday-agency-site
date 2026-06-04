@@ -5,6 +5,7 @@ import {
 } from "@/lib/tracker-revenue-display";
 
 export const COUNTRIES = [
+  { code: "us", name: "United States", flag: "🇺🇸" },
   { code: "fr", name: "France", flag: "🇫🇷" },
   { code: "gb", name: "United Kingdom", flag: "🇬🇧" },
   { code: "de", name: "Germany", flag: "🇩🇪" },
@@ -132,6 +133,13 @@ export interface CountryRanking {
   flag: string;
   name: string;
   rank: number | null;
+  /** Présent sur l’App Store dans ce pays (Sensor Tower `valid_countries`). */
+  storeAvailable?: boolean;
+  /** Marché prioritaire ST (`top_countries`). */
+  isTopMarket?: boolean;
+  /** Note boutique locale (iTunes lookup par pays). */
+  storeRating?: number;
+  storeRatingCount?: number;
 }
 
 export interface MultiCountryApp extends AppEntry {
@@ -536,9 +544,26 @@ export function timeAgo(dateStr: string): string {
   const days = daysSince(dateStr);
   if (days === 0) return "aujourd'hui";
   if (days === 1) return "hier";
-  if (days < 30) return `il y a ${days}j`;
-  if (days < 365) return `il y a ${Math.floor(days / 30)}mois`;
-  return `il y a ${Math.floor(days / 365)}an`;
+  if (days < 30) return `il y a ${days} j`;
+  if (days < 365) {
+    const months = Math.floor(days / 30);
+    return months <= 1 ? "il y a 1 mois" : `il y a ${months} mois`;
+  }
+  const years = Math.floor(days / 365);
+  return years <= 1 ? "il y a 1 an" : `il y a ${years} ans`;
+}
+
+/** Âge app pour la carte « Actif depuis » — sans « il y a », pluriels FR corrects. */
+export function formatAppAgeFr(dateStr: string): string {
+  if (!dateStr) return "—";
+  const days = daysSince(dateStr);
+  if (days === 0) return "Aujourd'hui";
+  if (days === 1) return "1 jour";
+  if (days < 30) return `${days} jours`;
+  const months = Math.floor(days / 30);
+  if (days < 365) return months <= 1 ? "1 mois" : `${months} mois`;
+  const years = Math.floor(days / 365);
+  return years <= 1 ? "1 an" : `${years} ans`;
 }
 
 /**
@@ -551,7 +576,10 @@ export function rankPresencePercent(rank: number, plateauSize = 100): number {
   return Math.round(((plateauSize + 1 - r) / plateauSize) * 100);
 }
 
-/** Ordres de grandeur indicatifs à partir du rang (formule interne, non contractuelle). */
+/**
+ * @deprecated Ne pas afficher à l’utilisateur — Trackapp = Sensor Tower ou « Indisponible ».
+ * Conservé pour scripts / legacy interne uniquement.
+ */
 export function estimateMonthlyDownloads(rank: number, country: CountryCode = TRACKER_DEFAULT_COUNTRY): string {
   // Coefficients par pays par rapport au référentiel du modèle
   const countryFactor: Record<string, number> = {
@@ -607,7 +635,9 @@ export function estimateMonthlyRevenue(
   return formatMillionsDollar(base);
 }
 
-/** Revenu mensuel estimé (hors agrégat ST) : montant « facture » déterministe, ancré sur le modèle interne. */
+/**
+ * @deprecated Ne pas afficher à l’utilisateur — Trackapp = Sensor Tower ou « Indisponible ».
+ */
 export function formatEstimatedMonthlyRevenuePrecise(
   rank: number,
   price: number,
@@ -644,6 +674,102 @@ export interface IosAggregateAppMetrics {
   revenueString: string;
   globalRatingCount: number;
   rating?: number;
+  active?: boolean;
+  updatedDate?: string;
+  topCountries?: string[];
+  validCountries?: string[];
+  canonicalCountry?: string;
+  /** Chemin ou URL ST — préférer `buildAppStoreUrl` pour l’App Store public. */
+  appViewUrl?: string;
+}
+
+/** Codes ISO ST (US, FR…) → code tracker (`fr`, `gb`…). */
+const ST_COUNTRY_TO_TRACKER: Record<string, CountryCode> = {
+  FR: "fr",
+  GB: "gb",
+  UK: "gb",
+  DE: "de",
+  JP: "jp",
+  BR: "br",
+  CA: "ca",
+  AU: "au",
+  IT: "it",
+  ES: "es",
+  MX: "mx",
+  IN: "in",
+  KR: "kr",
+  CN: "cn",
+};
+
+export function stCountryToTrackerCode(stCode: string): CountryCode | null {
+  return ST_COUNTRY_TO_TRACKER[String(stCode).toUpperCase()] ?? null;
+}
+
+export function mergeCountryRankingsWithIosMeta(
+  rankings: CountryRanking[],
+  agg: IosAggregateAppMetrics | null | undefined,
+): CountryRanking[] {
+  if (!agg) return rankings;
+  const valid = new Set(
+    (agg.validCountries ?? []).map((c) => String(c).toUpperCase()),
+  );
+  const top = new Set((agg.topCountries ?? []).map((c) => String(c).toUpperCase()));
+  return rankings.map((r) => {
+    const st = String(r.country).toUpperCase();
+    const stFromTracker = Object.entries(ST_COUNTRY_TO_TRACKER).find(([, v]) => v === r.country)?.[0];
+    const available =
+      valid.has(st) || (stFromTracker ? valid.has(stFromTracker) : false);
+    const isTop =
+      top.has(st) || (stFromTracker ? top.has(stFromTracker) : false);
+    return {
+      ...r,
+      storeAvailable: valid.size > 0 ? available : r.storeAvailable,
+      isTopMarket: top.size > 0 ? isTop : r.isTopMarket,
+    };
+  });
+}
+
+/** Notes iTunes par pays (marchés suivis uniquement). */
+export async function fetchStoreRatingsByCountry(
+  appId: string,
+  countries: readonly CountryCode[] = COUNTRIES.map((c) => c.code),
+): Promise<Partial<Record<CountryCode, { rating: number; count: number }>>> {
+  const out: Partial<Record<CountryCode, { rating: number; count: number }>> = {};
+  await Promise.all(
+    countries.map(async (code) => {
+      try {
+        const res = await fetch(
+          `https://itunes.apple.com/lookup?id=${appId}&country=${code}`,
+          { next: { revalidate: 3600 }, signal: AbortSignal.timeout(4000) },
+        );
+        if (!res.ok) return;
+        const data = (await res.json()) as { results?: Record<string, unknown>[] };
+        const row = data.results?.[0];
+        if (!row) return;
+        const rating = Number(row.averageUserRating ?? 0);
+        const count = Number(row.userRatingCount ?? 0);
+        if (rating > 0) out[code] = { rating, count };
+      } catch {
+        /* ignore */
+      }
+    }),
+  );
+  return out;
+}
+
+export function applyStoreRatingsToCountryRankings(
+  rankings: CountryRanking[],
+  ratings: Partial<Record<CountryCode, { rating: number; count: number }>>,
+): CountryRanking[] {
+  return rankings.map((r) => {
+    const local = ratings[r.country];
+    if (!local) return r;
+    return {
+      ...r,
+      storeRating: local.rating,
+      storeRatingCount: local.count,
+    };
+  });
 }
 
 function normalizeIosAggDisplayString(s: string): string {
@@ -685,71 +811,121 @@ function formatIosAggDownloadCount(n: number): string {
   return `${kRounded}K`;
 }
 
-/** Sensor Tower est hors chemin critique : un fetch lent bloquait toute la fiche (timeout global 12s). */
-const IOS_AGG_FETCH_MS = 3500;
+const IOS_AGG_BATCH_FETCH_MS = 8_000;
+
+function parseIosAggregateRow(
+  row: Record<string, unknown>,
+  fallbackId?: string | number,
+): IosAggregateAppMetrics | null {
+  if (!row) return null;
+  const dl = row.humanized_worldwide_last_month_downloads as Record<string, unknown> | undefined;
+  const rev = row.humanized_worldwide_last_month_revenue as Record<string, unknown> | undefined;
+  const ratingRaw = row.rating;
+  const rating =
+    typeof ratingRaw === "number" && Number.isFinite(ratingRaw)
+      ? ratingRaw
+      : typeof ratingRaw === "string"
+        ? Number.parseFloat(ratingRaw)
+        : undefined;
+  const dlN = Number(dl?.downloads ?? 0);
+  const dlParsed = parseIosAggScaledValue(String(dl?.string ?? ""));
+  const dlStrRaw = String(dl?.string ?? "—").trim();
+  const revStrRaw = String(rev?.string ?? "—").trim();
+  const revResolved = resolveSensorTowerRevenueUsd(rev);
+  const revUsd =
+    revResolved != null && Number.isFinite(revResolved) && revResolved > 0 ? revResolved : 0;
+  const rowId = String(row.app_id ?? fallbackId ?? "");
+  if (!rowId) return null;
+  const revKey = `ios-agg-rev:${rowId}`;
+  const revDisplayPrecise = revUsd > 0 ? derivePreciseRevenueDisplayUsd(revUsd, revKey) : 0;
+  const revStrNegative = /^-\s*/.test(revStrRaw);
+
+  const updatedRaw = row.updated_date;
+  const updatedDate =
+    typeof updatedRaw === "string" && updatedRaw.trim() ? updatedRaw.trim() : undefined;
+  const validRaw = row.valid_countries;
+  const topRaw = row.top_countries;
+  const validCountries = Array.isArray(validRaw)
+    ? validRaw.map((c) => String(c).toUpperCase()).filter(Boolean)
+    : undefined;
+  const topCountries = Array.isArray(topRaw)
+    ? topRaw.map((c) => String(c).toUpperCase()).filter(Boolean)
+    : undefined;
+  const viewRaw = row.app_view_url ?? row.url;
+  const appViewUrl = typeof viewRaw === "string" && viewRaw.trim() ? viewRaw.trim() : undefined;
+
+  return {
+    downloads: dlN,
+    downloadsString:
+      Number.isFinite(dlN) && dlN > 0
+        ? formatIosAggDownloadCount(dlN)
+        : dlParsed != null && dlParsed > 0
+          ? formatIosAggDownloadCount(dlParsed)
+          : dlStrRaw === "" || dlStrRaw === "—"
+            ? "—"
+            : normalizeIosAggDisplayString(dlStrRaw),
+    revenue: revUsd,
+    revenueString:
+      revUsd > 0
+        ? formatUsdTrackerPrecise(revDisplayPrecise)
+        : revStrRaw === "" || revStrRaw === "—" || revStrNegative
+          ? "—"
+          : normalizeIosAggDisplayString(revStrRaw),
+    globalRatingCount: Number(row.global_rating_count ?? 0),
+    rating: rating !== undefined && Number.isFinite(rating) ? rating : undefined,
+    active: row.active === true || row.active === "true",
+    updatedDate,
+    topCountries,
+    validCountries,
+    canonicalCountry:
+      typeof row.canonical_country === "string"
+        ? String(row.canonical_country).toUpperCase()
+        : undefined,
+    appViewUrl,
+  };
+}
+
+/** Un seul appel ST pour N apps (recherche live — ~500 ms au lieu de N×3 s). */
+export async function fetchIosAggregateAppMetricsBatch(
+  appIds: readonly string[],
+  options?: Readonly<{ timeoutMs?: number }>,
+): Promise<Map<string, IosAggregateAppMetrics>> {
+  const ids = [...new Set(appIds.map((id) => String(id).trim()).filter(Boolean))];
+  const out = new Map<string, IosAggregateAppMetrics>();
+  if (ids.length === 0) return out;
+
+  const timeoutMs = options?.timeoutMs ?? IOS_AGG_BATCH_FETCH_MS;
+  try {
+    const res = await fetch(
+      `https://app.sensortower.com/api/ios/apps?app_ids=${ids.join(",")}`,
+      {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15",
+        },
+        cache: "no-store",
+        signal: AbortSignal.timeout(timeoutMs),
+      },
+    );
+    if (!res.ok) return out;
+    const data = (await res.json()) as { apps?: Record<string, unknown>[] };
+    for (const row of data.apps ?? []) {
+      const parsed = parseIosAggregateRow(row, ids.length === 1 ? ids[0] : undefined);
+      const key = String(row.app_id ?? (ids.length === 1 ? ids[0] : ""));
+      if (parsed && key) out.set(key, parsed);
+    }
+  } catch {
+    /* ignore */
+  }
+  return out;
+}
 
 export async function fetchIosAggregateAppMetrics(
   appId: string | number,
   options?: Readonly<{ timeoutMs?: number }>,
 ): Promise<IosAggregateAppMetrics | null> {
-  const timeoutMs = options?.timeoutMs ?? IOS_AGG_FETCH_MS;
-  try {
-    const res = await fetch(`https://app.sensortower.com/api/ios/apps?app_ids=${appId}`, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15",
-      },
-      next: { revalidate: 3600 },
-      signal: AbortSignal.timeout(timeoutMs),
-    });
-    if (!res.ok) return null;
-    const data = (await res.json()) as { apps?: Record<string, unknown>[] };
-    const row = data.apps?.[0];
-    if (!row) return null;
-    const dl = row.humanized_worldwide_last_month_downloads as Record<string, unknown> | undefined;
-    const rev = row.humanized_worldwide_last_month_revenue as Record<string, unknown> | undefined;
-    const ratingRaw = row.rating;
-    const rating =
-      typeof ratingRaw === "number" && Number.isFinite(ratingRaw)
-        ? ratingRaw
-        : typeof ratingRaw === "string"
-          ? Number.parseFloat(ratingRaw)
-          : undefined;
-    const dlN = Number(dl?.downloads ?? 0);
-    const dlParsed = parseIosAggScaledValue(String(dl?.string ?? ""));
-    const dlStrRaw = String(dl?.string ?? "—").trim();
-    const revStrRaw = String(rev?.string ?? "—").trim();
-    const revResolved = resolveSensorTowerRevenueUsd(rev);
-    const revUsd =
-      revResolved != null && Number.isFinite(revResolved) && revResolved > 0 ? revResolved : 0;
-    const rowId = String(row.app_id ?? appId);
-    const revKey = `ios-agg-rev:${rowId}`;
-    const revDisplayPrecise =
-      revUsd > 0 ? derivePreciseRevenueDisplayUsd(revUsd, revKey) : 0;
-    const revStrNegative = /^-\s*/.test(revStrRaw);
-
-    return {
-      downloads: dlN,
-      downloadsString:
-        Number.isFinite(dlN) && dlN > 0
-          ? formatIosAggDownloadCount(dlN)
-          : dlParsed != null && dlParsed > 0
-            ? formatIosAggDownloadCount(dlParsed)
-            : dlStrRaw === "" || dlStrRaw === "—"
-              ? "—"
-              : normalizeIosAggDisplayString(dlStrRaw),
-      revenue: revUsd,
-      revenueString:
-        revUsd > 0
-          ? formatUsdTrackerPrecise(revDisplayPrecise)
-          : revStrRaw === "" || revStrRaw === "—" || revStrNegative
-            ? "—"
-            : normalizeIosAggDisplayString(revStrRaw),
-      globalRatingCount: Number(row.global_rating_count ?? 0),
-      rating: rating !== undefined && Number.isFinite(rating) ? rating : undefined,
-    };
-  } catch {
-    return null;
-  }
+  const map = await fetchIosAggregateAppMetricsBatch([String(appId)], options);
+  return map.get(String(appId)) ?? null;
 }
 
 /** Check where an app appears across all countries' top-free chart */

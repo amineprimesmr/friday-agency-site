@@ -57,7 +57,7 @@ export function TrackappInAppOffersSection({
         )}
         aria-label="Abonnements in-app"
       >
-        <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="m-0 text-[1.25rem] font-bold tracking-tight text-[var(--dash-text)]">
             Abonnements &amp; achats in-app
           </h2>
@@ -67,13 +67,11 @@ export function TrackappInAppOffersSection({
             onClick={() => void refresh()}
             disabled={refreshing}
           >
-            {refreshing ? "Recherche…" : "Actualiser les prix"}
+            {refreshing ? "Recherche…" : "Actualiser"}
           </button>
         </div>
         <p className="mt-3 text-[0.88rem] leading-relaxed text-[var(--dash-muted-light)]">
-          Aucune offre récupérée sur la fiche App Store pour le moment (8 pays testés en parallèle).
-          Apple ne liste pas toujours les abonnements sur le web — le paywall peut n&apos;apparaître
-          qu&apos;in-app. Clique sur <strong>Actualiser</strong> ou ouvre la fiche App Store.
+          Aucune offre détectée pour le moment. Apple ne liste pas toujours les abonnements sur le web.
         </p>
       </section>
     );
@@ -90,30 +88,14 @@ export function TrackappInAppOffersSection({
       )}
       aria-label="Abonnements in-app"
     >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="m-0 text-[1.25rem] font-bold tracking-tight text-[var(--dash-text)]">
-            Abonnements &amp; achats in-app
-          </h2>
-          <p className="mt-1 text-[0.8rem] text-[var(--dash-muted-light)]">
-            {data.offers.length} offre{data.offers.length > 1 ? "s" : ""} · fiche App Store (
-            {data.country.toUpperCase()}) · {data.sectionTitle}
-          </p>
-        </div>
-        <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[0.72rem] font-bold uppercase tracking-wide text-emerald-800">
-          Prix publics
-        </span>
-      </div>
-
-      <p className="mt-4 text-[0.82rem] leading-relaxed text-slate-500">
-        Montants tels qu&apos;affichés par Apple sur la fiche produit. Les promos, essais gratuits ou
-        prix du paywall in-app peuvent différer.
-      </p>
+      <h2 className="m-0 text-[1.25rem] font-bold tracking-tight text-[var(--dash-text)]">
+        Abonnements &amp; achats in-app
+      </h2>
 
       {subscriptions.length > 0 ? (
         <div className="mt-5">
           <h3 className="m-0 text-[0.72rem] font-bold uppercase tracking-[0.14em] text-slate-400">
-            Abonnements &amp; offres récurrentes
+            Abonnements
           </h3>
           <ul className="mt-3 divide-y divide-slate-100 rounded-2xl border border-slate-100">
             {subscriptions.map((offer) => (
@@ -126,7 +108,7 @@ export function TrackappInAppOffersSection({
       {others.length > 0 ? (
         <div className={subscriptions.length > 0 ? "mt-5" : "mt-5"}>
           <h3 className="m-0 text-[0.72rem] font-bold uppercase tracking-[0.14em] text-slate-400">
-            Autres achats intégrés
+            Autres achats
           </h3>
           <ul className="mt-3 divide-y divide-slate-100 rounded-2xl border border-slate-100">
             {others.map((offer) => (

@@ -1,7 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+
+import { TrackerAppArtwork } from "@/components/tracker/tracker-app-artwork";
 
 import { formatRatingCount, type CountryCode, type SearchResult } from "@/lib/apple-charts";
 import {
@@ -65,13 +66,12 @@ export function TrackappApptrackerAppResultCard({
       )}
     >
       <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-200">
-        {app.artworkUrl ? (
-          <Image src={app.artworkUrl} alt="" fill className="object-cover" sizes="64px" />
-        ) : (
-          <span className="grid h-full w-full place-items-center text-xl font-black text-slate-400">
-            {app.name.charAt(0)}
-          </span>
-        )}
+        <TrackerAppArtwork
+          url={app.artworkUrl}
+          name={app.name}
+          sizes="64px"
+          letterClassName="text-xl font-black text-slate-400"
+        />
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex flex-wrap items-start justify-between gap-2">
@@ -114,7 +114,7 @@ export function TrackappApptrackerAppResultCard({
           </>
         ) : (
           <p className="mt-4 text-[0.78rem] font-semibold text-amber-800">
-            Données réelles indisponibles (Sensor Tower ou top 100) — à corriger côté pipeline.
+            Données indisponibles pour le moment.
           </p>
         )}
       </span>

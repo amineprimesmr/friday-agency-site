@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { trackappApptrackerAppHref } from "@/lib/trackapp-apptracker-paths";
+import { trackappAccueilAppHref } from "@/lib/trackapp-apptracker-paths";
 import type { TrackappClonePromptBundle } from "@/lib/trackapp-clone-prompt";
 import {
   readPreferredIde,
@@ -191,7 +191,7 @@ export function TrackappCloneAppActions({
               />
             ) : null}
             <div className="min-w-0 flex-1">
-              <p className="trackapp-clone-hero-kicker m-0">Créer cette app</p>
+              <p className="trackapp-clone-hero-kicker m-0">appLAB</p>
               <h1 className="m-0 mt-2 text-[clamp(1.6rem,4vw,2.4rem)] font-black leading-tight tracking-tight">
                 {bundle.appName}
               </h1>
@@ -199,11 +199,11 @@ export function TrackappCloneAppActions({
                 <p className="mt-2 text-[0.95rem] font-semibold text-white/65">{artistName}</p>
               ) : null}
               <p className="mt-4 max-w-2xl text-[0.9rem] leading-relaxed text-white/70">
-                Spec produit + prompts Cursor / Claude Code. Rien ne part sans ta validation dans l&apos;IDE.
+                Spec produit + prompts Cursor / Claude Code. Rien ne part sans votre validation dans l&apos;IDE.
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <Link
-                  href={trackappApptrackerAppHref(appId, country)}
+                  href={trackappAccueilAppHref(appId, country)}
                   className="inline-flex min-h-10 items-center rounded-full border border-white/20 bg-white/10 px-4 text-[0.82rem] font-bold text-white no-underline hover:bg-white/15"
                 >
                   ← Fiche app

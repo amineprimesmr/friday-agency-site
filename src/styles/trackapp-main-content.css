@@ -1,36 +1,69 @@
 /**
  * Contenu dashboard à l’intérieur de .app-main (feuille claire Fidelity).
  * Reprend les blocs Trackapp avec variables adaptées au thème #app-app.
+ * Inclut aussi l’aperçu invité et AppLAB hors #app-app.
  */
-#app-app .app-main {
-  --dash-text: var(--app-text);
-  --dash-text-secondary: #334155;
-  --dash-muted: var(--app-text-muted);
-  --dash-muted-light: #64748b;
-  --dash-accent: var(--app-accent);
-  --dash-accent-hover: var(--app-accent-hover);
-  --dash-accent-light: var(--app-accent-light);
-  --dash-accent-glow: rgba(37, 99, 235, 0.28);
-  --dash-accent-subtle: rgba(37, 99, 235, 0.08);
-  --dash-success: #10b981;
-  --dash-success-light: rgba(16, 185, 129, 0.12);
-  --dash-error: #ef4444;
-  --dash-error-light: rgba(239, 68, 68, 0.12);
+:where(#app-app .app-main, .trackapp-guest-shell, .trackapp-applab-page) {
+  --dash-text: var(--ui-text, #f5f7ff);
+  --dash-text-secondary: var(--ui-text-secondary, rgb(226 232 255 / 0.78));
+  --dash-muted: var(--ui-muted, rgb(173 184 214 / 0.62));
+  --dash-muted-light: var(--ui-muted, rgb(173 184 214 / 0.62));
+  --dash-accent: var(--ui-accent, #3b82f6);
+  --dash-accent-hover: #2563eb;
+  --dash-accent-light: rgb(59 130 246 / 0.18);
+  --dash-accent-glow: rgb(59 130 246 / 0.36);
+  --dash-accent-subtle: rgb(59 130 246 / 0.12);
+  --dash-success: #22c55e;
+  --dash-success-light: rgb(34 197 94 / 0.18);
+  --dash-error: #f87171;
+  --dash-error-light: rgb(248 113 113 / 0.18);
   --dash-warning: #f59e0b;
-  --dash-warning-light: rgba(245, 158, 11, 0.12);
-  --dash-purple: #7c3aed;
-  --dash-purple-light: rgba(124, 58, 237, 0.12);
+  --dash-warning-light: rgb(245 158 11 / 0.18);
+  --dash-purple: #60a5fa;
+  --dash-purple-light: rgb(96 165 250 / 0.2);
   --dash-radius: 12px;
   --dash-radius-lg: 16px;
   --dash-radius-xl: 20px;
   --dash-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --dash-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
-  --dash-shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
-  --dash-shadow-lg: 0 8px 28px rgba(15, 23, 42, 0.1);
-  --dash-surface: #fff;
-  --dash-surface-2: #f8fafc;
-  --dash-border: #e2e8f0;
-  --dash-border-light: #cbd5e1;
+  --dash-shadow: var(--ui-shadow-sm, 0 6px 18px rgb(0 0 0 / 0.22));
+  --dash-shadow-md: var(--ui-shadow-md, 0 12px 34px rgb(0 0 0 / 0.3));
+  --dash-shadow-lg: var(--ui-shadow-lg, 0 22px 58px rgb(0 0 0 / 0.4));
+  --dash-surface: var(--ui-surface, rgb(11 14 22 / 0.84));
+  --dash-surface-2: var(--ui-surface-2, rgb(17 22 35 / 0.88));
+  --dash-border: var(--ui-border, rgb(148 163 184 / 0.22));
+  --dash-border-light: var(--ui-border-strong, rgb(125 211 252 / 0.45));
+  color: var(--dash-text);
+}
+
+#app-app .app-main {
+  --dash-text: var(--app-text);
+  --dash-text-secondary: var(--ui-text-secondary, rgb(226 232 255 / 0.78));
+  --dash-muted: var(--app-text-muted);
+  --dash-muted-light: var(--ui-muted, rgb(173 184 214 / 0.62));
+  --dash-accent: var(--app-accent);
+  --dash-accent-hover: var(--app-accent-hover);
+  --dash-accent-light: var(--app-accent-light);
+  --dash-accent-glow: rgb(59 130 246 / 0.36);
+  --dash-accent-subtle: rgb(59 130 246 / 0.12);
+  --dash-success: #22c55e;
+  --dash-success-light: rgb(34 197 94 / 0.18);
+  --dash-error: #f87171;
+  --dash-error-light: rgb(248 113 113 / 0.18);
+  --dash-warning: #f59e0b;
+  --dash-warning-light: rgb(245 158 11 / 0.18);
+  --dash-purple: #60a5fa;
+  --dash-purple-light: rgb(96 165 250 / 0.2);
+  --dash-radius: 12px;
+  --dash-radius-lg: 16px;
+  --dash-radius-xl: 20px;
+  --dash-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --dash-shadow: var(--ui-shadow-sm, 0 6px 18px rgb(0 0 0 / 0.22));
+  --dash-shadow-md: var(--ui-shadow-md, 0 12px 34px rgb(0 0 0 / 0.3));
+  --dash-shadow-lg: var(--ui-shadow-lg, 0 22px 58px rgb(0 0 0 / 0.4));
+  --dash-surface: var(--ui-surface, rgb(11 14 22 / 0.84));
+  --dash-surface-2: var(--ui-surface-2, rgb(17 22 35 / 0.88));
+  --dash-border: var(--ui-border, rgb(148 163 184 / 0.22));
+  --dash-border-light: var(--ui-border-strong, rgb(125 211 252 / 0.45));
 }
 
 #app-app .app-main .dashboard-main {
@@ -123,6 +156,10 @@
   margin: 0 0 0.65rem;
 }
 
+#app-app .app-main .trackapp-workspace-tool-page .trackapp-workspace-hero-title {
+  margin-top: 0;
+}
+
 #app-app .app-main .trackapp-workspace-hero-title {
   margin-top: clamp(1.1rem, 2vw, 1.75rem);
   font-size: clamp(1.55rem, 3.2vw, 2.35rem);
@@ -155,6 +192,11 @@
 #app-app .app-main .trackapp-content-card:hover {
   border-color: var(--dash-border-light);
   box-shadow: var(--dash-shadow-md);
+}
+
+#app-app .app-main .trackapp-content-card,
+#app-app .app-main .trackapp-ui-card {
+  backdrop-filter: blur(10px);
 }
 
 #app-app .app-main .trackapp-content-card-header {
@@ -258,9 +300,9 @@
   text-transform: uppercase;
   border: none;
   cursor: pointer;
-  background: linear-gradient(180deg, var(--app-accent-hover), var(--app-accent));
+  background: var(--ui-accent-gradient, linear-gradient(135deg, #1d4ed8 0%, #2563eb 42%, #06b6d4 100%));
   color: #fff;
-  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 8px 24px rgb(37 99 235 / 0.35);
   transition: transform 0.15s ease, box-shadow var(--dash-transition);
 }
 
@@ -282,7 +324,7 @@
   font-weight: 600;
   font-size: 0.78rem;
   border: 1px solid var(--dash-border);
-  background: #fff;
+  background: var(--ui-surface-soft, rgb(255 255 255 / 0.03));
   color: var(--dash-text-secondary);
   cursor: pointer;
   transition:
@@ -291,8 +333,9 @@
 }
 
 #app-app .app-main .trackapp-btn-ghost-dash:hover {
-  border-color: rgba(37, 99, 235, 0.35);
-  color: var(--app-accent);
+  border-color: var(--dash-border-light);
+  color: var(--dash-text);
+  background: rgb(59 130 246 / 0.1);
 }
 
 #app-app .app-main .dashboard-badge {
@@ -308,17 +351,17 @@
 #app-app .app-main .dashboard-badge-success {
   background: var(--dash-success-light);
   color: var(--dash-success);
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  border: 1px solid rgb(34 197 94 / 0.3);
 }
 
 #app-app .app-main .dashboard-badge-warning {
   background: var(--dash-warning-light);
   color: var(--dash-warning);
-  border: 1px solid rgba(245, 158, 11, 0.25);
+  border: 1px solid rgb(245 158 11 / 0.3);
 }
 
 #app-app .app-main .dashboard-badge-purple {
   background: var(--dash-purple-light);
   color: var(--dash-purple);
-  border: 1px solid rgba(124, 58, 237, 0.22);
+  border: 1px solid rgb(96 165 250 / 0.32);
 }

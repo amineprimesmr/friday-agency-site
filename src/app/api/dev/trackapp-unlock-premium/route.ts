@@ -39,7 +39,7 @@ export async function POST() {
   } = await supabase.auth.getUser();
 
   if (error || !user?.id) {
-    return NextResponse.json({ error: "Connecte-toi d'abord." }, { status: 401 });
+    return NextResponse.json({ error: "Connectez-vous d'abord." }, { status: 401 });
   }
 
   const ok = await persistTrackappPremium({
@@ -55,5 +55,5 @@ export async function POST() {
     );
   }
 
-  return NextResponse.json({ ok: true, redirect: "/trackapp/accueil" });
+  return NextResponse.json({ ok: true, redirect: "/trackapp/apptracker" });
 }

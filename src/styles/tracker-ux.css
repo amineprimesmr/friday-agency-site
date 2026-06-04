@@ -158,3 +158,44 @@
     transform: scale(0.985);
   }
 }
+
+.tracker-landing-hero-title {
+  margin: 0;
+  max-width: min(100%, 38rem);
+  margin-inline: auto;
+  padding-bottom: 0.375rem;
+  font-size: clamp(2rem, 7.2vw, 4.35rem);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+  background: linear-gradient(to bottom right, #fff 0%, rgb(244 244 245) 48%, rgb(113 113 122) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+@media (min-width: 640px) {
+  .tracker-landing-hero-title {
+    font-size: clamp(2.2rem, 7.8vw, 4.85rem);
+  }
+}
+
+.tracker-landing-hero-description {
+  margin: 0.85rem auto 0;
+  max-width: min(36ch, 100%);
+  padding-inline: 0.25rem;
+  font-size: clamp(0.78rem, 1.35vw, 0.9rem);
+  line-height: 1.42;
+  letter-spacing: -0.01em;
+  text-align: center;
+  text-wrap: balance;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+@media (min-width: 1024px) {
+  .tracker-landing-hero-description {
+    font-size: clamp(0.82rem, 1.15vw, 0.94rem);
+  }
+}

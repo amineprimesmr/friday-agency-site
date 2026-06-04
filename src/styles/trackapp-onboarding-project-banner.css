@@ -1,0 +1,64 @@
+.ta-project-banner {
+  margin-bottom: 1.25rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(212, 255, 34, 0.22);
+  background: linear-gradient(135deg, rgba(212, 255, 34, 0.08) 0%, rgba(124, 58, 237, 0.06) 100%);
+  padding: 1rem 1.15rem;
+}
+
+.ta-project-banner__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+}
+
+.ta-project-banner__eyebrow {
+  margin: 0 0 0.15rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #65a30d;
+}
+
+.ta-project-banner__title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: var(--dash-text, #0f172a);
+}
+
+.ta-project-banner__sub {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  color: var(--dash-muted-light, #64748b);
+}
+
+.ta-project-banner__cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0 1rem;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.ta-project-banner__cta:hover {
+  color: #d4ff22;
+}
+
+.ta-project-banner--discover {
+  border-color: rgb(124 58 237 / 0.22);
+  background: linear-gradient(135deg, rgb(124 58 237 / 0.08) 0%, rgb(59 130 246 / 0.05) 100%);
+}
+
+.ta-project-banner--discover .ta-project-banner__eyebrow {
+  color: rgb(91 33 182);
+}

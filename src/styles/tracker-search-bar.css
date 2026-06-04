@@ -589,6 +589,53 @@ kbd.tracker-kbd {
   text-decoration: underline;
 }
 
+/* Résultats Trackapp (nom · catégorie · revenus) */
+
+.tracker-search-row--live {
+  align-items: center;
+  gap: 12px;
+  padding-top: 11px;
+  padding-bottom: 11px;
+}
+
+.tracker-search-row-main--live {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+
+.tracker-search-chip--category {
+  max-width: 100%;
+}
+
+.tracker-search-stat-col--live {
+  min-width: 4.5rem;
+  text-align: right;
+}
+
+.tracker-search-revenue {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fafafa;
+  line-height: 1.2;
+}
+
+.tracker-search-revenue--pending {
+  color: #71717a;
+  animation: tracker-search-revenue-pulse 1s ease-in-out infinite;
+}
+
+@keyframes tracker-search-revenue-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 /* Skeleton shimmer (dès la frappe) */
 
 @keyframes tracker-search-skel-wave {
@@ -677,6 +724,60 @@ kbd.tracker-kbd {
   width: min(600px, 100%);
   margin-left: auto;
   margin-right: auto;
+}
+
+.tracker-search-pill-divider {
+  flex-shrink: 0;
+  width: 1px;
+  height: 1.35rem;
+  background: color-mix(in srgb, var(--c-light) 22%, transparent);
+  opacity: 0.55;
+}
+
+.tracker-switcher-host[data-search-surface="light"] .tracker-search-pill-divider {
+  background: color-mix(in srgb, var(--c-dark) 14%, transparent);
+  opacity: 0.35;
+}
+
+.tracker-search-sort {
+  flex-shrink: 0;
+  max-width: 8.75rem;
+  border: none;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--c-dark) 18%, transparent);
+  color: rgba(255, 255, 255, 0.92);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  padding: 0.35rem 1.6rem 0.35rem 0.55rem;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.65)' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.4rem center;
+  background-size: 12px;
+}
+
+.tracker-switcher-host[data-search-surface="light"] .tracker-search-sort {
+  background-color: color-mix(in srgb, var(--c-dark) 6%, transparent);
+  color: #0f172a;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(15,23,42,0.45)' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+}
+
+.tracker-search-sort:focus-visible {
+  outline: 2px solid rgba(200, 255, 61, 0.5);
+  outline-offset: 1px;
+}
+
+@media (max-width: 420px) {
+  .tracker-search-sort {
+    max-width: 6.5rem;
+    font-size: 0.68rem;
+    padding-right: 1.35rem;
+  }
 }
 
 /* Croix fermeture dans la pilule — mobile uniquement (rendu depuis TSX) */

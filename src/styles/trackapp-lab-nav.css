@@ -1,57 +1,370 @@
-/* Navigation workspace — style 81lab (sidebar + topbar fil d’Ariane) */
+/* Navigation workspace — sidebar studio */
 
 body.trackapp-fidelity-body #app-app {
-  --app-sidebar-width: 232px;
+  --app-topbar-height: 0px;
+  --app-sidebar-width: 200px;
+  --app-sidebar-width-collapsed: 68px;
+  --lab-rail-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --lab-rail-duration: 0.42s;
+  overscroll-behavior-y: none;
 }
 
 @media (min-width: 901px) {
-  body.trackapp-fidelity-body #app-app {
-    --app-topbar-height: 52px;
+  body.trackapp-fidelity-body #app-app[data-sidebar-expanded="false"] {
+    --app-sidebar-width: var(--app-sidebar-width-collapsed);
   }
 
   body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar {
+    position: fixed !important;
     top: 0 !important;
     height: 100vh !important;
     height: 100dvh !important;
     z-index: 400 !important;
-    background: #000 !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    width: var(--app-sidebar-width) !important;
+    min-width: var(--app-sidebar-width) !important;
+    transition:
+      width var(--lab-rail-duration) var(--lab-rail-ease),
+      min-width var(--lab-rail-duration) var(--lab-rail-ease);
+    background:
+      radial-gradient(120% 55% at 0% 0%, rgb(59 130 246 / 0.05) 0%, transparent 56%),
+      linear-gradient(165deg, rgb(7 8 14 / 0.24) 0%, rgb(8 10 18 / 0.18) 46%, rgb(10 6 15 / 0.16) 100%) !important;
+    border-right: 1px solid rgb(148 163 184 / 0.1) !important;
+    backdrop-filter: blur(22px) saturate(135%) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(135%) !important;
+    box-shadow: 4px 0 16px rgb(0 0 0 / 0.1);
   }
 
   body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar .app-sidebar-brand {
-    display: flex !important;
-    align-items: center;
-    padding: 1.35rem 1.1rem 1.15rem !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: none !important;
   }
 
   body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar .app-sidebar-nav {
-    padding: 0.65rem 0.65rem 1rem !important;
+    padding: 0 !important;
   }
 
-  body.trackapp-fidelity-body #app-app .app-desktop-topbar.trackapp-lab-topbar {
-    left: var(--app-sidebar-width);
-    right: 0;
-    width: auto;
-    display: flex !important;
-    align-items: center;
-    gap: 0.85rem;
-    padding: 0 1.15rem 0 0.85rem;
-    background: #000 !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  body.trackapp-fidelity-body #app-app .trackapp-lab-topbar .app-desktop-topbar__menu-btn {
-    display: none !important;
+  body.trackapp-fidelity-body #app-app .app-main {
+    transition: margin-left var(--lab-rail-duration) var(--lab-rail-ease);
   }
 
   body.trackapp-fidelity-body #app-app .app-main {
     margin-left: var(--app-sidebar-width) !important;
-    margin-top: var(--app-topbar-height) !important;
+    margin-top: 0 !important;
+    overscroll-behavior-y: none;
+  }
+
+  body.trackapp-fidelity-body #app-app[data-route-kind="applab-create"] .app-main {
+    margin-right: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 0.65rem 0 0 !important;
+    min-height: 100dvh !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  body.trackapp-fidelity-body #app-app[data-route-kind="applab-create"] .app-main > .app-content {
+    min-height: 100%;
   }
 }
 
-/* —— Sidebar brand —— */
+/* —— Icon rail (style Higgsfield) —— */
+
+.trackapp-lab-rail {
+  padding: 0.85rem 0.65rem 0.5rem;
+}
+
+.trackapp-lab-rail__stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+}
+
+.trackapp-lab-rail__slot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.trackapp-lab-rail__logo-toggle,
+.trackapp-lab-rail__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.72rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.2rem 0.35rem;
+  border: 0;
+  border-radius: 0.85rem;
+  background: transparent;
+  color: rgb(255 255 255 / 0.52);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    color 0.28s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    background 0.28s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform 0.28s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.trackapp-lab-rail__logo-toggle {
+  flex-shrink: 0;
+  margin-bottom: 0.35rem;
+}
+
+.trackapp-lab-rail__glyph--logo {
+  position: relative;
+  overflow: hidden;
+  background: rgb(255 255 255 / 0.06);
+  border-color: rgb(255 255 255 / 0.1);
+}
+
+.trackapp-lab-rail__logo-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    opacity 0.38s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform 0.38s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    filter 0.38s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1));
+  pointer-events: none;
+}
+
+.trackapp-lab-rail__logo-face--brand {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+  filter: blur(0);
+}
+
+.trackapp-lab-rail__logo-face--action {
+  opacity: 0;
+  transform: scale(0.78) rotate(-10deg);
+  filter: blur(2px);
+  color: rgb(255 255 255 / 0.88);
+}
+
+.trackapp-lab-rail__logo-toggle:hover .trackapp-lab-rail__logo-face--brand,
+.trackapp-lab-rail__logo-toggle:focus-visible .trackapp-lab-rail__logo-face--brand {
+  opacity: 0;
+  transform: scale(0.78) rotate(10deg);
+  filter: blur(2px);
+}
+
+.trackapp-lab-rail__logo-toggle:hover .trackapp-lab-rail__logo-face--action,
+.trackapp-lab-rail__logo-toggle:focus-visible .trackapp-lab-rail__logo-face--action {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+  filter: blur(0);
+}
+
+.trackapp-lab-rail__logo-toggle:hover,
+.trackapp-lab-rail__logo-toggle:focus-visible {
+  background: rgb(255 255 255 / 0.05);
+}
+
+.trackapp-lab-rail__logo-toggle:focus-visible,
+.trackapp-lab-rail__item:focus-visible {
+  outline: 2px solid rgb(125 211 252 / 0.55);
+  outline-offset: 2px;
+}
+
+.trackapp-lab-rail__logo-toggle:hover .trackapp-lab-rail__glyph--logo,
+.trackapp-lab-rail__logo-toggle:focus-visible .trackapp-lab-rail__glyph--logo {
+  background: rgb(255 255 255 / 0.1);
+  border-color: rgb(255 255 255 / 0.16);
+  transform: translateY(-1px);
+}
+
+.trackapp-lab-rail__logo-img {
+  width: 1.65rem !important;
+  height: 1.65rem !important;
+  border-radius: 0.55rem;
+}
+
+.trackapp-lab-rail__panel-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.trackapp-lab-rail__glyph {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.85rem;
+  background: rgb(255 255 255 / 0.04);
+  border: 1px solid rgb(255 255 255 / 0.06);
+  transition:
+    background 0.28s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    border-color 0.28s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform 0.28s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    box-shadow 0.28s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.trackapp-lab-rail__icon {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.trackapp-lab-rail__label {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.86rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 1;
+  max-width: 12rem;
+  transform: translateX(0);
+  transition:
+    opacity 0.32s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    max-width 0.38s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform 0.38s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.trackapp-lab-rail__item:hover {
+  color: rgb(255 255 255 / 0.88);
+}
+
+.trackapp-lab-rail__item:hover .trackapp-lab-rail__glyph {
+  background: rgb(59 130 246 / 0.14);
+  border-color: rgb(125 211 252 / 0.22);
+  transform: translateY(-1px);
+}
+
+.trackapp-lab-rail__item--active {
+  color: #fff !important;
+}
+
+.trackapp-lab-rail__item--active .trackapp-lab-rail__glyph {
+  background: linear-gradient(145deg, rgb(37 99 235 / 0.38) 0%, rgb(6 182 212 / 0.22) 100%);
+  border-color: rgb(125 211 252 / 0.42);
+  box-shadow: 0 8px 22px rgb(37 99 235 / 0.28);
+}
+
+.trackapp-lab-rail__item--pending {
+  color: rgb(255 255 255 / 0.86);
+}
+
+.trackapp-lab-rail__item--pending .trackapp-lab-rail__glyph {
+  animation: trackapp-rail-pending 0.75s ease-in-out infinite alternate;
+}
+
+.trackapp-lab-rail__item--project {
+  border: 1px solid rgb(56 189 248 / 0.16);
+  background: linear-gradient(135deg, rgb(37 99 235 / 0.08) 0%, rgb(6 182 212 / 0.05) 100%);
+}
+
+.trackapp-lab-rail__item--project .trackapp-lab-rail__glyph--project {
+  background: linear-gradient(145deg, rgb(37 99 235 / 0.22) 0%, rgb(6 182 212 / 0.14) 100%);
+  border-color: rgb(56 189 248 / 0.28);
+}
+
+.trackapp-lab-rail__icon--project {
+  color: rgb(186 230 253 / 0.95);
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.trackapp-lab-rail__badge {
+  margin-left: auto;
+  margin-right: 0.35rem;
+  padding: 0.12rem 0.38rem;
+  border-radius: 999px;
+  background: rgb(56 189 248 / 0.14);
+  color: rgb(186 230 253 / 0.88);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+@keyframes trackapp-rail-pending {
+  from {
+    opacity: 0.72;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Collapsed rail */
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-rail {
+  padding-inline: 0.55rem;
+}
+
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-rail__stack {
+  align-items: center;
+}
+
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-rail__logo-toggle,
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-rail__item {
+  justify-content: center;
+  width: 2.75rem;
+  min-width: 2.75rem;
+  padding-inline: 0;
+}
+
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-rail__logo-toggle {
+  margin-bottom: 0.5rem;
+}
+
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-rail__label,
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-rail__badge {
+  opacity: 0;
+  max-width: 0;
+  transform: translateX(-6px);
+  pointer-events: none;
+}
+
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-rail__item--project {
+  width: 2.75rem;
+  border-radius: 0.85rem;
+}
+
+/* Footer collapsed */
+.trackapp-sidebar-footer--collapsed {
+  align-items: center;
+  padding-inline: 0.55rem !important;
+}
+
+.trackapp-sidebar-footer--collapsed .trackapp-sidebar-earnings,
+.trackapp-sidebar-footer--collapsed .trackapp-sidebar-profile__meta,
+.trackapp-sidebar-footer--collapsed .trackapp-sidebar-profile__menu-wrap {
+  display: none !important;
+}
+
+.trackapp-sidebar-footer--collapsed .trackapp-sidebar-profile {
+  justify-content: center;
+  width: 100%;
+}
+
+.trackapp-sidebar-footer--collapsed .trackapp-sidebar-profile__avatar {
+  margin: 0 auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar,
+  body.trackapp-fidelity-body #app-app .app-main,
+  .trackapp-lab-rail__logo-face,
+  .trackapp-lab-rail__glyph,
+  .trackapp-lab-rail__label {
+    transition-duration: 0.01ms !important;
+  }
+
+  .trackapp-lab-rail__item--pending .trackapp-lab-rail__glyph {
+    animation: none;
+  }
+}
+
+/* —— Legacy brand (unused) —— */
 .trackapp-lab-sidebar__logo {
   gap: 0.55rem;
 }
@@ -62,6 +375,78 @@ body.trackapp-fidelity-body #app-app {
   font-style: italic;
   letter-spacing: -0.04em;
   color: #fff;
+}
+
+.trackapp-lab-sidebar__collapse-btn {
+  margin-left: auto;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.trackapp-lab-sidebar__collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: #fff;
+}
+
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .app-sidebar-brand {
+  padding-inline: 0.6rem !important;
+}
+
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-sidebar__logo {
+  justify-content: center;
+}
+
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-sidebar__logo-text,
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-nav__item-label,
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-nav__group-btn,
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-sidebar-footer {
+  display: none !important;
+}
+
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-nav__children {
+  margin-left: 0;
+  padding-left: 0;
+  border-left: 0;
+}
+
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-nav__item {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-nav__item-icon {
+  width: 1.8rem;
+}
+
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-nav__favorites-count,
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-nav__favorites-chevron,
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-nav__favorites-folder-label,
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-nav__favorites-subfolder-label,
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-nav__favorites-subfolder-count,
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-nav__favorites-app-name {
+  display: none !important;
+}
+
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-nav__favorites-folder-btn,
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-nav__favorites-subfolder-btn,
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-nav__favorites-folder-link,
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-nav__favorites-app {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-nav__favorites-tree,
+body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar.trackapp-lab-sidebar--collapsed .trackapp-lab-nav__favorites-subfolder-body {
+  border-left: 0;
+  padding-left: 0;
+  margin-left: 0;
 }
 
 /* —— Nav groups —— */
@@ -125,7 +510,7 @@ body.trackapp-fidelity-body #app-app {
 
 .trackapp-lab-nav__item:hover {
   color: rgba(255, 255, 255, 0.78);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgb(59 130 246 / 0.14);
 }
 
 .trackapp-lab-nav__item--pending {
@@ -140,7 +525,53 @@ body.trackapp-fidelity-body #app-app {
 .trackapp-lab-nav__item--active {
   color: #fff !important;
   font-weight: 600;
-  background: transparent;
+  background: rgb(37 99 235 / 0.12);
+}
+
+.trackapp-lab-nav__item--project {
+  margin-top: 0.15rem;
+  padding: 0.42rem 0.45rem;
+  border: 1px solid rgb(56 189 248 / 0.18);
+  background: linear-gradient(135deg, rgb(37 99 235 / 0.1) 0%, rgb(6 182 212 / 0.06) 100%);
+  color: rgba(255, 255, 255, 0.88);
+  animation: trackapp-nav-project-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.trackapp-lab-nav__item--project:hover {
+  color: #fff;
+  border-color: rgb(56 189 248 / 0.32);
+  background: linear-gradient(135deg, rgb(37 99 235 / 0.16) 0%, rgb(6 182 212 / 0.1) 100%);
+}
+
+.trackapp-lab-nav__item--project.trackapp-lab-nav__item--active {
+  border-color: rgb(56 189 248 / 0.42);
+}
+
+.trackapp-lab-nav__item-icon--project {
+  color: rgb(125 211 252 / 0.95);
+}
+
+.trackapp-lab-nav__item-badge {
+  margin-left: auto;
+  padding: 0.12rem 0.38rem;
+  border-radius: 999px;
+  background: rgb(56 189 248 / 0.14);
+  color: rgb(186 230 253 / 0.88);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+@keyframes trackapp-nav-project-in {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .trackapp-lab-nav__item--soon {
@@ -177,77 +608,56 @@ body.trackapp-fidelity-body #app-app {
   }
 }
 
-/* —— Topbar breadcrumb —— */
-.trackapp-lab-topbar__crumbs {
+/* —— Menu mobile (sans barre topbar) —— */
+.trackapp-mobile-menu-btn {
+  position: fixed;
+  top: max(0.65rem, env(safe-area-inset-top, 0px));
+  left: max(0.65rem, env(safe-area-inset-left, 0px));
+  z-index: 410;
   display: flex;
-  min-width: 0;
-  flex: 1;
-  align-items: center;
-  gap: 0.45rem;
-  font-size: 0.88rem;
-  font-weight: 500;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 0.65rem;
+  background: rgb(8 10 18 / 0.92);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
 }
 
-.trackapp-lab-topbar__crumb--section {
-  color: rgba(255, 255, 255, 0.45);
-}
-
-.trackapp-lab-topbar__crumb-sep {
-  color: rgba(255, 255, 255, 0.35);
-  font-size: 0.95rem;
-  line-height: 1;
-}
-
-.trackapp-lab-topbar__crumb--hub {
-  color: rgba(255, 255, 255, 0.72);
-  text-decoration: none;
-  flex-shrink: 0;
-}
-
-.trackapp-lab-topbar__crumb--hub:hover {
-  color: #fff;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.trackapp-lab-topbar__crumb--current {
-  color: #fff;
-  font-weight: 600;
-  min-width: 0;
-}
-
-.trackapp-lab-topbar__actions {
-  margin-left: auto;
-  flex-shrink: 0;
-}
-
-.trackapp-lab-topbar__mobile-menu-btn {
-  margin-left: auto;
-}
-
-/* Masquer recherche / marque topbar legacy */
-body.trackapp-fidelity-body #app-app .trackapp-lab-topbar .app-desktop-topbar__brand,
-body.trackapp-fidelity-body #app-app .trackapp-lab-topbar .app-desktop-topbar__search-center {
-  display: none !important;
+.trackapp-mobile-menu-btn span {
+  display: block;
+  width: 1.1rem;
+  height: 2px;
+  margin: 0 auto;
+  border-radius: 1px;
+  background: rgb(255 255 255 / 0.88);
 }
 
 @media (max-width: 900px) {
-  body.trackapp-fidelity-body #app-app .app-desktop-topbar.trackapp-lab-topbar {
-    background: #000 !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    justify-content: flex-end;
+  body.trackapp-fidelity-body #app-app .app-sidebar-overlay {
+    inset: 0 !important;
   }
 
-  body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar .app-sidebar-brand {
-    display: none !important;
+  body.trackapp-fidelity-body #app-app .trackapp-lab-sidebar {
+    width: min(56vw, 210px) !important;
+    min-width: min(56vw, 210px) !important;
+    background:
+      radial-gradient(120% 55% at 0% 0%, rgb(59 130 246 / 0.05) 0%, transparent 56%),
+      linear-gradient(165deg, rgb(7 8 14 / 0.28) 0%, rgb(8 10 18 / 0.22) 46%, rgb(10 6 15 / 0.2) 100%) !important;
+    backdrop-filter: blur(22px) saturate(135%) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(135%) !important;
+    border-right: 1px solid rgb(148 163 184 / 0.1) !important;
+    box-shadow: 6px 0 24px rgb(0 0 0 / 0.14);
   }
 
-  body.trackapp-fidelity-body #app-app .trackapp-lab-topbar__crumbs {
-    display: none !important;
-  }
-
-  body.trackapp-fidelity-body #app-app .trackapp-lab-topbar__actions {
-    display: none !important;
+  body.trackapp-fidelity-body #app-app .app-main {
+    margin-left: 0 !important;
+    margin-top: 0 !important;
+    padding-top: 3.25rem;
   }
 }
 
@@ -255,4 +665,701 @@ body.trackapp-fidelity-body #app-app .trackapp-lab-topbar .app-desktop-topbar__s
   .trackapp-lab-nav__item--pending .trackapp-lab-nav__item-icon {
     animation: none;
   }
+}
+
+/* —— Dossier favoris (sidebar) —— */
+.trackapp-lab-nav__favorites-folder {
+  margin: 0.05rem 0;
+}
+
+.trackapp-lab-nav__favorites-folder-btn {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.48rem 0.45rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 0.84rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.trackapp-lab-nav__favorites-folder-btn:hover,
+.trackapp-lab-nav__favorites-folder-btn--active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.trackapp-lab-nav__favorites-count {
+  margin-left: auto;
+  border-radius: 999px;
+  background: rgba(251, 191, 36, 0.16);
+  padding: 0.05rem 0.45rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: rgb(253 224 71);
+}
+
+.trackapp-lab-nav__favorites-chevron {
+  flex-shrink: 0;
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.45;
+  transform: rotate(0deg);
+  transition: transform 0.2s ease;
+}
+
+.trackapp-lab-nav__favorites-chevron.is-open {
+  transform: rotate(90deg);
+}
+
+.trackapp-lab-nav__favorites-tree {
+  margin: 0.15rem 0 0.35rem 0.15rem;
+  padding-left: 0.65rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.trackapp-lab-nav__favorites-subfolder {
+  margin-top: 0.2rem;
+}
+
+.trackapp-lab-nav__favorites-subfolder-btn {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.34rem 0.35rem;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.trackapp-lab-nav__favorites-subfolder-btn:hover,
+.trackapp-lab-nav__favorites-subfolder-btn--open {
+  color: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.trackapp-lab-nav__favorites-subfolder-label {
+  min-width: 0;
+}
+
+.trackapp-lab-nav__favorites-subfolder-count {
+  margin-left: auto;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.05rem 0.38rem;
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.trackapp-lab-nav__favorites-subfolder-body {
+  margin-top: 0.1rem;
+  padding-left: 0.35rem;
+}
+
+.trackapp-lab-nav__favorites-resource-art {
+  font-size: 0.52rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.trackapp-lab-nav__favorites-folder-link {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.38rem 0.4rem;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.42);
+  text-decoration: none;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.trackapp-lab-nav__favorites-folder-link:hover,
+.trackapp-lab-nav__favorites-folder-link--active {
+  color: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.trackapp-lab-nav__favorites-folder-icon {
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.trackapp-lab-nav__favorites-apps {
+  list-style: none;
+  margin: 0.35rem 0 0;
+  padding: 0;
+}
+
+.trackapp-lab-nav__favorites-app {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.4rem;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease,
+    transform 0.2s ease;
+}
+
+.trackapp-lab-nav__favorites-app:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.trackapp-lab-nav__favorites-app--active {
+  color: #fff;
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.trackapp-lab-nav__favorites-app-art {
+  position: relative;
+  width: 1.4rem;
+  height: 1.4rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 0.32rem;
+  background: rgba(255, 255, 255, 0.08);
+  display: grid;
+  place-items: center;
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+
+.trackapp-lab-nav__favorites-app-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trackapp-lab-nav__favorites-empty {
+  margin: 0.35rem 0 0;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.32);
+}
+
+/* —— Studio sidebar (Higgsfield) —— */
+
+.trackapp-studio-sidebar__head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.75rem 0.5rem 0.55rem;
+  flex-shrink: 0;
+}
+
+.trackapp-studio-sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.trackapp-studio-sidebar__brand--collapsed {
+  flex: 0;
+}
+
+.trackapp-studio-sidebar__brand-name {
+  margin: 0;
+  font-family:
+    var(--font-space-grotesk),
+    "Space Grotesk",
+    "Space Grotesk Fallback",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Ubuntu,
+    Cantarell,
+    "Noto Sans",
+    sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  font-style: normal;
+  line-height: 24px;
+  letter-spacing: normal;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.42);
+  white-space: nowrap;
+}
+
+.trackapp-studio-sidebar__head-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 0.55rem;
+  background: transparent;
+  color: rgb(255 255 255 / 0.45);
+  cursor: pointer;
+  transition:
+    color 0.28s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    background 0.28s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.trackapp-studio-sidebar__head-toggle:hover {
+  color: rgb(255 255 255 / 0.9);
+  background: rgb(255 255 255 / 0.06);
+}
+
+.trackapp-studio-sidebar__logo {
+  position: relative;
+  flex-shrink: 0;
+  width: 2.1rem;
+  height: 2.1rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  overflow: visible;
+  transition: opacity 0.28s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.trackapp-studio-sidebar__logo--compact {
+  margin: 0 auto;
+}
+
+.trackapp-studio-sidebar__logo:hover,
+.trackapp-studio-sidebar__logo:focus-visible {
+  background: transparent;
+}
+
+.trackapp-studio-sidebar__logo:focus-visible {
+  outline: 2px solid rgb(255 255 255 / 0.28);
+  outline-offset: 2px;
+  border-radius: 0.35rem;
+}
+
+.trackapp-studio-sidebar__logo-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    opacity 0.38s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform 0.38s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    filter 0.38s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.trackapp-studio-sidebar__logo-face--brand {
+  opacity: 1;
+  transform: scale(1);
+  filter: blur(0);
+}
+
+.trackapp-studio-sidebar__logo-face--action {
+  opacity: 0;
+  transform: scale(0.78) rotate(-8deg);
+  filter: blur(2px);
+  color: rgb(255 255 255 / 0.9);
+}
+
+.trackapp-studio-sidebar__logo:hover .trackapp-studio-sidebar__logo-face--brand,
+.trackapp-studio-sidebar__logo:focus-visible .trackapp-studio-sidebar__logo-face--brand {
+  opacity: 0;
+  transform: scale(0.78) rotate(8deg);
+  filter: blur(2px);
+}
+
+.trackapp-studio-sidebar__logo:hover .trackapp-studio-sidebar__logo-face--action,
+.trackapp-studio-sidebar__logo:focus-visible .trackapp-studio-sidebar__logo-face--action {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+  filter: blur(0);
+}
+
+.trackapp-studio-sidebar__logo-img {
+  width: 1.45rem !important;
+  height: 1.45rem !important;
+  border-radius: 0;
+}
+
+.trackapp-studio-sidebar__panel-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.trackapp-studio-sidebar__nav {
+  padding: 0 0.4rem 0.55rem;
+}
+
+.trackapp-studio-sidebar__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-bottom: 1.15rem;
+}
+
+.trackapp-studio-sidebar__action {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.48rem 0.38rem;
+  border: 0;
+  border-radius: 0.65rem;
+  background: transparent;
+  color: rgb(255 255 255 / 0.92);
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    color 0.25s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    background 0.25s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform 0.25s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.trackapp-studio-sidebar__action--muted {
+  color: rgb(255 255 255 / 0.42);
+}
+
+.trackapp-studio-sidebar__action:hover {
+  color: rgb(255 255 255 / 0.95);
+  background: rgb(255 255 255 / 0.05);
+}
+
+.trackapp-studio-sidebar__action-plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15rem;
+  font-size: 1.25rem;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.trackapp-studio-sidebar__action-search {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+}
+
+.trackapp-studio-sidebar__action--icon-only {
+  justify-content: center;
+  width: 2.75rem;
+  min-height: 2.75rem;
+  padding-inline: 0;
+  margin-inline: auto;
+  border-radius: 0.85rem;
+}
+
+.trackapp-studio-sidebar__section {
+  margin-bottom: 1rem;
+}
+
+.trackapp-studio-sidebar__section-label {
+  margin: 0 0 0.55rem;
+  padding-inline: 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgb(255 255 255 / 0.34);
+}
+
+.trackapp-studio-sidebar__section-toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+  padding: 0.35rem 0.45rem;
+  border: 0;
+  background: transparent;
+  color: rgb(255 255 255 / 0.34);
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.trackapp-studio-sidebar__chevron {
+  display: inline-block;
+  font-size: 0.85rem;
+  line-height: 1;
+  transform: rotate(180deg);
+  transition: transform 0.32s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.trackapp-studio-sidebar__chevron.is-open {
+  transform: rotate(0deg);
+}
+
+.trackapp-studio-sidebar__tools {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.trackapp-studio-sidebar__tool {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.24rem 0.3rem;
+  border-radius: 0.75rem;
+  color: rgb(255 255 255 / 0.88);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.25s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.trackapp-studio-sidebar__tool:hover {
+  background: rgb(255 255 255 / 0.05);
+}
+
+.trackapp-studio-sidebar__tool.is-active {
+  background: rgb(255 255 255 / 0.08);
+  color: #fff;
+}
+
+.trackapp-studio-sidebar__tool.is-active .trackapp-studio-sidebar__tool-icon {
+  background: rgb(255 255 255 / 0.12);
+  color: #fff;
+}
+
+.trackapp-studio-sidebar__tool--collapsed {
+  justify-content: center;
+  width: 2.75rem;
+  padding: 0.28rem 0;
+  margin-inline: auto;
+}
+
+.trackapp-studio-sidebar__tool-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 0.55rem;
+  background: rgb(255 255 255 / 0.06);
+  color: rgb(255 255 255 / 0.75);
+  flex-shrink: 0;
+  transition: transform 0.28s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.trackapp-studio-sidebar__tool-icon--blue {
+  background: linear-gradient(145deg, rgb(59 130 246 / 0.92) 0%, rgb(37 99 235 / 0.88) 100%);
+  color: #fff;
+  box-shadow: 0 6px 16px rgb(59 130 246 / 0.24);
+}
+
+.trackapp-studio-sidebar__tool:hover .trackapp-studio-sidebar__tool-icon {
+  transform: translateY(-1px);
+}
+
+.trackapp-studio-sidebar__tool--coming-soon {
+  position: relative;
+  cursor: not-allowed;
+  pointer-events: auto;
+  user-select: none;
+  overflow: hidden;
+}
+
+.trackapp-studio-sidebar__tool--coming-soon .trackapp-studio-sidebar__tool-label,
+.trackapp-studio-sidebar__tool--coming-soon .trackapp-studio-sidebar__tool-icon {
+  opacity: 0.38;
+}
+
+.trackapp-studio-sidebar__tool--coming-soon:hover,
+.trackapp-studio-sidebar__tool--coming-soon:focus-visible {
+  background: transparent;
+}
+
+.trackapp-studio-sidebar__tool--coming-soon .trackapp-studio-sidebar__tool-icon--blue {
+  background: rgb(255 255 255 / 0.08);
+  color: rgb(255 255 255 / 0.55);
+  box-shadow: none;
+}
+
+.trackapp-studio-sidebar__tool--coming-soon:hover .trackapp-studio-sidebar__tool-icon {
+  transform: none;
+}
+
+.trackapp-studio-sidebar__tool-hint {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  background: #14161e;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.16s ease,
+    visibility 0.16s ease;
+}
+
+.trackapp-studio-sidebar__tool--coming-soon:hover .trackapp-studio-sidebar__tool-hint,
+.trackapp-studio-sidebar__tool--coming-soon:focus-visible .trackapp-studio-sidebar__tool-hint {
+  opacity: 1;
+  visibility: visible;
+}
+
+.trackapp-studio-sidebar__projects {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.trackapp-studio-sidebar__project {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.38rem 0.38rem;
+  border-radius: 0.75rem;
+  color: rgb(255 255 255 / 0.72);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background 0.25s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    color 0.25s var(--lab-rail-ease, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.trackapp-studio-sidebar__project:hover {
+  background: rgb(255 255 255 / 0.05);
+  color: #fff;
+}
+
+.trackapp-studio-sidebar__project.is-active {
+  background: rgb(255 255 255 / 0.08);
+  color: #fff;
+}
+
+.trackapp-studio-sidebar__project--collapsed {
+  justify-content: center;
+  width: 2.75rem;
+  padding-inline: 0;
+  margin-inline: auto;
+}
+
+.trackapp-studio-sidebar__project-art {
+  width: 2.35rem;
+  height: 2.35rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 0.65rem;
+  background: rgb(255 255 255 / 0.08);
+  display: grid;
+  place-items: center;
+}
+
+.trackapp-studio-sidebar__project-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.trackapp-studio-sidebar__project-art-fallback {
+  font-size: 0.95rem;
+  color: rgb(186 230 253 / 0.9);
+}
+
+.trackapp-studio-sidebar__project-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trackapp-studio-sidebar__project-badge {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: rgb(186 230 253 / 0.85);
+}
+
+.trackapp-studio-sidebar--collapsed .trackapp-studio-sidebar__head {
+  justify-content: center;
+  padding-inline: 0.55rem;
+}
+
+.trackapp-studio-sidebar--collapsed .trackapp-studio-sidebar__nav {
+  padding-inline: 0.55rem;
+}
+
+.trackapp-studio-sidebar--collapsed .trackapp-studio-sidebar__actions {
+  align-items: center;
+}
+
+.trackapp-studio-sidebar--collapsed .trackapp-studio-sidebar__tools {
+  align-items: center;
+}
+
+/* Footer compact dans la sidebar studio ouverte */
+body.trackapp-fidelity-body #app-app .trackapp-studio-sidebar:not(.trackapp-studio-sidebar--collapsed) .trackapp-sidebar-earnings__content {
+  padding: 0.85rem 0.72rem 0.88rem;
+}
+
+body.trackapp-fidelity-body #app-app .trackapp-studio-sidebar:not(.trackapp-studio-sidebar--collapsed) .trackapp-sidebar-earnings__value {
+  font-size: 1.55rem;
+}
+
+body.trackapp-fidelity-body #app-app .trackapp-studio-sidebar:not(.trackapp-studio-sidebar--collapsed) .trackapp-sidebar-profile__avatar {
+  width: 2.1rem;
+  height: 2.1rem;
+}
+
+.trackapp-studio-search {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: start center;
+  padding: 5vh 1rem 2rem;
+}
+
+.trackapp-studio-search__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgb(0 0 0 / 0.62);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+
+.trackapp-studio-search__panel {
+  position: relative;
+  z-index: 1;
+  width: min(720px, 100%);
+}
+
+.ta-applab-home-tools {
+  padding-bottom: 0.5rem;
 }

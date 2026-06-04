@@ -6,6 +6,7 @@ type VerifyPlatform =
   | "youtube"
   | "facebook"
   | "linkedin"
+  | "threads"
   | "metaAdsLibrary";
 
 export type UrlVerifyResult = {
@@ -114,6 +115,13 @@ export async function verifyOutboundUrl(
     }
 
     if (status === 403) {
+      if (platform === "instagram" || platform === "tiktok") {
+        return {
+          ok: true,
+          reason: "HTTP 403 (mur anti-bot) — profil supposé actif",
+          httpStatus: status,
+        };
+      }
       return {
         ok: false,
         reason: "HTTP 403 — accès refusé, impossible de confirmer le compte officiel",
@@ -156,12 +164,53 @@ export function urlHasWebEvidence(urlString: string, sources: string[]): boolean
   const path = url.pathname.replace(/\/$/, "").toLowerCase();
   const needle = `${host}${path}`;
 
+  if (
+    sources.some((raw) => {
+      const s = parseUrl(raw);
+      if (!s) return false;
+      const sh = s.hostname.replace(/^www\./i, "").toLowerCase();
+      const sp = s.pathname.replace(/\/$/, "").toLowerCase();
+      const hay = `${sh}${sp}`;
+      return hay === needle || hay.includes(needle) || needle.includes(hay);
+    })
+  ) {
+    return true;
+  }
+
+  return urlHasSocialHandleEvidence(urlString, sources);
+}
+
+/** Match par handle (instagram.com/duolingo) même si la source a des query params. */
+function urlHasSocialHandleEvidence(urlString: string, sources: string[]): boolean {
+  const url = parseUrl(urlString);
+  if (!url) return false;
+  const host = url.hostname.replace(/^www\./i, "").toLowerCase();
+  const parts = url.pathname.split("/").filter(Boolean);
+  const handle = parts[0]?.replace(/^@/, "").toLowerCase();
+  if (!handle || handle.length < 3) return false;
+
+  const profileHosts: Record<string, string[]> = {
+    "instagram.com": ["instagram.com"],
+    "instagr.am": ["instagram.com"],
+    "tiktok.com": ["tiktok.com"],
+    "x.com": ["x.com", "twitter.com"],
+    "twitter.com": ["x.com", "twitter.com"],
+    "youtube.com": ["youtube.com"],
+    "facebook.com": ["facebook.com"],
+    "linkedin.com": ["linkedin.com"],
+    "threads.net": ["threads.net"],
+  };
+
+  const aliases = profileHosts[host];
+  if (!aliases) return false;
+
   return sources.some((raw) => {
     const s = parseUrl(raw);
     if (!s) return false;
     const sh = s.hostname.replace(/^www\./i, "").toLowerCase();
-    const sp = s.pathname.replace(/\/$/, "").toLowerCase();
-    const hay = `${sh}${sp}`;
-    return hay === needle || hay.includes(needle) || needle.includes(hay);
+    if (!aliases.some((a) => sh === a || sh.endsWith(`.${a}`))) return false;
+    const sp = s.pathname.split("/").filter(Boolean);
+    const shandle = sp[0]?.replace(/^@/, "").toLowerCase();
+    return shandle === handle;
   });
 }

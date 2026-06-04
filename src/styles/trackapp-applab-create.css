@@ -1,0 +1,2880 @@
+/* AppLAB Studio — layout Higgsfield, accent dégradé bleu */
+
+.ta-applab-studio {
+  --ac-panel: rgb(18 18 22 / 0.72);
+  --ac-border: rgb(255 255 255 / 0.08);
+  --ac-text: #f5f5f7;
+  --ac-muted: #8e8e93;
+  --ac-blue: #2563eb;
+  --ac-cyan: #06b6d4;
+  --ac-accent: #38bdf8;
+  --ac-accent-gradient: linear-gradient(135deg, #1d4ed8 0%, #2563eb 40%, #06b6d4 100%);
+  position: relative;
+  min-height: 100%;
+  background: transparent;
+  color: var(--ac-text);
+}
+
+.ta-applab-studio__frame {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 100%;
+}
+
+/* ── Sidebar ── */
+
+.ta-applab-studio__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.1rem 0.85rem;
+  border-right: 1px solid var(--ac-border);
+  background: rgb(6 6 8 / 0.92);
+  backdrop-filter: blur(16px);
+}
+
+.ta-applab-studio__sidebar-head {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.65rem;
+  padding: 0 0.25rem;
+}
+
+.ta-applab-studio__sidebar-kicker {
+  margin: 0;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ac-accent);
+}
+
+.ta-applab-studio__sidebar-title {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.ta-applab-studio__project {
+  margin: 0.65rem 0.25rem 1rem;
+  padding: 0.6rem 0.7rem;
+  border-radius: 12px;
+  border: 1px solid rgb(56 189 248 / 0.22);
+  background: linear-gradient(135deg, rgb(37 99 235 / 0.14) 0%, rgb(6 182 212 / 0.08) 100%);
+  animation: ta-applab-project-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ta-applab-studio__project-kicker {
+  margin: 0 0 0.2rem;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.42);
+}
+
+.ta-applab-studio__project-name {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--ac-text);
+  word-break: break-word;
+}
+
+.ta-applab-studio__project--back {
+  padding: 0.35rem 0.45rem;
+}
+
+.ta-applab-studio__back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: rgb(255 255 255 / 0.55);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.ta-applab-studio__back-row .ta-applab-studio__back-btn {
+  width: auto;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgb(56 189 248 / 0.2);
+  background: rgb(15 23 42 / 0.55);
+  animation: ta-applab-project-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ta-applab-studio__back-btn:hover:not(:disabled) {
+  color: var(--ac-text);
+  background: rgb(255 255 255 / 0.06);
+}
+
+.ta-applab-studio__back-row .ta-applab-studio__back-btn:hover:not(:disabled) {
+  border-color: rgb(56 189 248 / 0.35);
+  background: rgb(30 41 59 / 0.65);
+}
+
+.ta-applab-studio__back-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ta-applab-studio__back-btn-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+@keyframes ta-applab-project-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.ta-applab-studio__sidebar-cta {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.35rem;
+  padding: 0 0.75rem;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.04);
+  border: 1px solid var(--ac-border);
+  color: var(--ac-text);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.ta-applab-studio__sidebar-cta:hover {
+  border-color: rgb(56 189 248 / 0.35);
+  background: rgb(37 99 235 / 0.08);
+}
+
+.ta-applab-studio__sidebar-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.35rem;
+  padding: 0 0.75rem;
+  border-radius: 12px;
+  color: var(--ac-muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.ta-applab-studio__sidebar-search:hover {
+  color: var(--ac-text);
+  background: rgb(255 255 255 / 0.04);
+}
+
+.ta-applab-studio__sidebar-section {
+  margin: 0.85rem 0 0.35rem;
+  padding: 0 0.35rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.35);
+}
+
+.ta-applab-studio__sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.ta-applab-studio__sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 10px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--ac-muted);
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.ta-applab-studio__sidebar-link:hover {
+  color: var(--ac-text);
+  background: rgb(255 255 255 / 0.04);
+}
+
+.ta-applab-studio__sidebar-link.is-active {
+  color: var(--ac-text);
+  background: rgb(37 99 235 / 0.12);
+}
+
+.ta-applab-studio__sidebar-icon {
+  display: grid;
+  place-items: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.06);
+  font-size: 0.72rem;
+}
+
+.ta-applab-studio__sidebar-icon--blue {
+  background: linear-gradient(135deg, rgb(37 99 235 / 0.35), rgb(6 182 212 / 0.25));
+  box-shadow: 0 0 16px rgb(37 99 235 / 0.25);
+}
+
+.ta-applab-create-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ta-applab-create-steps__item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 10px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--ac-muted);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.ta-applab-create-steps__item.is-active {
+  background: rgb(37 99 235 / 0.14);
+  color: var(--ac-accent);
+}
+
+.ta-applab-create-steps__item.is-done {
+  color: rgb(255 255 255 / 0.78);
+}
+
+.ta-applab-create-steps__dot {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.18);
+  flex-shrink: 0;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ta-applab-create-steps__item.is-active .ta-applab-create-steps__dot {
+  background: var(--ac-cyan);
+  box-shadow: 0 0 14px rgb(6 182 212 / 0.55);
+}
+
+.ta-applab-create-steps__item.is-done .ta-applab-create-steps__dot {
+  background: rgb(56 189 248 / 0.85);
+}
+
+/* ── Stage ── */
+
+.ta-applab-studio__stage {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  overflow-y: auto;
+}
+
+.ta-applab-studio__back-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0.85rem 1.25rem 0;
+}
+
+.ta-applab-studio__project-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+  max-width: min(42vw, 320px);
+  padding: 0.35rem 0.65rem 0.35rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgb(56 189 248 / 0.2);
+  background: rgb(15 23 42 / 0.55);
+  animation: ta-applab-project-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ta-applab-studio__project-chip-dot {
+  flex-shrink: 0;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
+  box-shadow: 0 0 10px rgb(56 189 248 / 0.55);
+}
+
+.ta-applab-studio__project-chip-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ac-text);
+}
+
+.ta-applab-studio__studio-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ta-applab-studio__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.25rem;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgb(56 189 248 / 0.25);
+  background: rgb(37 99 235 / 0.12);
+  color: var(--ac-text);
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+}
+
+.ta-applab-studio__pill:hover {
+  border-color: rgb(56 189 248 / 0.45);
+  background: rgb(37 99 235 / 0.2);
+  transform: translateY(-1px);
+}
+
+.ta-applab-studio__pill-badge {
+  padding: 0.12rem 0.4rem;
+  border-radius: 999px;
+  background: var(--ac-accent-gradient);
+  color: #fff;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.ta-applab-studio__pill--ghost {
+  border-color: var(--ac-border);
+  background: rgb(255 255 255 / 0.04);
+}
+
+.ta-applab-studio__pill-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: rgb(34 197 94 / 0.9);
+  box-shadow: 0 0 8px rgb(34 197 94 / 0.5);
+}
+
+/* ── Hero ── */
+
+.ta-applab-studio__hero {
+  text-align: center;
+  padding: clamp(1.7rem, 5.5vh, 3.1rem) 1.5rem 0.35rem;
+  animation: ta-applab-fade-up 0.45s ease both;
+}
+
+.ta-applab-studio__hero--animated {
+  animation: none;
+}
+
+.ta-applab-studio__hero-copy {
+  will-change: transform, opacity;
+  width: 100%;
+}
+
+.ta-applab-studio__hero-title {
+  margin: 0.55rem 0 0;
+  max-width: 16ch;
+  margin-inline: auto;
+  font-size: clamp(1.65rem, 3.8vw, 2.65rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  text-transform: uppercase;
+  transition:
+    max-width 0.58s cubic-bezier(0.22, 1, 0.36, 1),
+    font-size 0.58s cubic-bezier(0.22, 1, 0.36, 1),
+    line-height 0.58s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ta-applab-studio__hero-title--concept {
+  max-width: min(100%, 28rem);
+  text-transform: none;
+  font-size: clamp(1.45rem, 3.2vw, 2.15rem);
+  line-height: 1.12;
+}
+
+.ta-applab-studio__social-proof {
+  margin-bottom: clamp(0.85rem, 2vh, 1.15rem);
+}
+
+.ta-applab-studio__back-row + .ta-applab-studio__hero {
+  padding-top: 1.35rem;
+}
+
+.ta-applab-studio__hero-kicker {
+  margin: 0;
+  font-family:
+    var(--font-space-grotesk),
+    "Space Grotesk",
+    "Space Grotesk Fallback",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Ubuntu,
+    Cantarell,
+    "Noto Sans",
+    sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  font-style: normal;
+  line-height: 24px;
+  letter-spacing: normal;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.42);
+}
+
+.ta-applab-studio__hero-app-name {
+  color: rgb(56 189 248 / 0.95);
+  font-style: italic;
+  font-weight: 900;
+}
+
+.ta-applab-studio__hero-sub {
+  margin: 0.75rem auto 0;
+  max-width: 36rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--ac-muted);
+}
+
+.ta-applab-studio__hero-sub--progress {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.42);
+}
+
+/* ── Liquid glass — même rendu que tracker-search-pill (landing) ── */
+
+.ta-applab-glass-panel,
+.ta-applab-studio__composer,
+.ta-clarify-wizard__card,
+.ta-applab-studio__composer-input,
+.ta-applab-studio__composer-textarea,
+.ta-applab-intel__question,
+.ta-applab-assessment.ta-applab-assessment--glass,
+.ta-applab-assessment__block,
+.ta-applab-clarify-field__help-block,
+.ta-clarify-wizard__help-block {
+  --c-glass: #bbbbbc;
+  --c-light: #fff;
+  --c-dark: #000;
+  --glass-reflex-dark: 2;
+  --glass-reflex-light: 0.3;
+  --saturation: 155%;
+  --tracker-glass-blur: 26px;
+
+  background-color: color-mix(in srgb, var(--c-glass) 12%, transparent);
+  -webkit-backdrop-filter: blur(var(--tracker-glass-blur)) saturate(var(--saturation)) url(#tracker-liquid-glass-fr);
+  backdrop-filter: blur(var(--tracker-glass-blur)) saturate(var(--saturation)) url(#tracker-liquid-glass-fr);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 10%), transparent),
+    inset 1.8px 3px 0 -2px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 90%), transparent),
+    inset -2px -2px 0 -2px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 80%), transparent),
+    inset -3px -8px 1px -6px color-mix(in srgb, var(--c-light) calc(var(--glass-reflex-light) * 60%), transparent),
+    inset -0.3px -1px 4px 0 color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 12%), transparent),
+    inset -1.5px 2.5px 0 -2px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 20%), transparent),
+    inset 0 3px 4px -2px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 20%), transparent),
+    inset 2px -6.5px 1px -4px color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
+    0 1px 5px 0 color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 10%), transparent),
+    0 6px 16px 0 color-mix(in srgb, var(--c-dark) calc(var(--glass-reflex-dark) * 8%), transparent);
+  transform: translateZ(0);
+}
+
+@media (max-width: 768px), (prefers-reduced-motion: reduce) {
+  .ta-applab-glass-panel,
+  .ta-applab-studio__composer,
+  .ta-clarify-wizard__card,
+  .ta-applab-studio__composer-input,
+  .ta-applab-studio__composer-textarea,
+  .ta-applab-intel__question,
+  .ta-applab-assessment.ta-applab-assessment--glass,
+  .ta-applab-assessment__block,
+  .ta-applab-clarify-field__help-block,
+  .ta-clarify-wizard__help-block {
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    backdrop-filter: blur(14px) saturate(130%);
+  }
+}
+
+/* ── Composer liquid glass ── */
+
+.ta-applab-studio__hero + .ta-applab-composer-slot {
+  margin-top: clamp(1rem, 2.8vh, 1.9rem);
+}
+
+.ta-applab-composer-slot {
+  width: 100%;
+  animation: ta-applab-composer-slot-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity, filter;
+}
+
+.ta-applab-studio__stage .ta-applab-composer-slot {
+  animation: none;
+}
+
+@keyframes ta-applab-composer-slot-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ta-applab-glass-panel {
+  --panel-width: min(920px, calc(100% - 2rem));
+  --panel-pad-block: 0.75rem;
+  --panel-pad-inline: 0.8rem;
+  --panel-radius: 22px;
+  --row-min-h: 5.25rem;
+  --row-gap: 0.65rem;
+  --field-size: clamp(1rem, 2.2vw, 1.1rem);
+  --cta-min-w: 7.75rem;
+  --cta-pad-block: 0.65rem;
+  --cta-pad-inline: 1.25rem;
+  --cta-inset: 0.35rem;
+  --cta-inner-radius: max(8px, calc(var(--panel-radius) - var(--panel-pad-inline) - var(--cta-inset) - 0.35rem));
+  --cta-outer-radius: clamp(
+    12px,
+    calc(var(--panel-radius) - var(--panel-pad-inline) - var(--panel-pad-block) - var(--cta-inset)),
+    var(--panel-radius)
+  );
+  --cta-flow: row;
+  --cta-gap: 0;
+  --cta-font: 0.78rem;
+
+  width: var(--panel-width);
+  margin: 0 auto;
+  padding: var(--panel-pad-block) var(--panel-pad-inline);
+  border-radius: var(--panel-radius);
+  border: none;
+  transition:
+    width 0.44s cubic-bezier(0.22, 1, 0.36, 1),
+    padding 0.44s cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 0.44s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.44s ease;
+}
+
+.ta-applab-glass-panel--compact {
+  --panel-width: min(480px, calc(100% - 2rem));
+  --panel-pad-block: 0.32rem;
+  --panel-pad-inline: 0.4rem;
+  --panel-radius: 999px;
+  --row-min-h: 2.65rem;
+  --row-gap: 0.42rem;
+  --cta-inset: 0.22rem;
+  --field-size: clamp(0.88rem, 2vw, 0.98rem);
+  --cta-min-w: 5.85rem;
+  --cta-pad-block: 0.5rem;
+  --cta-pad-inline: 1rem;
+  --cta-inner-radius: 11px;
+  --cta-flow: row;
+  --cta-gap: 0;
+  --cta-font: 0.68rem;
+}
+
+.ta-applab-glass-panel--expanded {
+  --panel-width: min(900px, calc(100% - 2rem));
+  --panel-pad-block: 0.72rem;
+  --panel-pad-inline: 0.75rem;
+  --panel-radius: 20px;
+  --row-min-h: 6.5rem;
+  --row-gap: 0.5rem;
+  --cta-inset: 0.3rem;
+  --field-size: clamp(0.95rem, 2vw, 1.05rem);
+  --cta-inner-radius: 14px;
+}
+
+.ta-applab-glass-panel--stacked {
+  --panel-width: min(920px, calc(100% - 2rem));
+  --row-min-h: auto;
+}
+
+.ta-applab-glass-panel__row--stack {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.ta-applab-glass-panel__editor--scroll {
+  max-height: min(54vh, 560px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  align-items: stretch;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.18) transparent;
+}
+
+.ta-applab-glass-panel__editor--scroll .ta-applab-glass-panel__field-layer {
+  width: 100%;
+}
+
+.ta-applab-glass-panel__aside--stack {
+  flex-direction: row;
+  justify-content: flex-end;
+  align-self: flex-end;
+  margin: 0;
+  padding: 0.15rem 0.35rem 0.05rem;
+}
+
+.ta-applab-glass-panel--stacked .ta-applab-glass-panel__cta {
+  min-width: 9.5rem;
+  border-radius: var(--cta-outer-radius);
+}
+
+.ta-applab-glass-panel__row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--row-gap);
+  min-height: var(--row-min-h);
+  transition: min-height 0.44s cubic-bezier(0.22, 1, 0.36, 1), gap 0.44s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ta-applab-glass-panel__editor {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  padding: 0.2rem 0.4rem 0.2rem 0.55rem;
+  transition: padding 0.44s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ta-applab-glass-panel--expanded .ta-applab-glass-panel__editor {
+  padding: 0.3rem 0.45rem 0.3rem 0.6rem;
+  align-items: flex-start;
+}
+
+.ta-applab-glass-panel__editor--morph {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.ta-applab-glass-panel__editor--morph.ta-applab-glass-panel__editor--area {
+  align-items: stretch;
+}
+
+.ta-applab-glass-panel__field-layer {
+  grid-area: 1 / 1;
+  width: 100%;
+  min-width: 0;
+}
+
+.ta-applab-glass-panel__field {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--ac-text);
+  font-family: inherit;
+  font-size: var(--field-size);
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  outline: none;
+  box-shadow: none;
+  resize: none;
+  transition: font-size 0.44s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ta-applab-glass-panel__field:focus,
+.ta-applab-glass-panel__field:focus-visible,
+.ta-applab-glass-panel input:focus,
+.ta-applab-glass-panel input:focus-visible,
+.ta-applab-glass-panel textarea:focus,
+.ta-applab-glass-panel textarea:focus-visible {
+  outline: none;
+  box-shadow: none;
+  border: none;
+}
+
+.ta-applab-glass-panel__field::placeholder {
+  color: rgb(255 255 255 / 0.52);
+  font-weight: 500;
+}
+
+.ta-applab-glass-panel__field--area {
+  min-height: 5.75rem;
+  align-self: stretch;
+  line-height: 1.5;
+}
+
+.ta-applab-glass-panel__aside {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: var(--cta-inset) 0;
+  margin: 0;
+  border: none;
+  transition: padding 0.44s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ta-applab-glass-panel__cta {
+  display: inline-flex;
+  flex-direction: var(--cta-flow);
+  align-items: center;
+  justify-content: center;
+  gap: var(--cta-gap);
+  min-width: var(--cta-min-w);
+  min-height: 0;
+  align-self: center;
+  padding: var(--cta-pad-block) var(--cta-pad-inline);
+  border: none;
+  border-radius: var(--cta-inner-radius) var(--cta-outer-radius) var(--cta-outer-radius) var(--cta-inner-radius);
+  background: var(--ac-accent-gradient);
+  color: #fff;
+  font-family: inherit;
+  font-size: var(--cta-font);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 10px 32px rgb(37 99 235 / 0.38);
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease,
+    min-width 0.44s cubic-bezier(0.22, 1, 0.36, 1),
+    padding 0.44s cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 0.44s cubic-bezier(0.22, 1, 0.36, 1),
+    font-size 0.44s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ta-applab-glass-panel--expanded .ta-applab-glass-panel__cta {
+  --cta-min-w: 7.25rem;
+  --cta-pad-block: 0.72rem;
+  --cta-pad-inline: 1.35rem;
+}
+
+.ta-applab-glass-panel__cta:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 40px rgb(37 99 235 / 0.48);
+}
+
+.ta-applab-glass-panel__cta:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.ta-applab-glass-panel__cta-label {
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.ta-applab-glass-panel__footer {
+  margin-top: 0.65rem;
+  padding: 0.55rem 0.5rem 0.15rem;
+  border-top: 1px solid rgb(255 255 255 / 0.06);
+}
+
+.ta-applab-glass-panel__nav {
+  margin-top: 0.5rem;
+  padding: 0 0.35rem;
+}
+
+.ta-applab-glass-panel__back {
+  padding: 0.1rem 0.25rem;
+  border: none;
+  background: transparent;
+  color: rgb(255 255 255 / 0.38);
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ta-applab-glass-panel__back:hover:not(:disabled) {
+  color: rgb(255 255 255 / 0.62);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ta-applab-composer-slot,
+  .ta-applab-studio__composer--animated,
+  .ta-applab-studio__below,
+  .ta-applab-studio__hero-copy {
+    animation: none;
+    filter: none !important;
+  }
+
+  .ta-applab-glass-panel,
+  .ta-applab-glass-panel__row,
+  .ta-applab-glass-panel__editor,
+  .ta-applab-glass-panel__field,
+  .ta-applab-glass-panel__aside,
+  .ta-applab-glass-panel__cta {
+    transition-duration: 0.01ms;
+  }
+}
+
+@media (max-width: 720px) {
+  .ta-applab-glass-panel--compact {
+    --panel-width: min(100%, calc(100% - 1.25rem));
+  }
+
+  .ta-applab-glass-panel__row {
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .ta-applab-glass-panel__aside {
+    justify-content: center;
+    padding: 0.35rem 0 0;
+    width: 100%;
+  }
+
+  .ta-applab-glass-panel__cta {
+    width: calc(100% - 2 * var(--cta-inset));
+    min-height: 2.75rem;
+    border-radius: var(--cta-outer-radius);
+    --cta-flow: row;
+  }
+}
+
+/* ── Composer (étapes complexes) ── */
+
+.ta-applab-studio__composer {
+  width: min(720px, calc(100% - 2.5rem));
+  margin: 0 auto;
+  padding: 1.15rem 1.25rem 1rem;
+  border-radius: 22px;
+  border: none;
+  animation: ta-applab-fade-up 0.5s ease 0.06s both;
+}
+
+.ta-applab-studio__composer--animated {
+  animation: none;
+  will-change: transform, opacity, filter;
+}
+
+.ta-applab-studio__below {
+  overflow: visible;
+  will-change: transform, opacity, filter;
+}
+
+.ta-applab-studio__below .ta-applab-studio__gallery {
+  animation: none;
+}
+
+.ta-applab-studio__composer--wide {
+  width: min(860px, calc(100% - 2.5rem));
+}
+
+.ta-applab-studio__composer--workspace {
+  width: min(960px, calc(100% - 2.5rem));
+}
+
+.ta-applab-studio__composer-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.ta-applab-studio__composer-body--welcome,
+.ta-applab-studio__composer-body--ready {
+  padding: 0.25rem 0;
+}
+
+.ta-applab-studio__composer-body--clarify {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.5rem;
+}
+
+.ta-applab-studio__composer-body--reference {
+  gap: 0.5rem;
+}
+
+.ta-applab-studio__composer-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.4);
+}
+
+.ta-applab-studio__composer-placeholder,
+.ta-applab-studio__composer-summary {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: rgb(255 255 255 / 0.78);
+}
+
+.ta-applab-studio__composer-input,
+.ta-applab-studio__composer-textarea {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 18px;
+  border: none;
+  color: var(--ac-text);
+  font-size: 1rem;
+  font-weight: 600;
+  outline: none;
+}
+
+.ta-applab-studio__composer-textarea {
+  min-height: 6.5rem;
+  resize: vertical;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.ta-applab-studio__composer-input::placeholder,
+.ta-applab-studio__composer-textarea::placeholder {
+  color: rgb(255 255 255 / 0.52);
+  font-weight: 500;
+}
+
+.ta-applab-studio__composer-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.ta-applab-studio__chip {
+  display: inline-flex;
+  min-height: 1.85rem;
+  align-items: center;
+  padding: 0 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  background: rgb(255 255 255 / 0.04);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: rgb(255 255 255 / 0.55);
+}
+
+.ta-applab-studio__composer-foot {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  color: var(--ac-muted);
+}
+
+.ta-applab-studio__composer-edit {
+  display: inline-flex;
+  margin-top: 1rem;
+  min-height: 2.35rem;
+  padding: 0 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--ac-border);
+  background: transparent;
+  color: var(--ac-text);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.ta-applab-studio__composer-edit:hover {
+  border-color: rgb(56 189 248 / 0.35);
+  background: rgb(37 99 235 / 0.08);
+}
+
+.ta-applab-studio__composer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgb(255 255 255 / 0.06);
+}
+
+.ta-applab-studio__composer-actions--solo-cta {
+  justify-content: flex-end;
+  margin-top: 0.85rem;
+  padding-top: 0.35rem;
+  border-top: none;
+}
+
+.ta-applab-studio__composer-actions--solo-cta .ta-applab-studio__btn--primary {
+  flex: none;
+  width: auto;
+}
+
+.ta-applab-studio__btn--back {
+  margin-right: auto;
+  min-height: auto;
+  padding: 0.15rem 0.35rem;
+  border: none;
+  background: transparent;
+  color: rgb(255 255 255 / 0.38);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+.ta-applab-studio__btn--back:hover:not(:disabled) {
+  color: rgb(255 255 255 / 0.62);
+  background: transparent;
+  border: none;
+}
+
+.ta-applab-studio__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2.85rem;
+  padding: 0 1.25rem;
+  border-radius: 999px;
+  border: none;
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.2s ease;
+}
+
+.ta-applab-studio__btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.ta-applab-studio__btn--ghost {
+  background: transparent;
+  border: 1px solid var(--ac-border);
+  color: var(--ac-text);
+}
+
+.ta-applab-studio__btn--ghost:hover:not(:disabled) {
+  border-color: rgb(255 255 255 / 0.18);
+  background: rgb(255 255 255 / 0.04);
+}
+
+.ta-applab-studio__btn--primary {
+  flex: 0 0 auto;
+  margin-left: auto;
+  background: var(--ac-accent-gradient);
+  color: #fff;
+  box-shadow: 0 8px 32px rgb(37 99 235 / 0.35);
+}
+
+.ta-applab-studio__btn--primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 40px rgb(37 99 235 / 0.45);
+}
+
+.ta-applab-studio__btn--primary.ta-applab-studio__btn--sentence {
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+/* ── Gallery ── */
+
+.ta-applab-studio__gallery {
+  flex: 0 0 auto;
+  margin-top: auto;
+  padding: clamp(5rem, 18vh, 10rem) 1.25rem 2.5rem;
+  overflow: visible;
+  animation: ta-applab-fade-up 0.55s ease 0.12s both;
+}
+
+.ta-applab-studio__gallery-heading {
+  margin: 0 auto clamp(0.85rem, 2vh, 1.25rem);
+  max-width: min(100%, 38rem);
+  padding: 0 0.35rem;
+  text-align: center;
+}
+
+.ta-applab-studio__hero-landing-icon {
+  margin-inline: 0 !important;
+  --hero-icon: clamp(2rem, 5.5vw, 3.35rem) !important;
+}
+
+.ta-applab-studio__hero-copy .ta-applab-studio__hero-landing-title {
+  max-width: min(100%, 14em);
+  line-height: 1.05;
+}
+
+.ta-applab-studio__hero-landing-title-line2 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 0.65rem;
+  white-space: nowrap;
+}
+
+.ta-applab-studio__gallery-heading .tracker-landing-hero-title {
+  font-size: clamp(1.12rem, 3.4vw, 1.58rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.32;
+  padding-bottom: 0;
+}
+
+.ta-applab-studio__gallery-updated {
+  justify-content: center;
+  margin-top: 0.4rem;
+  font-size: clamp(0.72rem, 1.9vw, 0.84rem);
+  font-weight: 500;
+  color: rgb(255 255 255 / 0.52);
+}
+
+.ta-applab-studio__gallery-hero-icon {
+  margin-inline: 0.2rem 0.35rem !important;
+}
+
+.ta-applab-studio__gallery-hero-title .ta-applab-studio__gallery-hero-icon {
+  --hero-icon: 1.42rem !important;
+}
+
+.ta-applab-format-grid {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: clamp(0.65rem, 1.6vw, 1rem);
+  max-width: 100%;
+  margin: 0 auto;
+  /* Espace au-dessus pour le scale hover — évite le clip du haut de l’iPhone */
+  padding: clamp(1.35rem, 3.5vh, 2rem) 1.25rem 0.85rem;
+  align-items: end;
+  overflow-x: auto;
+  overflow-y: visible;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(63 63 70 / 0.55) transparent;
+}
+
+.ta-applab-format-grid-outer {
+  overflow: visible;
+  max-width: 100%;
+}
+
+.ta-applab-format-grid::-webkit-scrollbar {
+  height: 6px;
+}
+
+.ta-applab-format-grid::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgb(63 63 70 / 0.55);
+}
+
+.ta-applab-format-grid > .ta-applab-format-card {
+  flex: 0 0 clamp(11rem, 16.5vw, 13.5rem);
+  scroll-snap-align: start;
+}
+
+@media (max-width: 820px) {
+  .ta-applab-format-grid {
+    gap: 0.85rem;
+    padding-inline: 1rem;
+  }
+
+  .ta-applab-format-grid > .ta-applab-format-card {
+    flex-basis: clamp(10rem, 46vw, 11.75rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .ta-applab-format-grid {
+    gap: 0.65rem;
+    padding-inline: 0.85rem;
+  }
+
+  .ta-applab-format-grid > .ta-applab-format-card {
+    flex-basis: clamp(9rem, 48vw, 10.5rem);
+  }
+}
+
+.ta-applab-format-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: visible;
+  background: transparent;
+  border: none;
+  z-index: 1;
+  outline: none;
+  padding-top: 1rem;
+}
+
+.ta-applab-format-card.is-hovered,
+.ta-applab-format-card:focus-within {
+  z-index: 8;
+}
+
+.ta-applab-iphone {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.ta-applab-iphone__device {
+  position: relative;
+  width: min(100%, 13.5rem);
+  aspect-ratio: 9 / 19.35;
+  padding: 0.28rem;
+  border-radius: 2.15rem;
+  background:
+    linear-gradient(155deg, rgb(72 72 78 / 0.95) 0%, rgb(28 28 32 / 0.98) 42%, rgb(12 12 14 / 1) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.14),
+    inset 0 0 0 2px rgb(0 0 0 / 0.65),
+    0 18px 42px rgb(0 0 0 / 0.42),
+    0 4px 12px rgb(0 0 0 / 0.28);
+  transform: scale(1) translateZ(0);
+  transform-origin: center bottom;
+  transition:
+    box-shadow 0.38s ease,
+    transform 0.38s cubic-bezier(0.34, 1.25, 0.64, 1);
+}
+
+.ta-applab-format-card.is-hovered .ta-applab-iphone__device,
+.ta-applab-format-card:focus-within .ta-applab-iphone__device {
+  transform: scale(1.06) translateZ(0);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.22),
+    inset 0 0 0 2px rgb(0 0 0 / 0.65),
+    0 28px 56px rgb(0 0 0 / 0.55),
+    0 0 0 1px rgb(255 255 255 / 0.08);
+}
+
+.ta-applab-iphone__btn {
+  position: absolute;
+  z-index: 2;
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgb(58 58 62) 0%, rgb(22 22 24) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.08),
+    0 0 0 1px rgb(0 0 0 / 0.45);
+  pointer-events: none;
+}
+
+.ta-applab-iphone__btn--silent {
+  left: -0.12rem;
+  top: 22%;
+  width: 0.12rem;
+  height: 1.35rem;
+}
+
+.ta-applab-iphone__btn--volume {
+  left: -0.12rem;
+  top: 32%;
+  width: 0.12rem;
+  height: 2.1rem;
+}
+
+.ta-applab-iphone__screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 1.85rem;
+  overflow: hidden;
+  background: #000;
+  isolation: isolate;
+}
+
+.ta-applab-format-card__video {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+/* Bandeau bas — logo, nom, CA / mois (aligné landing) */
+.ta-applab-format-foot {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 46%;
+  padding: 0 0.45rem 0.62rem;
+}
+
+.ta-applab-format-foot__gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    #000 0%,
+    rgb(0 0 0 / 0.92) 24%,
+    rgb(0 0 0 / 0.52) 46%,
+    rgb(0 0 0 / 0.12) 68%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.ta-applab-format-foot__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  text-align: left;
+  padding-top: 0.55rem;
+}
+
+.ta-applab-format-foot__head {
+  display: flex;
+  align-items: center;
+  gap: 0.38rem;
+  min-width: 0;
+}
+
+.ta-applab-format-foot__icon {
+  position: relative;
+  flex-shrink: 0;
+  width: 1.45rem;
+  height: 1.45rem;
+  overflow: hidden;
+  border-radius: 0.38rem;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
+    0 0 0 1px rgb(255 255 255 / 0.16),
+    0 3px 10px rgb(0 0 0 / 0.45);
+}
+
+.ta-applab-format-foot__title {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: rgb(255 255 255 / 0.98);
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.65);
+}
+
+.ta-applab-format-foot__money {
+  margin: 0;
+  padding-left: 0.1rem;
+  font-size: clamp(0.78rem, 2.6vw, 0.98rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  color: #fafafa;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.75);
+}
+
+.ta-applab-format-card.is-hovered .ta-applab-format-foot,
+.ta-applab-format-card:focus-within .ta-applab-format-foot {
+  opacity: 0.35;
+  transition: opacity 0.28s ease;
+}
+
+.ta-applab-format-foot {
+  transition: opacity 0.28s ease;
+}
+
+.ta-applab-iphone__island {
+  position: absolute;
+  top: 0.48rem;
+  left: 50%;
+  z-index: 4;
+  width: 31%;
+  min-width: 2.4rem;
+  height: 0.82rem;
+  border-radius: 999px;
+  background: #000;
+  transform: translateX(-50%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.04),
+    0 1px 3px rgb(0 0 0 / 0.35);
+  pointer-events: none;
+}
+
+.ta-applab-iphone__home-indicator {
+  position: absolute;
+  bottom: 0.38rem;
+  left: 50%;
+  z-index: 4;
+  width: 34%;
+  min-width: 2.5rem;
+  height: 0.2rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.42);
+  transform: translateX(-50%);
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.ta-applab-format-card .ta-applab-iphone__home-indicator {
+  opacity: 0;
+}
+
+.ta-applab-format-card__shade {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: linear-gradient(180deg, rgb(0 0 0 / 0.08) 0%, transparent 42%, rgb(0 0 0 / 0.72) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.ta-applab-format-card.is-hovered .ta-applab-format-card__shade,
+.ta-applab-format-card:focus-within .ta-applab-format-card__shade {
+  opacity: 1;
+}
+
+.ta-applab-format-card__cta-wrap {
+  position: absolute;
+  inset-inline: 0.55rem;
+  bottom: 0.72rem;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.ta-applab-format-card__cta {
+  pointer-events: auto;
+  display: inline-flex;
+  min-height: 2.1rem;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 9.5rem;
+  padding: 0 0.95rem;
+  border-radius: 999px;
+  background: #fff;
+  color: #0a0a0a;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  opacity: 0;
+  transform: translateY(12px) scale(0.96);
+  transition:
+    opacity 0.32s cubic-bezier(0.34, 1.2, 0.64, 1),
+    transform 0.32s cubic-bezier(0.34, 1.2, 0.64, 1),
+    filter 0.2s ease;
+}
+
+.ta-applab-format-card.is-hovered .ta-applab-format-card__cta,
+.ta-applab-format-card:focus-within .ta-applab-format-card__cta {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.ta-applab-format-card__cta:hover {
+  filter: brightness(0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ta-applab-format-card,
+  .ta-applab-format-card__cta,
+  .ta-applab-iphone__device {
+    transition-duration: 0.01ms;
+  }
+
+  .ta-applab-format-card.is-hovered .ta-applab-iphone__device,
+  .ta-applab-format-card:focus-within .ta-applab-iphone__device {
+    transform: scale(1.02);
+  }
+
+  .ta-applab-format-card__cta {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Suggestions (reference step) ── */
+
+.ta-applab-create-link {
+  color: var(--ac-accent);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.ta-applab-create-suggestions {
+  margin-top: 0.25rem;
+}
+
+.ta-applab-create-suggestions__loading {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem 0;
+  color: var(--ac-muted);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.ta-applab-create-suggestions__loading p {
+  margin: 0;
+}
+
+.ta-applab-create-spinner {
+  flex-shrink: 0;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  border: 2px solid rgb(37 99 235 / 0.15);
+  border-top-color: var(--ac-cyan);
+  animation: trackapp-applab-spin 0.75s linear infinite;
+}
+
+.ta-applab-create-suggestions__meta {
+  margin: 0 0 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgb(255 255 255 / 0.4);
+}
+
+.ta-applab-create-suggestions__empty {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.04);
+  font-size: 0.85rem;
+  color: var(--ac-muted);
+}
+
+.ta-applab-create-suggestions__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.ta-applab-create-suggestion {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.6rem 0.7rem;
+  border-radius: 14px;
+  border: 1px solid rgb(255 255 255 / 0.07);
+  background: rgb(0 0 0 / 0.28);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+}
+
+.ta-applab-create-suggestion:hover {
+  border-color: rgb(56 189 248 / 0.35);
+  background: rgb(37 99 235 / 0.08);
+  transform: translateX(2px);
+}
+
+.ta-applab-create-suggestion.is-selected {
+  border-color: rgb(56 189 248 / 0.55);
+  background: rgb(37 99 235 / 0.14);
+}
+
+.ta-applab-create-suggestion__rank {
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: var(--ac-accent);
+  min-width: 1.5rem;
+}
+
+.ta-applab-create-suggestion__art {
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  object-fit: cover;
+  background: rgb(255 255 255 / 0.06);
+}
+
+.ta-applab-create-suggestion__art--empty {
+  display: block;
+}
+
+.ta-applab-create-suggestion__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.ta-applab-create-suggestion__body strong {
+  font-size: 0.86rem;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ta-applab-create-suggestion__body span {
+  font-size: 0.7rem;
+  color: var(--ac-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ta-applab-create-suggestion__revenue-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+  flex-shrink: 0;
+}
+
+.ta-applab-create-suggestion__match {
+  padding: 0.18rem 0.42rem;
+  border-radius: 999px;
+  background: rgb(6 182 212 / 0.15);
+  color: rgb(103 232 249);
+  font-size: 0.6rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.ta-applab-studio__hero-sub--accent {
+  color: var(--ac-accent);
+  font-weight: 600;
+}
+
+/* ── AppLAB Intelligence (clarify + assessment) ── */
+
+.ta-applab-intel__intro {
+  margin: 0 0 1rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--ac-muted);
+}
+
+.ta-applab-intel__intro strong {
+  color: rgb(186 230 253 / 0.95);
+  font-weight: 700;
+}
+
+.ta-applab-intel__loading {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.5rem 0;
+  color: var(--ac-muted);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.ta-applab-intel__loading p {
+  margin: 0;
+}
+
+.ta-applab-intel__error {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgb(239 68 68 / 0.25);
+  background: rgb(239 68 68 / 0.08);
+  color: rgb(252 165 165);
+  font-size: 0.85rem;
+}
+
+.ta-applab-intel__questions {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ta-applab-intel__question {
+  padding: 0.85rem 0.9rem;
+  border-radius: 18px;
+  border: none;
+}
+
+.ta-applab-intel__question-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-bottom: 0.35rem;
+}
+
+.ta-applab-intel__question-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  margin-right: 0.45rem;
+  border-radius: 999px;
+  background: rgb(37 99 235 / 0.25);
+  color: rgb(186 230 253 / 0.95);
+  font-size: 0.68rem;
+  font-weight: 800;
+  vertical-align: middle;
+}
+
+.ta-applab-intel__question-optional {
+  flex-shrink: 0;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.06);
+  color: rgb(255 255 255 / 0.42);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ta-applab-intel__question-label {
+  display: block;
+  flex: 1;
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.ta-applab-intel__skipped {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  font-style: italic;
+  color: var(--ac-muted);
+}
+
+.ta-applab-intel__question-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.55rem;
+}
+
+.ta-applab-intel__suggest-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2rem;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgb(56 189 248 / 0.35);
+  background: linear-gradient(135deg, rgb(37 99 235 / 0.2) 0%, rgb(6 182 212 / 0.12) 100%);
+  color: rgb(186 230 253 / 0.95);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+}
+
+.ta-applab-intel__suggest-btn:hover:not(:disabled) {
+  border-color: rgb(56 189 248 / 0.55);
+  background: linear-gradient(135deg, rgb(37 99 235 / 0.28) 0%, rgb(6 182 212 / 0.18) 100%);
+}
+
+.ta-applab-intel__suggest-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.ta-applab-intel__skip-btn {
+  padding: 0.2rem 0.45rem;
+  border: none;
+  background: transparent;
+  color: rgb(255 255 255 / 0.38);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ta-applab-intel__skip-btn:hover:not(:disabled) {
+  color: rgb(255 255 255 / 0.62);
+}
+
+.ta-applab-intel__footer {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgb(255 255 255 / 0.06);
+}
+
+.ta-applab-intel__progress {
+  margin: 0 0 0.65rem;
+  font-size: 0.76rem;
+  color: var(--ac-muted);
+  text-align: center;
+}
+
+.ta-applab-intel__question-hint {
+  margin: 0 0 0.45rem;
+  font-size: 0.76rem;
+  color: var(--ac-muted);
+  line-height: 1.4;
+}
+
+.ta-applab-intel__answer {
+  min-height: 4rem;
+  margin-top: 0;
+}
+
+.ta-applab-intel__submit {
+  width: 100%;
+}
+
+.ta-applab-intel__ready {
+  margin: 0;
+  font-size: 0.88rem;
+  color: rgb(134 239 172);
+}
+
+.ta-applab-assessment__headline {
+  margin: 0 0 0.65rem;
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--ac-accent);
+}
+
+.ta-applab-assessment__summary {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: rgb(255 255 255 / 0.82);
+}
+
+.ta-applab-assessment--glass .ta-applab-assessment__summary {
+  margin-top: 0;
+}
+
+.ta-applab-assessment--glass .ta-applab-assessment__block {
+  padding: 0.65rem 0.75rem;
+}
+
+.ta-applab-assessment__grid {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.ta-applab-assessment__block {
+  padding: 0.75rem 0.85rem;
+  border-radius: 16px;
+  border: none;
+}
+
+.ta-applab-assessment__block--full {
+  margin-top: 0.65rem;
+}
+
+.ta-applab-assessment__block h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.45);
+}
+
+.ta-applab-assessment__block p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: rgb(255 255 255 / 0.78);
+}
+
+.ta-applab-assessment__block ul {
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.ta-applab-assessment__block li {
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: rgb(255 255 255 / 0.78);
+  margin-bottom: 0.25rem;
+}
+
+.ta-applab-assessment__risks li {
+  color: rgb(252 165 165);
+}
+
+.ta-applab-create-suggestion__revenue {
+  flex-shrink: 0;
+  padding: 0.22rem 0.48rem;
+  border-radius: 999px;
+  background: rgb(37 99 235 / 0.18);
+  color: rgb(147 197 253);
+  font-size: 0.66rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.ta-applab-create-ref-selected {
+  margin-top: 0.25rem;
+}
+
+.ta-applab-create-ref-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  background: rgb(0 0 0 / 0.28);
+}
+
+.ta-applab-create-ref-card--selected {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ta-applab-create-ref-card strong {
+  font-size: 0.88rem;
+}
+
+.ta-applab-create-ref-card span {
+  font-size: 0.75rem;
+  color: var(--ac-muted);
+}
+
+.ta-applab-create-ref-selected__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ta-applab-studio__btn--sm,
+.ta-applab-create-btn--sm {
+  min-height: 2.2rem;
+  padding: 0 0.8rem;
+  font-size: 0.76rem;
+}
+
+.ta-applab-create-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.35rem;
+  padding: 0 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--ac-border);
+  background: transparent;
+  color: var(--ac-text);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.ta-applab-create-btn--ghost:hover {
+  border-color: rgb(56 189 248 / 0.35);
+  background: rgb(37 99 235 / 0.08);
+}
+
+/* ── Workspace cards ── */
+
+.ta-applab-create-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.ta-applab-create-card {
+  padding: 1rem 1.05rem;
+  border-radius: 16px;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  background: rgb(0 0 0 / 0.28);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.ta-applab-create-card:hover {
+  border-color: rgb(56 189 248 / 0.35);
+  background: rgb(37 99 235 / 0.08);
+  transform: translateY(-2px);
+}
+
+.ta-applab-create-card__kicker {
+  margin: 0 0 0.3rem;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ac-accent);
+}
+
+.ta-applab-create-card__title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.ta-applab-create-card__sub {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--ac-muted);
+}
+
+.ta-applab-workspace-prompt {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgb(56 189 248 / 0.2);
+  background: rgb(37 99 235 / 0.08);
+}
+
+.ta-applab-workspace-prompt__kicker {
+  margin: 0 0 0.5rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ac-accent);
+}
+
+.ta-applab-workspace-prompt__body {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: rgb(255 255 255 / 0.78);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* ── Export prompt MVP ── */
+.ta-applab-mvp-prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.ta-applab-mvp-prompt__intro {
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgb(56 189 248 / 0.18);
+  background: rgb(37 99 235 / 0.06);
+}
+
+.ta-applab-mvp-prompt__kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ac-accent);
+}
+
+.ta-applab-mvp-prompt__lead {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: rgb(255 255 255 / 0.82);
+}
+
+.ta-applab-mvp-prompt__meta {
+  margin: 0.45rem 0 0;
+  font-size: 0.72rem;
+  color: rgb(255 255 255 / 0.45);
+}
+
+.ta-applab-mvp-prompt__stack {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.ta-applab-mvp-prompt__stack-legend {
+  margin: 0 0 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.55);
+}
+
+.ta-applab-mvp-prompt__stack-badge {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid rgb(56 189 248 / 0.45);
+  background: rgb(37 99 235 / 0.12);
+  max-width: 20rem;
+}
+
+.ta-applab-mvp-prompt__stack-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.ta-applab-mvp-prompt__stack-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background: rgb(255 255 255 / 0.03);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.ta-applab-mvp-prompt__stack-card:hover:not(:disabled) {
+  border-color: rgb(56 189 248 / 0.35);
+  background: rgb(37 99 235 / 0.08);
+}
+
+.ta-applab-mvp-prompt__stack-card.is-selected {
+  border-color: rgb(56 189 248 / 0.55);
+  background: rgb(37 99 235 / 0.14);
+  box-shadow: 0 0 0 1px rgb(56 189 248 / 0.2);
+}
+
+.ta-applab-mvp-prompt__stack-card:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.ta-applab-mvp-prompt__stack-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: rgb(255 255 255 / 0.92);
+}
+
+.ta-applab-mvp-prompt__stack-desc {
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: rgb(255 255 255 / 0.5);
+}
+
+.ta-applab-mvp-prompt__loading {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.75rem 0;
+  font-size: 0.85rem;
+  color: rgb(255 255 255 / 0.65);
+}
+
+.ta-applab-mvp-prompt__spinner {
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 2px solid rgb(56 189 248 / 0.25);
+  border-top-color: var(--ac-accent);
+  border-radius: 999px;
+  animation: trackapp-applab-spin 0.75s linear infinite;
+}
+
+.ta-applab-mvp-prompt__error {
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgb(239 68 68 / 0.35);
+  background: rgb(239 68 68 / 0.08);
+  font-size: 0.85rem;
+  color: rgb(252 165 165 / 0.95);
+}
+
+.ta-applab-mvp-prompt__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ta-applab-mvp-prompt__actions--primary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.ta-applab-mvp-prompt__actions--primary .ta-applab-studio__btn {
+  justify-content: center;
+  width: 100%;
+}
+
+.ta-applab-mvp-prompt__retry {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ac-accent);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.ta-applab-mvp-prompt__toggle {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ac-accent);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.ta-applab-mvp-prompt__body {
+  margin: 0;
+  max-height: min(420px, 50vh);
+  overflow: auto;
+  padding: 1rem;
+  border-radius: 14px;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  background: rgb(0 0 0 / 0.35);
+  font-size: 0.72rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: rgb(255 255 255 / 0.78);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.ta-applab-mvp-prompt__hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: rgb(255 255 255 / 0.55);
+}
+
+.ta-applab-mvp-prompt__details {
+  font-size: 0.82rem;
+  color: rgb(255 255 255 / 0.65);
+}
+
+.ta-applab-mvp-prompt__details summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: rgb(255 255 255 / 0.75);
+}
+
+.ta-applab-mvp-prompt__screen-list {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  line-height: 1.5;
+}
+
+.ta-applab-mvp-prompt__toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  margin: 0;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  background: rgb(15 23 42 / 0.95);
+  border: 1px solid rgb(56 189 248 / 0.35);
+  font-size: 0.82rem;
+  color: rgb(255 255 255 / 0.9);
+  box-shadow: 0 8px 32px rgb(0 0 0 / 0.45);
+}
+
+.ta-applab-studio__btn.is-preferred {
+  border-color: rgb(56 189 248 / 0.45);
+}
+
+.ta-applab-mvp-prompt__quality {
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background: rgb(255 255 255 / 0.03);
+}
+
+.ta-applab-mvp-prompt__quality.is-excellent {
+  border-color: rgb(34 197 94 / 0.35);
+  background: rgb(34 197 94 / 0.08);
+}
+
+.ta-applab-mvp-prompt__quality.is-good {
+  border-color: rgb(56 189 248 / 0.35);
+  background: rgb(37 99 235 / 0.08);
+}
+
+.ta-applab-mvp-prompt__quality.is-low {
+  border-color: rgb(251 191 36 / 0.35);
+  background: rgb(251 191 36 / 0.06);
+}
+
+.ta-applab-mvp-prompt__quality-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+}
+
+.ta-applab-mvp-prompt__quality-score {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: rgb(255 255 255 / 0.95);
+}
+
+.ta-applab-mvp-prompt__quality-label {
+  font-size: 0.78rem;
+  color: rgb(255 255 255 / 0.55);
+}
+
+.ta-applab-mvp-prompt__quality-checks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.25rem 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.72rem;
+  color: rgb(255 255 255 / 0.45);
+}
+
+.ta-applab-mvp-prompt__quality-checks .is-pass {
+  color: rgb(134 239 172 / 0.9);
+}
+
+.ta-applab-mvp-prompt__versions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ta-applab-mvp-prompt__versions-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgb(255 255 255 / 0.5);
+}
+
+.ta-applab-mvp-prompt__versions-select {
+  padding: 0.5rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  background: rgb(0 0 0 / 0.35);
+  color: rgb(255 255 255 / 0.88);
+  font-size: 0.82rem;
+}
+
+.ta-applab-mvp-prompt__file-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.ta-applab-mvp-prompt__file-tab {
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background: transparent;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgb(255 255 255 / 0.55);
+  cursor: pointer;
+}
+
+.ta-applab-mvp-prompt__file-tab.is-active {
+  border-color: rgb(56 189 248 / 0.45);
+  background: rgb(37 99 235 / 0.15);
+  color: rgb(255 255 255 / 0.92);
+}
+
+.ta-applab-constraints {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.ta-applab-constraints__label {
+  margin: 0.35rem 0 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.46);
+}
+
+.ta-applab-constraints__label:first-child {
+  margin-top: 0;
+}
+
+.ta-applab-constraints__lead {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: rgb(255 255 255 / 0.72);
+}
+
+.ta-applab-constraints__field {
+  min-height: 5.5rem;
+}
+
+.ta-applab-constraints__hint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: rgb(255 255 255 / 0.45);
+}
+
+.ta-applab-clarify-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  width: 100%;
+}
+
+.ta-applab-clarify-field__head {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ta-applab-clarify-field__help-btn {
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgb(56 189 248 / 0.28);
+  background: rgb(37 99 235 / 0.12);
+  color: rgb(186 230 253 / 0.95);
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ta-applab-clarify-field__help-btn.is-active {
+  background: rgb(37 99 235 / 0.28);
+}
+
+.ta-applab-clarify-field__help-block {
+  padding: 0.65rem 0.75rem;
+  border-radius: 16px;
+  border: none;
+}
+
+.ta-applab-clarify-field__help {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: rgb(255 255 255 / 0.72);
+}
+
+.ta-applab-clarify-field__examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.55rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ta-applab-clarify-field__example-btn {
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background: rgb(255 255 255 / 0.05);
+  color: rgb(255 255 255 / 0.78);
+  font-family: inherit;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.ta-applab-clarify-field__input {
+  min-height: 5.5rem;
+}
+
+.ta-applab-clarify-field__hint,
+.ta-applab-clarify-field__loading {
+  margin: 0;
+  font-size: 0.74rem;
+  color: rgb(255 255 255 / 0.42);
+}
+
+.ta-applab-workspace-prompt__files {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.ta-applab-workspace-prompt__file summary {
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgb(255 255 255 / 0.75);
+}
+
+@media (max-width: 720px) {
+  .ta-applab-mvp-prompt__stack-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ta-applab-mvp-prompt__quality-checks {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .ta-applab-mvp-prompt__stack-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@keyframes trackapp-applab-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Hub unique : sélection + ressources sous la galerie ── */
+
+.ta-applab-home-sections {
+  position: relative;
+  z-index: 1;
+  max-width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+.ta-applab-home-sections__block + .ta-applab-home-sections__block {
+  margin-top: 3.5rem;
+  padding-top: 3.5rem;
+  border-top: 1px solid rgb(148 163 184 / 0.14);
+}
+
+.ta-applab-home-sections__title {
+  font-family: var(--font-space-grotesk, inherit);
+  font-size: clamp(1.35rem, 2.8vw, 1.75rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: rgb(245 247 255 / 0.92);
+}
+
+.ta-applab-home-sections__desc {
+  margin: 0.55rem 0 0;
+  max-width: 62ch;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: rgb(173 184 214 / 0.72);
+}
+
+.ta-applab-home-sections .trackapp-resources-root--studio {
+  padding-bottom: 0;
+}
+
+.ta-applab-home-sections .trackapp-resources-root--studio .mt-8 {
+  margin-top: 1.5rem;
+}
+
+.ta-applab-home-sections .trackapp-resources-root--studio ul {
+  margin-top: 1.5rem;
+}
+
+.trackapp-lab-nav__children--flat {
+  margin: 0;
+  padding: 0.35rem 0.65rem 0.75rem;
+  border-left: 0;
+}
+
+@keyframes ta-applab-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Synthesis bilan ── */
+
+.ta-applab-synthesis {
+  width: min(920px, calc(100% - 2rem));
+  margin: clamp(1rem, 2.8vh, 1.9rem) auto 0;
+}
+
+.ta-applab-synthesis--analyzing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 1rem 2.5rem;
+}
+
+.ta-applab-synthesis__scan {
+  position: relative;
+  width: 5.5rem;
+  height: 5.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.ta-applab-synthesis__scan-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  border: 2px solid rgb(56 189 248 / 0.25);
+  animation: ta-applab-synthesis-pulse 1.8s ease-in-out infinite;
+}
+
+.ta-applab-synthesis__scan-core {
+  position: absolute;
+  inset: 1.1rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: linear-gradient(145deg, rgb(37 99 235 / 0.35), rgb(6 182 212 / 0.22));
+  font-size: 1.35rem;
+  color: rgb(186 230 253 / 0.95);
+}
+
+@keyframes ta-applab-synthesis-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+.ta-applab-synthesis__scan-title {
+  margin: 0;
+  font-size: clamp(1.05rem, 2.4vw, 1.35rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.ta-applab-synthesis__scan-sub {
+  margin: 0.55rem 0 0;
+  max-width: 36ch;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: rgb(255 255 255 / 0.55);
+}
+
+.ta-applab-synthesis__pipeline {
+  width: min(26rem, 100%);
+  margin: 1.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.ta-applab-synthesis__pipeline-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 0;
+  font-size: 0.84rem;
+  color: rgb(255 255 255 / 0.38);
+  transition: color 0.3s ease;
+}
+
+.ta-applab-synthesis__pipeline-item.is-active {
+  color: rgb(186 230 253 / 0.95);
+  font-weight: 650;
+}
+
+.ta-applab-synthesis__pipeline-item.is-done {
+  color: rgb(255 255 255 / 0.72);
+}
+
+.ta-applab-synthesis__pipeline-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.14);
+  flex-shrink: 0;
+}
+
+.ta-applab-synthesis__pipeline-item.is-active .ta-applab-synthesis__pipeline-dot {
+  background: rgb(56 189 248 / 0.95);
+  box-shadow: 0 0 12px rgb(56 189 248 / 0.55);
+}
+
+.ta-applab-synthesis__pipeline-item.is-done .ta-applab-synthesis__pipeline-dot {
+  background: rgb(34 197 94 / 0.85);
+}
+
+.ta-applab-synthesis--reveal {
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+  padding-bottom: 1rem;
+}
+
+.ta-applab-synthesis__section {
+  padding: 1rem 1.05rem 1.1rem;
+  border-radius: 18px;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  background: rgb(8 8 12 / 0.55);
+  backdrop-filter: blur(12px);
+}
+
+.ta-applab-synthesis__section-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.48);
+}
+
+.ta-applab-synthesis__section-desc {
+  margin: -0.35rem 0 0.85rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: rgb(255 255 255 / 0.52);
+}
+
+.ta-applab-synthesis__recap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ta-applab-synthesis__recap-label {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.42);
+}
+
+.ta-applab-synthesis__recap-value {
+  margin: 0.2rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: rgb(255 255 255 / 0.86);
+}
+
+.ta-applab-synthesis__headline {
+  margin: 0 0 0.5rem;
+  font-size: 1.02rem;
+  font-weight: 900;
+  color: var(--ac-accent);
+}
+
+.ta-applab-synthesis__summary {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: rgb(255 255 255 / 0.82);
+}
+
+.ta-applab-synthesis__decisions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ta-applab-synthesis__decision {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 12px;
+  background: rgb(0 0 0 / 0.22);
+}
+
+.ta-applab-synthesis__decision-label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgb(56 189 248 / 0.85);
+}
+
+.ta-applab-synthesis__decision-value {
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: rgb(255 255 255 / 0.78);
+}
+
+.ta-applab-synthesis__competitors {
+  margin: 0;
+  padding: 0;
+}
+
+.ta-applab-synthesis__competitor-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.ta-applab-synthesis__section--prompt {
+  padding: 0.85rem 0.95rem 1rem;
+}
+
+.ta-applab-synthesis__error {
+  margin: 0 0 1rem;
+  color: rgb(248 113 113 / 0.95);
+}
+
+.ta-applab-synthesis__enter-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 1.25rem auto 0;
+  width: min(920px, calc(100% - 2rem));
+}
+
+.ta-applab-synthesis__enter-wrap .ta-applab-studio__btn--sentence {
+  min-width: min(100%, 18rem);
+}

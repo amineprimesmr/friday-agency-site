@@ -81,6 +81,8 @@ export type HydratedCompetitor = CompetitorCandidate &
     app_id: string | null;
     artwork_url: string | null;
     artist_name: string | null;
+    /** Lien App Store validé (iTunes) — absent si retrait / ID LLM invalide. */
+    app_store_unavailable?: boolean;
     trackapp_metrics?: Readonly<{
       downloadsDisplay: string;
       revenueDisplay: string;

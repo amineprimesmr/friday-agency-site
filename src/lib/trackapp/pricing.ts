@@ -8,7 +8,7 @@ export const TRACKAPP_PRICING = {
     period: "/mois",
     note: "sans engagement",
     shortLabel: "Mensuel",
-    cardDesc: "Sans engagement — tu résilies en un clic quand tu veux.",
+    cardDesc: "Sans engagement — vous résiliez en un clic quand vous voulez.",
   },
   lifetime: {
     amount: 59,

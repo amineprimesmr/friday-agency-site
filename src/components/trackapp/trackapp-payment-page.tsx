@@ -57,7 +57,7 @@ export function TrackappPaymentPage({
               Fermer
             </button>
           ) : (
-            <Link className="saas-pay-checkout-back" href="/trackapp/accueil">
+            <Link className="saas-pay-checkout-back" href="/trackapp/apptracker">
               <CheckoutBackIcon />
               Retour
             </Link>
@@ -66,7 +66,7 @@ export function TrackappPaymentPage({
             <>
               <h1 id={embedded ? "trackapp-payment-dialog-title" : undefined}>CHOISISSEZ VOTRE ACCÈS</h1>
               <p className="saas-pay-checkout-trust-lead">
-                <strong>{trackappPricingSummary()}</strong> — même produit, tu choisis ta formule.
+                <strong>{trackappPricingSummary()}</strong> — même produit, vous choisissez votre formule.
               </p>
               <div className="tpl-pick__badge-wrap">
                 <TrackerHeroSocialProofBadge />
@@ -78,7 +78,7 @@ export function TrackappPaymentPage({
                 Finaliser sur Stripe
               </h1>
               <p className="tpl-paiement-form-intro__lead">
-                Choisis ton offre ci-dessous — paiement sécurisé via Stripe (mensuel ou à vie).
+                Choisissez votre offre ci-dessous — paiement sécurisé via Stripe (mensuel ou à vie).
               </p>
             </div>
           )}

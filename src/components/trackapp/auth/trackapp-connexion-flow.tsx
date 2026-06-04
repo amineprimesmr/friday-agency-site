@@ -12,8 +12,10 @@ import {
   TaAuthSuspended,
   TrackappLimeLogo,
 } from "@/components/trackapp/auth/trackapp-auth-shared";
+import { TrackappConnexionMissingSupabase } from "@/components/trackapp/auth/trackapp-connexion-missing-supabase";
 import { TrackappPaymentNavLink } from "@/components/trackapp/trackapp-payment-nav-link";
 import { createClient } from "@/lib/supabase/client";
+import { syncOnboardingDraftToProfile } from "@/lib/trackapp-onboarding/local-draft";
 
 function ConnexionExperienceInner({
   nextHrefSafe,
@@ -75,25 +77,19 @@ function ConnexionExperienceInner({
       setError(authErr.message ?? "Erreur de connexion.");
       return;
     }
+    try {
+      await fetch("/api/trackapp/profile/ensure", { method: "POST", credentials: "same-origin" });
+      await syncOnboardingDraftToProfile();
+    } catch {
+      /* profil créé au prochain accès workspace si besoin */
+    }
     onClose?.();
     router.refresh();
     router.push(nextHrefSafe);
   }
 
   if (!sb) {
-    return (
-      <div className={embedded ? "ta-auth-root ta-auth-root--embedded" : "ta-auth-root"}>
-        <div className="ta-auth-modal relative p-8 sm:p-10">
-          <p className="m-0 text-[14px] leading-relaxed text-white/60">
-            Variables Supabase introuvables côté navigateur. Vérifie{" "}
-            <code className="text-white/85">NEXT_PUBLIC_SUPABASE_URL</code> et{" "}
-            <code className="text-white/85">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> dans{" "}
-            <code className="text-white/85">.env.local</code>, puis redémarre{" "}
-            <code className="text-white/85">npm run dev</code>.
-          </p>
-        </div>
-      </div>
-    );
+    return <TrackappConnexionMissingSupabase embedded={embedded} />;
   }
 
   const closeHref = "/tracker";
@@ -122,7 +118,7 @@ function ConnexionExperienceInner({
           <h1 id="ta-auth-headline" className="ta-auth-headline">
             Connexion Trackapp
           </h1>
-          <p className="ta-auth-lead">Connecte-toi pour retrouver ton espace et tes outils.</p>
+          <p className="ta-auth-lead">Connectez-vous pour retrouver votre espace et vos outils.</p>
 
           <div className="ta-auth-oauth-stack">
             <button type="button" className="ta-auth-oauth-row" disabled={busy} onClick={oauth}>

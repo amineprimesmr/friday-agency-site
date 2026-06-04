@@ -1,6 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 
+import { TRACKAPP_WORKSPACE_HUB_PATH } from "@/lib/trackapp-apptracker-paths";
+import { ensureTrackappProfileRow } from "@/lib/trackapp-profile-favorites-store";
+
 /**
  * OAuth / magic-link Supabase (PKCE) — à ajouter dans Supabase Redirect URLs :
  * https://trackapp.fr/trackapp/auth/callback
@@ -13,13 +16,13 @@ export async function GET(request: NextRequest) {
   const code = url.searchParams.get("code");
   const nextRaw = url.searchParams.get("next");
 
-  let nextPath = "/trackapp/accueil";
+  let nextPath = TRACKAPP_WORKSPACE_HUB_PATH;
   if (nextRaw?.startsWith("/") && !nextRaw.startsWith("//")) {
     try {
       const pathOnly = decodeURIComponent(nextRaw.split("#")[0]);
       if (pathOnly.startsWith("/trackapp/")) nextPath = pathOnly;
     } catch {
-      nextPath = "/trackapp/accueil";
+      nextPath = TRACKAPP_WORKSPACE_HUB_PATH;
     }
   }
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -46,6 +49,13 @@ export async function GET(request: NextRequest) {
 
   const { error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) return failRedirect;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) {
+    await ensureTrackappProfileRow(supabase, user.id);
+  }
 
   return response;
 }

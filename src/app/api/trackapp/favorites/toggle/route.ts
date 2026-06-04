@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 
+import {
+  loadProfileFavorites,
+  saveProfileFavorites,
+  type ProfileFavoritesSnapshot,
+} from "@/lib/trackapp-profile-favorites-store";
 import { createClient } from "@/lib/supabase/server";
 import { TRACKAPP_ADS_CHANNELS } from "@/lib/trackapp-ads-channels";
 
@@ -53,68 +58,44 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "adsKey invalide." }, { status: 400 });
   }
 
-  const ins = await sb.from("trackapp_profiles").insert({ id: user.id });
-  if (ins.error && ins.error.code !== "23505") {
-    return NextResponse.json({ error: ins.error.message }, { status: 500 });
+  const current = await loadProfileFavorites(sb, user.id);
+  if (current.storageError) {
+    return NextResponse.json({ error: current.storageError }, { status: 500 });
   }
 
-  const { data: profile, error: selErr } = await sb
-    .from("trackapp_profiles")
-    .select("design_favorites, app_favorites, ads_favorites")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (selErr) {
-    const hint =
-      selErr.message.includes("app_favorites") || selErr.message.includes("does not exist")
-        ? "Migration Supabase manquante (app_favorites). Exécute les migrations du dossier supabase/migrations."
-        : selErr.message;
-    return NextResponse.json({ error: hint }, { status: 500 });
-  }
-
-  const parseArr = (raw: unknown) =>
-    Array.isArray(raw) ? raw.filter((x): x is string => typeof x === "string") : [];
-
-  let design = parseArr(profile?.design_favorites);
-  let apps = parseArr(profile?.app_favorites);
-  let ads = parseArr(profile?.ads_favorites);
+  let snapshot: ProfileFavoritesSnapshot = {
+    designIds: [...current.designIds],
+    appIds: [...current.appIds],
+    adsKeys: [...current.adsKeys],
+  };
 
   if (type === "design") {
-    const s = new Set(design);
+    const s = new Set(snapshot.designIds);
     if (s.has(designId)) s.delete(designId);
     else s.add(designId);
-    design = [...s];
+    snapshot = { ...snapshot, designIds: [...s] };
   } else if (type === "app") {
-    const s = new Set(apps);
+    const s = new Set(snapshot.appIds);
     if (s.has(appId)) s.delete(appId);
     else s.add(appId);
-    apps = [...s];
+    snapshot = { ...snapshot, appIds: [...s] };
   } else {
-    const s = new Set(ads);
+    const s = new Set(snapshot.adsKeys);
     if (s.has(adsKeyRaw)) s.delete(adsKeyRaw);
     else s.add(adsKeyRaw);
-    ads = [...s];
+    snapshot = { ...snapshot, adsKeys: [...s] };
   }
 
-  const { error: updErr } = await sb
-    .from("trackapp_profiles")
-    .update({
-      design_favorites: design,
-      app_favorites: apps,
-      ads_favorites: ads,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", user.id);
-
-  if (updErr) {
-    return NextResponse.json({ error: updErr.message }, { status: 500 });
+  const saved = await saveProfileFavorites(sb, user.id, snapshot);
+  if (!saved.ok) {
+    return NextResponse.json({ error: saved.error }, { status: 500 });
   }
 
   if (type === "design") {
-    return NextResponse.json({ favorites: design });
+    return NextResponse.json({ favorites: snapshot.designIds });
   }
   if (type === "app") {
-    return NextResponse.json({ appFavorites: apps });
+    return NextResponse.json({ appFavorites: snapshot.appIds });
   }
-  return NextResponse.json({ adsFavorites: ads });
+  return NextResponse.json({ adsFavorites: snapshot.adsKeys });
 }

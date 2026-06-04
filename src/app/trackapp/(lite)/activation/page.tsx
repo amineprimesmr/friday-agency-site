@@ -2,7 +2,7 @@ import { TaActivationFlow } from "@/components/trackapp/auth/trackapp-activation
 
 export const metadata = {
   title: "Activation — Trackapp",
-  description: "Finalise ton compte Trackapp après paiement.",
+  description: "Finalisez votre compte Trackapp après paiement.",
 };
 
 export default function TrackappActivationPage() {

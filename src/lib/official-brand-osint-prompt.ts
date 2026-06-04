@@ -29,10 +29,16 @@ Rejette : blogs, Crunchbase, directories, Notion, Medium, Product Hunt comme sit
 site_url = UNIQUEMENT la page d'accueil / landing (ex. https://marque.com/ ou https://marque.com/fr/).
 INTERDIT pour site_url : /terms, /terms-of-service, /privacy, /legal, /cgu, /cookies, /conditions, /politique-confidentialite, /mentions-legales ou toute page juridique secondaire.
 
-RÉSEAUX : analyser footer, navbar, about, contact, press, careers du site officiel.
-Un réseau est validé seulement si : branding cohérent, contenu sur l'app, bio avec site officiel ou App Store, compte officiel (pas fan).
-YouTube/TikTok/X : beaucoup d'apps n'ont PAS de chaîne officielle — dans ce cas null.
-Ne construis JAMAIS youtube.com/@handle sans l'avoir trouvé et vérifié.
+RÉSEAUX : recherche web explicite pour CHAQUE plateforme :
+- "[APP NAME] official instagram" → instagram.com/[handle]
+- "[APP NAME] official tiktok" → tiktok.com/@[handle]
+- Idem pour X, YouTube, Facebook, LinkedIn, Threads + footer du site officiel.
+Instagram et TikTok sont PRIORITAIRES : la plupart des apps consumer les ont (Duolingo, Opal, etc.).
+Ne mets null pour instagram_url / tiktok_url que si tu as cherché et confirmé l'absence.
+Un réseau est validé si : compte MARQUE (handle = nom de marque, ex. duolingo, opalapp), bio avec site officiel ou App Store.
+INTERDIT : tweets embarqués (/status/), posts Instagram (/p/), témoignages clients, comptes perso de fondateurs cités sur la page marketing.
+YouTube : beaucoup d'apps n'ont PAS de chaîne officielle — dans ce cas null pour youtube_url uniquement.
+Ne construis JAMAIS youtube.com/@handle ni youtu.be/VIDEO_ID sans l'avoir trouvé et vérifié.
 
 META ADS :
 1. Page Facebook officielle d'abord

@@ -24,6 +24,7 @@ const LINK_KEYS: OfficialLinkKey[] = [
   "youtube",
   "facebook",
   "linkedin",
+  "threads",
   "metaAdsLibrary",
 ];
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { TrackappDevSaasBypassButton } from "@/components/trackapp/trackapp-dev-saas-bypass";
 import { TrackerTrackappPaymentCta } from "@/components/tracker/tracker-trackapp-payment-cta";
 
 import "@/styles/tracker-hero-liquid-cta.css";
@@ -11,6 +12,7 @@ export function TrackerHeroTrackappCtas() {
       <TrackerTrackappPaymentCta className="tracker-hero-liquidglass">
         <span className="tracker-hero-liquidglass__label">Commencer maintenant</span>
       </TrackerTrackappPaymentCta>
+      <TrackappDevSaasBypassButton variant="hero" />
     </div>
   );
 }

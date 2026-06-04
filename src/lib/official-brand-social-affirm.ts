@@ -16,6 +16,8 @@ export type SocialAffirmResult = Readonly<{
   reason: string;
   bio: string | null;
   displayName: string | null;
+  followers: number | null;
+  verified: boolean | null;
 }>;
 
 const APIFY_TIMEOUT_MS = 35_000;
@@ -51,6 +53,30 @@ function appNameTokens(appName: string): string[] {
     .filter((t) => t.length >= 3 && !GENERIC_APP_NAME_TOKENS.has(t));
 }
 
+function numberFromAny(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const n = Number(value.replace(/[,\s]/g, ""));
+    if (Number.isFinite(n)) return n;
+  }
+  return null;
+}
+
+function boolFromAny(value: unknown): boolean | null {
+  return typeof value === "boolean" ? value : null;
+}
+
+function withProfileMetrics(
+  base: Omit<SocialAffirmResult, "followers" | "verified">,
+  metrics: Readonly<{ followers?: number | null; verified?: boolean | null }>,
+): SocialAffirmResult {
+  return {
+    ...base,
+    followers: metrics.followers ?? null,
+    verified: metrics.verified ?? null,
+  };
+}
+
 function bioAffirmsOfficialApp(args: Readonly<{
   bio: string | null;
   profileUrls: readonly (string | null | undefined)[];
@@ -59,12 +85,23 @@ function bioAffirmsOfficialApp(args: Readonly<{
   officialSiteUrl: string | null;
   profileHandle: string | null;
   strictBrandSlug: boolean;
+  followers?: number | null;
+  verified?: boolean | null;
 }>): SocialAffirmResult {
+  const metrics = { followers: args.followers ?? null, verified: args.verified ?? null };
   const hay = normalizeHaystack(
     [args.bio, args.displayName, ...args.profileUrls].filter((v): v is string => Boolean(v?.trim())).join(" "),
   );
   if (!hay.trim()) {
-    return { ok: false, reason: "profil sans bio exploitable", bio: args.bio, displayName: args.displayName };
+    return withProfileMetrics(
+      {
+        ok: false,
+        reason: "profil sans bio exploitable",
+        bio: args.bio,
+        displayName: args.displayName,
+      },
+      metrics,
+    );
   }
 
   const handleHay = args.profileHandle ? normalizeHaystack(args.profileHandle.replace(/^@/, "")) : "";
@@ -72,67 +109,66 @@ function bioAffirmsOfficialApp(args: Readonly<{
 
   if (args.strictBrandSlug) {
     if (!args.profileHandle || !handleMatchesBrandSlug(args.profileHandle, args.app.name)) {
-      return {
-        ok: false,
-        reason: "handle hors liste autorisée (déduction nom d'app uniquement)",
-        bio: args.bio,
-        displayName: args.displayName,
-      };
+      return withProfileMetrics(
+        {
+          ok: false,
+          reason: "handle hors liste autorisée (déduction nom d'app uniquement)",
+          bio: args.bio,
+          displayName: args.displayName,
+        },
+        metrics,
+      );
     }
     if (handleHay && hay.includes(handleHay)) {
-      return {
-        ok: true,
-        reason: "bio ou nom cite le handle officiel attendu",
-        bio: args.bio,
-        displayName: args.displayName,
-      };
+      return withProfileMetrics(
+        { ok: true, reason: "bio ou nom cite le handle officiel attendu", bio: args.bio, displayName: args.displayName },
+        metrics,
+      );
     }
     if (brandSlugs.some((slug) => hay.includes(normalizeHaystack(slug)))) {
-      return {
-        ok: true,
-        reason: "bio cite le slug marque de l'app",
-        bio: args.bio,
-        displayName: args.displayName,
-      };
+      return withProfileMetrics(
+        { ok: true, reason: "bio cite le slug marque de l'app", bio: args.bio, displayName: args.displayName },
+        metrics,
+      );
     }
     const titleHay = normalizeHaystack(primaryAppTitle(args.app.name));
     if (titleHay.length >= 4 && hay.includes(titleHay)) {
-      return {
-        ok: true,
-        reason: "bio cite le nom commercial de l'app",
-        bio: args.bio,
-        displayName: args.displayName,
-      };
+      return withProfileMetrics(
+        { ok: true, reason: "bio cite le nom commercial de l'app", bio: args.bio, displayName: args.displayName },
+        metrics,
+      );
     }
-    return {
-      ok: false,
-      reason: "bio sans preuve claire pour ce handle (mode strict)",
-      bio: args.bio,
-      displayName: args.displayName,
-    };
+    return withProfileMetrics(
+      { ok: false, reason: "bio sans preuve claire pour ce handle (mode strict)", bio: args.bio, displayName: args.displayName },
+      metrics,
+    );
   }
 
   if (brandSlugs.some((slug) => hay.includes(normalizeHaystack(slug)))) {
-    return {
-      ok: true,
-      reason: "bio ou nom de profil correspond au nom de l'app",
-      bio: args.bio,
-      displayName: args.displayName,
-    };
+    return withProfileMetrics(
+      { ok: true, reason: "bio ou nom de profil correspond au nom de l'app", bio: args.bio, displayName: args.displayName },
+      metrics,
+    );
   }
 
   const siteHost = hostFromUrl(args.officialSiteUrl);
   if (siteHost) {
     const domainRoot = siteHost.split(".")[0] ?? "";
     if (hay.includes(normalizeHaystack(siteHost)) || (domainRoot.length >= 4 && hay.includes(normalizeHaystack(domainRoot)))) {
-      return { ok: true, reason: "bio ou lien externe cite le site officiel", bio: args.bio, displayName: args.displayName };
+      return withProfileMetrics(
+        { ok: true, reason: "bio ou lien externe cite le site officiel", bio: args.bio, displayName: args.displayName },
+        metrics,
+      );
     }
   }
 
   if (args.app.trackViewUrl) {
     const storeHay = normalizeHaystack(args.app.trackViewUrl);
     if (hay.includes(storeHay) || hay.includes(normalizeHaystack(`apps.apple.com/app/id${args.app.id}`))) {
-      return { ok: true, reason: "bio cite la fiche App Store", bio: args.bio, displayName: args.displayName };
+      return withProfileMetrics(
+        { ok: true, reason: "bio cite la fiche App Store", bio: args.bio, displayName: args.displayName },
+        metrics,
+      );
     }
   }
 
@@ -140,12 +176,15 @@ function bioAffirmsOfficialApp(args: Readonly<{
   if (tokens.length >= 2) {
     const matched = tokens.filter((token) => hay.includes(normalizeHaystack(token)));
     if (matched.length >= 2) {
-      return {
-        ok: true,
-        reason: `bio cite le nom de l'app (${matched.join(", ")})`,
-        bio: args.bio,
-        displayName: args.displayName,
-      };
+      return withProfileMetrics(
+        {
+          ok: true,
+          reason: `bio cite le nom de l'app (${matched.join(", ")})`,
+          bio: args.bio,
+          displayName: args.displayName,
+        },
+        metrics,
+      );
     }
   }
 
@@ -154,16 +193,22 @@ function bioAffirmsOfficialApp(args: Readonly<{
     const sellerTokens = appNameTokens(seller);
     const sellerMatched = sellerTokens.filter((t) => hay.includes(normalizeHaystack(t)));
     if (sellerTokens.length >= 2 && sellerMatched.length >= 2) {
-      return { ok: true, reason: "bio cite l'éditeur officiel", bio: args.bio, displayName: args.displayName };
+      return withProfileMetrics(
+        { ok: true, reason: "bio cite l'éditeur officiel", bio: args.bio, displayName: args.displayName },
+        metrics,
+      );
     }
   }
 
-  return {
-    ok: false,
-    reason: "bio sans lien clair vers le site officiel, l'App Store ou le nom de l'app",
-    bio: args.bio,
-    displayName: args.displayName,
-  };
+  return withProfileMetrics(
+    {
+      ok: false,
+      reason: "bio sans lien clair vers le site officiel, l'App Store ou le nom de l'app",
+      bio: args.bio,
+      displayName: args.displayName,
+    },
+    metrics,
+  );
 }
 
 async function runApifyActor(actorId: string, input: Record<string, unknown>): Promise<Record<string, unknown>[]> {
@@ -193,7 +238,16 @@ async function runApifyActor(actorId: string, input: Record<string, unknown>): P
   }
 }
 
-async function fetchInstagramProfileBrief(profileUrl: string, handle: string): Promise<{ bio: string | null; displayName: string | null; externalUrl: string | null } | null> {
+async function fetchInstagramProfileBrief(
+  profileUrl: string,
+  handle: string,
+): Promise<{
+  bio: string | null;
+  displayName: string | null;
+  externalUrl: string | null;
+  followers: number | null;
+  verified: boolean | null;
+} | null> {
   const actorId =
     process.env.APIFY_INSTAGRAM_ACTOR_ID?.trim() || "apify/instagram-profile-scraper";
   const cleanHandle = handle.replace(/^@/, "");
@@ -223,6 +277,14 @@ async function fetchInstagramProfileBrief(profileUrl: string, handle: string): P
           : typeof row.website === "string"
             ? row.website
             : null,
+    followers: numberFromAny(
+      row.followersCount ??
+        row.followers ??
+        (row.edge_followed_by && typeof row.edge_followed_by === "object"
+          ? (row.edge_followed_by as Record<string, unknown>).count
+          : null),
+    ),
+    verified: boolFromAny(row.isVerified ?? row.verified ?? row.is_verified),
   };
 }
 
@@ -232,7 +294,10 @@ function nestedRecordString(obj: unknown, key: string): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
-async function fetchTikTokProfileBrief(profileUrl: string, handle: string): Promise<{ bio: string | null; displayName: string | null } | null> {
+async function fetchTikTokProfileBrief(
+  profileUrl: string,
+  handle: string,
+): Promise<{ bio: string | null; displayName: string | null; followers: number | null; verified: boolean | null } | null> {
   const actorId = process.env.APIFY_TIKTOK_ACTOR_ID?.trim() || "clockworks/tiktok-profile-scraper";
   const cleanHandle = handle.replace(/^@/, "");
   const items = await runApifyActor(actorId, {
@@ -247,7 +312,10 @@ async function fetchTikTokProfileBrief(profileUrl: string, handle: string): Prom
   const row = items.find((item) => item.type === "profile") ?? items[0];
   if (!row) return null;
 
-  const authorMeta = row.authorMeta;
+  const authorMeta =
+    row.authorMeta && typeof row.authorMeta === "object"
+      ? (row.authorMeta as Record<string, unknown>)
+      : null;
 
   return {
     bio:
@@ -258,6 +326,10 @@ async function fetchTikTokProfileBrief(profileUrl: string, handle: string): Prom
       nestedRecordString(row, "nickname") ??
       nestedRecordString(row, "authorNickname") ??
       nestedRecordString(authorMeta, "nickName"),
+    followers: numberFromAny(
+      row.followers ?? row.fans ?? authorMeta?.fans ?? authorMeta?.followerCount,
+    ),
+    verified: boolFromAny(row.verified ?? authorMeta?.verified),
   };
 }
 
@@ -271,33 +343,45 @@ export async function affirmOfficialSocialProfile(
 ): Promise<SocialAffirmResult> {
   const strictBrandSlug = options?.strictBrandSlug ?? false;
   if (!process.env.APIFY_TOKEN?.trim()) {
-    return {
-      ok: false,
-      reason: "vérification bio indisponible (APIFY_TOKEN manquant)",
-      bio: null,
-      displayName: null,
-    };
+    return withProfileMetrics(
+      {
+        ok: false,
+        reason: "vérification bio indisponible (APIFY_TOKEN manquant)",
+        bio: null,
+        displayName: null,
+      },
+      {},
+    );
   }
 
   const handleFromUrl =
     platform === "instagram" ? instagramHandleFromUrl(profileUrl) : tiktokHandleFromUrl(profileUrl);
   if (!handleFromUrl) {
-    return { ok: false, reason: `URL ${platform} invalide`, bio: null, displayName: null };
+    return withProfileMetrics(
+      { ok: false, reason: `URL ${platform} invalide`, bio: null, displayName: null },
+      {},
+    );
   }
   if (isMonsterSocialHandle(handleFromUrl, app.name)) {
-    return {
-      ok: false,
-      reason: "handle dérivé du titre complet (trop long)",
-      bio: null,
-      displayName: null,
-    };
+    return withProfileMetrics(
+      {
+        ok: false,
+        reason: "handle dérivé du titre complet (trop long)",
+        bio: null,
+        displayName: null,
+      },
+      {},
+    );
   }
 
   if (platform === "instagram") {
     const handle = handleFromUrl;
     const meta = await fetchInstagramProfileBrief(instagramProfileUrlFromHandle(handle), handle);
     if (!meta) {
-      return { ok: false, reason: "impossible de lire le profil Instagram (Apify)", bio: null, displayName: null };
+      return withProfileMetrics(
+        { ok: false, reason: "impossible de lire le profil Instagram (Apify)", bio: null, displayName: null },
+        {},
+      );
     }
     const verdict = bioAffirmsOfficialApp({
       bio: meta.bio,
@@ -307,6 +391,8 @@ export async function affirmOfficialSocialProfile(
       officialSiteUrl,
       profileHandle: handle,
       strictBrandSlug,
+      followers: meta.followers,
+      verified: meta.verified,
     });
     return { ...verdict, displayName: meta.displayName };
   }
@@ -314,7 +400,10 @@ export async function affirmOfficialSocialProfile(
   const handle = handleFromUrl;
   const meta = await fetchTikTokProfileBrief(tiktokProfileUrlFromHandle(handle), handle);
   if (!meta) {
-    return { ok: false, reason: "impossible de lire le profil TikTok (Apify)", bio: null, displayName: null };
+    return withProfileMetrics(
+      { ok: false, reason: "impossible de lire le profil TikTok (Apify)", bio: null, displayName: null },
+      {},
+    );
   }
   const verdict = bioAffirmsOfficialApp({
     bio: meta.bio,
@@ -324,6 +413,8 @@ export async function affirmOfficialSocialProfile(
     officialSiteUrl,
     profileHandle: handle,
     strictBrandSlug,
+    followers: meta.followers,
+    verified: meta.verified,
   });
   return { ...verdict, displayName: meta.displayName };
 }

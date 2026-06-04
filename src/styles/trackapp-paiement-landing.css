@@ -394,6 +394,133 @@
   outline-offset: 2px;
 }
 
+/* Mobile — Apple Pay natif (Safari) + fallback */
+.tpl-spotlight__apple-pay {
+  display: block;
+  width: 100%;
+  min-height: 3.25rem;
+  margin-top: 0.95rem;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  -webkit-appearance: -apple-pay-button;
+  -apple-pay-button-type: buy;
+  -apple-pay-button-style: black;
+  appearance: none;
+}
+
+.tpl-spotlight__apple-pay:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.tpl-spotlight__apple-pay-fallback {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  min-height: 3.25rem;
+  border-radius: 999px;
+  background: #000;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+@supports not (-webkit-appearance: -apple-pay-button) {
+  .tpl-spotlight__apple-pay {
+    background: #000;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .tpl-spotlight__apple-pay .tpl-spotlight__apple-pay-fallback {
+    display: inline-flex;
+  }
+}
+
+.tpl-spotlight__pay-card-link {
+  display: block;
+  width: 100%;
+  margin-top: 0.85rem;
+  padding: 0.35rem 0.5rem;
+  border: none;
+  background: none;
+  color: rgb(255 255 255 / 0.52);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-align: center;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tpl-spotlight__pay-card-link:hover {
+  color: rgb(255 255 255 / 0.78);
+}
+
+/* Stripe Checkout Elements (Apple Pay + carte in-page) */
+.tpl-stripe-checkout {
+  width: 100%;
+}
+
+.tpl-stripe-checkout__loading {
+  margin: 0.75rem 0 0;
+  font-size: 0.82rem;
+  color: rgb(255 255 255 / 0.55);
+  text-align: center;
+}
+
+.tpl-stripe-checkout__express {
+  margin-top: 0.95rem;
+}
+
+.tpl-stripe-checkout__express .StripeElement,
+.tpl-stripe-checkout__card .StripeElement {
+  width: 100%;
+}
+
+.tpl-stripe-checkout__or {
+  margin: 0.65rem 0 0;
+  font-size: 0.78rem;
+  color: rgb(255 255 255 / 0.42);
+  text-align: center;
+}
+
+.tpl-stripe-checkout__card {
+  margin-top: 0.35rem;
+}
+
+.tpl-stripe-checkout__card .saas-pay-continue {
+  margin-top: 1rem;
+}
+
+.tpl-stripe-checkout--order-form .tpl-stripe-checkout__express {
+  margin-top: 0;
+}
+
+.tpl-spotlight__order.tpl-stripe-checkout,
+.tpl-spotlight__order .tpl-stripe-checkout {
+  margin-top: 0.35rem;
+}
+
+.tpl-spotlight-carousel--checkout-reveal .tpl-spotlight__order--revealed .tpl-stripe-checkout__card .saas-pay-wallet-divider {
+  margin-top: 0;
+}
+
+.tpl-spotlight__pay-card-link:focus-visible {
+  outline: 2px solid rgb(255 255 255 / 0.35);
+  outline-offset: 2px;
+  border-radius: 0.35rem;
+}
+
 .tpl-spotlight-carousel--checkout-reveal .tpl-spotlight__order--revealed {
   margin-top: 0.95rem;
   padding-top: 0;
@@ -548,6 +675,13 @@
   flex-wrap: wrap;
 }
 
+.tpl-spotlight__head-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
 .tpl-spotlight__name {
   margin: 0;
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
@@ -613,6 +747,17 @@
   font-size: 0.78rem;
   font-weight: 900;
   letter-spacing: -0.02em;
+}
+
+.tpl-spotlight__chip--guarantee {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(52, 211, 153, 0.42);
+  color: #a7f3d0;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  white-space: nowrap;
 }
 
 .tpl-spotlight__desc {
@@ -748,13 +893,37 @@
   overflow: hidden;
   width: 100%;
   border-radius: 0;
-  touch-action: pan-y;
+  touch-action: pan-x pan-y;
   cursor: grab;
   -webkit-user-select: none;
   user-select: none;
   /* Container query : centre la carte active (~85 cqi) avec bandes égales pour le peek */
   container-type: inline-size;
   container-name: tpl-spotlight;
+}
+
+@media (max-width: 1023px) {
+  .tpl-spotlight-carousel:not(.tpl-spotlight-carousel--checkout-open) .tpl-spotlight-carousel__viewport {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+  }
+
+  .tpl-spotlight-carousel:not(.tpl-spotlight-carousel--checkout-open) .tpl-spotlight-carousel__viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tpl-spotlight-carousel:not(.tpl-spotlight-carousel--checkout-open) .tpl-spotlight-carousel__track {
+    transform: none !important;
+  }
+
+  .tpl-spotlight-carousel:not(.tpl-spotlight-carousel--checkout-open) .tpl-spotlight-carousel__slide {
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+  }
 }
 
 .tpl-spotlight-carousel__viewport:active {

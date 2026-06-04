@@ -1,12 +1,8 @@
-import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-import { CreateAppJourney } from "@/components/trackapp/create-app-journey";
+import { TRACKAPP_LANDING_PATH } from "@/lib/trackapp-landing-paths";
 
-export const metadata: Metadata = {
-  title: "Créer mon app — Trackapp",
-  description: "Parcours guidé pour créer une app iOS avec l'IA, de l'idée au lancement.",
-};
-
-export default function TrackappCreerMonAppPage() {
-  return <CreateAppJourney />;
+/** Legacy — Formation / creer-mon-app → AppLAB Créer une app. */
+export default function TrackappCreerMonAppRedirect() {
+  redirect(TRACKAPP_LANDING_PATH);
 }

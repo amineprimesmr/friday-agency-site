@@ -1,36 +1,34 @@
 import { cache } from "react";
 
-import { createClient } from "@/lib/supabase/server";
+import { loadProfileFavorites } from "@/lib/trackapp-profile-favorites-store";
+import { getTrackappUser } from "@/lib/supabase/get-trackapp-user";
 
 export type TrackappProfileFavorites = Readonly<{
   loggedIn: boolean;
   designIds: string[];
   appIds: string[];
   adsKeys: string[];
+  storageError: string | null;
 }>;
 
 export const getTrackappProfileFavorites = cache(async (): Promise<TrackappProfileFavorites> => {
-  const sb = await createClient();
-  if (!sb) return { loggedIn: false, designIds: [], appIds: [], adsKeys: [] };
+  const empty: TrackappProfileFavorites = {
+    loggedIn: false,
+    designIds: [],
+    appIds: [],
+    adsKeys: [],
+    storageError: null,
+  };
 
-  const {
-    data: { user },
-  } = await sb.auth.getUser();
-  if (!user) return { loggedIn: false, designIds: [], appIds: [], adsKeys: [] };
+  const { sb, user } = await getTrackappUser();
+  if (!sb || !user) return empty;
 
-  const { data } = await sb
-    .from("trackapp_profiles")
-    .select("design_favorites, app_favorites, ads_favorites")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  const asStrings = (raw: unknown) =>
-    Array.isArray(raw) ? raw.filter((x): x is string => typeof x === "string") : [];
-
+  const loaded = await loadProfileFavorites(sb, user.id);
   return {
     loggedIn: true,
-    designIds: asStrings(data?.design_favorites),
-    appIds: asStrings(data?.app_favorites),
-    adsKeys: asStrings(data?.ads_favorites),
+    designIds: loaded.designIds,
+    appIds: loaded.appIds,
+    adsKeys: loaded.adsKeys,
+    storageError: loaded.storageError,
   };
 });

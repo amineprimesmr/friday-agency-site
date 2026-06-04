@@ -22,8 +22,8 @@ export function TrackappGagner240Page({ showDashboard = false }: Props) {
             <p className="trackapp-workspace-hero-kicker">Affiliation</p>
             <h1 className="trackapp-workspace-hero-title">Dashboard affiliation</h1>
             <p className="trackapp-workspace-hero-desc mx-auto max-w-[46ch]">
-              Connecte-toi pour récupérer ton lien de parrainage, offrir −40&nbsp;% sur l&apos;abonnement à ton audience et
-              suivre tes commissions.
+              Connectez-vous pour récupérer votre lien de parrainage, offrir −40&nbsp;% sur l&apos;abonnement à votre audience et
+              suivre vos commissions.
             </p>
             <div className="mt-8">
               <Link

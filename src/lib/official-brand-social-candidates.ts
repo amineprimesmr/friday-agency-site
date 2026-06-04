@@ -96,6 +96,13 @@ export function buildAppBrandSlugs(appName: string): string[] {
     slugs.add(`${parts[0]}app`);
   }
 
+  /** Token principal (« Duolingo : Cours… » → duolingo) — handle le plus courant en social. */
+  const lead = parts.find((p) => p.length >= 4 && !NAME_STOP_WORDS.has(p));
+  if (lead) {
+    slugs.add(lead);
+    slugs.add(`${lead}app`);
+  }
+
   return [...slugs];
 }
 

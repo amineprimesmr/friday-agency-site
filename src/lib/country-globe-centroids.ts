@@ -2,6 +2,7 @@ import type { CountryCode } from "@/lib/apple-charts";
 
 /** Centroïdes approximatifs [lat, lng] pour marqueurs globe (cobe). */
 export const COUNTRY_GLOBE_CENTROIDS: Record<CountryCode, readonly [number, number]> = {
+  us: [39.83, -98.58],
   fr: [46.23, 2.21],
   gb: [55.38, -3.44],
   de: [51.17, 10.45],

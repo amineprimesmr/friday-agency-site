@@ -13,6 +13,8 @@ const APPLE_MZSTATIC_PATTERNS = Array.from({ length: 18 }, (_, i) => ({
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname),
+  /** Stripe utilise des modules Node (crypto, net) — ne pas les bundler avec Turbopack. */
+  serverExternalPackages: ["stripe"],
   experimental: {
     optimizePackageImports: ["framer-motion"],
   },
@@ -37,7 +39,29 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      { source: "/", destination: "/tracker", permanent: true },
+      { source: "/", destination: "/trackapp", permanent: false },
+      {
+        source: "/trackapp/creer-une-app",
+        destination: "/trackapp",
+        permanent: false,
+      },
+      {
+        source: "/trackapp/creer-mon-app",
+        destination: "/trackapp",
+        permanent: false,
+      },
+      { source: "/tracker/top-charts", destination: "/trackapp/accueil", permanent: false },
+      { source: "/tracker/top-charts/:path*", destination: "/trackapp/accueil", permanent: false },
+      {
+        source: "/tracker/apps/:id",
+        destination: "/trackapp/accueil/:id",
+        permanent: false,
+      },
+      {
+        source: "/tracker/search",
+        destination: "/trackapp/accueil",
+        permanent: false,
+      },
     ];
   },
 };

@@ -15,15 +15,22 @@ function parseBillingPlan(body: { plan?: unknown } | null): TrackappBillingPlan 
   return "lifetime";
 }
 
+function parseUiMode(body: { uiMode?: unknown } | null): "hosted" | "elements" {
+  if (body?.uiMode === "elements") return "elements";
+  return "hosted";
+}
+
 export async function POST(req: Request) {
   const stripe = getStripe();
 
   let plan: TrackappBillingPlan = "lifetime";
+  let uiMode: "hosted" | "elements" = "hosted";
   try {
     const ct = req.headers.get("content-type") ?? "";
     if (ct.includes("application/json")) {
-      const body = (await req.json()) as { plan?: unknown };
+      const body = (await req.json()) as { plan?: unknown; uiMode?: unknown };
       plan = parseBillingPlan(body);
+      uiMode = parseUiMode(body);
     }
   } catch {
     plan = "lifetime";
@@ -71,15 +78,22 @@ export async function POST(req: Request) {
   try {
     const referralFriendCoupon = process.env.STRIPE_COUPON_ID_REFERRAL_FRIEND?.trim();
     const isLifetime = plan === "lifetime";
+    const isElements = uiMode === "elements";
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: isLifetime ? "payment" : "subscription",
       customer_creation: "always",
       line_items: [{ price, quantity: 1 }],
-      success_url: `${origin}/trackapp/activation?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/trackapp/paiement`,
       metadata,
     };
+
+    if (isElements) {
+      sessionParams.ui_mode = "elements";
+      sessionParams.return_url = `${origin}/trackapp/activation?session_id={CHECKOUT_SESSION_ID}`;
+    } else {
+      sessionParams.success_url = `${origin}/trackapp/activation?session_id={CHECKOUT_SESSION_ID}`;
+      sessionParams.cancel_url = `${origin}/trackapp/paiement`;
+    }
 
     if (referralFriendCoupon && metadata.referrer_user_id) {
       sessionParams.discounts = [{ coupon: referralFriendCoupon }];
@@ -88,6 +102,13 @@ export async function POST(req: Request) {
     }
 
     const sessionStripe = await stripe.checkout.sessions.create(sessionParams);
+
+    if (isElements) {
+      if (!sessionStripe.client_secret) {
+        return NextResponse.json({ error: "Stripe n'a pas retourné de client secret." }, { status: 502 });
+      }
+      return NextResponse.json({ clientSecret: sessionStripe.client_secret });
+    }
 
     if (!sessionStripe.url) {
       return NextResponse.json({ error: "Stripe n'a pas retourné d'URL de paiement." }, { status: 502 });

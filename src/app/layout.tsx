@@ -24,11 +24,11 @@ export const metadata: Metadata = {
     template: "%s · Trackapp",
   },
   description:
-    "Suivez les classements App Store en temps réel : Top Charts, nouveautés, mouvements de rangs par pays et catégorie.",
+    "Recherchez une app iOS, analysez revenus et signaux publics, puis lancez votre projet avec Trackapp.",
   openGraph: {
     title: "Trackapp — App Store Tracker",
     description:
-      "Classements iOS en temps réel, top charts, nouveautés et explorer d'apps.",
+      "Recherche App Store, métriques et outils pour créer et monétiser votre app.",
     type: "website",
     locale: "fr_FR",
   },

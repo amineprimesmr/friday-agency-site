@@ -3,9 +3,21 @@ import { NextResponse } from "next/server";
 import { normalizeTrackerCountryParam, searchApps, type CountryCode } from "@/lib/apple-charts";
 import {
   enrichSearchResultsWithTrackappMetricsForLiveSearch,
+  METRICS_TO_FIX,
   TRACKAPP_METRICS_UNAVAILABLE_LABEL,
+  type SearchResultWithTrackappMetrics,
 } from "@/lib/trackapp-app-display-metrics";
 import { finalizeTrackappRevenueEurLabel } from "@/lib/trackapp-revenue-display";
+import {
+  sortSearchResults,
+  type TrackappSearchSort,
+} from "@/lib/trackapp-smart-search/rank-results";
+
+function parseSortParam(raw: string | null): TrackappSearchSort {
+  const s = (raw ?? "").trim().toLowerCase();
+  if (s === "revenue" || s === "downloads" || s === "rating" || s === "recent") return s;
+  return "relevance";
+}
 
 export const maxDuration = 60;
 
@@ -27,16 +39,30 @@ export async function GET(req: Request) {
   const q = (searchParams.get("q") ?? "").trim();
   const country = normalizeTrackerCountryParam(searchParams.get("country")) as CountryCode;
   const limit = Math.min(Math.max(Number(searchParams.get("limit") ?? "12") || 12, 1), 12);
+  const sort = parseSortParam(searchParams.get("sort"));
 
   if (!q) {
     return NextResponse.json({ apps: [] }, { status: 200 });
   }
 
-  try {
-    const raw = await searchApps(q, country, limit);
-    const enriched = await enrichSearchResultsWithTrackappMetricsForLiveSearch(raw, country);
+  const quick = searchParams.get("quick") === "1";
 
-    const apps = enriched.map((app) => ({
+  try {
+    const raw = await searchApps(q, country, Math.min(limit * 2, 24));
+    let enriched: SearchResultWithTrackappMetrics[];
+
+    if (quick) {
+      enriched = raw.map((app) => ({
+        ...app,
+        trackappMetrics: METRICS_TO_FIX,
+      }));
+    } else {
+      enriched = await enrichSearchResultsWithTrackappMetricsForLiveSearch(raw, country);
+    }
+
+    const sorted = sortSearchResults(enriched, sort, q, country).slice(0, limit);
+
+    const apps = sorted.map((app) => ({
       id: app.id,
       name: app.name,
       artistName: app.artistName,
@@ -47,7 +73,9 @@ export async function GET(req: Request) {
       releaseDate: app.releaseDate,
       rating: app.averageUserRating,
       langLabel: langChip(app.languageCodesISO2A),
-      revenueDisplay: revenueForSearchRow(app.trackappMetrics.revenueDisplay),
+      revenueDisplay: quick
+        ? "…"
+        : revenueForSearchRow(app.trackappMetrics.revenueDisplay),
       metricSource: app.trackappMetrics.metricSource,
     }));
 

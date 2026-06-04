@@ -1,94 +1,154 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
 import {
-  IconNavAccueil,
   IconNavBook,
-  IconNavChart,
-  IconNavFile,
-  IconNavHeart,
-  IconNavNotes,
+  IconNavSparkle,
+  IconPanelClose,
+  IconPanelOpen,
+  IconSearch,
 } from "@/components/trackapp/trackapp-lab-nav-icons";
 import { TrackappLogoMark } from "@/components/trackapp/trackapp-logo-mark";
 import { TrackappSidebarFooter } from "@/components/trackapp/trackapp-sidebar-footer";
-import type { TrackappNavItem } from "@/lib/trackapp-workspace-nav";
 import {
-  groupHasActiveItem,
-  isNavItemActive,
-  TRACKAPP_NAV_GROUPS,
-} from "@/lib/trackapp-workspace-nav";
+  APPLAB_DRAFT_CHANGE_EVENT,
+  defaultApplabCreateDraft,
+  readApplabCreateDraft,
+  writeApplabCreateDraft,
+} from "@/lib/trackapp-applab-create/storage";
+import { trackappGuestNavHref, TRACKAPP_LANDING_PATH } from "@/lib/trackapp-landing-paths";
+import {
+  TRACKAPP_APPTRACKER_PATH,
+  TRACKAPP_RESSOURCES_PATH,
+} from "@/lib/trackapp-tools-paths";
 import { cn } from "@/lib/utils";
 
-import type { ComponentType, SVGProps } from "react";
+type ProjectEntry = Readonly<{
+  name: string;
+  inProgress: boolean;
+  artworkUrl: string | null;
+}>;
 
-const ITEM_ICONS: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
-  Accueil: IconNavAccueil,
-  "Mes favoris": IconNavHeart,
-  "Mes notes": IconNavNotes,
-  "Notre sélection": IconNavChart,
-  Formation: IconNavBook,
-  Ressources: IconNavFile,
-};
+function readProjectEntry(): ProjectEntry | null {
+  const draft = readApplabCreateDraft();
+  const name = draft?.name?.trim() ?? "";
+  if (name.length < 2) return null;
+  return {
+    name,
+    inProgress: !draft?.setupComplete,
+    artworkUrl: draft?.referenceAppArtworkUrl ?? null,
+  };
+}
 
-function NavItemIcon({ label }: { label: string }) {
-  const Icon = ITEM_ICONS[label] ?? IconNavFile;
+function SidebarLogoToggle({
+  collapsed,
+  onToggle,
+  compact,
+}: Readonly<{
+  collapsed: boolean;
+  onToggle?: () => void;
+  compact?: boolean;
+}>) {
   return (
-    <span className="trackapp-lab-nav__item-icon">
-      <Icon className="h-[18px] w-[18px]" />
-    </span>
+    <button
+      type="button"
+      className={cn("trackapp-studio-sidebar__logo", compact && "trackapp-studio-sidebar__logo--compact")}
+      aria-label={collapsed ? "Ouvrir le menu" : "Ranger le menu"}
+      aria-pressed={collapsed}
+      onClick={onToggle}
+    >
+      <span className="trackapp-studio-sidebar__logo-face trackapp-studio-sidebar__logo-face--brand" aria-hidden>
+        <TrackappLogoMark size="xs" className="trackapp-studio-sidebar__logo-img" decorative />
+      </span>
+      <span className="trackapp-studio-sidebar__logo-face trackapp-studio-sidebar__logo-face--action" aria-hidden>
+        {collapsed ? (
+          <IconPanelOpen className="trackapp-studio-sidebar__panel-icon" />
+        ) : (
+          <IconPanelClose className="trackapp-studio-sidebar__panel-icon" />
+        )}
+      </span>
+    </button>
   );
 }
 
-function NavSubLink({
-  item,
-  pathname,
+function ToolLink({
+  href,
+  label,
+  icon: Icon,
+  tone = "blue",
+  collapsed,
+  active = false,
   onNavigate,
-  onPendingNavigate,
-  pending,
+  loggedIn = true,
 }: Readonly<{
-  item: TrackappNavItem;
-  pathname: string;
+  href: string;
+  label: string;
+  icon: typeof IconNavSparkle;
+  tone?: "blue" | "neutral";
+  collapsed?: boolean;
+  active?: boolean;
   onNavigate?: () => void;
-  onPendingNavigate?: (href: string) => void;
-  pending?: boolean;
+  loggedIn?: boolean;
 }>) {
-  const active = isNavItemActive(pathname, item);
-  const className = cn(
-    "trackapp-lab-nav__item",
-    active && "trackapp-lab-nav__item--active",
-    pending && "trackapp-lab-nav__item--pending",
-    item.soon && "trackapp-lab-nav__item--soon",
-  );
-
-  const body = (
-    <>
-      <NavItemIcon label={item.label} />
-      <span className="trackapp-lab-nav__item-label">{item.label}</span>
-    </>
-  );
-
-  if (item.soon) {
-    return (
-      <span className={className} aria-disabled title="Bientôt disponible">
-        {body}
-      </span>
-    );
-  }
+  const resolvedHref = trackappGuestNavHref(href, loggedIn);
 
   return (
     <Link
-      href={item.href}
-      prefetch={false}
-      className={className}
-      onClick={() => {
-        if (!active) onPendingNavigate?.(item.href);
-        onNavigate?.();
-      }}
+      href={resolvedHref}
+      className={cn(
+        "trackapp-studio-sidebar__tool",
+        collapsed && "trackapp-studio-sidebar__tool--collapsed",
+        active && "is-active",
+      )}
+      title={label}
+      aria-current={active ? "page" : undefined}
+      onClick={() => onNavigate?.()}
     >
-      {body}
+      <span className={cn("trackapp-studio-sidebar__tool-icon", tone === "blue" && "trackapp-studio-sidebar__tool-icon--blue")}>
+        <Icon className="h-[16px] w-[16px]" />
+      </span>
+      {!collapsed ? <span className="trackapp-studio-sidebar__tool-label">{label}</span> : null}
     </Link>
+  );
+}
+
+function ToolComingSoon({
+  label,
+  icon: Icon,
+  tone = "blue",
+  collapsed,
+  hint = "Coming soon",
+}: Readonly<{
+  label: string;
+  icon: typeof IconNavSparkle;
+  tone?: "blue" | "neutral";
+  collapsed?: boolean;
+  hint?: string;
+}>) {
+  return (
+    <span
+      tabIndex={0}
+      className={cn(
+        "trackapp-studio-sidebar__tool trackapp-studio-sidebar__tool--coming-soon",
+        collapsed && "trackapp-studio-sidebar__tool--collapsed",
+      )}
+      role="status"
+      aria-label={`${label} — ${hint}`}
+      aria-disabled="true"
+      title={hint}
+    >
+      <span className={cn("trackapp-studio-sidebar__tool-icon", tone === "blue" && "trackapp-studio-sidebar__tool-icon--blue")}>
+        <Icon className="h-[16px] w-[16px]" />
+      </span>
+      {!collapsed ? <span className="trackapp-studio-sidebar__tool-label">{label}</span> : null}
+      <span className="trackapp-studio-sidebar__tool-hint" aria-hidden>
+        {hint}
+      </span>
+    </span>
   );
 }
 
@@ -98,111 +158,205 @@ export function TrackappLabSidebar({
   onNavigate,
   email,
   signOutHref,
+  loggedIn = false,
+  collapsed = false,
+  onToggleCollapse,
 }: Readonly<{
   pathname: string;
   mobileMenuOpen: boolean;
   onNavigate?: () => void;
   email?: string;
   signOutHref?: string;
+  loggedIn?: boolean;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 }>) {
-  const [pendingHref, setPendingHref] = useState<string | null>(null);
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
-    const init: Record<string, boolean> = {};
-    for (const g of TRACKAPP_NAV_GROUPS) {
-      init[g.id] = Boolean(g.defaultOpen) || groupHasActiveItem(pathname, g);
+  const router = useRouter();
+  const [projectsOpen, setProjectsOpen] = useState(true);
+  const [project, setProject] = useState<ProjectEntry | null>(null);
+
+  const refreshProject = useCallback(() => {
+    setProject(readProjectEntry());
+  }, []);
+
+  useEffect(() => {
+    refreshProject();
+    window.addEventListener(APPLAB_DRAFT_CHANGE_EVENT, refreshProject);
+    window.addEventListener("storage", refreshProject);
+    return () => {
+      window.removeEventListener(APPLAB_DRAFT_CHANGE_EVENT, refreshProject);
+      window.removeEventListener("storage", refreshProject);
+    };
+  }, [refreshProject, pathname]);
+
+  const startNewProject = useCallback(() => {
+    writeApplabCreateDraft(defaultApplabCreateDraft());
+    refreshProject();
+    if (pathname !== TRACKAPP_LANDING_PATH) {
+      router.push(TRACKAPP_LANDING_PATH);
+    } else {
+      window.location.href = TRACKAPP_LANDING_PATH;
     }
-    return init;
-  });
+    onNavigate?.();
+  }, [onNavigate, pathname, refreshProject, router]);
 
-  useEffect(() => {
-    setPendingHref(null);
-    setOpenGroups((prev) => {
-      const next = { ...prev };
-      for (const g of TRACKAPP_NAV_GROUPS) {
-        if (groupHasActiveItem(pathname, g)) next[g.id] = true;
-      }
-      return next;
-    });
-  }, [pathname]);
+  const openApptracker = useCallback(() => {
+    const target = trackappGuestNavHref(TRACKAPP_APPTRACKER_PATH, Boolean(loggedIn));
+    if (pathname !== TRACKAPP_APPTRACKER_PATH || !loggedIn) {
+      router.push(target);
+    }
+    onNavigate?.();
+  }, [loggedIn, onNavigate, pathname, router]);
 
-  /** Si la navigation Next reste bloquée, ne pas laisser l’item en « chargement » indéfiniment. */
-  useEffect(() => {
-    if (!pendingHref) return undefined;
-    const id = window.setTimeout(() => setPendingHref(null), 12_000);
-    return () => window.clearTimeout(id);
-  }, [pendingHref]);
+  const isOnStudio =
+    pathname === TRACKAPP_LANDING_PATH || pathname.startsWith(`${TRACKAPP_LANDING_PATH}?`);
+  const projectActive = isOnStudio && Boolean(project);
 
   return (
-    <aside
-      id="app-sidebar"
-      className={cn(
-        "app-sidebar trackapp-lab-sidebar hidden md:flex flex-col fixed left-0 z-[90]",
-        mobileMenuOpen && "is-mobile-open",
-      )}
-      aria-label="Navigation Trackapp"
-    >
-      <span id="app-business-name" className="app-business-name-hidden" aria-hidden>
-        Trackapp
-      </span>
+    <>
+      <aside
+        id="app-sidebar"
+        className={cn(
+          "app-sidebar trackapp-lab-sidebar trackapp-studio-sidebar hidden md:flex flex-col fixed left-0 z-[90]",
+          mobileMenuOpen && "is-mobile-open",
+          collapsed && "trackapp-lab-sidebar--collapsed trackapp-studio-sidebar--collapsed",
+        )}
+        aria-label="Navigation Trackapp"
+      >
+        <span id="app-business-name" className="app-business-name-hidden" aria-hidden>
+          Trackapp
+        </span>
 
-      <div className="trackapp-lab-sidebar__brand app-sidebar-brand">
-        <Link
-          href="/trackapp/accueil"
-          className="trackapp-lab-sidebar__logo app-sidebar-logo"
-          aria-label="Trackapp"
-          onClick={() => onNavigate?.()}
-        >
-          <TrackappLogoMark size="sm" className="app-sidebar-logo-img app-sidebar-logo-img--brand" decorative />
-          <span className="trackapp-lab-sidebar__logo-text app-sidebar-logo-text">Trackapp</span>
-        </Link>
-      </div>
+        <div className="trackapp-studio-sidebar__head">
+          <div className={cn("trackapp-studio-sidebar__brand", collapsed && "trackapp-studio-sidebar__brand--collapsed")}>
+            <SidebarLogoToggle collapsed={collapsed} onToggle={onToggleCollapse} compact={collapsed} />
+            {!collapsed ? <p className="trackapp-studio-sidebar__brand-name">Trackapp</p> : null}
+          </div>
+          {!collapsed ? (
+            <button
+              type="button"
+              className="trackapp-studio-sidebar__head-toggle"
+              aria-label="Ranger le menu"
+              onClick={onToggleCollapse}
+            >
+              <IconPanelClose className="h-[18px] w-[18px]" />
+            </button>
+          ) : null}
+        </div>
 
-      <nav className="trackapp-lab-nav app-sidebar-nav flex-1 overflow-y-auto" aria-label="Menu principal">
-        {TRACKAPP_NAV_GROUPS.map((group) => {
-          const open = openGroups[group.id] ?? false;
-          const hasItems = group.items.length > 0;
+        <nav className="trackapp-studio-sidebar__nav app-sidebar-nav flex-1 overflow-y-auto overflow-x-hidden" aria-label="Menu principal">
+          <div className="trackapp-studio-sidebar__actions">
+            <button
+              type="button"
+              className={cn("trackapp-studio-sidebar__action", collapsed && "trackapp-studio-sidebar__action--icon-only")}
+              title="Nouveau projet"
+              onClick={startNewProject}
+            >
+              <span className="trackapp-studio-sidebar__action-plus" aria-hidden>
+                +
+              </span>
+              {!collapsed ? <span>Nouveau projet</span> : null}
+            </button>
 
-          return (
-            <div key={group.id} className="trackapp-lab-nav__group">
-              <button
-                type="button"
-                className="trackapp-lab-nav__group-btn"
-                aria-expanded={hasItems ? open : false}
-                onClick={() => {
-                  if (!hasItems) return;
-                  setOpenGroups((s) => ({ ...s, [group.id]: !s[group.id] }));
-                }}
-              >
-                <span className="trackapp-lab-nav__group-label">{group.label}</span>
-                <span className="trackapp-lab-nav__group-toggle" aria-hidden>
-                  {hasItems ? (open ? "−" : "+") : "+"}
-                </span>
-              </button>
+            <button
+              type="button"
+              className={cn(
+                "trackapp-studio-sidebar__action trackapp-studio-sidebar__action--muted",
+                collapsed && "trackapp-studio-sidebar__action--icon-only",
+              )}
+              title="Chercher une app"
+              onClick={openApptracker}
+            >
+              <IconSearch className="trackapp-studio-sidebar__action-search" />
+              {!collapsed ? <span>Chercher une app</span> : null}
+            </button>
+          </div>
 
-              {hasItems && open ? (
-                <div className="trackapp-lab-nav__children">
-                  {group.items.map((item) => (
-                    <NavSubLink
-                      key={`${group.id}-${item.label}`}
-                      item={item}
-                      pathname={pathname}
-                      onNavigate={onNavigate}
-                      onPendingNavigate={setPendingHref}
-                      pending={pendingHref === item.href}
-                    />
-                  ))}
-                </div>
-              ) : null}
+          <div className="trackapp-studio-sidebar__section">
+            {!collapsed ? <p className="trackapp-studio-sidebar__section-label">Outils</p> : null}
+            <div className="trackapp-studio-sidebar__tools">
+              <ToolLink
+                href={TRACKAPP_APPTRACKER_PATH}
+                label="Apptracker"
+                icon={IconSearch}
+                collapsed={collapsed}
+                active={pathname === TRACKAPP_APPTRACKER_PATH}
+                onNavigate={onNavigate}
+                loggedIn={loggedIn}
+              />
+              <ToolLink
+                href={TRACKAPP_RESSOURCES_PATH}
+                label="Ressources"
+                icon={IconNavBook}
+                tone="neutral"
+                collapsed={collapsed}
+                active={
+                  pathname === TRACKAPP_RESSOURCES_PATH || pathname.startsWith(`${TRACKAPP_RESSOURCES_PATH}/`)
+                }
+                onNavigate={onNavigate}
+                loggedIn={loggedIn}
+              />
+              <ToolComingSoon label="Marketing Studio" icon={IconNavSparkle} collapsed={collapsed} />
             </div>
-          );
-        })}
-      </nav>
+          </div>
 
-      <TrackappSidebarFooter
-        email={email}
-        signOutHref={signOutHref ?? "/trackapp/deconnexion"}
-        onNavigate={onNavigate}
-      />
-    </aside>
+          {project ? (
+            <div className="trackapp-studio-sidebar__section">
+              {!collapsed ? (
+                <button
+                  type="button"
+                  className="trackapp-studio-sidebar__section-toggle"
+                  aria-expanded={projectsOpen}
+                  onClick={() => setProjectsOpen((v) => !v)}
+                >
+                  <span>Projets</span>
+                  <span className={cn("trackapp-studio-sidebar__chevron", projectsOpen && "is-open")} aria-hidden>
+                    ⌃
+                  </span>
+                </button>
+              ) : null}
+
+              {(collapsed || projectsOpen) && (
+                <div className="trackapp-studio-sidebar__projects">
+                  <Link
+                    href={TRACKAPP_LANDING_PATH}
+                    className={cn(
+                      "trackapp-studio-sidebar__project",
+                      projectActive && "is-active",
+                      collapsed && "trackapp-studio-sidebar__project--collapsed",
+                    )}
+                    title={project.name}
+                    onClick={() => onNavigate?.()}
+                  >
+                    <span className="trackapp-studio-sidebar__project-art" aria-hidden>
+                      {project.artworkUrl ? (
+                        <Image src={project.artworkUrl} alt="" width={36} height={36} unoptimized />
+                      ) : (
+                        <span className="trackapp-studio-sidebar__project-art-fallback">✦</span>
+                      )}
+                    </span>
+                    {!collapsed ? (
+                      <span className="trackapp-studio-sidebar__project-name">{project.name}</span>
+                    ) : null}
+                    {!collapsed && project.inProgress ? (
+                      <span className="trackapp-studio-sidebar__project-badge">···</span>
+                    ) : null}
+                  </Link>
+                </div>
+              )}
+            </div>
+          ) : null}
+        </nav>
+
+        <TrackappSidebarFooter
+          email={email}
+          signOutHref={signOutHref ?? "/trackapp/deconnexion"}
+          onNavigate={onNavigate}
+          collapsed={collapsed}
+          loggedIn={loggedIn}
+        />
+      </aside>
+
+    </>
   );
 }

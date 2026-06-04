@@ -8,8 +8,6 @@ import {
   rankPresencePercent,
   formatRatingCount,
   formatBytes,
-  estimateMonthlyDownloads,
-  formatEstimatedMonthlyRevenuePrecise,
   timeAgo,
   daysSince,
   normalizeTrackerCountryParam,
@@ -23,6 +21,11 @@ import {
   fetchCountryRankingsCached,
   loadTrackerAppEmbedContextCached,
 } from "@/lib/tracker-server-cache";
+import { metricsFromEmbedContext } from "@/lib/trackapp-app-display-metrics";
+import {
+  formatDisplayMetricsDownloads,
+  formatDisplayMetricsRevenue,
+} from "@/lib/trackapp-real-metrics-only";
 import {
   buildAppStoreTrackerSimilarEmbedSrc,
   buildEmbedCountriesIframeSrc,
@@ -201,7 +204,6 @@ function CompetitorsPanel({ apps, currentId, country, category }: {
             <span className={`flex-1 truncate text-xs font-medium group-hover:text-white ${app.id === currentId ? "text-white" : "text-white/70"}`}>
               {app.name}
             </span>
-            <span className="shrink-0 text-[11px] text-white/30">{estimateMonthlyDownloads(app.rank, country)}</span>
           </TrackerNavLink>
         ))}
         {apps.length === 0 && (
@@ -227,14 +229,27 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
     app,
     sidebarApps,
     overallRank,
+    genreSliceRank,
     displayRank,
     rankHeroMode,
     aggregateMetrics: agg,
   } = ctx;
 
-  const useAggregateMetrics = Boolean(
-    agg && agg.downloadsString !== "—" && agg.revenueString !== "—",
+  const displayMetrics = metricsFromEmbedContext(
+    {
+      id: app.id,
+      price: app.price,
+      categoryId: app.primaryGenreId,
+      primaryGenreId: app.primaryGenreId,
+    },
+    country as CountryCode,
+    agg,
+    overallRank,
+    genreSliceRank,
   );
+  const useAggregateMetrics = displayMetrics.metricSource === "agrégé monde / mois";
+  const downloadsMain = formatDisplayMetricsDownloads(displayMetrics);
+  const revenueMain = formatDisplayMetricsRevenue(displayMetrics);
 
   const embedCountriesSrc = buildEmbedCountriesIframeSrc(id, {
     theme: "dark",
@@ -264,8 +279,8 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
             Tableau de bord
           </Link>
           <span>/</span>
-          <Link href="/tracker/top-charts" className="transition hover:text-white/60">
-            Classements
+          <Link href="/trackapp/apptracker" className="transition hover:text-white/60">
+            Explorer
           </Link>
           <span>/</span>
           <span className="text-white/55">{app.name}</span>
@@ -402,31 +417,13 @@ export default async function AppDetailPage({ params, searchParams }: PageProps)
                 : "Aucune note pour ce marché."
             }
             ratingsFreshBadge={notesFreshBadge}
-            downloadsMain={
-              useAggregateMetrics && agg
-                ? agg.downloadsString.toUpperCase()
-                : overallRank !== null
-                  ? estimateMonthlyDownloads(overallRank, country)
-                  : "—"
-            }
+            downloadsMain={downloadsMain}
             downloadsSubtitle="/mois"
-            downloadsSourceLabel={useAggregateMetrics ? "Agrégé · monde" : null}
+            downloadsSourceLabel={useAggregateMetrics ? "Mondial" : "Indisponible"}
             downloadsSourceAccent={useAggregateMetrics}
-            revenueMain={
-              useAggregateMetrics && agg
-                ? agg.revenueString
-                : overallRank !== null
-                  ? formatEstimatedMonthlyRevenuePrecise(
-                      overallRank,
-                      app.price,
-                      app.primaryGenreId,
-                      country,
-                      id,
-                    )
-                  : "—"
-            }
+            revenueMain={revenueMain}
             revenueSubtitle="/mois"
-            revenueSourceLabel={useAggregateMetrics ? "Agrégé · monde" : null}
+            revenueSourceLabel={useAggregateMetrics ? "Mondial" : "Indisponible"}
             revenueSourceAccent={useAggregateMetrics}
           />
         </div>

@@ -1,7 +1,18 @@
 import type { CountryCode, SearchResult } from "@/lib/apple-charts";
 import type { SearchResultWithTrackappMetrics } from "@/lib/trackapp-app-display-metrics";
 
-export type TrackappSearchSort = "relevance" | "revenue" | "downloads" | "rating";
+export type TrackappSearchSort = "relevance" | "revenue" | "downloads" | "rating" | "recent";
+
+export const TRACKAPP_SEARCH_SORT_OPTIONS: ReadonlyArray<{
+  id: TrackappSearchSort;
+  label: string;
+}> = [
+  { id: "relevance", label: "Pertinence" },
+  { id: "revenue", label: "Revenus" },
+  { id: "downloads", label: "Téléchargements" },
+  { id: "recent", label: "Récent" },
+  { id: "rating", label: "Note" },
+];
 
 function relevanceScore(query: string, app: SearchResult): number {
   const q = query.trim().toLowerCase();
@@ -48,6 +59,15 @@ export function sortSearchResults(
         const dr = b.averageUserRating - a.averageUserRating;
         if (dr !== 0) return dr;
         return b.userRatingCount - a.userRatingCount;
+      });
+      break;
+    case "recent":
+      list.sort((a, b) => {
+        const tb = Date.parse(b.releaseDate ?? "");
+        const ta = Date.parse(a.releaseDate ?? "");
+        const db = Number.isFinite(tb) ? tb : 0;
+        const da = Number.isFinite(ta) ? ta : 0;
+        return db - da;
       });
       break;
     default:

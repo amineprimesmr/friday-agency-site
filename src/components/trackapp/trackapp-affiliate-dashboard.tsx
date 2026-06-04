@@ -121,7 +121,7 @@ export function TrackappAffiliateDashboard() {
       });
       const json = (await res.json()) as { ok?: boolean; error?: string };
       if (!res.ok) throw new Error(json.error ?? "Virement refusé.");
-      setActionMsg("Virement initié vers ton compte bancaire.");
+      setActionMsg("Virement initié vers votre compte bancaire.");
       await load();
     } catch (e) {
       setActionMsg(e instanceof Error ? e.message : "Erreur virement.");
@@ -160,9 +160,9 @@ export function TrackappAffiliateDashboard() {
         <p className="trackapp-workspace-hero-kicker">Affiliation</p>
         <h1 className="ta-aff-dash__title">Dashboard affiliation</h1>
         <p className="ta-aff-dash__lead">
-          Partage <strong>ton lien personnel</strong> : ton audience bénéficie de{" "}
-          <strong>−{discountPct}&nbsp;%</strong> sur l&apos;abonnement au moment du paiement (offre filleul), et tu
-          touches <strong>{commissionMrrEur.toLocaleString("fr-FR")}&nbsp;€ de MRR</strong> par filleul actif, chaque
+          Partagez <strong>votre lien personnel</strong> : votre audience bénéficie de{" "}
+          <strong>−{discountPct}&nbsp;%</strong> sur l&apos;abonnement au moment du paiement (offre filleul), et vous
+          touchez <strong>{commissionMrrEur.toLocaleString("fr-FR")}&nbsp;€ de MRR</strong> par filleul actif, chaque
           mois tant qu&apos;il reste abonné.
         </p>
       </header>
@@ -172,8 +172,8 @@ export function TrackappAffiliateDashboard() {
           Lien à copier
         </h2>
         <p className="ta-aff-dash__panel-desc">
-          Envoie ce lien : les inscriptions sont rattachées à ton compte. Les personnes qui souscrivent l&apos;abonnement
-          après être passées par ton lien obtiennent <strong>−{discountPct}&nbsp;%</strong> sur le plan (réduction appliquée
+          Envoyez ce lien : les inscriptions sont rattachées à votre compte. Les personnes qui souscrivent l&apos;abonnement
+          après être passées par votre lien obtiennent <strong>−{discountPct}&nbsp;%</strong> sur le plan (réduction appliquée
           au paiement Stripe lorsque la remise filleul est activée sur le projet).
         </p>
         <div className="ta-aff-dash__copy-row">
@@ -212,7 +212,7 @@ export function TrackappAffiliateDashboard() {
       <section className="ta-aff-dash__panel">
         <h2 className="ta-aff-dash__panel-title">Versements</h2>
         <p className="ta-aff-dash__panel-desc">
-          Connecte un compte Stripe pour recevoir tes commissions par virement. Seuil minimum :{" "}
+          Connectez un compte Stripe pour recevoir vos commissions par virement. Seuil minimum :{" "}
           {formatEur(data.minPayoutCents)}.
         </p>
         <div className="ta-aff-dash__actions">

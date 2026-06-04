@@ -21,8 +21,8 @@ const ESSENTIALS: Tool[] = [
     badge: "Obligatoire",
     role: "Publier sur l'App Store, utiliser TestFlight, gérer les certificats et accéder à App Store Connect.",
     why:
-      "C'est la porte d'entrée officielle pour distribuer une app iOS. Les 99 $/an ne sont pas juste une dépense : Apple propose généralement un crédit promotionnel Apple Ads d'environ 100 $ pour les nouveaux comptes éligibles, ce qui peut compenser le coût de départ si tu l'utilises pour tester l'acquisition.",
-    tip: "À faire dès que l'app devient sérieuse : tu débloques TestFlight, les builds réels, les fiches App Store et les campagnes Apple Ads.",
+      "C'est la porte d'entrée officielle pour distribuer une app iOS. Les 99 $/an ne sont pas juste une dépense : Apple propose généralement un crédit promotionnel Apple Ads d'environ 100 $ pour les nouveaux comptes éligibles, ce qui peut compenser le coût de départ si vous l'utilisez pour tester l'acquisition.",
+    tip: "À faire dès que l'app devient sérieuse : vous débloquez TestFlight, les builds réels, les fiches App Store et les campagnes Apple Ads.",
     href: "https://developer.apple.com/programs/",
     cta: "Ouvrir Apple Developer",
   },
@@ -31,8 +31,8 @@ const ESSENTIALS: Tool[] = [
     badge: "IDE conseillé",
     role: "Coder l'app plus vite avec un IDE assisté par IA, comprendre le projet, générer/refactorer des écrans.",
     why:
-      "Tu peux utiliser Claude directement, mais Cursor est plus pratique pour bosser dans le code : fichiers, contexte du repo, modifications multi-fichiers et itérations rapides. C'est l'outil que je conseille pour avancer proprement.",
-    tip: "Utilise Claude/Cursor pour transformer une idée d'écran en composants, puis demande toujours une passe de nettoyage/performance.",
+      "Vous pouvez utiliser Claude directement, mais Cursor est plus pratique pour bosser dans le code : fichiers, contexte du repo, modifications multi-fichiers et itérations rapides. C'est l'outil que je conseille pour avancer proprement.",
+    tip: "Utilisez Claude/Cursor pour transformer une idée d'écran en composants, puis demandez toujours une passe de nettoyage/performance.",
     href: "https://cursor.com/",
     cta: "Voir Cursor",
   },
@@ -41,8 +41,8 @@ const ESSENTIALS: Tool[] = [
     badge: "Build iOS",
     role: "Compiler, signer, lancer sur simulateur/iPhone, envoyer les builds vers TestFlight.",
     why:
-      "Même si tu codes avec Cursor, Xcode reste indispensable pour le pipeline Apple : simulateurs, certificats, archives et upload App Store.",
-    tip: "Garde Xcode à jour, mais évite de changer de version en plein rush de soumission App Store.",
+      "Même si vous codez avec Cursor, Xcode reste indispensable pour le pipeline Apple : simulateurs, certificats, archives et upload App Store.",
+    tip: "Gardez Xcode à jour, mais évitez de changer de version en plein rush de soumission App Store.",
     href: "https://developer.apple.com/xcode/",
     cta: "Télécharger Xcode",
   },
@@ -51,8 +51,8 @@ const ESSENTIALS: Tool[] = [
     badge: "Backend rapide",
     role: "Auth, base de données, storage, push notifications, analytics et crash reporting.",
     why:
-      "Très bon choix pour lancer vite sans construire tout un backend. Tu peux valider ton app, tes utilisateurs et tes premières features sans perdre des semaines sur l'infra.",
-    tip: "Commence léger : Auth + Firestore + Crashlytics. Ajoute le reste seulement quand le produit en a besoin.",
+      "Très bon choix pour lancer vite sans construire tout un backend. Vous pouvez valider votre app, vos utilisateurs et vos premières features sans perdre des semaines sur l'infra.",
+    tip: "Commencez léger : Auth + Firestore + Crashlytics. Ajoutez le reste seulement quand le produit en a besoin.",
     href: "https://firebase.google.com/",
     cta: "Voir Firebase",
   },
@@ -72,7 +72,7 @@ const ESSENTIALS: Tool[] = [
     role: "Créer des visuels, scènes, images marketing et directions graphiques pour l'intérieur de l'app.",
     why:
       "Pratique pour produire vite des assets et tester une DA sans attendre un designer. Idéal pour hero images, onboarding, avatars, mockups et visuels de campagne.",
-    tip: "Utilise-le comme générateur de pistes, puis garde uniquement une direction cohérente dans toute l'app.",
+    tip: "Utilisez-le comme générateur de pistes, puis gardez uniquement une direction cohérente dans toute l'app.",
     href: "https://higgsfield.ai/",
     cta: "Voir Higgsfield",
   },
@@ -83,15 +83,15 @@ const BONUS: Tool[] = [
     name: "App Store Connect",
     badge: "Publication",
     role: "Fiches App Store, screenshots, prix, TestFlight, reviews, analytics Apple.",
-    why: "C'est ton cockpit Apple après la licence développeur.",
-    tip: "Prépare tes screenshots et mots-clés avant la fin du développement, pas après.",
+    why: "C'est votre cockpit Apple après la licence développeur.",
+    tip: "Préparez vos screenshots et mots-clés avant la fin du développement, pas après.",
   },
   {
     name: "Apple Ads",
     badge: "Acquisition",
     role: "Tester les premiers mots-clés payants directement dans l'App Store.",
     why: "Le trafic est ultra intentionniste : les gens cherchent déjà une app.",
-    tip: "Commence avec exact match sur 5 à 10 mots-clés très précis, pas en broad trop large.",
+    tip: "Commencez avec exact match sur 5 à 10 mots-clés très précis, pas en broad trop large.",
     href: "https://searchads.apple.com/",
     cta: "Voir Apple Ads",
   },
@@ -100,7 +100,7 @@ const BONUS: Tool[] = [
     badge: "Abonnements",
     role: "Gérer paywalls, abonnements, achats in-app et droits premium.",
     why: "Évite de perdre du temps sur la complexité StoreKit dès le début.",
-    tip: "Très utile si ton app a un abonnement, un essai gratuit ou plusieurs offres.",
+    tip: "Très utile si votre app a un abonnement, un essai gratuit ou plusieurs offres.",
     href: "https://www.revenuecat.com/",
     cta: "Voir RevenueCat",
   },
@@ -108,8 +108,8 @@ const BONUS: Tool[] = [
     name: "Mobbin",
     badge: "Références UI",
     role: "Explorer de vrais écrans d'apps connues pour comprendre les flows qui convertissent.",
-    why: "Plus productif que recopier au hasard : tu étudies des patterns déjà validés.",
-    tip: "Regarde onboarding, paywall, settings, empty states et flows d'upgrade.",
+    why: "Plus productif que recopier au hasard : vous étudiez des patterns déjà validés.",
+    tip: "Regardez onboarding, paywall, settings, empty states et flows d'upgrade.",
     href: "https://mobbin.com/",
     cta: "Voir Mobbin",
   },
@@ -118,7 +118,7 @@ const BONUS: Tool[] = [
     badge: "Qualité",
     role: "Détecter erreurs, crashs et lenteurs en production.",
     why: "Une app qui plante perd des reviews, du ranking et de la confiance.",
-    tip: "Installe-le avant le lancement public, pas après les premiers crashs utilisateurs.",
+    tip: "Installez-le avant le lancement public, pas après les premiers crashs utilisateurs.",
     href: "https://sentry.io/",
     cta: "Voir Sentry",
   },
@@ -126,8 +126,8 @@ const BONUS: Tool[] = [
     name: "PostHog",
     badge: "Analytics produit",
     role: "Comprendre activation, rétention, funnels et événements clés.",
-    why: "Tu dois savoir où les utilisateurs bloquent avant de refaire le design.",
-    tip: "Tracke peu mais bien : onboarding terminé, paywall vu, achat démarré, achat réussi.",
+    why: "Vous devez savoir où les utilisateurs bloquent avant de refaire le design.",
+    tip: "Suivez peu mais bien : onboarding terminé, paywall vu, achat démarré, achat réussi.",
     href: "https://posthog.com/",
     cta: "Voir PostHog",
   },
@@ -198,10 +198,10 @@ export default function TrackappLogicielsPage() {
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="trackapp-workspace-hero-kicker">Bonus utiles</p>
-            <h2 className="m-0 text-[1.45rem] font-bold tracking-tight text-[var(--dash-text)]">À ajouter selon ton niveau</h2>
+            <h2 className="m-0 text-[1.45rem] font-bold tracking-tight text-[var(--dash-text)]">À ajouter selon votre niveau</h2>
           </div>
           <p className="max-w-md text-[0.9rem] leading-relaxed text-[var(--dash-muted-light)]">
-            Pas besoin de tout installer le jour 1. Ajoute ces outils quand ils débloquent un vrai problème.
+            Pas besoin de tout installer le jour 1. Ajoutez ces outils quand ils débloquent un vrai problème.
           </p>
         </div>
 

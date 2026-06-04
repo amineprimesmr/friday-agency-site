@@ -38,7 +38,7 @@ export function TrackappDevPremiumBypassButton() {
         throw new Error(data.error || "Impossible d'activer l'accès dev.");
       }
 
-      window.location.href = data.redirect ?? "/trackapp/accueil";
+      window.location.href = data.redirect ?? "/trackapp/apptracker";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Échec du bypass dev.");
     } finally {

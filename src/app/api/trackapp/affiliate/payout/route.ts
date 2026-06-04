@@ -7,7 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe";
 
 const ERROR_MESSAGES: Record<string, string> = {
-  connect_required: "Configure d’abord ton compte bancaire (Stripe Connect).",
+  connect_required: "Configurez d’abord votre compte bancaire (Stripe Connect).",
   connect_not_ready: "Termine la configuration Stripe pour recevoir des virements.",
   below_minimum: `Solde disponible insuffisant (minimum ${AFFILIATE_MIN_PAYOUT_CENTS / 100} €).`,
   payout_record_failed: "Erreur lors de la préparation du virement.",

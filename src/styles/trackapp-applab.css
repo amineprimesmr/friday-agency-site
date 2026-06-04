@@ -1,0 +1,364 @@
+/* ── AppLAB Intelligence Report ── */
+
+.trackapp-applab-page {
+  --applab-violet: #7c3aed;
+  --applab-indigo: #4f46e5;
+  color: var(--dash-text, #0f172a);
+}
+
+.trackapp-applab-page h1,
+.trackapp-applab-page h2,
+.trackapp-applab-page h3,
+.trackapp-applab-page p,
+.trackapp-applab-page li,
+.trackapp-applab-page td,
+.trackapp-applab-page th {
+  color: inherit;
+}
+
+.trackapp-applab-hero {
+  overflow: hidden;
+  border-radius: 1.875rem;
+  border: 1px solid var(--dash-border);
+  background: linear-gradient(135deg, #faf5ff 0%, #fff 40%, #eef2ff 100%);
+  box-shadow: var(--dash-shadow-lg);
+}
+
+.trackapp-applab-hero__grid {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .trackapp-applab-hero__grid {
+    grid-template-columns: auto 1fr auto;
+    align-items: start;
+    padding: 1.75rem 2rem;
+  }
+}
+
+.trackapp-applab-verdict {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.trackapp-applab-verdict--launch {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.trackapp-applab-verdict--pivot {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.trackapp-applab-verdict--avoid {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.trackapp-applab-score {
+  display: grid;
+  place-items: center;
+  min-width: 5.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 1.25rem;
+  background: #fff;
+  border: 1px solid rgba(124, 58, 237, 0.15);
+  box-shadow: var(--dash-shadow);
+  text-align: center;
+}
+
+.trackapp-applab-score__value {
+  font-size: 1.75rem;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  color: var(--applab-violet);
+  line-height: 1;
+}
+
+.trackapp-applab-score__label {
+  margin-top: 0.25rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dash-muted-light);
+}
+
+.trackapp-applab-layout {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  .trackapp-applab-layout {
+    grid-template-columns: 220px minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.trackapp-applab-nav {
+  position: sticky;
+  top: 5.5rem;
+  display: none;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  border-radius: 1.25rem;
+  border: 1px solid var(--dash-border);
+  background: #fff;
+  box-shadow: var(--dash-shadow);
+}
+
+@media (min-width: 1024px) {
+  .trackapp-applab-nav {
+    display: flex;
+  }
+}
+
+.trackapp-applab-nav__link {
+  display: block;
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--dash-muted-light);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.trackapp-applab-nav__link:hover,
+.trackapp-applab-nav__link--active {
+  background: #f5f3ff;
+  color: #5b21b6;
+}
+
+.trackapp-applab-section {
+  scroll-margin-top: 6rem;
+  overflow: hidden;
+  border-radius: 1.75rem;
+  border: 1px solid var(--dash-border);
+  background: #fff;
+  box-shadow: var(--dash-shadow);
+}
+
+.trackapp-applab-section__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--dash-border);
+  background: linear-gradient(180deg, #fafafa, #fff);
+}
+
+.trackapp-applab-section__kicker {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--applab-violet);
+}
+
+.trackapp-applab-section__title {
+  margin: 0.15rem 0 0;
+  font-size: 1.15rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: var(--dash-text);
+}
+
+.trackapp-applab-section__body {
+  padding: 1.25rem;
+}
+
+.trackapp-applab-prose {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--dash-text);
+}
+
+.trackapp-applab-prose p {
+  margin: 0 0 0.75rem;
+}
+
+.trackapp-applab-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.trackapp-applab-list li {
+  margin-bottom: 0.35rem;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--dash-text);
+}
+
+.trackapp-applab-format-grid {
+  display: grid;
+  gap: 0.85rem;
+}
+
+@media (min-width: 640px) {
+  .trackapp-applab-format-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.trackapp-applab-format-card {
+  border-radius: 1.25rem;
+  border: 1px solid var(--dash-border);
+  background: linear-gradient(180deg, #faf5ff 0%, #fff 100%);
+  padding: 1rem;
+}
+
+.trackapp-applab-format-card__score {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.75rem;
+  background: var(--applab-violet);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.trackapp-applab-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.trackapp-applab-tab {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--dash-border);
+  background: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #475569;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.trackapp-applab-tab--active {
+  border-color: rgba(124, 58, 237, 0.25);
+  background: #f5f3ff;
+  color: #5b21b6;
+}
+
+.trackapp-applab-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.trackapp-applab-table th,
+.trackapp-applab-table td {
+  padding: 0.55rem 0.65rem;
+  border-bottom: 1px solid var(--dash-border);
+  text-align: left;
+}
+
+.trackapp-applab-table th {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dash-muted-light);
+}
+
+.trackapp-applab-error {
+  border-radius: 1.25rem;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  padding: 1rem 1.25rem;
+  color: #991b1b;
+  font-size: 0.88rem;
+}
+
+.trackapp-applab-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.25rem;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--dash-border);
+  background: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--dash-text);
+  cursor: pointer;
+}
+
+.trackapp-applab-refresh:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.trackapp-applab-axis-grid {
+  display: grid;
+  gap: 0.85rem;
+}
+
+@media (min-width: 768px) {
+  .trackapp-applab-axis-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.trackapp-applab-axis {
+  border-radius: 1rem;
+  border: 1px solid var(--dash-border);
+  background: #fafafa;
+  padding: 0.85rem 1rem;
+}
+
+.trackapp-applab-axis__title {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dash-muted-light);
+}
+
+.trackapp-applab-roadmap-item {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--dash-border);
+}
+
+.trackapp-applab-roadmap-item:last-child {
+  border-bottom: none;
+}
+
+.trackapp-applab-roadmap-item__week {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--applab-violet);
+}

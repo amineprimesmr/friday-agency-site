@@ -3,7 +3,7 @@
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { TrackappPaiementOrderForm } from "@/components/trackapp/trackapp-paiement-order-form";
+import { TrackappPaiementStripeCheckout } from "@/components/trackapp/trackapp-paiement-stripe-checkout";
 import { openTrackappStripeCheckout } from "@/lib/trackapp/stripe-payment-links";
 import { TRACKAPP_PAIEMENT_UNLOCK_ITEMS } from "@/lib/trackapp-paiement-unlock-items";
 import { getTrackappPaiementPlan, setTrackappPaiementPlan } from "@/lib/trackapp-paiement-plan-storage";
@@ -23,7 +23,7 @@ function UnlockCreditBox({
         </p>
         {priceNote ? <p className="tpl-credit-box__price-note">{priceNote}</p> : null}
       </div>
-      <p className="tpl-credit-box__title">Ce que tu débloques après achat :</p>
+      <p className="tpl-credit-box__title">Ce que vous débloquez après achat :</p>
       <ul className="tpl-credit-box__list">
         {TRACKAPP_PAIEMENT_UNLOCK_ITEMS.map((line) => (
           <li key={line} className="tpl-credit-box__list-item">
@@ -46,6 +46,23 @@ function LifetimeChip() {
           <span className="tpl-spotlight__chip-reduction-pct">{TRACKAPP_PRICING.lifetime.shortLabel}</span>
         </span>
       </span>
+    </span>
+  );
+}
+
+function GuaranteeChip() {
+  return (
+    <span className="tpl-spotlight__chip tpl-spotlight__chip--guarantee">
+      Satisfait ou remboursé · 7&nbsp;jours
+    </span>
+  );
+}
+
+function LifetimeBadges() {
+  return (
+    <span className="tpl-spotlight__head-badges">
+      <LifetimeChip />
+      <GuaranteeChip />
     </span>
   );
 }
@@ -73,8 +90,8 @@ function SpotlightOfferCheckout({
   checkoutRevealed,
   onRevealCheckout,
   directStripeLink = false,
-  country,
-  onCountryChange,
+  country: _country,
+  onCountryChange: _onCountryChange,
 }: Readonly<{
   plan: TrackappBillingPlan;
   priceAmount: string;
@@ -89,7 +106,7 @@ function SpotlightOfferCheckout({
 }>) {
   const [stripeBusy, setStripeBusy] = useState(false);
 
-  const goStripe = useCallback(async () => {
+  const goCheckout = useCallback(async () => {
     if (stripeBusy) return;
     setStripeBusy(true);
     try {
@@ -103,46 +120,31 @@ function SpotlightOfferCheckout({
     return (
       <div className="tpl-spotlight__checkout-intro">
         <UnlockCreditBox priceAmount={priceAmount} pricePeriod={pricePeriod} priceNote={priceNote} />
-        <button type="button" className="tpl-spotlight__join" onClick={goStripe} disabled={stripeBusy}>
+        <button type="button" className="tpl-spotlight__join" onClick={goCheckout} disabled={stripeBusy}>
           {stripeBusy ? "Redirection…" : "Rejoindre"}
         </button>
       </div>
     );
   }
 
-  if (checkoutReveal && !checkoutRevealed) {
-    return (
-      <div className="tpl-spotlight__checkout-intro">
-        <UnlockCreditBox priceAmount={priceAmount} pricePeriod={pricePeriod} priceNote={priceNote} />
-        <button type="button" className="tpl-spotlight__join" onClick={onRevealCheckout}>
-          Rejoindre
-        </button>
-      </div>
-    );
-  }
-
-  if (checkoutReveal && checkoutRevealed) {
-    return (
-      <TrackappPaiementOrderForm
-        plan={plan}
-        country={country}
-        onCountryChange={onCountryChange}
-        className="tpl-spotlight__order tpl-spotlight__order--revealed"
-        hideWalletHero
-      />
-    );
-  }
+  const showExpress = !checkoutReveal || !checkoutRevealed;
+  const showCard = !checkoutReveal || checkoutRevealed;
 
   return (
-    <>
+    <div className="tpl-spotlight__checkout-intro">
       <UnlockCreditBox priceAmount={priceAmount} pricePeriod={pricePeriod} priceNote={priceNote} />
-      <TrackappPaiementOrderForm
+      <TrackappPaiementStripeCheckout
         plan={plan}
-        country={country}
-        onCountryChange={onCountryChange}
-        className="tpl-spotlight__order"
+        showExpress={showExpress}
+        showCard={showCard}
+        className={checkoutRevealed ? "tpl-spotlight__order tpl-spotlight__order--revealed" : "tpl-spotlight__order"}
       />
-    </>
+      {checkoutReveal && !checkoutRevealed ? (
+        <button type="button" className="tpl-spotlight__pay-card-link" onClick={onRevealCheckout}>
+          ou payer par carte
+        </button>
+      ) : null}
+    </div>
   );
 }
 
@@ -174,8 +176,15 @@ export function TrackappPaiementPlanSpotlightCards({
   );
 }
 
-const SWIPE_THRESHOLD_PX = 44;
-const SWIPE_AXIS_LOCK_PX = 14;
+const SCROLL_SYNC_MS = 90;
+
+function planIndexFromCarouselSlide(slideIndex: number): 0 | 1 {
+  return slideIndex === 0 ? 1 : 0;
+}
+
+function carouselIndexFromPlanIndex(planIndex: 0 | 1): number {
+  return planIndex === 0 ? 1 : 0;
+}
 
 function PageSpotlightCarousel({
   className,
@@ -191,7 +200,7 @@ function PageSpotlightCarousel({
   /** 0 = à vie, 1 = mensuel */
   const [index, setIndex] = useState(0);
   const viewportRef = useRef<HTMLDivElement>(null);
-  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const programmaticScrollRef = useRef(false);
   const [internalCheckoutRevealed, setInternalCheckoutRevealed] = useState(false);
   const isCheckoutControlled = checkoutRevealedProp !== undefined && onCheckoutRevealedChange !== undefined;
   const checkoutRevealed = isCheckoutControlled ? checkoutRevealedProp : internalCheckoutRevealed;
@@ -216,6 +225,24 @@ function PageSpotlightCarousel({
     setTrackappPaiementPlan("monthly");
   }, []);
 
+  const carouselIndex = carouselIndexFromPlanIndex(index as 0 | 1);
+
+  const scrollToCarouselIndex = useCallback(
+    (targetIndex: number, behavior: ScrollBehavior = "smooth") => {
+      const viewport = viewportRef.current;
+      if (!viewport || checkoutRevealed) return;
+      const slides = viewport.querySelectorAll<HTMLElement>(".tpl-spotlight-carousel__slide");
+      const target = slides[targetIndex];
+      if (!target) return;
+      programmaticScrollRef.current = true;
+      target.scrollIntoView({ inline: "center", block: "nearest", behavior });
+      window.setTimeout(() => {
+        programmaticScrollRef.current = false;
+      }, behavior === "smooth" ? 480 : 60);
+    },
+    [checkoutRevealed],
+  );
+
   const syncFromStore = useCallback(() => {
     setIndex(getTrackappPaiementPlan() === "lifetime" ? 0 : 1);
   }, []);
@@ -231,57 +258,50 @@ function PageSpotlightCarousel({
   }, [index, resetCheckout]);
 
   useEffect(() => {
+    scrollToCarouselIndex(carouselIndex);
+  }, [carouselIndex, scrollToCarouselIndex]);
+
+  useEffect(() => {
     const viewport = viewportRef.current;
     if (!viewport) return;
 
-    const onTouchStart = (event: TouchEvent) => {
-      if (checkoutRevealed) return;
-      const touch = event.touches[0];
-      if (!touch) return;
-      touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    let scrollTimer: number | undefined;
+
+    const onScroll = () => {
+      if (programmaticScrollRef.current || checkoutRevealed) return;
+      if (scrollTimer) window.clearTimeout(scrollTimer);
+      scrollTimer = window.setTimeout(() => {
+        const slides = Array.from(viewport.querySelectorAll<HTMLElement>(".tpl-spotlight-carousel__slide"));
+        if (slides.length < 2) return;
+
+        const viewportCenter = viewport.scrollLeft + viewport.clientWidth / 2;
+        let closestSlide = 0;
+        let minDistance = Number.POSITIVE_INFINITY;
+
+        slides.forEach((slide, slideIndex) => {
+          const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
+          const distance = Math.abs(slideCenter - viewportCenter);
+          if (distance < minDistance) {
+            minDistance = distance;
+            closestSlide = slideIndex;
+          }
+        });
+
+        const planIndex = planIndexFromCarouselSlide(closestSlide);
+        if (planIndex === 0 && index !== 0) goLifetime();
+        else if (planIndex === 1 && index !== 1) goMonthly();
+      }, SCROLL_SYNC_MS);
     };
 
-    const onTouchMove = (event: TouchEvent) => {
-      const start = touchStartRef.current;
-      if (!start || checkoutRevealed) return;
-      const touch = event.touches[0];
-      if (!touch) return;
-      const dx = touch.clientX - start.x;
-      const dy = touch.clientY - start.y;
-      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > SWIPE_AXIS_LOCK_PX) {
-        event.preventDefault();
-      }
-    };
-
-    const onTouchEnd = (event: TouchEvent) => {
-      const start = touchStartRef.current;
-      touchStartRef.current = null;
-      if (!start || checkoutRevealed) return;
-      const touch = event.changedTouches[0];
-      if (!touch) return;
-      const dx = touch.clientX - start.x;
-      const dy = touch.clientY - start.y;
-      if (Math.abs(dy) > Math.abs(dx) || Math.abs(dx) < SWIPE_THRESHOLD_PX) return;
-      if (dx < 0 && index === 0) goMonthly();
-      else if (dx > 0 && index === 1) goLifetime();
-    };
-
-    viewport.addEventListener("touchstart", onTouchStart, { passive: true });
-    viewport.addEventListener("touchmove", onTouchMove, { passive: false });
-    viewport.addEventListener("touchend", onTouchEnd, { passive: true });
-    viewport.addEventListener("touchcancel", onTouchEnd, { passive: true });
-
+    viewport.addEventListener("scroll", onScroll, { passive: true });
     return () => {
-      viewport.removeEventListener("touchstart", onTouchStart);
-      viewport.removeEventListener("touchmove", onTouchMove);
-      viewport.removeEventListener("touchend", onTouchEnd);
-      viewport.removeEventListener("touchcancel", onTouchEnd);
+      viewport.removeEventListener("scroll", onScroll);
+      if (scrollTimer) window.clearTimeout(scrollTimer);
     };
   }, [checkoutRevealed, goLifetime, goMonthly, index]);
 
   const [country, setCountry] = useState("FR");
 
-  const carouselIndex = index === 0 ? 1 : 0;
   const showMonthlySlide = !checkoutReveal || !checkoutRevealed || index === 1;
   const showLifetimeSlide = !checkoutReveal || !checkoutRevealed || index === 0;
 
@@ -346,7 +366,7 @@ function PageSpotlightCarousel({
                 <div className="tpl-spotlight__content">
                   <div className="tpl-spotlight__head">
                     <p className="tpl-spotlight__name">TRACKAPP</p>
-                    <LifetimeChip />
+                    <LifetimeBadges />
                   </div>
                   <p className="tpl-spotlight__desc">{lifetime.cardDesc}</p>
                   <SpotlightOfferCheckout
@@ -443,7 +463,7 @@ function ModalSpotlightGrid({ className }: Readonly<{ className?: string }>) {
               <div className="tpl-spotlight__content">
                 <div className="tpl-spotlight__head">
                   <p className="tpl-spotlight__name">TRACKAPP</p>
-                  <LifetimeChip />
+                  <LifetimeBadges />
                 </div>
                 <p className="tpl-spotlight__desc">{lifetime.cardDesc}</p>
                 <SpotlightOfferCheckout

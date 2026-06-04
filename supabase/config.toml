@@ -1,0 +1,20 @@
+# Projet Trackapp (lié via `supabase link --project-ref djdelmktmnjaybvjcudm`)
+project_id = "djdelmktmnjaybvjcudm"
+
+[auth]
+enabled = true
+site_url = "https://trackapp.fr"
+additional_redirect_urls = [
+  "https://trackapp.fr/trackapp/**",
+  "https://www.trackapp.fr/trackapp/**",
+  "https://trackapp.fr/trackapp/auth/callback",
+  "http://127.0.0.1:3000/trackapp/auth/callback",
+  "http://localhost:3000/trackapp/auth/callback",
+]
+
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
+
+[auth.email]
+enable_confirmations = true

@@ -14,13 +14,13 @@ export const PROMO_SLIDES = [
   {
     badge: "Nouveau",
     title: "XCODE EXPRESS",
-    copy: "Passe vite du squelette fonctionnel aux écrans clés sans te perdre dans la doc.",
+    copy: "Passez vite du squelette fonctionnel aux écrans clés sans vous perdre dans la doc.",
     label: "Xcode express",
   },
   {
     badge: "Avec données",
     title: "TRACKER ADS",
-    copy: "Inspire-toi avec les creatives et tendances depuis le tracker intégré.",
+    copy: "Inspirez-vous avec les creatives et tendances depuis le tracker intégré.",
     label: "Tracker Ads",
   },
   {
@@ -184,10 +184,9 @@ export function PromoPanel({
 export function TaAuthLegalFooter() {
   return (
     <p className="ta-auth-legal">
-      En continuant, je confirme avoir lu la{" "}
-      <Link href="/trackapp/legal/privacy">Politique de confidentialité</Link>{" "}
-      et j&apos;accepte les <Link href="/trackapp/legal/terms">Conditions d&apos;utilisation</Link>.
-      Je confirme également avoir au moins 18 ans.
+      En continuant, vous acceptez les{" "}
+      <Link href="/trackapp/legal/terms">conditions d&apos;utilisation</Link> et la{" "}
+      <Link href="/trackapp/legal/privacy">politique de confidentialité</Link>.
     </p>
   );
 }

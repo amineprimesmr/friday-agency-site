@@ -8,11 +8,15 @@ export function TrackappAppFavoriteRow({
   appId,
   initialFavorite,
   favoritesEnabled,
+  appName,
+  artworkUrl,
   children,
 }: Readonly<{
   appId: string;
   initialFavorite: boolean;
   favoritesEnabled: boolean;
+  appName?: string;
+  artworkUrl?: string | null;
   children: ReactNode;
 }>) {
   return (
@@ -20,7 +24,13 @@ export function TrackappAppFavoriteRow({
       <div className="min-w-0 flex-1">{children}</div>
       {favoritesEnabled ? (
         <div className="flex shrink-0 items-start pt-3 pr-0.5">
-          <TrackappAppFavoriteButton appId={appId} initialFavorite={initialFavorite} enabled={favoritesEnabled} />
+          <TrackappAppFavoriteButton
+            appId={appId}
+            initialFavorite={initialFavorite}
+            enabled={favoritesEnabled}
+            appName={appName}
+            artworkUrl={artworkUrl}
+          />
         </div>
       ) : null}
     </div>

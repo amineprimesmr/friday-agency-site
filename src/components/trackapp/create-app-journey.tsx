@@ -41,9 +41,9 @@ const MODULES: JourneyModule[] = [
     ],
     actions: [
       "Ecris 10 idees d'apps sans juger.",
-      "Choisis 3 idees avec une cible claire.",
+      "Choisissez 3 idees avec une cible claire.",
       "Pour chaque idee, note le probleme, la frequence d'utilisation et le potentiel de paiement.",
-      "Garde l'idee la plus simple a expliquer en une phrase.",
+      "Gardez l'idee la plus simple a expliquer en une phrase.",
     ],
     deliverables: [
       "Nom provisoire de l'app.",
@@ -58,7 +58,7 @@ const MODULES: JourneyModule[] = [
       "J'ai choisi un modele business provisoire.",
     ],
     prompt:
-      "Agis comme un product strategist iOS. Aide-moi a transformer cette idee en concept d'app rentable. Donne-moi : cible, probleme, promesse, MVP, risque principal, modele economique, et 5 noms possibles. Idee : [COLLE TON IDEE].",
+      "Agis comme un product strategist iOS. Aide-moi a transformer cette idee en concept d'app rentable. Donne-moi : cible, probleme, promesse, MVP, risque principal, modele economique, et 5 noms possibles. Idee : [COLLEZ VOTRE IDEE].",
     media: [
       {
         type: "image",
@@ -68,7 +68,7 @@ const MODULES: JourneyModule[] = [
       {
         type: "video",
         title: "Mini-demo de recherche d'idee",
-        note: "Video pertinente : toi qui pars d'une niche et remplis la fiche en direct.",
+        note: "Video pertinente : vous qui partez d'une niche et remplissez la fiche en direct.",
       },
     ],
   },
@@ -77,7 +77,7 @@ const MODULES: JourneyModule[] = [
     eyebrow: "Recherche",
     title: "Analyser le marche App Store",
     promise: "Comprendre ce qui existe deja pour ne pas coder a l'aveugle.",
-    outcome: "3 concurrents, leurs forces/faiblesses, et ton angle de differenciation.",
+    outcome: "3 concurrents, leurs forces/faiblesses, et votre angle de differenciation.",
     tools: ["Tracker App Store", "App Store", "Apple Ads"],
     lessons: [
       "Un concurrent qui gagne de l'argent est une preuve de marche, pas une menace.",
@@ -85,10 +85,10 @@ const MODULES: JourneyModule[] = [
       "Les reviews negatives donnent les meilleures idees de features.",
     ],
     actions: [
-      "Cherche 5 mots-cles autour de ton idee.",
-      "Ouvre 10 apps similaires dans le Tracker.",
-      "Note leur prix, leurs notes, leurs screenshots, leur promesse et leurs reviews negatives.",
-      "Garde 3 concurrents directs et 3 angles pour faire mieux.",
+      "Cherchez 5 mots-cles autour de votre idee.",
+      "Ouvrez 10 apps similaires dans le Tracker.",
+      "Notez leur prix, leurs notes, leurs screenshots, leur promesse et leurs reviews negatives.",
+      "Gardez 3 concurrents directs et 3 angles pour faire mieux.",
     ],
     deliverables: [
       "Liste de 3 concurrents.",
@@ -126,11 +126,11 @@ const MODULES: JourneyModule[] = [
     lessons: [
       "Cursor est l'atelier principal : il comprend le code et modifie plusieurs fichiers.",
       "Xcode reste indispensable pour compiler et envoyer sur TestFlight.",
-      "Le compte Apple Developer coute 99 $/an, mais un credit promo Apple Ads d'environ 100 $ peut compenser le depart si tu es eligible.",
+      "Le compte Apple Developer coute 99 $/an, mais un credit promo Apple Ads d'environ 100 $ peut compenser le depart si vous etes eligible.",
     ],
     actions: [
       "Installer Xcode depuis Apple.",
-      "Installer Cursor et connecter ton compte IA.",
+      "Installer Cursor et connecter votre compte IA.",
       "Creer ou preparer le compte Apple Developer.",
       "Creer un projet Firebase vide.",
       "Creer un compte RevenueCat si l'app aura un abonnement.",
@@ -170,7 +170,7 @@ const MODULES: JourneyModule[] = [
     outcome: "Moodboard, palette, style, references d'ecrans et assets initiaux.",
     tools: ["Pinterest", "Mobbin", "Higgsfield", "Ressources Trackapp"],
     lessons: [
-      "L'IA code mieux quand tu lui donnes une direction visuelle precise.",
+      "L'IA code mieux quand vous lui donnez une direction visuelle precise.",
       "Un bon design system V1 tient en quelques couleurs, espacements, cards et boutons.",
       "Les references doivent guider, pas etre copiees pixel par pixel.",
     ],
@@ -341,7 +341,7 @@ const MODULES: JourneyModule[] = [
     outcome: "Auth, base de donnees, regles et donnees persistantes.",
     tools: ["Firebase", "Cursor", "Xcode"],
     lessons: [
-      "Commence par le minimum : auth + collection principale.",
+      "Commencez par le minimum : auth + collection principale.",
       "Les regles de securite sont aussi importantes que l'UI.",
       "Les donnees mock doivent etre remplacees progressivement, pas en un seul big bang.",
     ],
@@ -462,7 +462,7 @@ const MODULES: JourneyModule[] = [
     id: "store",
     eyebrow: "Publication",
     title: "Preparer l'App Store",
-    promise: "Transformer ton build en fiche qui convertit.",
+    promise: "Transformer votre build en fiche qui convertit.",
     outcome: "Build TestFlight, screenshots, description, mots-cles, privacy labels.",
     tools: ["App Store Connect", "Xcode", "Higgsfield", "Apple Developer"],
     lessons: [
@@ -615,7 +615,7 @@ export function CreateAppJourney() {
           <div>
             <h1 className="trackapp-workspace-hero-title">Créer mon app de A à Z</h1>
             <p className="trackapp-workspace-hero-desc max-w-[72ch]">
-              Avance module par module, construis l&apos;app en direct avec l&apos;IA, valide chaque livrable, puis débloque la suite.
+              Avancez module par module, construisez l&apos;app en direct avec l&apos;IA, validez chaque livrable, puis débloquez la suite.
             </p>
           </div>
           <div className="rounded-[22px] border border-[var(--dash-border)] bg-white px-5 py-4 shadow-[var(--dash-shadow)]">
@@ -692,7 +692,7 @@ export function CreateAppJourney() {
 
             <section className="grid gap-4 lg:grid-cols-2">
               <div className="rounded-[22px] border border-[var(--dash-border)] p-5">
-                <h3 className="m-0 text-[1rem] font-bold text-[var(--dash-text)]">Ce que tu dois comprendre</h3>
+                <h3 className="m-0 text-[1rem] font-bold text-[var(--dash-text)]">Ce que vous devez comprendre</h3>
                 <ul className="mt-4 space-y-3 pl-0">
                   {active.lessons.map((item) => (
                     <li key={item} className="flex gap-3 text-[0.92rem] leading-relaxed text-[var(--dash-muted-light)]">
@@ -809,8 +809,8 @@ export function CreateAppJourney() {
       </div>
 
       <div className="mt-8 rounded-[22px] border border-[var(--dash-border)] bg-white p-5 text-[0.9rem] leading-relaxed text-[var(--dash-muted-light)] shadow-[var(--dash-shadow)]">
-        Ce parcours est volontairement verrouillé : l&apos;objectif n&apos;est pas de lire une formation, mais de construire ton app à chaque module.
-        Tu peux compléter la page <Link href="/trackapp/logiciels" className="font-semibold text-[var(--dash-text)] underline-offset-4 hover:underline">Logiciels</Link> en parallèle.
+        Ce parcours est volontairement verrouillé : l&apos;objectif n&apos;est pas de lire une formation, mais de construire votre app à chaque module.
+        Vous pouvez compléter la page <Link href="/trackapp/logiciels" className="font-semibold text-[var(--dash-text)] underline-offset-4 hover:underline">Logiciels</Link> en parallèle.
       </div>
     </div>
   );

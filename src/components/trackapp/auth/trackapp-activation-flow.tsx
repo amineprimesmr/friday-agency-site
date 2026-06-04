@@ -15,6 +15,7 @@ import {
   TrackappLimeLogo,
 } from "@/components/trackapp/auth/trackapp-auth-shared";
 import { createClient } from "@/lib/supabase/client";
+import { syncOnboardingDraftToProfile } from "@/lib/trackapp-onboarding/local-draft";
 import { trackappPlanDisplayLabel, type TrackappBillingPlan } from "@/lib/trackapp/pricing";
 
 type CheckoutInfo = {
@@ -67,10 +68,11 @@ function ActivationExperienceInner() {
     return `${origin}/trackapp/auth/callback?next=${nextEnc}`;
   }, [firstName, sessionId]);
 
-  const finishToAccueil = useCallback(() => {
+  const finishToAccueil = useCallback(async () => {
     setStep("done");
+    await syncOnboardingDraftToProfile();
     router.refresh();
-    router.push("/trackapp/accueil");
+    router.push("/trackapp/apptracker");
   }, [router]);
 
   useEffect(() => {
@@ -104,7 +106,7 @@ function ActivationExperienceInner() {
             body: JSON.stringify({ session_id: sessionId, first_name: returnedFirstName }),
           });
           const linkData = (await linkRes.json().catch(() => ({}))) as { error?: string };
-          if (!linkRes.ok) throw new Error(linkData.error || "Impossible de lier ton paiement.");
+          if (!linkRes.ok) throw new Error(linkData.error || "Impossible de lier votre paiement.");
           finishToAccueil();
           return;
         }
@@ -122,7 +124,7 @@ function ActivationExperienceInner() {
             finishToAccueil();
             return;
           }
-          setError(linkData.error ?? "Connecte-toi avec l'e-mail utilisé lors du paiement.");
+          setError(linkData.error ?? "Connectez-vous avec l'e-mail utilisé lors du paiement.");
           setStep("account");
           return;
         }
@@ -142,7 +144,7 @@ function ActivationExperienceInner() {
 
   const oauthGoogle = useCallback(async () => {
     if (!sb || firstName.trim().length < 2) {
-      setError("Indique ton prénom avant de continuer avec Google.");
+      setError("Indiquez votre prénom avant de continuer avec Google.");
       return;
     }
     setBusy(true);
@@ -176,7 +178,7 @@ function ActivationExperienceInner() {
       });
       const data = (await res.json()) as { error?: string; email?: string };
       if (res.status === 409) {
-        setError(data.error ?? "Compte existant — connecte-toi.");
+        setError(data.error ?? "Compte existant — connectez-vous.");
         return;
       }
       if (!res.ok) throw new Error(data.error || "Création du compte impossible.");
@@ -228,7 +230,7 @@ function ActivationExperienceInner() {
               >
                 <div className="ta-activation-spinner" aria-hidden />
                 <p className="ta-activation-stage__label">
-                  {step === "linking" ? "Finalisation de ton compte…" : "Vérification du paiement…"}
+                  {step === "linking" ? "Finalisation de votre compte…" : "Vérification du paiement…"}
                 </p>
               </motion.div>
             : step === "celebrate" ?
@@ -252,7 +254,7 @@ function ActivationExperienceInner() {
                 </motion.div>
                 <h1 className="ta-auth-headline">Paiement confirmé</h1>
                 <p className="ta-auth-lead">
-                  {checkout ? planLabel(checkout.plan) : "Trackapp"} activé — il ne reste qu&apos;à créer ton compte.
+                  {checkout ? planLabel(checkout.plan) : "Trackapp"} activé — il ne reste qu&apos;à créer votre compte.
                 </p>
               </motion.div>
             : step === "error" ?
@@ -275,7 +277,7 @@ function ActivationExperienceInner() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={reduce ? { duration: 0.15 } : { type: "spring", damping: 26, stiffness: 300 }}
                 >
-                  <h1 className="ta-auth-headline">Crée ton compte</h1>
+                  <h1 className="ta-auth-headline">Créez votre compte</h1>
                   <p className="ta-auth-lead">
                     Dernière étape pour accéder à Trackapp
                     {checkout?.email_masked ? ` · ${checkout.email_masked}` : ""}.
@@ -287,7 +289,7 @@ function ActivationExperienceInner() {
                   <input
                     id="ta-act-firstname"
                     className="ta-auth-input ta-activation-input"
-                    placeholder="Ton prénom"
+                    placeholder="Votre prénom"
                     autoComplete="given-name"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}

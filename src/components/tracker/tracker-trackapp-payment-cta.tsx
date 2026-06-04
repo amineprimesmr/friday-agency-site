@@ -4,9 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
+import { TRACKAPP_LANDING_PATH } from "@/lib/trackapp-landing-paths";
 import { cn } from "@/lib/utils";
-
-const PAYMENT_HREF = "/trackapp/paiement";
 
 export function TrackerTrackappPaymentCta({
   className,
@@ -18,11 +17,11 @@ export function TrackerTrackappPaymentCta({
   const router = useRouter();
 
   useEffect(() => {
-    router.prefetch(PAYMENT_HREF);
+    router.prefetch(TRACKAPP_LANDING_PATH);
   }, [router]);
 
   return (
-    <Link href={PAYMENT_HREF} className={cn(className, "tracker-hero-liquidglass--instant")} prefetch>
+    <Link href={TRACKAPP_LANDING_PATH} className={cn(className, "tracker-hero-liquidglass--instant")} prefetch>
       {children}
     </Link>
   );

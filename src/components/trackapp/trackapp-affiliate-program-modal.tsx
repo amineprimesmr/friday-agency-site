@@ -57,8 +57,8 @@ export function TrackappAffiliateProgramModal({
           Affiliation Trackapp
         </h2>
         <p className="mt-3 text-[0.92rem] leading-relaxed text-slate-600">
-          Ton lien offre <strong className="text-slate-900">−40&nbsp;%</strong> sur l&apos;abonnement aux personnes qui
-          passent par toi, et tu gagnes <strong className="text-slate-900">20&nbsp;€ de MRR</strong> par filleul actif
+          Votre lien offre <strong className="text-slate-900">−40&nbsp;%</strong> sur l&apos;abonnement aux personnes qui
+          passent par vous, et vous gagnez <strong className="text-slate-900">20&nbsp;€ de MRR</strong> par filleul actif
           chaque mois.
         </p>
         <Link

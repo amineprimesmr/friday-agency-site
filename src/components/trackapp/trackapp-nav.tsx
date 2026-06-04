@@ -24,7 +24,7 @@ export function TrackappNav({
           {loggedIn ? (
             <>
               <span className="hidden max-w-[12rem] truncate text-white/45 sm:inline">{email ?? ""}</span>
-              <Link href="/trackapp/accueil" className="rounded-full px-4 py-2 text-violet-200 transition hover:bg-white/[0.05]">
+              <Link href="/trackapp/apptracker" className="rounded-full px-4 py-2 text-violet-200 transition hover:bg-white/[0.05]">
                 Accueil
               </Link>
               <Link href={signOutHref} className="rounded-full border border-white/12 px-4 py-2 text-white/80 hover:bg-white/[0.04]">

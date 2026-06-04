@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { estimateMonthlyDownloads, type AppEntry, type CountryCode } from "@/lib/apple-charts";
+import type { AppEntry, CountryCode } from "@/lib/apple-charts";
 
 type Props = {
   appName: string;
@@ -62,7 +62,7 @@ export function EmbedSimilarShell({
                 )}
               </span>
               <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-white/88">{app.name}</span>
-              <span className="shrink-0 text-[11px] tabular-nums text-white/40">{estimateMonthlyDownloads(app.rank, country)}</span>
+              <span className="shrink-0 font-mono text-[11px] tabular-nums text-white/40">#{app.rank}</span>
             </a>
           </li>
         ))}

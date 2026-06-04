@@ -7,13 +7,9 @@ import type { CountryCode } from "@/lib/apple-charts";
 export async function TrackappOfficialPresenceSection({
   app,
   country,
-  initialFavorite,
-  favoritesEnabled,
 }: {
   app: AppDetail;
   country: CountryCode;
-  initialFavorite: boolean;
-  favoritesEnabled: boolean;
 }) {
   const presence = await buildOfficialBrandPresenceContext(app);
   const instagramUrl = presence.officialLinks.instagram.validated ? presence.officialLinks.instagram.url : null;
@@ -25,8 +21,6 @@ export async function TrackappOfficialPresenceSection({
       <TrackappOfficialPresencePanel
         appId={app.id}
         appName={app.name}
-        initialFavorite={initialFavorite}
-        favoritesEnabled={favoritesEnabled}
         officialLinks={presence.officialLinks}
         profiles={presence.socialProfiles}
         sources={presence.sources}

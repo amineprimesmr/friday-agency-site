@@ -9,6 +9,9 @@ export function TrackappFidelitySidebar(
     onNavigate?: () => void;
     email?: string;
     signOutHref?: string;
+    loggedIn?: boolean;
+    collapsed?: boolean;
+    onToggleCollapse?: () => void;
   }>,
 ) {
   return <TrackappLabSidebar {...props} />;

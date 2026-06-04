@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
-/** Hub favoris → liste apps par défaut. */
+import { TRACKAPP_LANDING_PATH } from "@/lib/trackapp-landing-paths";
+
 export default function TrackappFavorisIndexPage() {
-  redirect("/trackapp/favoris/apps");
+  redirect(TRACKAPP_LANDING_PATH);
 }

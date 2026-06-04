@@ -1,0 +1,139 @@
+.trackapp-fav-btn {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.trackapp-fav-btn__button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 14px;
+  border: 1px solid rgb(226 232 240);
+  background: #fff;
+  color: rgb(100 116 139);
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.06);
+  transition:
+    transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.trackapp-fav-btn__icon {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.trackapp-fav-btn__button--page {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.trackapp-fav-btn__button--page .trackapp-fav-btn__icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.trackapp-fav-btn__button:hover:not(:disabled) {
+  border-color: rgb(251 191 36 / 0.55);
+  color: rgb(217 119 6);
+  background: rgb(255 251 235);
+}
+
+.trackapp-fav-btn__button--active {
+  border-color: rgb(251 191 36 / 0.65);
+  background: linear-gradient(145deg, rgb(255 251 235), rgb(254 243 199 / 0.75));
+  color: rgb(180 83 9);
+  box-shadow:
+    0 0 0 3px rgb(251 191 36 / 0.14),
+    0 8px 20px rgb(245 158 11 / 0.18);
+}
+
+.trackapp-fav-btn__button--pop {
+  animation: trackapp-fav-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.trackapp-fav-btn__ring {
+  pointer-events: none;
+  position: absolute;
+  inset: -4px;
+  border-radius: 18px;
+  border: 2px solid rgb(251 191 36 / 0.55);
+  opacity: 0;
+}
+
+.trackapp-fav-btn__button--pop .trackapp-fav-btn__ring {
+  animation: trackapp-fav-ring 0.65s ease-out;
+}
+
+.trackapp-fav-btn__toast {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 0.45rem);
+  z-index: 30;
+  white-space: nowrap;
+  border-radius: 999px;
+  border: 1px solid rgb(167 243 208);
+  background: rgb(236 253 245);
+  padding: 0.28rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgb(6 95 70);
+  box-shadow: 0 6px 18px rgb(16 185 129 / 0.12);
+  animation: trackapp-fav-toast 2.2s ease forwards;
+}
+
+@keyframes trackapp-fav-pop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes trackapp-fav-ring {
+  0% {
+    opacity: 0.85;
+    transform: scale(0.92);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+
+@keyframes trackapp-fav-toast {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  12% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  78% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trackapp-fav-btn__button--pop,
+  .trackapp-fav-btn__button--pop .trackapp-fav-btn__ring,
+  .trackapp-fav-btn__toast {
+    animation: none;
+  }
+}

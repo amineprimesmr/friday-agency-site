@@ -6,7 +6,8 @@ import { formatShowcaseLastUpdatedLine } from "@/lib/tracker-showcase-last-updat
 import { cn } from "@/lib/utils";
 import "@/styles/build-next-showcase.css";
 
-function ShowcaseLastUpdatedRow({ className }: { className?: string }) {
+/** Sous-ligne date/heure (showcase vidéos) — réutilisable hors `ShowcaseHeroHeader`. */
+export function ShowcaseLastUpdatedSubline({ className }: { className?: string }) {
   const [line, setLine] = useState("");
 
   useEffect(() => {
@@ -40,7 +41,9 @@ export type ShowcaseHeroHeaderProps = {
    * Sous-le-titre après le titre : date dynamique (showcase vidéos) ou rythme éditorial (grille Tracker).
    * @default "last-updated"
    */
-  subFooter?: "last-updated" | "weekly";
+  subFooter?: "last-updated" | "weekly" | "none";
+  /** Courte description sous le titre (style intro section). */
+  description?: string;
   /** Place la ligne sous-footer au-dessus du titre (ex. « Dernière mise à jour » avant le H2). */
   subFooterPlacement?: "below" | "above";
   /** Ruban pleine viewport comme sous le hero tracker */
@@ -50,6 +53,8 @@ export type ShowcaseHeroHeaderProps = {
   /** Libellé entre les crochets (espaces inclus pour le mono), défaut APPTRACKER */
   badgeLabel?: string;
   align?: "left" | "center";
+  /** Classes additionnelles sur le `<h2>` titre. */
+  titleClassName?: string;
   /** Classes additionnelles sur le `<header>` (ex. compact vertical). */
   className?: string;
 };
@@ -60,19 +65,21 @@ export function ShowcaseHeroHeader({
   tagline,
   subFooter = "last-updated",
   subFooterPlacement = "below",
+  description,
   bleed = true,
   showBracketBadge = true,
   badgeLabel = " APPTRACKER ",
   align = "left",
+  titleClassName,
   className,
 }: ShowcaseHeroHeaderProps) {
   const subAboveClass = subFooterPlacement === "above" ? "build-next-hero-title__sub--above-title" : undefined;
 
   const subRow =
-    subFooter === "weekly" ? (
+    subFooter === "none" ? null : subFooter === "weekly" ? (
       <ShowcaseWeeklySublineRow className={subAboveClass} />
     ) : (
-      <ShowcaseLastUpdatedRow className={subAboveClass} />
+      <ShowcaseLastUpdatedSubline className={subAboveClass} />
     );
 
   return (
@@ -99,9 +106,11 @@ export function ShowcaseHeroHeader({
 
         {subFooterPlacement === "above" ? subRow : null}
 
-        <h2 id={headingId} className="build-next-hero-title">
+        <h2 id={headingId} className={cn("build-next-hero-title", titleClassName)}>
           {title}
         </h2>
+
+        {description ? <p className="build-next-hero-description">{description}</p> : null}
 
         {tagline ? <p className="build-next-hero-tagline">{tagline}</p> : null}
 

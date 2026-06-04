@@ -1,0 +1,219 @@
+/* ── Trackapp AI — analyse progressive fiche app ── */
+
+.trackapp-analysis-root {
+  --ta-ai-violet: #7c3aed;
+  --ta-ai-indigo: #4f46e5;
+  --ta-ai-glow: rgba(124, 58, 237, 0.14);
+}
+
+.trackapp-analysis-status {
+  position: sticky;
+  top: 0.75rem;
+  z-index: 20;
+  margin-bottom: 1rem;
+  pointer-events: none;
+}
+
+.trackapp-analysis-status__inner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  overflow: hidden;
+  border-radius: 999px;
+  border: 1px solid rgba(124, 58, 237, 0.18);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.97) 0%, rgba(248, 250, 255, 0.98) 100%);
+  padding: 0.55rem 0.85rem 0.55rem 0.65rem;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset,
+    0 8px 28px var(--ta-ai-glow),
+    var(--dash-shadow);
+  backdrop-filter: blur(12px);
+}
+
+.trackapp-analysis-status__icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--ta-ai-violet), var(--ta-ai-indigo));
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+
+.trackapp-analysis-status__icon::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  border: 1px solid rgba(124, 58, 237, 0.35);
+  animation: ta-ai-pulse-ring 2s ease-out infinite;
+}
+
+.trackapp-analysis-status__icon--done {
+  background: linear-gradient(135deg, #059669, #10b981);
+}
+
+.trackapp-analysis-status__icon--done::after {
+  display: none;
+}
+
+.trackapp-analysis-status__body {
+  min-width: 0;
+  flex: 1;
+}
+
+.trackapp-analysis-status__kicker {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #7c3aed;
+}
+
+.trackapp-analysis-status__label {
+  margin: 0.1rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--dash-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trackapp-analysis-status__progress {
+  display: flex;
+  align-items: center;
+  gap: 0.28rem;
+  flex-shrink: 0;
+}
+
+.trackapp-analysis-status__dot {
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 999px;
+  background: #e2e8f0;
+  transition: background 0.35s ease, transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.trackapp-analysis-status__dot--active {
+  background: var(--ta-ai-violet);
+  transform: scale(1.15);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.18);
+}
+
+.trackapp-analysis-status__dot--done {
+  background: #10b981;
+}
+
+/* Skeleton bloc analyse */
+.trackapp-analysis-block {
+  position: relative;
+  overflow: hidden;
+}
+
+.trackapp-analysis-block__scan::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    rgba(124, 58, 237, 0.07) 48%,
+    rgba(79, 70, 229, 0.1) 52%,
+    transparent 62%
+  );
+  transform: translateX(-120%);
+  animation: ta-ai-scan 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.trackapp-analysis-block__header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(124, 58, 237, 0.14);
+  background: linear-gradient(135deg, rgba(245, 243, 255, 0.95), rgba(238, 242, 255, 0.85));
+}
+
+.trackapp-analysis-block__spinner {
+  position: relative;
+  width: 1.1rem;
+  height: 1.1rem;
+  flex-shrink: 0;
+}
+
+.trackapp-analysis-block__spinner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  border: 2px solid rgba(124, 58, 237, 0.22);
+  border-top-color: #7c3aed;
+  animation: ta-spin 0.75s linear infinite;
+}
+
+.trackapp-analysis-block__title {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #5b21b6;
+}
+
+.trackapp-analysis-shimmer {
+  border-radius: 0.5rem;
+  background: linear-gradient(90deg, #f1f5f9 0%, #e8edf5 45%, #f8fafc 55%, #f1f5f9 100%);
+  background-size: 220% 100%;
+  animation: ta-ai-shimmer 1.35s ease-in-out infinite;
+}
+
+@keyframes ta-ai-scan {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes ta-ai-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes ta-ai-pulse-ring {
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+
+@keyframes ta-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trackapp-analysis-block__scan::after,
+  .trackapp-analysis-shimmer,
+  .trackapp-analysis-block__spinner::before,
+  .trackapp-analysis-status__icon::after {
+    animation: none;
+  }
+}

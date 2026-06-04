@@ -4,14 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 
-import "@/styles/trackapp-sidebar-footer.css";
+import { displayNameFromEmail } from "@/lib/trackapp-display-name";
+import { trackappGuestNavHref } from "@/lib/trackapp-landing-paths";
+import { cn } from "@/lib/utils";
 
-function displayNameFromEmail(email: string | undefined): string {
-  if (!email) return "Créateur";
-  const local = email.split("@")[0] ?? "";
-  const chunk = local.split(/[._-]+/).find(Boolean) ?? local;
-  return chunk.charAt(0).toUpperCase() + chunk.slice(1);
-}
+import "@/styles/trackapp-sidebar-footer.css";
 
 function formatEarningsEur(amount: number): string {
   return `${amount.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}€`;
@@ -24,19 +21,31 @@ type Props = Readonly<{
   signOutHref: string;
   totalEarningsEur?: number;
   onNavigate?: () => void;
+  collapsed?: boolean;
+  loggedIn?: boolean;
 }>;
 
-export function TrackappSidebarFooter({ email, signOutHref, totalEarningsEur, onNavigate }: Props) {
+export function TrackappSidebarFooter({
+  email,
+  signOutHref,
+  totalEarningsEur,
+  onNavigate,
+  collapsed = false,
+  loggedIn = false,
+}: Props) {
+  const affiliationHref = trackappGuestNavHref(AFFILIATION_HREF, loggedIn);
   const menuId = useId();
   const [menuOpen, setMenuOpen] = useState(false);
   const [earnedCents, setEarnedCents] = useState(totalEarningsEur ?? 0);
+  const [affiliateLoaded, setAffiliateLoaded] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
 
   const name = displayNameFromEmail(email);
   const earningsLabel = formatEarningsEur(earnedCents / 100);
 
-  useEffect(() => {
-    if (!email) return;
+  const loadAffiliateBalance = () => {
+    if (!email || affiliateLoaded) return;
+    setAffiliateLoaded(true);
     void fetch("/api/trackapp/affiliate/me", { credentials: "include" })
       .then((r) => (r.ok ? r.json() : null))
       .then((json: { balance?: { totalEarnedCents?: number } } | null) => {
@@ -45,7 +54,11 @@ export function TrackappSidebarFooter({ email, signOutHref, totalEarningsEur, on
         }
       })
       .catch(() => {});
-  }, [email]);
+  };
+
+  useEffect(() => {
+    if (menuOpen) loadAffiliateBalance();
+  }, [menuOpen]);
   const avatarUrl = email
     ? `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1e293b&color=fff&size=96`
     : null;
@@ -67,11 +80,13 @@ export function TrackappSidebarFooter({ email, signOutHref, totalEarningsEur, on
   }, [menuOpen]);
 
   return (
-    <footer className="app-sidebar-footer trackapp-sidebar-footer">
+    <footer className={cn("app-sidebar-footer trackapp-sidebar-footer", collapsed && "trackapp-sidebar-footer--collapsed")}>
       <Link
-        href={AFFILIATION_HREF}
+        href={affiliationHref}
         className="trackapp-sidebar-earnings"
         aria-label="Affiliation — gains totaux"
+        onPointerEnter={loadAffiliateBalance}
+        onFocus={loadAffiliateBalance}
         onClick={() => onNavigate?.()}
       >
         <span className="trackapp-sidebar-earnings__glow" aria-hidden />
@@ -116,9 +131,6 @@ export function TrackappSidebarFooter({ email, signOutHref, totalEarningsEur, on
 
           {menuOpen ? (
             <div id={menuId} className="trackapp-sidebar-profile__dropdown" role="menu">
-              <Link href="/trackapp/gagner-240" role="menuitem" onClick={() => setMenuOpen(false)}>
-                Affiliation
-              </Link>
               <a href={signOutHref} role="menuitem" className="danger" onClick={() => setMenuOpen(false)}>
                 Déconnexion
               </a>
