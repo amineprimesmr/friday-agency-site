@@ -17,6 +17,18 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["stripe"],
   experimental: {
     optimizePackageImports: ["framer-motion"],
+    /** Vidéos dans public/ + dossier Ressources : servies en statique, pas dans les lambdas (limite 250 Mo). */
+    outputFileTracingExcludes: {
+      "*": [
+        "./Ressources/**",
+        "./public/selection-app/**",
+        "./public/videoauto/**",
+        "./public/assets/appvideo/**",
+        "./public/**/*.mp4",
+        "./public/**/*.mov",
+        "./public/**/*.zip",
+      ],
+    },
   },
   images: {
     remotePatterns: [
