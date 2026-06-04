@@ -74,6 +74,9 @@ async function scanTrackappResourcesUncached(): Promise<{
   baseDir: string | null;
   items: TrackappResourceRow[];
 }> {
+  // Sur Vercel : pas de scan disque (évite d’embarquer Ressources/ ou des .mp4 dans les lambdas).
+  if (process.env.VERCEL) return scanFromGeneratedBuild();
+
   const fromFs = await scanFromFilesystem();
   if (fromFs.items.length > 0) return fromFs;
   return scanFromGeneratedBuild();

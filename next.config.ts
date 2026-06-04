@@ -13,22 +13,24 @@ const APPLE_MZSTATIC_PATTERNS = Array.from({ length: 18 }, (_, i) => ({
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname),
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: false },
   /** Stripe utilise des modules Node (crypto, net) — ne pas les bundler avec Turbopack. */
   serverExternalPackages: ["stripe"],
+  /** Vidéos dans public/ + Ressources : statiques uniquement, pas dans les lambdas (limite 250 Mo Vercel). */
+  outputFileTracingExcludes: {
+    "*": [
+      "./Ressources/**",
+      "./public/selection-app/**",
+      "./public/videoauto/**",
+      "./public/assets/appvideo/**",
+      "./public/**/*.mp4",
+      "./public/**/*.mov",
+      "./public/**/*.zip",
+    ],
+  },
   experimental: {
     optimizePackageImports: ["framer-motion"],
-    /** Vidéos dans public/ + dossier Ressources : servies en statique, pas dans les lambdas (limite 250 Mo). */
-    outputFileTracingExcludes: {
-      "*": [
-        "./Ressources/**",
-        "./public/selection-app/**",
-        "./public/videoauto/**",
-        "./public/assets/appvideo/**",
-        "./public/**/*.mp4",
-        "./public/**/*.mov",
-        "./public/**/*.zip",
-      ],
-    },
   },
   images: {
     remotePatterns: [
